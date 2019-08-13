@@ -20,6 +20,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_ojt\completion;
+
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_ojt_completion extends rb_base_source {
@@ -45,14 +47,14 @@ class rb_source_ojt_completion extends rb_base_source {
             SELECT ".$DB->sql_concat('ub.courseid', "'-'", 'ub.userid', "'-'", 'ub.ojtid', "'-'", 'ub.topicid', "'-'", 'ub.type')." AS id,
             ub.courseid, ub.userid, ub.ojtid, ub.topicid, ub.type, bc.status, bc.timemodified, bc.modifiedby
             FROM (
-                (SELECT ue.courseid, ue.userid, b.id AS ojtid, 0 AS topicid,".OJT_CTYPE_OJT." AS type
+                (SELECT ue.courseid, ue.userid, b.id AS ojtid, 0 AS topicid," . completion::COMP_TYPE_OJT . " AS type
                 FROM
                     (SELECT distinct courseid, userid
                     FROM {enrol} e
                     JOIN {user_enrolments} ue ON e.id = ue.enrolid) ue
                 JOIN {ojt} b ON ue.courseid = b.course)
                 UNION
-                (SELECT ue.courseid, ue.userid, b.id AS ojtid, t.id AS topicid,".OJT_CTYPE_TOPIC." AS type
+                (SELECT ue.courseid, ue.userid, b.id AS ojtid, t.id AS topicid," . completion::COMP_TYPE_TOPIC . " AS type
                 FROM
                     (SELECT DISTINCT courseid, userid
                     FROM {enrol} e
@@ -407,7 +409,7 @@ class rb_source_ojt_completion extends rb_base_source {
 
     function rb_display_ojt_completion_status($status, $row, $isexport) {
         if (empty($status)) {
-            return get_string('completionstatus'.OJT_INCOMPLETE, 'ojt');
+            return get_string('completionstatus' . completion::STATUS_INCOMPLETE, 'ojt');
         } else {
             return get_string('completionstatus'.$status, 'ojt');
         }
@@ -445,7 +447,7 @@ class rb_source_ojt_completion extends rb_base_source {
     //
 
     function rb_filter_ojt_completion_status_list() {
-        $statuses = array(OJT_INCOMPLETE, OJT_REQUIREDCOMPLETE, OJT_COMPLETE);
+        $statuses = array(completion::STATUS_INCOMPLETE, completion::STATUS_REQUIREDCOMPLETE, completion::STATUS_COMPLETE);
         $statuslist = array();
         foreach ($statuses as $status) {
             $statuslist[$status] = get_string('completionstatus'.$status, 'ojt');
@@ -455,7 +457,7 @@ class rb_source_ojt_completion extends rb_base_source {
     }
 
     function rb_filter_ojt_type_list() {
-        $types = array(OJT_CTYPE_OJT, OJT_CTYPE_TOPIC);
+        $types = array(completion::COMP_TYPE_OJT, completion::COMP_TYPE_TOPIC);
         $typelist = array();
         foreach ($types as $type) {
             $typelist[$type] = get_string('type'.$type, 'ojt');
@@ -590,9 +592,9 @@ class rb_ojt_completion_type_content extends rb_base_content {
         $mform->disabledIf('ojt_completion_type_enable', 'contentenabled', 'eq', 0);
         $radiogroup = array();
         $radiogroup[] =& $mform->createElement('radio', 'ojt_completion_type_completiontype',
-            '', get_string('type'.OJT_CTYPE_OJT, 'ojt'), OJT_CTYPE_OJT);
+            '', get_string('type' . completion::COMP_TYPE_OJT, 'ojt'), completion::COMP_TYPE_OJT);
         $radiogroup[] =& $mform->createElement('radio', 'ojt_completion_type_completiontype',
-            '', get_string('type'.OJT_CTYPE_TOPIC, 'ojt'), OJT_CTYPE_TOPIC);
+            '', get_string('type' . completion::COMP_TYPE_TOPIC, 'ojt'), completion::COMP_TYPE_TOPIC);
         $mform->addGroup($radiogroup, 'ojt_completion_type_completiontype_group',
             get_string('includecompltyperecords', 'rb_source_ojt_completion'), html_writer::empty_tag('br'), false);
         $mform->setDefault('ojt_completion_type_completiontype', $completiontype);

@@ -23,6 +23,8 @@
  * @subpackage ojt
  */
 
+use mod_ojt\completion;
+
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_ojt_topic_item_completion extends rb_base_source {
@@ -54,7 +56,7 @@ class rb_source_ojt_topic_item_completion extends rb_base_source {
         $this->defaultfilters = $this->define_defaultfilters();
         $this->requiredcolumns = $this->define_requiredcolumns();
         $this->sourcetitle = get_string('ojttopicitemcompletion', 'rb_source_ojt_topic_item_completion');
-        $this->sourcewhere = 'base.type = '.OJT_CTYPE_TOPICITEM;
+        $this->sourcewhere = 'base.type = ' . completion::COMP_TYPE_TOPICITEM;
 
         parent::__construct();
     }
@@ -381,7 +383,7 @@ class rb_source_ojt_topic_item_completion extends rb_base_source {
 
     function rb_display_ojt_completion_status($status, $row, $isexport) {
         if (empty($status)) {
-            return get_string('completionstatus'.OJT_INCOMPLETE, 'ojt');
+            return get_string('completionstatus' . completion::STATUS_INCOMPLETE, 'ojt');
         } else {
             return get_string('completionstatus'.$status, 'ojt');
         }
@@ -408,7 +410,7 @@ class rb_source_ojt_topic_item_completion extends rb_base_source {
     //
 
     function rb_filter_ojt_completion_status_list() {
-        $statuses = array(OJT_INCOMPLETE, OJT_REQUIREDCOMPLETE, OJT_COMPLETE);
+        $statuses = array(completion::STATUS_INCOMPLETE, completion::STATUS_REQUIREDCOMPLETE, completion::STATUS_COMPLETE);
         $statuslist = array();
         foreach ($statuses as $status) {
             $statuslist[$status] = get_string('completionstatus'.$status, 'ojt');

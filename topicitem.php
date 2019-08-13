@@ -20,7 +20,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+use mod_ojt\topic_item;
+
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__).'/lib.php');
 require_once(dirname(__FILE__).'/locallib.php');
 require_once(dirname(__FILE__).'/forms.php');
@@ -54,7 +56,7 @@ if ($delete) {
 
     require_sesskey();
 
-    ojt_delete_topic_item($itemid, $context);
+    topic_item::delete_topic_item($itemid, $context);
     $redirecturl = new moodle_url('/mod/ojt/manage.php', array('cmid' => $cm->id));
     totara_set_notification(get_string('itemdeleted', 'ojt'), $redirecturl, array('class' => 'notifysuccess'));
 }

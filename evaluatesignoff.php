@@ -24,6 +24,8 @@
  * OJT item completion ajax toggler
  */
 
+use mod_ojt\ojt;
+
 define('AJAX_SCRIPT', true);
 
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
@@ -74,7 +76,7 @@ if ($currentsignoff = $DB->get_record('ojt_topic_signoff', array('userid' => $us
     $topicsignoff->id = $DB->insert_record('ojt_topic_signoff', $topicsignoff);
 }
 
-$modifiedstr = ojt_get_modifiedstr($topicsignoff->timemodified);
+$modifiedstr = ojt::get_modifiedstr($topicsignoff->timemodified);
 
 $jsonparams = array(
     'topicsignoff' => $topicsignoff,

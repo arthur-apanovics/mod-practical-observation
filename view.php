@@ -25,7 +25,9 @@
  *
  */
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+use mod_ojt\ojt;
+
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot.'/mod/ojt/lib.php');
 require_once($CFG->dirroot.'/mod/ojt/locallib.php');
 require_once($CFG->dirroot .'/totara/core/js/lib/setup.php');
@@ -101,7 +103,7 @@ if (($canevaluate || $cansignoff)) {
     echo html_writer::end_tag('div');
 }
 
-$userojt = ojt_get_user_ojt($ojt->id, $USER->id);
+$userojt = ojt::get_user_ojt($ojt->id, $USER->id);
 
 // "Evaluate self" button
 if ($canevalself) {

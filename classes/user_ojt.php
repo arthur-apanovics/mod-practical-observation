@@ -20,12 +20,36 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/**
- * Internal library of functions for module ojt
- *
- * All the ojt specific functions, needed to implement the module
- * logic, should go here. Never include this file from your lib.php!
- */
+namespace mod_ojt;
 
-defined('MOODLE_INTERNAL') || die();
+use mod_ojt\traits\record_mapper;
 
+class user_ojt extends ojt {
+    use record_mapper;
+
+    /**
+     * @var int
+     */
+    public $userid;
+
+    /**
+     * @var topic[]
+     */
+    public $topics;
+
+    /**
+     * @var completion
+     */
+    public $completion;
+
+    public function __construct($id, $userid) {
+        parent::__construct($id);
+
+        $this->userid = $userid;
+        $this->topics = topic::get_user_topics($this->userid, $this->id);
+    }
+
+    private function populate_user_ojt() {
+
+    }
+}

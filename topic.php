@@ -20,7 +20,10 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+use mod_ojt\completion;
+use mod_ojt\topic;
+
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__).'/lib.php');
 require_once(dirname(__FILE__).'/locallib.php');
 require_once(dirname(__FILE__).'/forms.php');
@@ -50,7 +53,7 @@ if ($delete) {
         die();
     }
 
-    ojt_delete_topic($topicid);
+    topic::delete_topic($topicid);
     $redirecturl = new moodle_url('/mod/ojt/manage.php', array('cmid' => $cm->id));
     totara_set_notification(get_string('topicdeleted', 'ojt'), $redirecturl, array('class' => 'notifysuccess'));
 }
@@ -78,9 +81,9 @@ if ($data = $form->get_data()) {
         if (!empty($topic->competencies)) {
             // We need to add 'proficient' competency records for any historical user topic completions
             $topiccompletions = $DB->get_records_select('ojt_completion', 'topicid = ? AND type = ? AND status IN(?,?)',
-                array($data->id, OJT_CTYPE_TOPIC, OJT_REQUIREDCOMPLETE, OJT_COMPLETE));
+                array($data->id, completion::COMP_TYPE_TOPIC, completion::STATUS_REQUIREDCOMPLETE, completion::STATUS_COMPLETE));
             foreach ($topiccompletions as $tc) {
-                ojt_update_topic_competency_proficiency($tc->userid, $tc->topicid, $tc->status);
+                topic::update_topic_competency_proficiency($tc->userid, $tc->topicid, $tc->status);
             }
         }
         $transaction->allow_commit();

@@ -31,27 +31,10 @@
  * Moodle is performing actions across all modules.
  */
 
+use mod_ojt\completion;
+use mod_ojt\ojt;
+
 defined('MOODLE_INTERNAL') || die();
-
-/**
- * OJT completion types
- */
-define('OJT_CTYPE_OJT', 0);
-define('OJT_CTYPE_TOPIC', 1);
-define('OJT_CTYPE_TOPICITEM', 2);
-
-/**
- * OJT completion statuses
- */
-define('OJT_INCOMPLETE', 0);
-define('OJT_REQUIREDCOMPLETE', 1);
-define('OJT_COMPLETE', 2);
-
-/**
- * OJT completion requirements
- */
-define('OJT_REQUIRED', 0);
-define('OJT_OPTIONAL', 1);
 
 /* Moodle core API */
 
@@ -66,13 +49,10 @@ define('OJT_OPTIONAL', 1);
 function ojt_supports($feature) {
 
     switch($feature) {
-        case FEATURE_MOD_INTRO:
-            return true;
         case FEATURE_SHOW_DESCRIPTION:
-            return true;
         case FEATURE_BACKUP_MOODLE2:
-            return true;
         case FEATURE_COMPLETION_HAS_RULES:
+        case FEATURE_MOD_INTRO:
             return true;
         default:
             return null;
@@ -249,7 +229,7 @@ function ojt_get_completion_progress($cm, $userid) {
     if ($ojt->completiontopics) {
         $ojtcomplete = $DB->record_exists_select('ojt_completion',
             'ojtid = ? AND userid =? AND type = ? AND status IN (?, ?)',
-            array($ojt->id, $userid, OJT_CTYPE_OJT, OJT_COMPLETE, OJT_REQUIREDCOMPLETE));
+            array($ojt->id, $userid, completion::COMP_TYPE_OJT, completion::STATUS_COMPLETE, completion::STATUS_REQUIREDCOMPLETE));
         if ($ojtcomplete) {
             $result[] = get_string('completiontopics', 'ojt');
         }
@@ -283,7 +263,7 @@ function ojt_get_completion_state($course, $cm, $userid, $type) {
 
     return $DB->record_exists_select('ojt_completion',
         'ojtid = ? AND userid =? AND type = ? AND status IN (?, ?)',
-        array($ojt->id, $userid, OJT_CTYPE_OJT, OJT_COMPLETE, OJT_REQUIREDCOMPLETE));
+        array($ojt->id, $userid, completion::COMP_TYPE_OJT, completion::STATUS_COMPLETE, completion::STATUS_REQUIREDCOMPLETE));
 
 }
 
@@ -345,7 +325,7 @@ function ojt_cron () {
         JOIN {user} u ON bc.userid = u.id
         WHERE bc.type = ? AND bc.status = ? AND bc.timemodified > ?
         AND b.id IN (SELECT id FROM {ojt} WHERE managersignoff = 1)";
-    $tcompletions = $DB->get_records_sql($sql, array(OJT_CTYPE_TOPIC, OJT_COMPLETE, $lastcron));
+    $tcompletions = $DB->get_records_sql($sql, array(completion::COMP_TYPE_TOPIC, completion::STATUS_COMPLETE, $lastcron));
     foreach ($tcompletions as $completion) {
         $managerids = \totara_job\job_assignment::get_all_manager_userids($completion->userid);
         foreach ($managerids as $managerid) {
@@ -454,7 +434,7 @@ function ojt_pluginfile($course, $cm, $context, $filearea, array $args, $forcedo
 
     $userid = $args[0];
     require_once($CFG->dirroot.'/mod/ojt/locallib.php');
-    if (!(ojt_can_evaluate($userid, $context) || $userid == $USER->id)) {
+    if (!(ojt::can_evaluate($userid, $context) || $userid == $USER->id)) {
         // Only evaluators and/or owners have access to files
         return false;
     }
@@ -566,7 +546,7 @@ function ojt_comment_permissions($args) {
     global $CFG;
     require_once($CFG->dirroot.'/mod/ojt/locallib.php');
 
-    if (!ojt_can_evaluate($args->itemid, $args->context)) {
+    if (!ojt::can_evaluate($args->itemid, $args->context)) {
         return array('post'=>false, 'view'=>true);
     }
 

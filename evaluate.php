@@ -25,7 +25,10 @@
  * OJT evaluation for a user
  */
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+use mod_ojt\completion;
+use mod_ojt\ojt;
+
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot.'/mod/ojt/lib.php');
 require_once($CFG->dirroot.'/mod/ojt/locallib.php');
 require_once($CFG->dirroot .'/totara/core/js/lib/setup.php');
@@ -50,14 +53,14 @@ if ($cmid) {
 require_login($course, true, $cm);
 
 $modcontext = context_module::instance($cm->id);
-$canevaluate = ojt_can_evaluate($userid, $modcontext);
+$canevaluate = ojt::can_evaluate($userid, $modcontext);
 $cansignoff = has_capability('mod/ojt:signoff', $modcontext);
 $canwitness = has_capability('mod/ojt:witnessitem', $modcontext);
 if (!($canevaluate || $cansignoff || $canwitness)) {
     print_error('accessdenied', 'ojt');
 }
 
-$userojt = ojt_get_user_ojt($ojt->id, $userid);
+$userojt = ojt::get_user_ojt($ojt->id, $userid);
 
 // Print the page header.
 
@@ -69,11 +72,12 @@ if (has_capability('mod/ojt:evaluate', $modcontext) || has_capability('mod/ojt:s
 }
 $PAGE->navbar->add(fullname($user));
 
-$args = array('args' => '{"ojtid":'.$userojt->id.
+$args = array('args' => '{
+       "ojtid":'.$userojt->id.
     ', "userid":'.$userid.
-    ', "OJT_COMPLETE":'.OJT_COMPLETE.
-    ', "OJT_REQUIREDCOMPLETE":'.OJT_REQUIREDCOMPLETE.
-    ', "OJT_INCOMPLETE":'.OJT_INCOMPLETE.
+    ', "OJT_COMPLETE":' . completion::STATUS_COMPLETE .
+    ', "OJT_REQUIREDCOMPLETE":' . completion::STATUS_REQUIREDCOMPLETE .
+    ', "OJT_INCOMPLETE":' . completion::STATUS_INCOMPLETE .
     '}');
 $jsmodule = array(
     'name' => 'mod_ojt_evaluate',

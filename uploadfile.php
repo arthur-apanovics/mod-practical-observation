@@ -24,6 +24,8 @@
  * Upload a file to a ojt topic item
  */
 
+use mod_ojt\ojt;
+
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/totara/plan/lib.php');
 require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
@@ -54,7 +56,7 @@ if (!($ojt->allowfileuploads || $ojt->allowselffileuploads)) {
 }
 // Only users with evaluate perm or evaluateself that's also the ojt user should be able to upload a file (if config allows)
 // Also allow ojt owners to upload files, if configured
-$canevaluate = ojt_can_evaluate($userid, $modcontext);
+$canevaluate = ojt::can_evaluate($userid, $modcontext);
 $canselfupload = $ojt->allowselffileuploads && $userid == $USER->id;
 if (!($canevaluate || $canselfupload)) {
     print_error('access denied');

@@ -24,6 +24,10 @@
  * OJT item completion ajax toggler
  */
 
+use mod_ojt\completion;
+use mod_ojt\ojt;
+use mod_ojt\topic;
+
 define('AJAX_SCRIPT', true);
 
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
@@ -45,7 +49,7 @@ $cm         = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false
 
 require_login($course, true, $cm);
 
-if (!ojt_can_evaluate($userid, context_module::instance($cm->id))) {
+if (!ojt::can_evaluate($userid, context_module::instance($cm->id))) {
     print_error('access denied');
 }
 
@@ -63,12 +67,12 @@ $params = array('userid' => $userid,
     'ojtid' => $ojtid,
     'topicid' => $item->topicid,
     'topicitemid' => $itemid,
-    'type' => OJT_CTYPE_TOPICITEM);
+    'type' => completion::COMP_TYPE_TOPICITEM);
 if ($completion = $DB->get_record('ojt_completion', $params)) {
     // Update
     switch ($action) {
         case 'togglecompletion':
-            $completion->status = $completion->status == OJT_COMPLETE ? OJT_INCOMPLETE : OJT_COMPLETE;
+            $completion->status = $completion->status == completion::STATUS_COMPLETE ? completion::STATUS_INCOMPLETE : completion::STATUS_COMPLETE;
             break;
         case 'savecomment':
             $completion->comment = required_param('comment', PARAM_TEXT);
@@ -85,7 +89,7 @@ if ($completion = $DB->get_record('ojt_completion', $params)) {
     $completion = (object)$params;
     switch ($action) {
         case 'togglecompletion':
-            $completion->status = OJT_COMPLETE;
+            $completion->status = completion::STATUS_COMPLETE;
             break;
         case 'savecomment':
             $completion->comment = required_param('comment', PARAM_TEXT);
@@ -99,14 +103,14 @@ if ($completion = $DB->get_record('ojt_completion', $params)) {
     $completion->id = $DB->insert_record('ojt_completion', $completion);
 }
 
-$modifiedstr = ojt_get_modifiedstr($completion->timemodified);
+$modifiedstr = ojt::get_modifiedstr($completion->timemodified);
 
 $jsonparams = array(
     'item' => $completion,
     'modifiedstr' => $modifiedstr
 );
 if ($action == 'togglecompletion') {
-    $topiccompletion = ojt_update_topic_completion($userid, $ojtid, $item->topicid);
+    $topiccompletion = topic::update_topic_completion($userid, $ojtid, $item->topicid);
     $jsonparams['topic'] = $topiccompletion;
 }
 

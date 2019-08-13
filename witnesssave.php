@@ -24,6 +24,9 @@
  * OJT witness ajax toggler
  */
 
+use mod_ojt\ojt;
+use mod_ojt\topic;
+
 define('AJAX_SCRIPT', true);
 
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
@@ -81,11 +84,11 @@ if ($witness = $DB->get_record('ojt_item_witness', $params)) {
 }
 
 // Update topic completion
-$topiccompletion = ojt_update_topic_completion($userid, $ojt->id, $item->topicid);
+$topiccompletion = topic::update_topic_completion($userid, $ojt->id, $item->topicid);
 
 $transaction->allow_commit();
 
-$modifiedstr = ojt_get_modifiedstr($witness->timewitnessed);
+$modifiedstr = ojt::get_modifiedstr($witness->timewitnessed);
 
 $jsonparams = array(
     'item' => $witness,
