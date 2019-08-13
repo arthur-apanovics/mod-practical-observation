@@ -23,23 +23,26 @@
 /**
  * Structure step to restore one ojt activity
  */
-class restore_ojt_activity_structure_step extends restore_activity_structure_step {
+class restore_ojt_activity_structure_step extends restore_activity_structure_step
+{
 
     /**
      * Defines structure of path elements to be processed during the restore
      *
      * @return array of {@link restore_path_element}
      */
-    protected function define_structure() {
+    protected function define_structure()
+    {
 
         // Get know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
 
-        $paths = array();
+        $paths   = array();
         $paths[] = new restore_path_element('ojt', '/activity/ojt');
         $paths[] = new restore_path_element('ojt_topic', '/activity/ojt/topics/topic');
         $paths[] = new restore_path_element('ojt_topic_item', '/activity/ojt/topics/topic/items/item');
-        if ($userinfo) {
+        if ($userinfo)
+        {
             $paths[] = new restore_path_element('ojt_completion', '/activity/ojt/completions/completion');
             $paths[] = new restore_path_element('ojt_topic_signoff', '/activity/ojt/topic_signoffs/topic_signoff');
             $paths[] = new restore_path_element('ojt_item_witness', '/activity/ojt/item_witnesses/item_witness');
@@ -54,13 +57,14 @@ class restore_ojt_activity_structure_step extends restore_activity_structure_ste
      *
      * @param array $data parsed element data
      */
-    protected function process_ojt($data) {
+    protected function process_ojt($data)
+    {
         global $DB;
 
-        $data = (object)$data;
-        $oldid = $data->id;
-        $data->course = $this->get_courseid();
-        $data->timecreated = time();
+        $data               = (object) $data;
+        $oldid              = $data->id;
+        $data->course       = $this->get_courseid();
+        $data->timecreated  = time();
         $data->timemodified = time();
 
         // Create the ojt instance.
@@ -73,11 +77,12 @@ class restore_ojt_activity_structure_step extends restore_activity_structure_ste
      *
      * @param array $data parsed element data
      */
-    protected function process_ojt_topic($data) {
+    protected function process_ojt_topic($data)
+    {
         global $DB;
 
-        $data = (object)$data;
-        $oldid = $data->id;
+        $data        = (object) $data;
+        $oldid       = $data->id;
         $data->ojtid = $this->get_new_parentid('ojt');
 
         // Add ojt topic.
@@ -90,11 +95,12 @@ class restore_ojt_activity_structure_step extends restore_activity_structure_ste
      *
      * @param array $data parsed element data
      */
-    protected function process_ojt_topic_item($data) {
+    protected function process_ojt_topic_item($data)
+    {
         global $DB;
 
-        $data = (object)$data;
-        $oldid = $data->id;
+        $data          = (object) $data;
+        $oldid         = $data->id;
         $data->topicid = $this->get_new_parentid('ojt_topic');
 
         // Add ojt topic.
@@ -107,16 +113,17 @@ class restore_ojt_activity_structure_step extends restore_activity_structure_ste
      *
      * @param array $data parsed element data
      */
-    protected function process_ojt_completion($data) {
+    protected function process_ojt_completion($data)
+    {
         global $DB;
 
-        $data = (object)$data;
-        $oldid = $data->id;
-        $data->userid = $this->get_mappingid('user', $data->userid);
-        $data->ojtid = $this->get_new_parentid('ojt');
-        $data->topicid = $this->get_mappingid('ojt_topic', $data->topicid);
+        $data              = (object) $data;
+        $oldid             = $data->id;
+        $data->userid      = $this->get_mappingid('user', $data->userid);
+        $data->ojtid       = $this->get_new_parentid('ojt');
+        $data->topicid     = $this->get_mappingid('ojt_topic', $data->topicid);
         $data->topicitemid = $this->get_mappingid('ojt_topic_item', $data->topicitemid);
-        $data->modifiedby = $this->get_mappingid('user', $data->userid);
+        $data->modifiedby  = $this->get_mappingid('user', $data->userid);
 
         // Add ojt topic.
         $newitemid = $DB->insert_record('ojt_completion', $data);
@@ -127,13 +134,14 @@ class restore_ojt_activity_structure_step extends restore_activity_structure_ste
      *
      * @param array $data parsed element data
      */
-    protected function process_ojt_topic_signoff($data) {
+    protected function process_ojt_topic_signoff($data)
+    {
         global $DB;
 
-        $data = (object)$data;
-        $oldid = $data->id;
-        $data->userid = $this->get_mappingid('user', $data->userid);
-        $data->topicid = $this->get_mappingid('ojt_topic', $data->topicid);
+        $data             = (object) $data;
+        $oldid            = $data->id;
+        $data->userid     = $this->get_mappingid('user', $data->userid);
+        $data->topicid    = $this->get_mappingid('ojt_topic', $data->topicid);
         $data->modifiedby = $this->get_mappingid('user', $data->userid);
 
         // Add ojt topic.
@@ -145,12 +153,13 @@ class restore_ojt_activity_structure_step extends restore_activity_structure_ste
      *
      * @param array $data parsed element data
      */
-    protected function process_ojt_item_witness($data) {
+    protected function process_ojt_item_witness($data)
+    {
         global $DB;
 
-        $data = (object)$data;
-        $oldid = $data->id;
-        $data->userid = $this->get_mappingid('user', $data->userid);
+        $data              = (object) $data;
+        $oldid             = $data->id;
+        $data->userid      = $this->get_mappingid('user', $data->userid);
         $data->topicitemid = $this->get_mappingid('ojt_topic_item', $data->topicitemid);
         $data->witnessedby = $this->get_mappingid('user', $data->witnessedby);
 
@@ -159,11 +168,11 @@ class restore_ojt_activity_structure_step extends restore_activity_structure_ste
     }
 
 
-
     /**
      * Post-execution actions
      */
-    protected function after_execute() {
+    protected function after_execute()
+    {
         // Add ojt related files, no need to match by itemname (just internally handled context).
         $this->add_related_files('mod_ojt', 'intro', null);
     }

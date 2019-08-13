@@ -27,40 +27,42 @@ use mod_ojt\completion;
 require_once($CFG->dirroot . '/totara/reportbuilder/classes/rb_base_content.php');
 
 # Include the ojt rb source, to ensure all default settings get created upon report creation
-require_once($CFG->dirroot.'/mod/ojt/rb_sources/rb_source_ojt_completion.php');
+require_once($CFG->dirroot . '/mod/ojt/rb_sources/rb_source_ojt_completion.php');
 
-require_once($CFG->dirroot.'/mod/ojt/lib.php');
+require_once($CFG->dirroot . '/mod/ojt/lib.php');
 
-class rb_ojt_evaluation_embedded extends rb_base_embedded {
+class rb_ojt_evaluation_embedded extends rb_base_embedded
+{
 
     public $url, $source, $fullname, $filters, $columns;
     public $contentmode, $contentsettings, $embeddedparams;
     public $hidden, $accessmode, $accesssettings, $shortname;
     public $defaultsortcolumn, $defaultsortorder;
 
-    public function __construct($data) {
+    public function __construct($data)
+    {
         $ojtid = array_key_exists('ojtid', $data) ? $data['ojtid'] : null;
 
-        $url = new moodle_url('/mod/ojt/report.php', $data);
-        $this->url = $url->out_as_local_url();
-        $this->source = 'ojt_completion';
+        $url                     = new moodle_url('/mod/ojt/report.php', $data);
+        $this->url               = $url->out_as_local_url();
+        $this->source            = 'ojt_completion';
         $this->defaultsortcolumn = 'user_namelink';
-        $this->shortname = 'ojt_evaluation';
-        $this->fullname = get_string('ojtevaluation', 'rb_source_ojt_completion');
-        $this->columns = array(
+        $this->shortname         = 'ojt_evaluation';
+        $this->fullname          = get_string('ojtevaluation', 'rb_source_ojt_completion');
+        $this->columns           = array(
             array(
-                'type' => 'user',
-                'value' => 'namelink',
+                'type'    => 'user',
+                'value'   => 'namelink',
                 'heading' => get_string('name', 'rb_source_user'),
             ),
             array(
-                'type' => 'base',
-                'value' => 'status',
+                'type'    => 'base',
+                'value'   => 'status',
                 'heading' => get_string('status', 'rb_source_ojt_completion'),
             ),
             array(
-                'type' => 'ojt',
-                'value' => 'evaluatelink',
+                'type'    => 'ojt',
+                'value'   => 'evaluatelink',
                 'heading' => ' ',
             ),
         );
@@ -68,28 +70,29 @@ class rb_ojt_evaluation_embedded extends rb_base_embedded {
         // no filters
         $this->filters = array(
             array(
-                'type' => 'user',
-                'value' => 'fullname',
+                'type'     => 'user',
+                'value'    => 'fullname',
                 'advanced' => 0,
             ),
             array(
-                'type' => 'base',
-                'value' => 'status',
+                'type'     => 'base',
+                'value'    => 'status',
                 'advanced' => 0,
             ),
         );
 
-        $this->contentmode = REPORT_BUILDER_CONTENT_MODE_ALL;
+        $this->contentmode     = REPORT_BUILDER_CONTENT_MODE_ALL;
         $this->contentsettings = array(
             'ojt_completion_type' => array(
-                'enable' => 1,
+                'enable'         => 1,
                 'completiontype' => completion::COMP_TYPE_OJT
             )
         );
 
         // only show non-deleted users
         $this->embeddedparams = array();
-        if (!empty($ojtid)) {
+        if (!empty($ojtid))
+        {
             $this->embeddedparams['ojtid'] = $ojtid;
         }
 
@@ -101,11 +104,12 @@ class rb_ojt_evaluation_embedded extends rb_base_embedded {
      * We use $reportfor instead of $USER->id and $report->get_param_value() instead of getting params
      * some other way so that the embedded report will be compatible with the scheduler (in the future).
      *
-     * @param int $reportfor userid of the user that this report is being generated for
+     * @param int           $reportfor userid of the user that this report is being generated for
      * @param reportbuilder $report the report object - can use get_param_value to get params
      * @return boolean true if the user can access this report
      */
-    public function is_capable($reportfor, $report) {
+    public function is_capable($reportfor, $report)
+    {
         return true;
     }
 }

@@ -24,17 +24,17 @@ use mod_ojt\completion;
 use mod_ojt\topic;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once(dirname(__FILE__).'/lib.php');
-require_once(dirname(__FILE__).'/locallib.php');
-require_once(dirname(__FILE__).'/forms.php');
+require_once(dirname(__FILE__) . '/lib.php');
+require_once(dirname(__FILE__) . '/locallib.php');
+require_once(dirname(__FILE__) . '/forms.php');
 
-$ojtid = required_param('bid', PARAM_INT); // OJT instance id.
-$topicid  = optional_param('id', 0, PARAM_INT);  // Topic id.
-$delete = optional_param('delete', 0, PARAM_BOOL);
+$ojtid   = required_param('bid', PARAM_INT); // OJT instance id.
+$topicid = optional_param('id', 0, PARAM_INT);  // Topic id.
+$delete  = optional_param('delete', 0, PARAM_BOOL);
 
-$ojt = $DB->get_record('ojt', array('id' => $ojtid), '*', MUST_EXIST);
+$ojt    = $DB->get_record('ojt', array('id' => $ojtid), '*', MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
-$cm = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
+$cm     = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
 
 require_login($course, true, $cm);
 require_capability('mod/ojt:manage', context_module::instance($cm->id));
@@ -42,9 +42,11 @@ require_capability('mod/ojt:manage', context_module::instance($cm->id));
 $PAGE->set_url('/mod/ojt/topic.php', array('bid' => $ojtid, 'id' => $topicid));
 
 // Handle actions
-if ($delete) {
+if ($delete)
+{
     $confirm = optional_param('confirm', 0, PARAM_BOOL);
-    if (!$confirm) {
+    if (!$confirm)
+    {
         echo $OUTPUT->header();
         $confirmurl = $PAGE->url;
         $confirmurl->params(array('delete' => 1, 'confirm' => 1, 'sesskey' => sesskey()));
@@ -59,30 +61,39 @@ if ($delete) {
 }
 
 $form = new ojt_topic_form(null, array('courseid' => $course->id, 'ojtid' => $ojtid));
-if ($data = $form->get_data()) {
+if ($data = $form->get_data())
+{
     // Save topic
-    $topic = new stdClass();
-    $topic->ojtid = $data->bid;
-    $topic->name = $data->name;
+    $topic                = new stdClass();
+    $topic->ojtid         = $data->bid;
+    $topic->name          = $data->name;
     $topic->completionreq = $data->completionreq;
-    $topic->competencies = !empty($data->competencies) ? implode(',', $data->competencies) : '';
+    $topic->competencies  = !empty($data->competencies) ? implode(',', $data->competencies) : '';
     $topic->allowcomments = $data->allowcomments;
 
-    if (empty($data->id)) {
+    if (empty($data->id))
+    {
         // Add
         $DB->insert_record('ojt_topic', $topic);
-    } else {
+    }
+    else
+    {
         // Update
         $topic->id = $data->id;
 
         $transaction = $DB->start_delegated_transaction();
         $DB->update_record('ojt_topic', $topic);
 
-        if (!empty($topic->competencies)) {
+        if (!empty($topic->competencies))
+        {
             // We need to add 'proficient' competency records for any historical user topic completions
             $topiccompletions = $DB->get_records_select('ojt_completion', 'topicid = ? AND type = ? AND status IN(?,?)',
-                array($data->id, completion::COMP_TYPE_TOPIC, completion::STATUS_REQUIREDCOMPLETE, completion::STATUS_COMPLETE));
-            foreach ($topiccompletions as $tc) {
+                array($data->id,
+                      completion::COMP_TYPE_TOPIC,
+                      completion::STATUS_REQUIREDCOMPLETE,
+                      completion::STATUS_COMPLETE));
+            foreach ($topiccompletions as $tc)
+            {
                 topic::update_topic_competency_proficiency($tc->userid, $tc->topicid, $tc->status);
             }
         }
@@ -96,7 +107,7 @@ if ($data = $form->get_data()) {
 // Print the page header.
 $actionstr = empty($topicid) ? get_string('addtopic', 'ojt') : get_string('edittopic', 'ojt');
 $PAGE->set_title(format_string($ojt->name));
-$PAGE->set_heading(format_string($ojt->name).' - '.$actionstr);
+$PAGE->set_heading(format_string($ojt->name) . ' - ' . $actionstr);
 
 // Output starts here.
 echo $OUTPUT->header();
@@ -104,8 +115,9 @@ echo $OUTPUT->header();
 // Replace the following lines with you own code.
 echo $OUTPUT->heading($PAGE->heading);
 
-if (!empty($topicid)) {
-    $topic = $DB->get_record('ojt_topic', array('id' => $topicid), '*', MUST_EXIST);
+if (!empty($topicid))
+{
+    $topic               = $DB->get_record('ojt_topic', array('id' => $topicid), '*', MUST_EXIST);
     $topic->competencies = explode(',', $topic->competencies);
     $form->set_data($topic);
 }

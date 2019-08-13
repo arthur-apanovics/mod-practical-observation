@@ -29,19 +29,22 @@ require_once($CFG->dirroot . '/mod/ojt/backup/moodle2/restore_ojt_stepslib.php')
  *
  * Provides all the settings and steps to perform complete restore of the activity.
  */
-class restore_ojt_activity_task extends restore_activity_task {
+class restore_ojt_activity_task extends restore_activity_task
+{
 
     /**
      * Define (add) particular settings this activity can have
      */
-    protected function define_my_settings() {
+    protected function define_my_settings()
+    {
         // No particular settings for this activity.
     }
 
     /**
      * Define (add) particular steps this activity can have
      */
-    protected function define_my_steps() {
+    protected function define_my_steps()
+    {
         // We have just one structure step here.
         $this->add_step(new restore_ojt_activity_structure_step('ojt_structure', 'ojt.xml'));
     }
@@ -50,7 +53,8 @@ class restore_ojt_activity_task extends restore_activity_task {
      * Define the contents in the activity that must be
      * processed by the link decoder
      */
-    static public function define_decode_contents() {
+    static public function define_decode_contents()
+    {
         $contents = array();
 
         $contents[] = new restore_decode_content('ojt', array('intro'), 'ojt');
@@ -62,7 +66,8 @@ class restore_ojt_activity_task extends restore_activity_task {
      * Define the decoding rules for links belonging
      * to the activity to be executed by the link decoder
      */
-    static public function define_decode_rules() {
+    static public function define_decode_rules()
+    {
         $rules = array();
 
         $rules[] = new restore_decode_rule('OJTVIEWBYID', '/mod/ojt/view.php?id=$1', 'course_module');
@@ -78,7 +83,8 @@ class restore_ojt_activity_task extends restore_activity_task {
      * ojt logs. It must return one array
      * of {@link restore_log_rule} objects
      */
-    static public function define_restore_log_rules() {
+    static public function define_restore_log_rules()
+    {
         $rules = array();
 
         $rules[] = new restore_log_rule('ojt', 'add', 'view.php?id={course_module}', '{ojt}');
@@ -98,7 +104,8 @@ class restore_ojt_activity_task extends restore_activity_task {
      * by the restore final task, but are defined here at
      * activity level. All them are rules not linked to any module instance (cmid = 0)
      */
-    static public function define_restore_log_rules_for_course() {
+    static public function define_restore_log_rules_for_course()
+    {
         $rules = array();
 
         $rules[] = new restore_log_rule('ojt', 'view all', 'index.php?id={course}', null);

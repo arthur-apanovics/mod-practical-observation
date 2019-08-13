@@ -26,7 +26,8 @@ use coding_exception;
 use mod_ojt\traits\record_mapper;
 use stdClass;
 
-class completion {
+class completion
+{
     use record_mapper;
 
     /**

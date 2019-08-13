@@ -52,66 +52,65 @@ defined('MOODLE_INTERNAL') || die();
 // Modify capabilities as needed and remove this comment.
 $capabilities = array(
     'mod/ojt:addinstance' => array(
-        'riskbitmask' => RISK_XSS,
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
+        'riskbitmask'          => RISK_XSS,
+        'captype'              => 'write',
+        'contextlevel'         => CONTEXT_COURSE,
+        'archetypes'           => array(
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
+            'manager'        => CAP_ALLOW
         ),
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
 
     'mod/ojt:view' => array(
-        'captype' => 'read',
+        'captype'      => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
-            'student' => CAP_ALLOW,
-            'teacher' => CAP_ALLOW,
+        'legacy'       => array(
+            'student'        => CAP_ALLOW,
+            'teacher'        => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
+            'manager'        => CAP_ALLOW
         )
     ),
 
     'mod/ojt:evaluate' => array(
-        'riskbitmask' => RISK_SPAM,
-        'captype' => 'write',
+        'riskbitmask'  => RISK_SPAM,
+        'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
+        'legacy'       => array(
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
+            'manager'        => CAP_ALLOW
         )
     ),
 
     'mod/ojt:evaluateself' => array(
-        'captype' => 'write',
+        'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
-        )
+        'legacy'       => array()
     ),
 
     'mod/ojt:signoff' => array(
-        'riskbitmask' => RISK_SPAM,
-        'captype' => 'write',
+        'riskbitmask'  => RISK_SPAM,
+        'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
+        'legacy'       => array(
             'manager' => CAP_ALLOW
         )
     ),
 
-    'mod/ojt:manage' => array(
-        'riskbitmask' => RISK_XSS,
-        'captype' => 'write',
+    'mod/ojt:manage'      => array(
+        'riskbitmask'  => RISK_XSS,
+        'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
+        'legacy'       => array(
             'editingteacher' => CAP_ALLOW,
         )
     ),
     'mod/ojt:witnessitem' => array(
-        'riskbitmask' => RISK_SPAM,
-        'captype' => 'write',
+        'riskbitmask'  => RISK_SPAM,
+        'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
+        'legacy'       => array(
             'manager' => CAP_ALLOW
         )
     ),

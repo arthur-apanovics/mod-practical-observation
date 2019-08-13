@@ -39,20 +39,24 @@ defined('MOODLE_INTERNAL') || die();
  * @param int $oldversion
  * @return bool
  */
-function xmldb_ojt_upgrade($oldversion) {
+function xmldb_ojt_upgrade($oldversion)
+{
     global $DB;
 
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
-    if ($oldversion < 2016031400) {
+    if ($oldversion < 2016031400)
+    {
 
         $table = new xmldb_table('ojt_topic_item');
 
         // Define field allowselffileuploads to be added to ojt_topic_item.
-        $field = new xmldb_field('allowselffileuploads', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'allowfileuploads');
+        $field = new xmldb_field('allowselffileuploads', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0',
+            'allowfileuploads');
 
         // Conditionally launch add field allowselffileuploads.
-        if (!$dbman->field_exists($table, $field)) {
+        if (!$dbman->field_exists($table, $field))
+        {
             $dbman->add_field($table, $field);
         }
 

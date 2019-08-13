@@ -29,7 +29,8 @@
  *
  * @see upgrade_plugins_modules()
  */
-function xmldb_ojt_install() {
+function xmldb_ojt_install()
+{
 }
 
 /**
@@ -37,5 +38,6 @@ function xmldb_ojt_install() {
  *
  * @see upgrade_plugins_modules()
  */
-function xmldb_ojt_install_recovery() {
+function xmldb_ojt_install_recovery()
+{
 }

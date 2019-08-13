@@ -24,7 +24,8 @@ namespace mod_ojt;
 
 use mod_ojt\traits\record_mapper;
 
-class user_ojt extends ojt {
+class user_ojt extends ojt
+{
     use record_mapper;
 
     /**
@@ -42,14 +43,16 @@ class user_ojt extends ojt {
      */
     public $completion;
 
-    public function __construct($id, $userid) {
+    public function __construct($id, $userid)
+    {
         parent::__construct($id);
 
         $this->userid = $userid;
         $this->topics = topic::get_user_topics($this->userid, $this->id);
     }
 
-    private function populate_user_ojt() {
+    private function populate_user_ojt()
+    {
 
     }
 }

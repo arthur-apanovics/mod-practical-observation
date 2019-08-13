@@ -24,13 +24,16 @@ use mod_ojt\completion;
 
 defined('MOODLE_INTERNAL') || die();
 
-class rb_source_ojt_completion extends rb_base_source {
+class rb_source_ojt_completion extends rb_base_source
+{
     public $base, $joinlist, $columnoptions, $filteroptions;
     public $contentoptions, $paramoptions, $defaultcolumns;
     public $defaultfilters, $requiredcolumns, $sourcetitle;
 
-    function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
-        if ($groupid instanceof rb_global_restriction_set) {
+    function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null)
+    {
+        if ($groupid instanceof rb_global_restriction_set)
+        {
             throw new coding_exception('Wrong parameter orders detected during report source instantiation.');
         }
 
@@ -41,10 +44,11 @@ class rb_source_ojt_completion extends rb_base_source {
         $this->add_global_report_restriction_join('base', 'userid');
 
         global $CFG, $DB;
-        require_once($CFG->dirroot.'/mod/ojt/lib.php');
+        require_once($CFG->dirroot . '/mod/ojt/lib.php');
 
         $this->base = "(
-            SELECT ".$DB->sql_concat('ub.courseid', "'-'", 'ub.userid', "'-'", 'ub.ojtid', "'-'", 'ub.topicid', "'-'", 'ub.type')." AS id,
+            SELECT " . $DB->sql_concat('ub.courseid', "'-'", 'ub.userid', "'-'", 'ub.ojtid', "'-'", 'ub.topicid', "'-'",
+                'ub.type') . " AS id,
             ub.courseid, ub.userid, ub.ojtid, ub.topicid, ub.type, bc.status, bc.timemodified, bc.modifiedby
             FROM (
                 (SELECT ue.courseid, ue.userid, b.id AS ojtid, 0 AS topicid," . completion::COMP_TYPE_OJT . " AS type
@@ -70,15 +74,15 @@ class rb_source_ojt_completion extends rb_base_source {
             ORDER BY courseid, userid, ojtid, topicid
         )";
 
-        $this->joinlist = $this->define_joinlist();
-        $this->columnoptions = $this->define_columnoptions();
-        $this->filteroptions = $this->define_filteroptions();
-        $this->contentoptions = $this->define_contentoptions();
-        $this->paramoptions = $this->define_paramoptions();
-        $this->defaultcolumns = $this->define_defaultcolumns();
-        $this->defaultfilters = $this->define_defaultfilters();
+        $this->joinlist        = $this->define_joinlist();
+        $this->columnoptions   = $this->define_columnoptions();
+        $this->filteroptions   = $this->define_filteroptions();
+        $this->contentoptions  = $this->define_contentoptions();
+        $this->paramoptions    = $this->define_paramoptions();
+        $this->defaultcolumns  = $this->define_defaultcolumns();
+        $this->defaultfilters  = $this->define_defaultfilters();
         $this->requiredcolumns = $this->define_requiredcolumns();
-        $this->sourcetitle = get_string('ojtcompletion', 'rb_source_ojt_completion');
+        $this->sourcetitle     = get_string('ojtcompletion', 'rb_source_ojt_completion');
 
         parent::__construct();
     }
@@ -87,7 +91,8 @@ class rb_source_ojt_completion extends rb_base_source {
      * Global report restrictions are implemented in this source.
      * @return boolean
      */
-    public function global_restrictions_supported() {
+    public function global_restrictions_supported()
+    {
         return true;
     }
 
@@ -98,11 +103,12 @@ class rb_source_ojt_completion extends rb_base_source {
     //
     //
 
-    protected function define_joinlist() {
+    protected function define_joinlist()
+    {
         global $CFG;
 
         // to get access to constants
-        require_once($CFG->dirroot.'/mod/ojt/lib.php');
+        require_once($CFG->dirroot . '/mod/ojt/lib.php');
         require_once($CFG->dirroot . '/completion/criteria/completion_criteria.php');
 
         $joinlist = array(
@@ -158,7 +164,8 @@ class rb_source_ojt_completion extends rb_base_source {
         return $joinlist;
     }
 
-    protected function define_columnoptions() {
+    protected function define_columnoptions()
+    {
         global $DB;
 
         $columnoptions = array(
@@ -167,16 +174,18 @@ class rb_source_ojt_completion extends rb_base_source {
                 'name',
                 get_string('ojt', 'rb_source_ojt_completion'),
                 'ojt.name',
-                array('joins' => 'ojt', 'displayfunc' => 'ojt_link',
-                    'extrafields' => array('userid' => 'base.userid', 'ojtid' => 'base.ojtid'))
+                array('joins'       => 'ojt',
+                      'displayfunc' => 'ojt_link',
+                      'extrafields' => array('userid' => 'base.userid', 'ojtid' => 'base.ojtid'))
             ),
             new rb_column_option(
                 'ojt',
                 'evaluatelink',
                 get_string('evaluatelink', 'rb_source_ojt_completion'),
                 'ojt.name',
-                array('joins' => 'ojt', 'displayfunc' => 'ojt_evaluate_link',
-                    'extrafields' => array('userid' => 'base.userid', 'ojtid' => 'base.ojtid'))
+                array('joins'       => 'ojt',
+                      'displayfunc' => 'ojt_evaluate_link',
+                      'extrafields' => array('userid' => 'base.userid', 'ojtid' => 'base.ojtid'))
             ),
 
             new rb_column_option(
@@ -206,7 +215,7 @@ class rb_source_ojt_completion extends rb_base_source {
                 get_string('topicsignoffuser', 'rb_source_ojt_completion'),
                 $DB->sql_fullname("topicsignoffuser.firstname", "topicsignoffuser.lastname"),
                 array(
-                    'joins' => 'topicsignoffuser',
+                    'joins'       => 'topicsignoffuser',
                     'displayfunc' => 'link_user',
                     'extrafields' => array('user_id' => "topicsignoffuser.id"),
                 )
@@ -239,7 +248,7 @@ class rb_source_ojt_completion extends rb_base_source {
                 get_string('modifiedby', 'rb_source_ojt_completion'),
                 $DB->sql_fullname("modifyuser.firstname", "modifyuser.lastname"),
                 array(
-                    'joins' => 'modifyuser',
+                    'joins'       => 'modifyuser',
                     'displayfunc' => 'link_user',
                     'extrafields' => array('user_id' => "modifyuser.id"),
                 )
@@ -257,7 +266,8 @@ class rb_source_ojt_completion extends rb_base_source {
         return $columnoptions;
     }
 
-    protected function define_filteroptions() {
+    protected function define_filteroptions()
+    {
         $filteroptions = array(
 
             new rb_filter_option(
@@ -310,7 +320,8 @@ class rb_source_ojt_completion extends rb_base_source {
         return $filteroptions;
     }
 
-    protected function define_contentoptions() {
+    protected function define_contentoptions()
+    {
         $contentoptions = array();
         $this->add_basic_user_content_options($contentoptions);
         $contentoptions[] = new rb_content_option(
@@ -322,7 +333,8 @@ class rb_source_ojt_completion extends rb_base_source {
         return $contentoptions;
     }
 
-    protected function define_paramoptions() {
+    protected function define_paramoptions()
+    {
         $paramoptions = array(
             new rb_param_option(
                 'ojtid',
@@ -333,30 +345,31 @@ class rb_source_ojt_completion extends rb_base_source {
         return $paramoptions;
     }
 
-    protected function define_defaultcolumns() {
+    protected function define_defaultcolumns()
+    {
         $defaultcolumns = array(
             array(
-                'type' => 'user',
+                'type'  => 'user',
                 'value' => 'namelink',
             ),
             array(
-                'type' => 'course',
+                'type'  => 'course',
                 'value' => 'courselink',
             ),
             array(
-                'type' => 'ojt',
+                'type'  => 'ojt',
                 'value' => 'name',
             ),
             array(
-                'type' => 'ojt_topic',
+                'type'  => 'ojt_topic',
                 'value' => 'name',
             ),
             array(
-                'type' => 'base',
+                'type'  => 'base',
                 'value' => 'type',
             ),
             array(
-                'type' => 'base',
+                'type'  => 'base',
                 'value' => 'status',
             ),
 
@@ -364,31 +377,32 @@ class rb_source_ojt_completion extends rb_base_source {
         return $defaultcolumns;
     }
 
-    protected function define_defaultfilters() {
+    protected function define_defaultfilters()
+    {
         $defaultfilters = array(
             array(
-                'type' => 'ojt',
+                'type'  => 'ojt',
                 'value' => 'name',
             ),
             array(
-                'type' => 'ojt_topic',
+                'type'  => 'ojt_topic',
                 'value' => 'name',
             ),
             array(
-                'type' => 'base',
+                'type'  => 'base',
                 'value' => 'type',
             ),
             array(
-                'type' => 'base',
+                'type'  => 'base',
                 'value' => 'status',
             ),
             array(
-                'type' => 'user',
+                'type'  => 'user',
                 'value' => 'fullname',
             ),
             array(
-                'type' => 'course',
-                'value' => 'fullname',
+                'type'     => 'course',
+                'value'    => 'fullname',
                 'advanced' => 1,
             ),
         );
@@ -396,7 +410,8 @@ class rb_source_ojt_completion extends rb_base_source {
         return $defaultfilters;
     }
 
-    protected function define_requiredcolumns() {
+    protected function define_requiredcolumns()
+    {
         $requiredcolumns = array();
         return $requiredcolumns;
     }
@@ -407,31 +422,39 @@ class rb_source_ojt_completion extends rb_base_source {
     //
     //
 
-    function rb_display_ojt_completion_status($status, $row, $isexport) {
-        if (empty($status)) {
+    function rb_display_ojt_completion_status($status, $row, $isexport)
+    {
+        if (empty($status))
+        {
             return get_string('completionstatus' . completion::STATUS_INCOMPLETE, 'ojt');
-        } else {
-            return get_string('completionstatus'.$status, 'ojt');
+        }
+        else
+        {
+            return get_string('completionstatus' . $status, 'ojt');
         }
     }
 
-    function rb_display_ojt_type($type, $row, $isexport) {
-        return get_string('type'.$type, 'ojt');
+    function rb_display_ojt_type($type, $row, $isexport)
+    {
+        return get_string('type' . $type, 'ojt');
     }
 
-    function rb_display_ojt_link($ojtname, $row, $isexport) {
+    function rb_display_ojt_link($ojtname, $row, $isexport)
+    {
         return html_writer::link(new moodle_url('/mod/ojt/evaluate.php',
             array('userid' => $row->userid, 'bid' => $row->ojtid)), $ojtname);
 
     }
 
-    function rb_display_ojt_evaluate_link($ojtname, $row, $isexport) {
+    function rb_display_ojt_evaluate_link($ojtname, $row, $isexport)
+    {
         return html_writer::link(new moodle_url('/mod/ojt/evaluate.php',
             array('userid' => $row->userid, 'bid' => $row->ojtid)), get_string('evaluate', 'rb_source_ojt_completion'));
 
     }
 
-    function rb_display_ojt_topic_signedoff($signedoff, $row, $isexport) {
+    function rb_display_ojt_topic_signedoff($signedoff, $row, $isexport)
+    {
 
         return !empty($signedoff) ? get_string('yes') : get_string('no');
 
@@ -446,21 +469,26 @@ class rb_source_ojt_completion extends rb_base_source {
     //
     //
 
-    function rb_filter_ojt_completion_status_list() {
-        $statuses = array(completion::STATUS_INCOMPLETE, completion::STATUS_REQUIREDCOMPLETE, completion::STATUS_COMPLETE);
+    function rb_filter_ojt_completion_status_list()
+    {
+        $statuses   =
+            array(completion::STATUS_INCOMPLETE, completion::STATUS_REQUIREDCOMPLETE, completion::STATUS_COMPLETE);
         $statuslist = array();
-        foreach ($statuses as $status) {
-            $statuslist[$status] = get_string('completionstatus'.$status, 'ojt');
+        foreach ($statuses as $status)
+        {
+            $statuslist[$status] = get_string('completionstatus' . $status, 'ojt');
         }
 
         return $statuslist;
     }
 
-    function rb_filter_ojt_type_list() {
-        $types = array(completion::COMP_TYPE_OJT, completion::COMP_TYPE_TOPIC);
+    function rb_filter_ojt_type_list()
+    {
+        $types    = array(completion::COMP_TYPE_OJT, completion::COMP_TYPE_TOPIC);
         $typelist = array();
-        foreach ($types as $type) {
-            $typelist[$type] = get_string('type'.$type, 'ojt');
+        foreach ($types as $type)
+        {
+            $typelist[$type] = get_string('type' . $type, 'ojt');
         }
 
         return $typelist;
@@ -474,37 +502,62 @@ class rb_source_ojt_completion extends rb_base_source {
      * Inject column_test data into database.
      * @param totara_reportbuilder_column_testcase $testcase
      */
-    public function phpunit_column_test_add_data(totara_reportbuilder_column_testcase $testcase) {
-       global $DB;
+    public function phpunit_column_test_add_data(totara_reportbuilder_column_testcase $testcase)
+    {
+        global $DB;
 
-       if (!PHPUNIT_TEST) {
-           throw new coding_exception('phpunit_prepare_test_data() cannot be used outside of unit tests');
-       }
-       $data = array(
-            'ojt' => array(
+        if (!PHPUNIT_TEST)
+        {
+            throw new coding_exception('phpunit_prepare_test_data() cannot be used outside of unit tests');
+        }
+        $data = array(
+            'ojt'             => array(
                 array('id' => 1, 'course' => 1, 'name' => 'test ojt', 'intro' => '', 'timecreated' => 1)
             ),
-            'ojt_topic' => array(
+            'ojt_topic'       => array(
                 array('id' => 1, 'ojtid' => 1, 'name' => 'test ojt topic')
             ),
-            'ojt_topic_item' => array(
+            'ojt_topic_item'  => array(
                 array('id' => 1, 'ojtid' => 1, 'topicid' => 1, 'name' => 'test ojt topic item')
             ),
-            'ojt_completion' => array(
-                array('id' => 1, 'userid' => 2, 'type' => 0, 'ojtid' => 1, 'topicid' => 0, 'topicitemid' => 0, 'status' => 1, 'modifiedby' => 1),
-                array('id' => 2, 'userid' => 2, 'type' => 1, 'ojtid' => 1, 'topicid' => 1, 'topicitemid' => 0, 'status' => 1, 'modifiedby' => 1),
-                array('id' => 3, 'userid' => 2, 'type' => 2, 'ojtid' => 1, 'topicid' => 1, 'topicitemid' => 1, 'status' => 1, 'modifiedby' => 1),
+            'ojt_completion'  => array(
+                array('id'          => 1,
+                      'userid'      => 2,
+                      'type'        => 0,
+                      'ojtid'       => 1,
+                      'topicid'     => 0,
+                      'topicitemid' => 0,
+                      'status'      => 1,
+                      'modifiedby'  => 1),
+                array('id'          => 2,
+                      'userid'      => 2,
+                      'type'        => 1,
+                      'ojtid'       => 1,
+                      'topicid'     => 1,
+                      'topicitemid' => 0,
+                      'status'      => 1,
+                      'modifiedby'  => 1),
+                array('id'          => 3,
+                      'userid'      => 2,
+                      'type'        => 2,
+                      'ojtid'       => 1,
+                      'topicid'     => 1,
+                      'topicitemid' => 1,
+                      'status'      => 1,
+                      'modifiedby'  => 1),
             ),
             'user_enrolments' => array(
                 array('id' => 1, 'status' => 0, 'enrolid' => 1, 'userid' => 2)
             ),
         );
-        foreach ($data as $table => $data) {
-            foreach($data as $datarow) {
+        foreach ($data as $table => $data)
+        {
+            foreach ($data as $datarow)
+            {
                 $DB->import_record($table, $datarow);
             }
             $DB->get_manager()->reset_sequence(new xmldb_table($table));
-       }
+        }
     }
 
     /**
@@ -512,8 +565,10 @@ class rb_source_ojt_completion extends rb_base_source {
      * @param rb_column_option $columnoption
      * @return int
      */
-    public function phpunit_column_test_expected_count($columnoption) {
-        if (!PHPUNIT_TEST) {
+    public function phpunit_column_test_expected_count($columnoption)
+    {
+        if (!PHPUNIT_TEST)
+        {
             throw new coding_exception('phpunit_column_test_expected_count() cannot be used outside of unit tests');
         }
         return 2;
@@ -522,29 +577,30 @@ class rb_source_ojt_completion extends rb_base_source {
 } // end of rb_source_course_completion class
 
 
-
 /**
  * Restrict content by ojt completion type
  *
  * Pass in an integer that represents a ojt completion type, e.g OJT_CTYPE_TOPIC
  */
-class rb_ojt_completion_type_content extends rb_base_content {
+class rb_ojt_completion_type_content extends rb_base_content
+{
 
     /**
      * Generate the SQL to apply this content restriction
      *
-     * @param string $field SQL field to apply the restriction against
+     * @param string  $field SQL field to apply the restriction against
      * @param integer $reportid ID of the report
      *
      * @return array containing SQL snippet to be used in a WHERE clause, as well as array of SQL params
      */
-    public function sql_restriction($field, $reportid) {
+    public function sql_restriction($field, $reportid)
+    {
         global $CFG, $DB;
 
         require_once($CFG->dirroot . '/mod/ojt/lib.php');
 
         // remove rb_ from start of classname
-        $type = substr(get_class($this), 3);
+        $type     = substr(get_class($this), 3);
         $settings = reportbuilder::get_all_settings($reportid, $type);
 
         return array('base.type = :crbct', array('crbct' => $settings['completiontype']));
@@ -553,19 +609,21 @@ class rb_ojt_completion_type_content extends rb_base_content {
     /**
      * Generate a human-readable text string describing the restriction
      *
-     * @param string $title Name of the field being restricted
+     * @param string  $title Name of the field being restricted
      * @param integer $reportid ID of the report
      *
      * @return string Human readable description of the restriction
      */
-    public function text_restriction($title, $reportid) {
+    public function text_restriction($title, $reportid)
+    {
         global $DB;
 
         // remove rb_ from start of classname
-        $type = substr(get_class($this), 3);
+        $type     = substr(get_class($this), 3);
         $settings = reportbuilder::get_all_settings($reportid, $type);
 
-        return !empty($settings['completiontype']) ? $title.' - '.get_string('type'.$settings['completiontype'], 'ojt') : '';
+        return !empty($settings['completiontype']) ?
+            $title . ' - ' . get_string('type' . $settings['completiontype'], 'ojt') : '';
     }
 
 
@@ -574,13 +632,14 @@ class rb_ojt_completion_type_content extends rb_base_content {
      *
      * @param object &$mform Moodle form object to modify (passed by reference)
      * @param integer $reportid ID of the report being adjusted
-     * @param string $title Name of the field the restriction is acting on
+     * @param string  $title Name of the field the restriction is acting on
      */
-    public function form_template(&$mform, $reportid, $title) {
+    public function form_template(&$mform, $reportid, $title)
+    {
         // get current settings
         // remove rb_ from start of classname
-        $type = substr(get_class($this), 3);
-        $enable = reportbuilder::get_setting($reportid, $type, 'enable');
+        $type           = substr(get_class($this), 3);
+        $enable         = reportbuilder::get_setting($reportid, $type, 'enable');
         $completiontype = reportbuilder::get_setting($reportid, $type, 'completiontype');
 
         $mform->addElement('header', 'ojt_completion_type_header',
@@ -590,7 +649,7 @@ class rb_ojt_completion_type_content extends rb_base_content {
             get_string('completiontypeenable', 'rb_source_ojt_completion'));
         $mform->setDefault('ojt_completion_type_enable', $enable);
         $mform->disabledIf('ojt_completion_type_enable', 'contentenabled', 'eq', 0);
-        $radiogroup = array();
+        $radiogroup   = array();
         $radiogroup[] =& $mform->createElement('radio', 'ojt_completion_type_completiontype',
             '', get_string('type' . completion::COMP_TYPE_OJT, 'ojt'), completion::COMP_TYPE_OJT);
         $radiogroup[] =& $mform->createElement('radio', 'ojt_completion_type_completiontype',
@@ -609,26 +668,27 @@ class rb_ojt_completion_type_content extends rb_base_content {
      * Processes the form elements created by {@link form_template()}
      *
      * @param integer $reportid ID of the report to process
-     * @param object $fromform Moodle form data received via form submission
+     * @param object  $fromform Moodle form data received via form submission
      *
      * @return boolean True if form was successfully processed
      */
-    public function form_process($reportid, $fromform) {
+    public function form_process($reportid, $fromform)
+    {
         $status = true;
         // remove rb_ from start of classname
         $type = substr(get_class($this), 3);
 
         // enable checkbox option
         $enable = (isset($fromform->ojt_completion_type_enable) &&
-            $fromform->ojt_completion_type_enable) ? 1 : 0;
+                   $fromform->ojt_completion_type_enable) ? 1 : 0;
         $status = $status && reportbuilder::update_setting($reportid, $type,
-            'enable', $enable);
+                'enable', $enable);
 
         // recursive radio option
         $recursive = isset($fromform->ojt_completion_type_completiontype) ?
             $fromform->ojt_completion_type_completiontype : 0;
-        $status = $status && reportbuilder::update_setting($reportid, $type,
-            'completiontype', $recursive);
+        $status    = $status && reportbuilder::update_setting($reportid, $type,
+                'completiontype', $recursive);
 
         return $status;
     }

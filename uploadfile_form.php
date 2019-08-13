@@ -24,14 +24,16 @@
  * The form for editing evidence
  */
 
-if (!defined('MOODLE_INTERNAL')) {
+if (!defined('MOODLE_INTERNAL'))
+{
     die('Direct access to this script is forbidden.');    //  It must be included from a Moodle page
 }
 
 require_once("{$CFG->libdir}/formslib.php");
 require_once("{$CFG->libdir}/uploadlib.php");
 
-class ojt_topicitem_files_form extends moodleform {
+class ojt_topicitem_files_form extends moodleform
+{
 
     /**
      * Requires the following $_customdata to be passed into the constructor:
@@ -39,16 +41,18 @@ class ojt_topicitem_files_form extends moodleform {
      *
      * @global object $DB
      */
-    function definition() {
+    function definition()
+    {
         global $DB, $FILEPICKER_OPTIONS;
 
         $mform =& $this->_form;
 
         // Determine permissions from evidence
-        $topicitemid = $this->_customdata['topicitemid'];
-        $userid = $this->_customdata['userid'];
+        $topicitemid    = $this->_customdata['topicitemid'];
+        $userid         = $this->_customdata['userid'];
         $evidencetypeid = isset($this->_customdata['evidencetypeid']) ? $this->_customdata['evidencetypeid'] : null;
-        $fileoptions = isset($this->_customdata['fileoptions']) ? $this->_customdata['fileoptions'] : $FILEPICKER_OPTIONS;
+        $fileoptions    =
+            isset($this->_customdata['fileoptions']) ? $this->_customdata['fileoptions'] : $FILEPICKER_OPTIONS;
 
         $mform->addElement('hidden', 'tiid', $topicitemid);
         $mform->setType('tiid', PARAM_INT);
@@ -57,7 +61,7 @@ class ojt_topicitem_files_form extends moodleform {
         $mform->setType('userid', PARAM_INT);
 
         $mform->addElement('filemanager', 'topicitemfiles_filemanager',
-                get_string('topicitemfiles', 'ojt'), null, $fileoptions);
+            get_string('topicitemfiles', 'ojt'), null, $fileoptions);
 
         $this->add_action_buttons(true, get_string('updatefiles', 'ojt'));
     }

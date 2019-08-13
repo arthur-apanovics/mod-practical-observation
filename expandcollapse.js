@@ -34,7 +34,7 @@ M.mod_ojt_expandcollapse = M.mod_ojt_expandcollapse || {
      * @param object    YUI instance
      * @param string    args supplied in JSON format
      */
-    init: function(Y, args) {
+    init: function (Y, args) {
         // save a reference to the Y instance (all of its dependencies included)
         this.Y = Y;
 
@@ -56,7 +56,7 @@ M.mod_ojt_expandcollapse = M.mod_ojt_expandcollapse || {
         var config = this.config;
 
         // Init topic expand/collapse
-        $('.mod-ojt-topic-heading').on('click', function() {
+        $('.mod-ojt-topic-heading').on('click', function () {
             var topicheading = $(this);
             if (topicheading.hasClass('expanded')) {
                 topicheading.removeClass('expanded').addClass('collapsed');
@@ -68,5 +68,5 @@ M.mod_ojt_expandcollapse = M.mod_ojt_expandcollapse || {
 
     },  // init
 
-}
+};
 

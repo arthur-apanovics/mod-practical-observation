@@ -28,59 +28,63 @@ use mod_ojt\ojt;
 
 define('AJAX_SCRIPT', true);
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
-require_once($CFG->dirroot.'/mod/ojt/lib.php');
-require_once($CFG->dirroot.'/mod/ojt/locallib.php');
-require_once($CFG->dirroot .'/totara/core/js/lib/setup.php');
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once($CFG->dirroot . '/mod/ojt/lib.php');
+require_once($CFG->dirroot . '/mod/ojt/locallib.php');
+require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
 
 require_sesskey();
 
-$userid = required_param('userid', PARAM_INT);
-$ojtid  = required_param('bid', PARAM_INT);
+$userid  = required_param('userid', PARAM_INT);
+$ojtid   = required_param('bid', PARAM_INT);
 $topicid = required_param('id', PARAM_INT);
 
-$user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
-$ojt  = $DB->get_record('ojt', array('id' => $ojtid), '*', MUST_EXIST);
-$course     = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
-$cm         = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
+$user   = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
+$ojt    = $DB->get_record('ojt', array('id' => $ojtid), '*', MUST_EXIST);
+$course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
+$cm     = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
 
 require_login($course, true, $cm);
 
 require_capability('mod/ojt:signoff', context_module::instance($cm->id));
 
-if (!$ojt->managersignoff) {
+if (!$ojt->managersignoff)
+{
     print_error('manager signoff not enabled for this ojt');
 }
 
 // Get the ojt topic
-$sql = "SELECT t.*, t.id AS topicid
+$sql   = "SELECT t.*, t.id AS topicid
     FROM {ojt_topic} t
     WHERE t.ojtid = ? AND t.id = ?";
 $topic = $DB->get_record_sql($sql, array($ojt->id, $topicid), MUST_EXIST);
 
 // Update/delete the signoff record
-$topicsignoff = new stdClass();
-$topicsignoff->userid = $userid;
-$topicsignoff->topicid = $topic->id;
+$topicsignoff               = new stdClass();
+$topicsignoff->userid       = $userid;
+$topicsignoff->topicid      = $topic->id;
 $topicsignoff->timemodified = time();
-$topicsignoff->modifiedby = $USER->id;
+$topicsignoff->modifiedby   = $USER->id;
 
-if ($currentsignoff = $DB->get_record('ojt_topic_signoff', array('userid' => $userid, 'topicid' => $topicid))) {
+if ($currentsignoff = $DB->get_record('ojt_topic_signoff', array('userid' => $userid, 'topicid' => $topicid)))
+{
     // Update
-    $topicsignoff->id = $currentsignoff->id;
+    $topicsignoff->id        = $currentsignoff->id;
     $topicsignoff->signedoff = !($currentsignoff->signedoff);
     $DB->update_record('ojt_topic_signoff', $topicsignoff);
-} else {
+}
+else
+{
     // Insert
     $topicsignoff->signedoff = 1;
-    $topicsignoff->id = $DB->insert_record('ojt_topic_signoff', $topicsignoff);
+    $topicsignoff->id        = $DB->insert_record('ojt_topic_signoff', $topicsignoff);
 }
 
 $modifiedstr = ojt::get_modifiedstr($topicsignoff->timemodified);
 
 $jsonparams = array(
     'topicsignoff' => $topicsignoff,
-    'modifiedstr' => $modifiedstr
+    'modifiedstr'  => $modifiedstr
 );
 
 echo json_encode($jsonparams);

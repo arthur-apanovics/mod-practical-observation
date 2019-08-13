@@ -22,41 +22,68 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-class backup_ojt_activity_structure_step extends backup_activity_structure_step {
+class backup_ojt_activity_structure_step extends backup_activity_structure_step
+{
 
     /**
      * Defines the backup structure of the module
      *
      * @return backup_nested_element
      */
-    protected function define_structure() {
+    protected function define_structure()
+    {
 
         // Get know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
 
         // Define the root element describing the ojt instance.
         $ojt = new backup_nested_element('ojt', array('id'), array(
-            'name', 'intro', 'introformat', 'grade', 'managersignoff', 'itemwitness', 'completiontopics'));
+            'name',
+            'intro',
+            'introformat',
+            'grade',
+            'managersignoff',
+            'itemwitness',
+            'completiontopics'));
 
         $topics = new backup_nested_element('topics');
-        $topic = new backup_nested_element('topic', array('id'), array(
-            'name', 'completionreq'));
+        $topic  = new backup_nested_element('topic', array('id'), array(
+            'name',
+            'completionreq'));
 
         $items = new backup_nested_element('items');
-        $item = new backup_nested_element('item', array('id'), array(
-            'name', 'completionreq', 'allowfileuploads', 'allowselffileuploads'));
+        $item  = new backup_nested_element('item', array('id'), array(
+            'name',
+            'completionreq',
+            'allowfileuploads',
+            'allowselffileuploads'));
 
         $completions = new backup_nested_element('completions');
-        $completion = new backup_nested_element('completion', array('id'), array(
-            'userid', 'type', 'topicid', 'topicitemid', 'status', 'comment', 'timemodified', 'modifiedby'));
+        $completion  = new backup_nested_element('completion', array('id'), array(
+            'userid',
+            'type',
+            'topicid',
+            'topicitemid',
+            'status',
+            'comment',
+            'timemodified',
+            'modifiedby'));
 
         $topic_signoffs = new backup_nested_element('topic_signoffs');
-        $topic_signoff = new backup_nested_element('topic_signoff', array('id'), array(
-            'userid', 'topicid', 'signedoff', 'comment', 'timemodified', 'modifiedby'));
+        $topic_signoff  = new backup_nested_element('topic_signoff', array('id'), array(
+            'userid',
+            'topicid',
+            'signedoff',
+            'comment',
+            'timemodified',
+            'modifiedby'));
 
         $item_witnesses = new backup_nested_element('item_witnesses');
-        $item_witness = new backup_nested_element('item_witness', array('id'), array(
-            'userid', 'topicitemid', 'witnessedby', 'timewitnessed'));
+        $item_witness   = new backup_nested_element('item_witness', array('id'), array(
+            'userid',
+            'topicitemid',
+            'witnessedby',
+            'timewitnessed'));
 
         // Build the tree
         $ojt->add_child($topics);
@@ -88,7 +115,8 @@ class backup_ojt_activity_structure_step extends backup_activity_structure_step 
              WHERE topicid = ?',
             array(backup::VAR_PARENTID));
 
-        if ($userinfo) {
+        if ($userinfo)
+        {
             $completion->set_source_sql('
                 SELECT *
                   FROM {ojt_completion}

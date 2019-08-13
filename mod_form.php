@@ -29,17 +29,19 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/course/moodleform_mod.php');
+require_once($CFG->dirroot . '/course/moodleform_mod.php');
 
 /**
  * Module instance settings form
  */
-class mod_ojt_mod_form extends moodleform_mod {
+class mod_ojt_mod_form extends moodleform_mod
+{
 
     /**
      * Defines forms elements
      */
-    public function definition() {
+    public function definition()
+    {
 
         $mform = $this->_form;
 
@@ -48,9 +50,12 @@ class mod_ojt_mod_form extends moodleform_mod {
 
         // Adding the standard "name" field.
         $mform->addElement('text', 'name', get_string('ojtname', 'ojt'), array('size' => '64'));
-        if (!empty($CFG->formatstringstriptags)) {
+        if (!empty($CFG->formatstringstriptags))
+        {
             $mform->setType('name', PARAM_TEXT);
-        } else {
+        }
+        else
+        {
             $mform->setType('name', PARAM_CLEAN);
         }
         $mform->addRule('name', null, 'required', null, 'client');
@@ -74,14 +79,16 @@ class mod_ojt_mod_form extends moodleform_mod {
         $this->add_action_buttons();
     }
 
-    function add_completion_rules() {
+    function add_completion_rules()
+    {
         $mform =& $this->_form;
 
         $mform->addElement('advcheckbox', 'completiontopics', '', get_string('completiontopics', 'ojt'));
         return array('completiontopics');
     }
 
-    function completion_rule_enabled($data) {
+    function completion_rule_enabled($data)
+    {
         return !empty($data['completiontopics']);
     }
 

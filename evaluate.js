@@ -33,7 +33,7 @@ M.mod_ojt_evaluate = M.mod_ojt_evaluate || {
      * @param object    YUI instance
      * @param string    args supplied in JSON format
      */
-    init: function(Y, args) {
+    init: function (Y, args) {
         // save a reference to the Y instance (all of its dependencies included)
         this.Y = Y;
         var ojtobj = this;
@@ -60,19 +60,19 @@ M.mod_ojt_evaluate = M.mod_ojt_evaluate || {
             var completionimg = $(this);
             var itemid = $(this).closest('.ojt-eval-actions').attr('ojt-item-id');
             $.ajax({
-                url: M.cfg.wwwroot+'/mod/ojt/evaluatesave.php',
+                url: M.cfg.wwwroot + '/mod/ojt/evaluatesave.php',
                 type: 'POST',
                 data: {
-                    'sesskey' : M.cfg.sesskey,
+                    'sesskey': M.cfg.sesskey,
                     'action': 'togglecompletion',
                     'bid': config.ojtid,
                     'userid': config.userid,
                     'id': itemid
                 },
-                beforeSend: function() {
+                beforeSend: function () {
                     ojtobj.replaceIcon(completionimg, 'loading');
                 },
-                success: function(data) {
+                success: function (data) {
                     if (data.item.status == config.OJT_COMPLETE) {
                         ojtobj.replaceIcon(completionimg, 'completion-manual-y');
                     } else {
@@ -80,10 +80,10 @@ M.mod_ojt_evaluate = M.mod_ojt_evaluate || {
                     }
 
                     // Update the topic's completion too.
-                    ojtobj.setTopicStatusIcon(data.topic.status, $('#ojt-topic-'+data.topic.topicid+' .ojt-topic-status'));
+                    ojtobj.setTopicStatusIcon(data.topic.status, $('#ojt-topic-' + data.topic.topicid + ' .ojt-topic-status'));
 
                     // Update modified string.
-                    $('.mod-ojt-modifiedstr[ojt-item-id='+itemid+']').html(data.modifiedstr);
+                    $('.mod-ojt-modifiedstr[ojt-item-id=' + itemid + ']').html(data.modifiedstr);
 
                     $(completionimg).next('.ojt-completion-comment').focus();
                 },
@@ -99,24 +99,24 @@ M.mod_ojt_evaluate = M.mod_ojt_evaluate || {
             var commentinput = this;
             var itemid = $(this).attr('ojt-item-id');
             $.ajax({
-                url: M.cfg.wwwroot+'/mod/ojt/evaluatesave.php',
+                url: M.cfg.wwwroot + '/mod/ojt/evaluatesave.php',
                 type: 'POST',
                 data: {
-                    'sesskey' : M.cfg.sesskey,
+                    'sesskey': M.cfg.sesskey,
                     'action': 'savecomment',
                     'bid': config.ojtid,
                     'userid': config.userid,
                     'id': itemid,
                     'comment': $(commentinput).val()
                 },
-                success: function(data) {
+                success: function (data) {
 
                     // Update comment text box, so we can get the date in there too
                     $(commentinput).val(data.item.comment);
                     // Update the comment print box
-                    $('.ojt-completion-comment-print[ojt-item-id='+itemid+']').html(data.item.comment);
+                    $('.ojt-completion-comment-print[ojt-item-id=' + itemid + ']').html(data.item.comment);
 
-                    $('.mod-ojt-modifiedstr[ojt-item-id='+itemid+']').html(data.modifiedstr);
+                    $('.mod-ojt-modifiedstr[ojt-item-id=' + itemid + ']').html(data.modifiedstr);
                 },
                 error: function (data) {
                     console.log(data);
@@ -130,18 +130,18 @@ M.mod_ojt_evaluate = M.mod_ojt_evaluate || {
             var completionimg = $(this);
             var itemid = $(this).closest('.ojt-witness-item').attr('ojt-item-id');
             $.ajax({
-                url: M.cfg.wwwroot+'/mod/ojt/witnesssave.php',
+                url: M.cfg.wwwroot + '/mod/ojt/witnesssave.php',
                 type: 'POST',
                 data: {
-                    'sesskey' : M.cfg.sesskey,
+                    'sesskey': M.cfg.sesskey,
                     'bid': config.ojtid,
                     'userid': config.userid,
                     'id': itemid
                 },
-                beforeSend: function() {
+                beforeSend: function () {
                     ojtobj.replaceIcon(completionimg, 'loading');
                 },
-                success: function(data) {
+                success: function (data) {
                     if (data.item.witnessedby > 0) {
                         ojtobj.replaceIcon(completionimg, 'completion-manual-y');
                     } else {
@@ -149,10 +149,10 @@ M.mod_ojt_evaluate = M.mod_ojt_evaluate || {
                     }
 
                     // Update the topic's completion too.
-                    ojtobj.setTopicStatusIcon(data.topic.status, $('#ojt-topic-'+data.topic.topicid+' .ojt-topic-status'));
+                    ojtobj.setTopicStatusIcon(data.topic.status, $('#ojt-topic-' + data.topic.topicid + ' .ojt-topic-status'));
 
                     // Update modified string.
-                    $('.mod-ojt-witnessedstr[ojt-item-id='+itemid+']').html(data.modifiedstr);
+                    $('.mod-ojt-witnessedstr[ojt-item-id=' + itemid + ']').html(data.modifiedstr);
                 },
                 error: function (data) {
                     console.log(data);
@@ -167,25 +167,25 @@ M.mod_ojt_evaluate = M.mod_ojt_evaluate || {
             var topicid = $(this).closest('.mod-ojt-topic-signoff');
             var topicid = $(topicid).attr('ojt-topic-id');
             $.ajax({
-                url: M.cfg.wwwroot+'/mod/ojt/evaluatesignoff.php',
+                url: M.cfg.wwwroot + '/mod/ojt/evaluatesignoff.php',
                 type: 'POST',
                 data: {
-                    'sesskey' : M.cfg.sesskey,
+                    'sesskey': M.cfg.sesskey,
                     'bid': config.ojtid,
                     'userid': config.userid,
                     'id': topicid
                 },
-                beforeSend: function() {
+                beforeSend: function () {
                     ojtobj.replaceIcon(signoffimg, 'loading');
                 },
-                success: function(data) {
+                success: function (data) {
                     if (data.topicsignoff.signedoff) {
                         ojtobj.replaceIcon(signoffimg, 'completion-manual-y');
                     } else {
                         ojtobj.replaceIcon(signoffimg, 'completion-manual-n');
                     }
 
-                    $('.mod-ojt-topic-signoff[ojt-topic-id='+topicid+'] .mod-ojt-topic-modifiedstr').html(data.modifiedstr);
+                    $('.mod-ojt-topic-signoff[ojt-topic-id=' + topicid + '] .mod-ojt-topic-modifiedstr').html(data.modifiedstr);
                 },
                 error: function (data) {
                     console.log(data);
@@ -195,28 +195,28 @@ M.mod_ojt_evaluate = M.mod_ojt_evaluate || {
         });
     },  // init
 
-	replaceIcon: function (icon, newiconname) {
+    replaceIcon: function (icon, newiconname) {
         require(['core/templates'], function (templates) {
-			templates.renderIcon(newiconname).done(function (html) {
-				icon.attr('data-flex-icon', $(html).attr('data-flex-icon'));
-				icon.attr('class', $(html).attr('class'));
-			});
-		});
+            templates.renderIcon(newiconname).done(function (html) {
+                icon.attr('data-flex-icon', $(html).attr('data-flex-icon'));
+                icon.attr('class', $(html).attr('class'));
+            });
+        });
 
-	},
+    },
 
     setTopicStatusIcon: function (topicstatus, statuscontainer) {
-		var iconname = 'times-danger';
-		if (topicstatus == this.config.OJT_COMPLETE) {
-			iconname = 'check-success';
-		} else if (topicstatus == this.config.OJT_REQUIREDCOMPLETE) {
-			iconname = 'check-warning';
-		}
-		require(['core/templates'], function (templates) {
-			templates.renderIcon(iconname).done(function (html) {
-				statuscontainer.html(html);
-			});
-		});
+        var iconname = 'times-danger';
+        if (topicstatus == this.config.OJT_COMPLETE) {
+            iconname = 'check-success';
+        } else if (topicstatus == this.config.OJT_REQUIREDCOMPLETE) {
+            iconname = 'check-warning';
+        }
+        require(['core/templates'], function (templates) {
+            templates.renderIcon(iconname).done(function (html) {
+                statuscontainer.html(html);
+            });
+        });
     },
-}
+};
 

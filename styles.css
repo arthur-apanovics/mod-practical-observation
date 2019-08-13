@@ -1,8 +1,8 @@
 .config-mod-ojt-topic-heading,
 .mod-ojt-topic-heading {
-    font-size: 1.4em;
-    font-weight: bold;
-    margin-top: 0.5em;
+    font-size:     1.4em;
+    font-weight:   bold;
+    margin-top:    0.5em;
     margin-bottom: 0.2em;
 }
 
@@ -33,7 +33,7 @@
 
 .config-mod-ojt-topic-items {
     margin-left: 1em;
-    font-size: 1.2em;
+    font-size:   1.2em;
 }
 
 .config-mod-ojt-topic-item,
@@ -43,15 +43,15 @@
 
 #mod-ojt-user-ojt .mod-ojt-topic-items {
     font-size: 1.2em;
-    display: table;
+    display:   table;
 }
 
 #mod-ojt-user-ojt .mod-ojt-modifiedstr,
 #mod-ojt-user-ojt .mod-ojt-witnessedstr,
 #mod-ojt-user-ojt .mod-ojt-topic-modifiedstr {
-    font-size: 0.8em;
+    font-size:  0.8em;
     font-style: italic;
-    color: grey;
+    color:      grey;
 }
 
 #mod-ojt-user-ojt .mod-ojt-topic-signoff {
@@ -68,7 +68,7 @@ img.ojt-topic-completion-status {
 
 #mod-ojt-user-ojt textarea.ojt-completion-comment {
     margin-left: 0.4em;
-    width: 90%;
+    width:       90%;
 }
 
 #ojt-eval-icon-templates {
@@ -130,7 +130,7 @@ img.ojt-topic-completion-status {
     }
 
     #region-main {
-        width: 100% !important;
+        width:   100% !important;
         padding: 0;
     }
 
@@ -145,8 +145,9 @@ img.ojt-topic-completion-status {
     #mod-ojt-user-ojt .mod-ojt-topic-items {
         display: table;
     }
+
     #mod-ojt-user-ojt .mod-ojt-topic {
-        page-break-inside : avoid;
+        page-break-inside: avoid;
     }
 }
 

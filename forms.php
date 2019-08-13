@@ -20,7 +20,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-if (!defined('MOODLE_INTERNAL')) {
+if (!defined('MOODLE_INTERNAL'))
+{
     die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
 }
 
@@ -29,12 +30,14 @@ require_once($CFG->libdir . '/formslib.php');
 /**
  * OJT topic form
  */
-class ojt_topic_form extends moodleform {
-    function definition() {
+class ojt_topic_form extends moodleform
+{
+    function definition()
+    {
         global $CFG;
-        $mform =& $this->_form;
+        $mform    =& $this->_form;
         $courseid = $this->_customdata['courseid'];
-        $ojtid = $this->_customdata['ojtid'];
+        $ojtid    = $this->_customdata['ojtid'];
 
         $mform->addElement('text', 'name', get_string('name', 'ojt'));
         $mform->setType('name', PARAM_TEXT);
@@ -42,25 +45,32 @@ class ojt_topic_form extends moodleform {
 
         $mform->addElement('advcheckbox', 'completionreq', get_string('optionalcompletion', 'ojt'));
 
-        if (!empty($CFG->enablecompetencies)) {
-            require_once($CFG->dirroot.'/totara/hierarchy/prefix/competency/lib.php');
-            $competency = new competency();
-            $coursecomps = $competency->get_course_evidence($courseid);
+        if (!empty($CFG->enablecompetencies))
+        {
+            require_once($CFG->dirroot . '/totara/hierarchy/prefix/competency/lib.php');
+            $competency   = new competency();
+            $coursecomps  = $competency->get_course_evidence($courseid);
             $competencies = array();
-            foreach ($coursecomps as $c) {
+            foreach ($coursecomps as $c)
+            {
                 $competencies[$c->id] = format_string($c->fullname);
             }
-            if (!empty($competencies)) {
-                $select = $mform->addElement('select', 'competencies', get_string('competencies', 'ojt'), $competencies, array('size' => 7));
+            if (!empty($competencies))
+            {
+                $select = $mform->addElement('select', 'competencies', get_string('competencies', 'ojt'), $competencies,
+                    array('size' => 7));
                 $select->setMultiple(true);
                 $mform->setType('competencies', PARAM_INT);
                 $mform->addHelpButton('competencies', 'competencies', 'ojt');
             }
         }
 
-        if ($CFG->usecomments) {
+        if ($CFG->usecomments)
+        {
             $mform->addElement('advcheckbox', 'allowcomments', get_string('allowcomments', 'ojt'));
-        } else {
+        }
+        else
+        {
             $mform->addElement('hidden', 'allowcomments', false);
         }
         $mform->setType('allowcomments', PARAM_BOOL);
@@ -79,11 +89,13 @@ class ojt_topic_form extends moodleform {
 /**
  * OJT topic item form
  */
-class ojt_topic_item_form extends moodleform {
-    function definition() {
+class ojt_topic_item_form extends moodleform
+{
+    function definition()
+    {
         global $CFG;
-        $mform =& $this->_form;
-        $ojtid = $this->_customdata['ojtid'];
+        $mform   =& $this->_form;
+        $ojtid   = $this->_customdata['ojtid'];
         $topicid = $this->_customdata['topicid'];
 
         $mform->addElement('text', 'name', get_string('name', 'ojt'));

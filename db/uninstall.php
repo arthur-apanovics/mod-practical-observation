@@ -29,6 +29,7 @@
 /**
  * Custom uninstallation procedure
  */
-function xmldb_ojt_uninstall() {
+function xmldb_ojt_uninstall()
+{
     return true;
 }

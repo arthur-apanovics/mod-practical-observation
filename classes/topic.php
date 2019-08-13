@@ -26,7 +26,8 @@ use competency_evidence;
 use mod_ojt\traits\record_mapper;
 use stdClass;
 
-class topic {
+class topic
+{
     use record_mapper;
 
     /**
@@ -64,11 +65,13 @@ class topic {
         self::createFromIdOrMapToRecord($id_or_record);
     }
 
-    public static function get_user_topics($userid, $ojtid): array {
+    public static function get_user_topics($userid, $ojtid): array
+    {
         $records = self::get_user_topic_records($userid, $ojtid);
 
         $topics = [];
-        foreach ($records as $record){
+        foreach ($records as $record)
+        {
             $topic_obj = new topic();
             $topic_obj->mapToRecord($record);
             $topics[] = $topic_obj;
@@ -77,12 +80,13 @@ class topic {
         return $topics;
     }
 
-    public static function get_user_topic_records($userid, $ojtid) {
+    public static function get_user_topic_records($userid, $ojtid)
+    {
         global $DB;
 
         $sql = 'SELECT t.*, CASE WHEN c.status IS NULL THEN ' . completion::STATUS_INCOMPLETE . ' ELSE c.status END AS status,
-        s.signedoff, s.modifiedby AS signoffmodifiedby, s.timemodified AS signofftimemodified,'.
-               get_all_user_name_fields(true, 'su', '', 'signoffuser').'
+        s.signedoff, s.modifiedby AS signoffmodifiedby, s.timemodified AS signofftimemodified,' .
+               get_all_user_name_fields(true, 'su', '', 'signoffuser') . '
         FROM {ojt_topic} t
         LEFT JOIN {ojt_completion} c ON t.id = c.topicid AND c.type = ? AND c.userid = ?
         LEFT JOIN {ojt_topic_signoff} s ON t.id = s.topicid AND s.userid = ?
@@ -92,26 +96,32 @@ class topic {
         return $DB->get_records_sql($sql, array(completion::COMP_TYPE_TOPIC, $userid, $userid, $ojtid));
     }
 
-    public static function update_topic_completion($userid, $ojtid, $topicid) {
+    public static function update_topic_completion($userid, $ojtid, $topicid)
+    {
         global $DB, $USER;
 
         $ojt = $DB->get_record('ojt', array('id' => $ojtid), '*', MUST_EXIST);
 
         // Check if all required topic items have been completed
-        $sql = 'SELECT i.*, CASE WHEN c.status IS NULL THEN ' . completion::STATUS_INCOMPLETE . ' ELSE c.status END AS status
+        $sql   = 'SELECT i.*, CASE WHEN c.status IS NULL THEN ' . completion::STATUS_INCOMPLETE . ' ELSE c.status END AS status
         FROM {ojt_topic_item} i
         LEFT JOIN {ojt_completion} c ON i.id = c.topicitemid AND c.ojtid = ? AND c.type = ? AND c.userid = ?
         WHERE i.topicid = ?';
         $items = $DB->get_records_sql($sql, array($ojtid, completion::COMP_TYPE_TOPICITEM, $userid, $topicid));
 
         $status = completion::STATUS_COMPLETE;
-        foreach ($items as $item) {
-            if ($item->status == completion::STATUS_INCOMPLETE) {
-                if ($item->completionreq == completion::REQ_REQUIRED) {
+        foreach ($items as $item)
+        {
+            if ($item->status == completion::STATUS_INCOMPLETE)
+            {
+                if ($item->completionreq == completion::REQ_REQUIRED)
+                {
                     // All required items not complete - bail!
                     $status = completion::STATUS_INCOMPLETE;
                     break;
-                } else if ($item->completionreq == completion::REQ_OPTIONAL) {
+                }
+                else if ($item->completionreq == completion::REQ_OPTIONAL)
+                {
                     // Degrade status a bit
                     $status = completion::STATUS_REQUIREDCOMPLETE;
                 }
@@ -119,7 +129,8 @@ class topic {
         }
 
         if (in_array($status, array(completion::STATUS_COMPLETE, completion::STATUS_REQUIREDCOMPLETE))
-            && $ojt->itemwitness && !ojt::topic_items_witnessed($topicid, $userid)) {
+            && $ojt->itemwitness && !ojt::topic_items_witnessed($topicid, $userid))
+        {
 
             // All required items must also be witnessed - degrade status
             $status = completion::STATUS_INCOMPLETE;
@@ -127,21 +138,25 @@ class topic {
 
         $currentcompletion = $DB->get_record('ojt_completion',
             array('userid' => $userid, 'topicid' => $topicid, 'type' => completion::COMP_TYPE_TOPIC));
-        if (empty($currentcompletion->status) || $status != $currentcompletion->status) {
+        if (empty($currentcompletion->status) || $status != $currentcompletion->status)
+        {
             // Update topic completion
             $transaction = $DB->start_delegated_transaction();
 
-            $completion = empty($currentcompletion) ? new stdClass() : $currentcompletion;
-            $completion->status = $status;
+            $completion               = empty($currentcompletion) ? new stdClass() : $currentcompletion;
+            $completion->status       = $status;
             $completion->timemodified = time();
-            $completion->modifiedby = $USER->id;
-            if (empty($currentcompletion)) {
-                $completion->userid = $userid;
-                $completion->type = completion::COMP_TYPE_TOPIC;
-                $completion->ojtid = $ojtid;
+            $completion->modifiedby   = $USER->id;
+            if (empty($currentcompletion))
+            {
+                $completion->userid  = $userid;
+                $completion->type    = completion::COMP_TYPE_TOPIC;
+                $completion->ojtid   = $ojtid;
                 $completion->topicid = $topicid;
-                $completion->id = $DB->insert_record('ojt_completion', $completion);
-            } else {
+                $completion->id      = $DB->insert_record('ojt_completion', $completion);
+            }
+            else
+            {
                 $DB->update_record('ojt_completion', $completion);
             }
 
@@ -156,40 +171,46 @@ class topic {
         return empty($completion) ? $currentcompletion : $completion;
     }
 
-    public static function update_topic_competency_proficiency($userid, $topicid, $status) {
+    public static function update_topic_competency_proficiency($userid, $topicid, $status)
+    {
         global $CFG, $DB;
 
-        require_once($CFG->dirroot.'/totara/hierarchy/prefix/competency/evidence/lib.php');
+        require_once($CFG->dirroot . '/totara/hierarchy/prefix/competency/evidence/lib.php');
 
-        if (!in_array($status, array(completion::STATUS_COMPLETE, completion::STATUS_REQUIREDCOMPLETE))) {
+        if (!in_array($status, array(completion::STATUS_COMPLETE, completion::STATUS_REQUIREDCOMPLETE)))
+        {
             return;
         }
 
         $competencies = $DB->get_field('ojt_topic', 'competencies', array('id' => $topicid));
-        if (empty($competencies)) {
+        if (empty($competencies))
+        {
             // Nothing to do here :)
             return;
         }
         $competencies = explode(',', $competencies);
 
-        foreach ($competencies as $competencyid) {
+        foreach ($competencies as $competencyid)
+        {
             // this is copied from totara/hierarchy/prefix/competency/evidence/lib.php - hierarchy_add_competency_evidence()
             $todb = new competency_evidence(
                 array(
-                    'competencyid'  => $competencyid,
-                    'userid'        => $userid,
-                    'manual'        => 0,
-                    'reaggregate'   => 1,
+                    'competencyid'   => $competencyid,
+                    'userid'         => $userid,
+                    'manual'         => 0,
+                    'reaggregate'    => 1,
                     'assessmenttype' => 'ojt'
                 )
             );
 
-            if ($recordid = $DB->get_field('comp_record', 'id', array('userid' => $userid, 'competencyid' => $competencyid))) {
+            if ($recordid =
+                $DB->get_field('comp_record', 'id', array('userid' => $userid, 'competencyid' => $competencyid)))
+            {
                 $todb->id = $recordid;
             }
 
             // Get the first 'proficient' scale value for the competency
-            $sql = "SELECT csv.id
+            $sql           = "SELECT csv.id
             FROM {comp_scale} cs
             JOIN {comp_scale_values} csv ON cs.id = csv.scaleid
             JOIN {comp_scale_assignments} csa ON cs.id = csa.scaleid
@@ -202,22 +223,25 @@ class topic {
             $todb->update_proficiency($proficiencyid);
 
             // Update stats block
-            $currentuser = $userid;
-            $event = STATS_EVENT_COMP_ACHIEVED;
-            $data2 = $competencyid;
-            $time = time();
-            $count = $DB->count_records('block_totara_stats', array('userid' => $currentuser, 'eventtype' => $event, 'data2' => $data2));
+            $currentuser  = $userid;
+            $event        = STATS_EVENT_COMP_ACHIEVED;
+            $data2        = $competencyid;
+            $time         = time();
+            $count        = $DB->count_records('block_totara_stats',
+                array('userid' => $currentuser, 'eventtype' => $event, 'data2' => $data2));
             $isproficient = $DB->get_field('comp_scale_values', 'proficient', array('id' => $proficiencyid));
 
             // Check the proficiency is set to "proficient" and check for duplicate data.
-            if ($isproficient && $count == 0) {
+            if ($isproficient && $count == 0)
+            {
                 totara_stats_add_event($time, $currentuser, $event, '', $data2);
             }
             $transaction->allow_commit();
         }
     }
 
-    public static function delete_topic($topicid) {
+    public static function delete_topic($topicid)
+    {
         global $DB;
 
         $transaction = $DB->start_delegated_transaction();

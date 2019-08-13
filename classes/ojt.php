@@ -30,7 +30,8 @@ use dml_transaction_exception;
 use mod_ojt\traits\record_mapper;
 use stdClass;
 
-class ojt {
+class ojt
+{
     use record_mapper;
 
     /**
@@ -102,18 +103,20 @@ class ojt {
 
     /**
      * Get OJT object by OJT id and user id
-     * 
+     *
      * @param int $ojtid
      * @param int $userid
      * @return mixed
      * @throws coding_exception
      * @throws dml_exception
      */
-    public static function get_user_ojt(int $ojtid, int $userid) {
+    public static function get_user_ojt(int $ojtid, int $userid)
+    {
         global $DB;
 
         // Get the ojt details.
-        $sql = 'SELECT '.$userid.' AS userid, b.*, CASE WHEN c.status IS NULL THEN ' . completion::STATUS_INCOMPLETE . ' ELSE c.status END AS status, c.comment
+        $sql =
+            'SELECT ' . $userid . ' AS userid, b.*, CASE WHEN c.status IS NULL THEN ' . completion::STATUS_INCOMPLETE . ' ELSE c.status END AS status, c.comment
         FROM {ojt} b
         LEFT JOIN {ojt_completion} c ON b.id = c.ojtid AND c.type = ? AND c.userid = ?
         WHERE b.id = ?';
@@ -121,19 +124,21 @@ class ojt {
 
         // Add topics and completion data.
         $ojt->topics = topic::get_user_topic_records($userid, $ojtid);
-        foreach ($ojt->topics as $i => $topic) {
+        foreach ($ojt->topics as $i => $topic)
+        {
             $ojt->topics[$i]->items = array();
         }
-        if (empty($ojt->topics)) {
+        if (empty($ojt->topics))
+        {
             return $ojt;
         }
 
         // Add items and completion info.
         list($insql, $params) = $DB->get_in_or_equal(array_keys($ojt->topics));
-        $sql = "SELECT i.*, CASE WHEN c.status IS NULL THEN " . completion::STATUS_INCOMPLETE . " ELSE c.status END AS status,
-            c.comment, c.timemodified, c.modifiedby,bw.witnessedby,bw.timewitnessed,".
-               get_all_user_name_fields(true, 'moduser', '', 'modifier').",".
-               get_all_user_name_fields(true, 'witnessuser', '', 'itemwitness')."
+        $sql    = "SELECT i.*, CASE WHEN c.status IS NULL THEN " . completion::STATUS_INCOMPLETE . " ELSE c.status END AS status,
+            c.comment, c.timemodified, c.modifiedby,bw.witnessedby,bw.timewitnessed," .
+                  get_all_user_name_fields(true, 'moduser', '', 'modifier') . "," .
+                  get_all_user_name_fields(true, 'witnessuser', '', 'itemwitness') . "
         FROM {ojt_topic_item} i
         LEFT JOIN {ojt_completion} c ON i.id = c.topicitemid AND c.type = ? AND c.userid = ?
         LEFT JOIN {user} moduser ON c.modifiedby = moduser.id
@@ -142,9 +147,10 @@ class ojt {
         WHERE i.topicid {$insql}
         ORDER BY i.topicid, i.id";
         $params = array_merge(array(completion::COMP_TYPE_TOPICITEM, $userid, $userid), $params);
-        $items = $DB->get_records_sql($sql, $params);
+        $items  = $DB->get_records_sql($sql, $params);
 
-        foreach ($items as $i => $item) {
+        foreach ($items as $i => $item)
+        {
             $ojt->topics[$item->topicid]->items[$i] = $item;
         }
 
@@ -158,44 +164,56 @@ class ojt {
      * @throws dml_exception
      * @throws dml_transaction_exception
      */
-    public static function update_completion(int $userid, int $ojtid) {
+    public static function update_completion(int $userid, int $ojtid)
+    {
         global $DB, $USER;
 
         // Check if all required ojt topics have been completed, then complete the ojt
         $topics = topic::get_user_topic_records($userid, $ojtid);
 
         $status = completion::STATUS_COMPLETE;
-        foreach ($topics as $topic) {
-            if ($topic->status == completion::STATUS_INCOMPLETE) {
-                if ($topic->completionreq == completion::REQ_REQUIRED) {
+        foreach ($topics as $topic)
+        {
+            if ($topic->status == completion::STATUS_INCOMPLETE)
+            {
+                if ($topic->completionreq == completion::REQ_REQUIRED)
+                {
                     // All required topics not complete - bail!
                     $status = completion::STATUS_INCOMPLETE;
                     break;
-                } else if ($topic->completionreq == completion::REQ_OPTIONAL) {
+                }
+                else if ($topic->completionreq == completion::REQ_OPTIONAL)
+                {
                     // Degrade status a bit
                     $status = completion::STATUS_REQUIREDCOMPLETE;
                 }
-            } else if ($topic->status == completion::STATUS_REQUIREDCOMPLETE) {
+            }
+            else if ($topic->status == completion::STATUS_REQUIREDCOMPLETE)
+            {
                 // Degrade status a bit
                 $status = completion::STATUS_REQUIREDCOMPLETE;
             }
         }
 
-        $transaction = $DB->start_delegated_transaction();
+        $transaction       = $DB->start_delegated_transaction();
         $currentcompletion = $DB->get_record('ojt_completion',
             array('userid' => $userid, 'ojtid' => $ojtid, 'type' => completion::COMP_TYPE_OJT));
-        if (empty($currentcompletion->status) || $status != $currentcompletion->status) {
+        if (empty($currentcompletion->status) || $status != $currentcompletion->status)
+        {
             // Update ojt completion
-            $completion = empty($currentcompletion) ? new stdClass() : $currentcompletion;
-            $completion->status = $status;
+            $completion               = empty($currentcompletion) ? new stdClass() : $currentcompletion;
+            $completion->status       = $status;
             $completion->timemodified = time();
-            $completion->modifiedby = $USER->id;
-            if (empty($currentcompletion)) {
+            $completion->modifiedby   = $USER->id;
+            if (empty($currentcompletion))
+            {
                 $completion->userid = $userid;
-                $completion->type = completion::COMP_TYPE_OJT;
-                $completion->ojtid = $ojtid;
-                $completion->id = $DB->insert_record('ojt_completion', $completion);
-            } else {
+                $completion->type   = completion::COMP_TYPE_OJT;
+                $completion->ojtid  = $ojtid;
+                $completion->id     = $DB->insert_record('ojt_completion', $completion);
+            }
+            else
+            {
                 $DB->update_record('ojt_completion', $completion);
             }
 
@@ -207,19 +225,25 @@ class ojt {
         return empty($completion) ? $currentcompletion : $completion;
     }
 
-    public static function update_activity_completion($ojtid, $userid, $ojtstatus) {
+    public static function update_activity_completion($ojtid, $userid, $ojtstatus)
+    {
         global $DB;
 
         $ojt = $DB->get_record('ojt', array('id' => $ojtid), '*', MUST_EXIST);
-        if ($ojt->completiontopics) {
+        if ($ojt->completiontopics)
+        {
             $course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
 
-            $cm = get_coursemodule_from_instance('ojt', $ojt->id, $ojt->course, false, MUST_EXIST);
+            $cm          = get_coursemodule_from_instance('ojt', $ojt->id, $ojt->course, false, MUST_EXIST);
             $ccompletion = new completion_info($course);
-            if ($ccompletion->is_enabled($cm)) {
-                if (in_array($ojtstatus, array(completion::STATUS_COMPLETE, completion::STATUS_REQUIREDCOMPLETE))) {
+            if ($ccompletion->is_enabled($cm))
+            {
+                if (in_array($ojtstatus, array(completion::STATUS_COMPLETE, completion::STATUS_REQUIREDCOMPLETE)))
+                {
                     $ccompletion->update_state($cm, COMPLETION_COMPLETE, $userid);
-                } else {
+                }
+                else
+                {
                     $ccompletion->update_state($cm, COMPLETION_INCOMPLETE, $userid);
                 }
             }
@@ -234,7 +258,8 @@ class ojt {
      * @return bool
      * @throws dml_exception
      */
-    public static function topic_items_witnessed($topicid, $userid) {
+    public static function topic_items_witnessed($topicid, $userid)
+    {
         global $DB;
 
         $sql = "SELECT ti.id
@@ -245,34 +270,40 @@ class ojt {
         return !$DB->record_exists_sql($sql, array($userid, completion::REQ_REQUIRED, $topicid));
     }
 
-    public static function get_modifiedstr($timemodified, $user=null) {
+    public static function get_modifiedstr($timemodified, $user = null)
+    {
         global $USER;
 
-        if (empty($user)) {
+        if (empty($user))
+        {
             $user = $USER;
         }
 
-        if (empty($timemodified)) {
+        if (empty($timemodified))
+        {
             return '';
         }
 
-        return 'by '.fullname($user).' on '.userdate($timemodified, get_string('strftimedatetimeshort', 'core_langconfig'));
+        return 'by ' . fullname($user) . ' on ' .
+               userdate($timemodified, get_string('strftimedatetimeshort', 'core_langconfig'));
     }
 
     /**
      * Checks if a user has capabilities to evaluate an ojt activity
      *
-     * @param int $userid
+     * @param int     $userid
      * @param context $context
      * @return bool
      * @throws coding_exception
      */
-    public static function can_evaluate($userid, $context) {
+    public static function can_evaluate($userid, $context)
+    {
         global $USER;
 
         if (!has_capability('mod/ojt:evaluate', $context)
             && !(has_capability('mod/ojt:evaluateself', $context)
-                 && $USER->id == $userid)) {
+                 && $USER->id == $userid))
+        {
             return false;
         }
 

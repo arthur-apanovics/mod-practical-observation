@@ -26,7 +26,8 @@ use coding_exception;
 use mod_ojt\traits\record_mapper;
 use stdClass;
 
-class topic_item {
+class topic_item
+{
     use record_mapper;
 
     /**
@@ -59,7 +60,8 @@ class topic_item {
      */
     public $allowselffileuploads;
 
-    public static function delete_topic_item($itemid, $context) {
+    public static function delete_topic_item($itemid, $context)
+    {
         global $DB;
 
         $transaction = $DB->start_delegated_transaction();
@@ -70,7 +72,7 @@ class topic_item {
 
         // Delete item files
         $fs = get_file_storage();
-        $fs->delete_area_files($context->id, 'mod_ojt', 'topicitemfiles'.$itemid);
+        $fs->delete_area_files($context->id, 'mod_ojt', 'topicitemfiles' . $itemid);
 
         $transaction->allow_commit();
     }
