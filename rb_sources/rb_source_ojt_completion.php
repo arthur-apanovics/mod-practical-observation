@@ -20,7 +20,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_ojt\completion;
+use mod_ojt\models\completion;
 
 defined('MOODLE_INTERNAL') || die();
 

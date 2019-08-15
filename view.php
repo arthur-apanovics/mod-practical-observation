@@ -26,7 +26,8 @@
  */
 
 use mod_ojt\event\course_module_viewed;
-use mod_ojt\ojt;
+use mod_ojt\models\ojt;
+use mod_ojt\user_ojt;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/mod/ojt/lib.php');
@@ -35,22 +36,25 @@ require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
 
 $id = optional_param('id', 0, PARAM_INT); // Course_module ID, or
 $b  = optional_param('n', 0, PARAM_INT);  // ojt instance ID.
+$t  = optional_param('t', 0, PARAM_INT); // Topic id
 
 if ($id)
 {
-    $cm     = get_coursemodule_from_id('ojt', $id, 0, false, MUST_EXIST);
-    $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $ojt    = $DB->get_record('ojt', array('id' => $cm->instance), '*', MUST_EXIST);
+    $cm           = get_coursemodule_from_id('ojt', $id, 0, false, MUST_EXIST);
+    $course       = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+    $ojt_snapshot = $DB->get_record('ojt', array('id' => $cm->instance), '*', MUST_EXIST);
+    $ojt          = new ojt($cm->instance);
 }
 else if ($b)
 {
-    $ojt    = $DB->get_record('ojt', array('id' => $b), '*', MUST_EXIST);
-    $course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
-    $cm     = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
+    $ojt_snapshot = $DB->get_record('ojt', array('id' => $b), '*', MUST_EXIST);
+    $ojt          = new ojt($b);
+    $course       = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
+    $cm           = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
 }
 else
 {
-    error('You must specify a course_module ID or an instance ID');
+    print_error('You must specify a course_module ID or an instance ID');
 }
 
 require_login($course, true, $cm);
@@ -60,11 +64,11 @@ $event = course_module_viewed::create(array(
     'context'  => $PAGE->context,
 ));
 $event->add_record_snapshot('course', $PAGE->course);
-$event->add_record_snapshot($PAGE->cm->modname, $ojt);
+$event->add_record_snapshot($PAGE->cm->modname, $ojt_snapshot);
 $event->trigger();
+unset($ojt_snapshot);
 
 // Print the page header.
-
 $PAGE->set_url('/mod/ojt/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($ojt->name));
 $PAGE->set_heading(format_string($course->fullname));
@@ -112,7 +116,7 @@ if (($canevaluate || $cansignoff))
     echo html_writer::end_tag('div');
 }
 
-$userojt = ojt::get_user_ojt($ojt->id, $USER->id);
+$userojt = new user_ojt($ojt, $USER->id);
 
 // "Evaluate self" button
 if ($canevalself)
@@ -135,7 +139,8 @@ if ($ojt->intro)
 }
 
 $renderer = $PAGE->get_renderer('ojt');
-echo $renderer->user_ojt($userojt);
+
+echo $renderer->user_ojt($userojt, $t);
 
 // Finish the page.
 echo $OUTPUT->footer();

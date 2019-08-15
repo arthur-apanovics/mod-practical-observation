@@ -24,8 +24,8 @@
  * OJT witness ajax toggler
  */
 
-use mod_ojt\ojt;
-use mod_ojt\topic;
+use mod_ojt\models\ojt;
+use mod_ojt\models\topic;
 
 define('AJAX_SCRIPT', true);
 

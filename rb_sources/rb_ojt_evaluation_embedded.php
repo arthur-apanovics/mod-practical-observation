@@ -22,7 +22,7 @@
 
 global $CFG;
 
-use mod_ojt\completion;
+use mod_ojt\models\completion;
 
 require_once($CFG->dirroot . '/totara/reportbuilder/classes/rb_base_content.php');
 

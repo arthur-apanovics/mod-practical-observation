@@ -24,7 +24,7 @@
  * Upload a file to a ojt topic item
  */
 
-use mod_ojt\ojt;
+use mod_ojt\models\ojt;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/totara/plan/lib.php');

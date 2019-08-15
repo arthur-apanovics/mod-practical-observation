@@ -20,7 +20,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt;
+namespace mod_ojt\models;
 
 use competency_evidence;
 use mod_ojt\traits\record_mapper;
@@ -41,6 +41,11 @@ class topic
     public $ojtid;
 
     /**
+     * @var string
+     */
+    public $name;
+
+    /**
      * @var int
      */
     public $completionreq;
@@ -58,42 +63,11 @@ class topic
 
     /**
      * topic constructor.
-     * @param int|stdClass $id_or_record
+     * @param int|object $id_or_record
      */
     public function __construct($id_or_record = null)
     {
-        self::createFromIdOrMapToRecord($id_or_record);
-    }
-
-    public static function get_user_topics($userid, $ojtid): array
-    {
-        $records = self::get_user_topic_records($userid, $ojtid);
-
-        $topics = [];
-        foreach ($records as $record)
-        {
-            $topic_obj = new topic();
-            $topic_obj->mapToRecord($record);
-            $topics[] = $topic_obj;
-        }
-
-        return $topics;
-    }
-
-    public static function get_user_topic_records($userid, $ojtid)
-    {
-        global $DB;
-
-        $sql = 'SELECT t.*, CASE WHEN c.status IS NULL THEN ' . completion::STATUS_INCOMPLETE . ' ELSE c.status END AS status,
-        s.signedoff, s.modifiedby AS signoffmodifiedby, s.timemodified AS signofftimemodified,' .
-               get_all_user_name_fields(true, 'su', '', 'signoffuser') . '
-        FROM {ojt_topic} t
-        LEFT JOIN {ojt_completion} c ON t.id = c.topicid AND c.type = ? AND c.userid = ?
-        LEFT JOIN {ojt_topic_signoff} s ON t.id = s.topicid AND s.userid = ?
-        LEFT JOIN {user} su ON s.modifiedby = su.id
-        WHERE t.ojtid = ?
-        ORDER BY t.id';
-        return $DB->get_records_sql($sql, array(completion::COMP_TYPE_TOPIC, $userid, $userid, $ojtid));
+        self::create_from_id_or_map_to_record($id_or_record);
     }
 
     public static function update_topic_completion($userid, $ojtid, $topicid)
@@ -112,7 +86,7 @@ class topic
         $status = completion::STATUS_COMPLETE;
         foreach ($items as $item)
         {
-            if ($item->status == completion::STATUS_INCOMPLETE)
+            if ($item->completion->status == completion::STATUS_INCOMPLETE)
             {
                 if ($item->completionreq == completion::REQ_REQUIRED)
                 {
@@ -259,10 +233,9 @@ class topic
      * @param int $id
      * @return stdClass|false false if record not found
      */
-    protected function getRecordFromId(int $id)
+    protected function get_record_from_id(int $id)
     {
         global $DB;
-
         return $DB->get_record('ojt_topic', array('id' => $id));
     }
 }

@@ -25,8 +25,9 @@
  * OJT evaluation for a user
  */
 
-use mod_ojt\completion;
-use mod_ojt\ojt;
+use mod_ojt\models\completion;
+use mod_ojt\models\ojt;
+use mod_ojt\user_ojt;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/mod/ojt/lib.php');
@@ -67,10 +68,9 @@ if (!($canevaluate || $cansignoff || $canwitness))
     print_error('accessdenied', 'ojt');
 }
 
-$userojt = ojt::get_user_ojt($ojt->id, $userid);
+$userojt = new user_ojt($ojt, $userid);
 
 // Print the page header.
-
 $PAGE->set_url('/mod/ojt/evaluate.php', array('cmid' => $cm->id, 'userid' => $userid));
 $PAGE->set_title(format_string($ojt->name));
 $PAGE->set_heading(format_string($ojt->name) . ' - ' . get_string('evaluate', 'ojt'));
@@ -123,7 +123,7 @@ if ($ojt->intro)
 
 // Print the evaluation
 $renderer = $PAGE->get_renderer('ojt');
-echo $renderer->user_ojt($userojt, $canevaluate, $cansignoff, $canwitness);
+echo $renderer->user_ojt($userojt, null, $canevaluate, $cansignoff, $canwitness);
 
 // Finish the page.
 echo $OUTPUT->footer();

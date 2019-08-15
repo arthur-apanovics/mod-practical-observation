@@ -20,13 +20,14 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt;
+namespace mod_ojt\models;
+
 
 use coding_exception;
 use mod_ojt\traits\record_mapper;
 use stdClass;
 
-class topic_item
+class topic_signoff
 {
     use record_mapper;
 
@@ -36,55 +37,51 @@ class topic_item
     public $id;
 
     /**
-     * @var topic
+     * @var int
      */
-    public $topic;
-
-    /**
-     * @var string
-     */
-    public $name;
+    public $userid;
 
     /**
      * @var int
      */
-    public $completionreq;
+    public $topicid;
 
     /**
      * @var bool
      */
-    public $allowfileuploads;
+    public $signedoff;
 
     /**
-     * @var bool
+     * @var string
      */
-    public $allowselffileuploads;
-
-    public static function delete_topic_item($itemid, $context)
-    {
-        global $DB;
-
-        $transaction = $DB->start_delegated_transaction();
-
-        $DB->delete_records('ojt_topic_item', array('id' => $itemid));
-        $DB->delete_records('ojt_completion', array('topicitemid' => $itemid));
-        $DB->delete_records('ojt_item_witness', array('topicitemid' => $itemid));
-
-        // Delete item files
-        $fs = get_file_storage();
-        $fs->delete_area_files($context->id, 'mod_ojt', 'topicitemfiles' . $itemid);
-
-        $transaction->allow_commit();
-    }
+    public $comment;
 
     /**
-     * topic_item constructor.
-     * @param int|stdClass $id_or_record
+     * @var int
+     */
+    public $timemodified;
+
+    /**
+     * @var int
+     */
+    public $modifiedby;
+
+
+    /**
+     * signoff constructor.
+     * @param int|object $id_or_record
      * @throws coding_exception
      */
     public function __construct($id_or_record = null)
     {
-        self::createFromIdOrMapToRecord($id_or_record);
+        self::create_from_id_or_map_to_record($id_or_record);
+    }
+
+    public static function get_user_topic_signoff(int $topicid, int $userid)
+    {
+        global $DB;
+        return new topic_signoff(
+            $DB->get_record('ojt_topic_signoff', ['userid' => $userid, 'topicid' => $topicid]));
     }
 
     /**
@@ -92,10 +89,9 @@ class topic_item
      * @param int $id
      * @return stdClass|false false if record not found
      */
-    protected function getRecordFromId(int $id)
+    protected function get_record_from_id(int $id)
     {
         global $DB;
-
-        return $DB->get_record('ojt_topic_item', array('id' => $id));
+        return $DB->get_record('ojt_topic_signoff', array('id' => $id));
     }
 }

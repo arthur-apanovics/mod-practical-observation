@@ -20,7 +20,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt;
+namespace mod_ojt\models;
 
 use coding_exception;
 use completion_info;
@@ -28,6 +28,7 @@ use context;
 use dml_exception;
 use dml_transaction_exception;
 use mod_ojt\traits\record_mapper;
+use mod_ojt\user_topic;
 use stdClass;
 
 class ojt
@@ -37,52 +38,52 @@ class ojt
     /**
      * @var int
      */
-    protected $id;
+    public $id;
 
     /**
      * @var stdClass
      */
-    protected $course;
+    public $course;
 
     /**
      * @var string
      */
-    protected $name;
+    public $name;
 
     /**
      * @var string
      */
-    protected $intro;
+    public $intro;
 
     /**
      * @var int
      */
-    protected $introformat;
+    public $introformat;
 
     /**
      * @var bool
      */
-    protected $completiontopics;
+    public $completiontopics;
 
     /**
      * @var int
      */
-    protected $timecreated;
+    public $timecreated;
 
     /**
      * @var int
      */
-    protected $timemodified;
+    public $timemodified;
 
     /**
      * @var bool
      */
-    protected $managersignoff;
+    public $managersignoff;
 
     /**
      * @var bool
      */
-    protected $itemwitness;
+    public $itemwitness;
 
 
     // /**
@@ -93,68 +94,12 @@ class ojt
 
     /**
      * ojt constructor.
-     * @param int|stdClass $id_or_record
+     * @param int|object $id_or_record
      * @throws coding_exception
      */
     public function __construct($id_or_record = null)
     {
-        self::createFromIdOrMapToRecord($id_or_record);
-    }
-
-    /**
-     * Get OJT object by OJT id and user id
-     *
-     * @param int $ojtid
-     * @param int $userid
-     * @return mixed
-     * @throws coding_exception
-     * @throws dml_exception
-     */
-    public static function get_user_ojt(int $ojtid, int $userid)
-    {
-        global $DB;
-
-        // Get the ojt details.
-        $sql =
-            'SELECT ' . $userid . ' AS userid, b.*, CASE WHEN c.status IS NULL THEN ' . completion::STATUS_INCOMPLETE . ' ELSE c.status END AS status, c.comment
-        FROM {ojt} b
-        LEFT JOIN {ojt_completion} c ON b.id = c.ojtid AND c.type = ? AND c.userid = ?
-        WHERE b.id = ?';
-        $ojt = $DB->get_record_sql($sql, array(completion::COMP_TYPE_OJT, $userid, $ojtid), MUST_EXIST);
-
-        // Add topics and completion data.
-        $ojt->topics = topic::get_user_topic_records($userid, $ojtid);
-        foreach ($ojt->topics as $i => $topic)
-        {
-            $ojt->topics[$i]->items = array();
-        }
-        if (empty($ojt->topics))
-        {
-            return $ojt;
-        }
-
-        // Add items and completion info.
-        list($insql, $params) = $DB->get_in_or_equal(array_keys($ojt->topics));
-        $sql    = "SELECT i.*, CASE WHEN c.status IS NULL THEN " . completion::STATUS_INCOMPLETE . " ELSE c.status END AS status,
-            c.comment, c.timemodified, c.modifiedby,bw.witnessedby,bw.timewitnessed," .
-                  get_all_user_name_fields(true, 'moduser', '', 'modifier') . "," .
-                  get_all_user_name_fields(true, 'witnessuser', '', 'itemwitness') . "
-        FROM {ojt_topic_item} i
-        LEFT JOIN {ojt_completion} c ON i.id = c.topicitemid AND c.type = ? AND c.userid = ?
-        LEFT JOIN {user} moduser ON c.modifiedby = moduser.id
-        LEFT JOIN {ojt_item_witness} bw ON bw.topicitemid = i.id AND bw.userid = ?
-        LEFT JOIN {user} witnessuser ON bw.witnessedby = witnessuser.id
-        WHERE i.topicid {$insql}
-        ORDER BY i.topicid, i.id";
-        $params = array_merge(array(completion::COMP_TYPE_TOPICITEM, $userid, $userid), $params);
-        $items  = $DB->get_records_sql($sql, $params);
-
-        foreach ($items as $i => $item)
-        {
-            $ojt->topics[$item->topicid]->items[$i] = $item;
-        }
-
-        return $ojt;
+        self::create_from_id_or_map_to_record($id_or_record);
     }
 
     /**
@@ -169,7 +114,7 @@ class ojt
         global $DB, $USER;
 
         // Check if all required ojt topics have been completed, then complete the ojt
-        $topics = topic::get_user_topic_records($userid, $ojtid);
+        $topics = user_topic::get_user_topic_records($userid, $ojtid);
 
         $status = completion::STATUS_COMPLETE;
         foreach ($topics as $topic)
@@ -263,9 +208,11 @@ class ojt
         global $DB;
 
         $sql = "SELECT ti.id
-        FROM {ojt_topic_item} ti
-        LEFT JOIN {ojt_item_witness} iw ON ti.id = iw.topicitemid AND iw.witnessedby != 0 AND iw.userid = ?
-        WHERE ti.completionreq = ? AND ti.topicid = ? AND iw.witnessedby IS NULL";
+                FROM {ojt_topic_item} ti
+                LEFT JOIN {ojt_item_witness} iw ON ti.id = iw.topicitemid AND iw.witnessedby != 0 AND iw.userid = ?
+                WHERE ti.completionreq = ? 
+                AND ti.topicid = ? 
+                AND iw.witnessedby IS NULL";
 
         return !$DB->record_exists_sql($sql, array($userid, completion::REQ_REQUIRED, $topicid));
     }
@@ -310,10 +257,9 @@ class ojt
         return true;
     }
 
-    protected function getRecordFromId(int $id)
+    protected function get_record_from_id(int $id)
     {
         global $DB;
-
         return $DB->get_record('ojt', array('id' => $id));
     }
 }

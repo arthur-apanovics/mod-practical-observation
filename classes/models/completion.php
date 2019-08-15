@@ -20,7 +20,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt;
+namespace mod_ojt\models;
 
 use coding_exception;
 use mod_ojt\traits\record_mapper;
@@ -53,62 +53,69 @@ class completion
     /**
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @var int
      */
-    private $userid;
+    public $userid;
 
     /**
      * @var int
      */
-    private $type;
+    public $type;
 
     /**
      * @var int
      */
-    private $ojtid;
+    public $ojtid;
 
     /**
      * @var topic
      */
-    private $topic;
+    public $topicid;
 
     /**
      * @var topic_item
      */
-    private $topicitem;
+    public $topicitemid;
 
     /**
      * @var int
      */
-    private $status;
+    public $status;
 
     /**
      * @var string
      */
-    private $comment;
+    public $comment;
 
     /**
      * @var int
      */
-    private $timemodified;
+    public $timemodified;
 
     /**
      * @var int userid
      */
-    private $modifiedby;
+    public $modifiedby;
 
 
     /**
      * completion constructor.
-     * @param int|stdClass $id_or_record
+     * @param int|object $id_or_record
      * @throws coding_exception
      */
     public function __construct($id_or_record = null)
     {
-        self::createFromIdOrMapToRecord($id_or_record);
+        self::create_from_id_or_map_to_record($id_or_record);
+    }
+
+    public static function get_user_completion(int $topicitemid, int $userid)
+    {
+        global $DB;
+        return new completion(
+            $DB->get_record('ojt_completion', ['topicitemid' => $topicitemid, 'userid' => $userid]));
     }
 
     /**
@@ -116,10 +123,9 @@ class completion
      * @param int $id
      * @return stdClass|false false if record not found
      */
-    protected function getRecordFromId(int $id)
+    protected function get_record_from_id(int $id)
     {
         global $DB;
-
         return $DB->get_record('ojt_completion', array('id' => $id));
     }
 }

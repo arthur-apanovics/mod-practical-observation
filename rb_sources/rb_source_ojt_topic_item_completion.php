@@ -23,7 +23,7 @@
  * @subpackage ojt
  */
 
-use mod_ojt\completion;
+use mod_ojt\models\completion;
 
 defined('MOODLE_INTERNAL') || die();
 

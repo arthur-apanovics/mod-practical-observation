@@ -31,8 +31,8 @@
  * Moodle is performing actions across all modules.
  */
 
-use mod_ojt\completion;
-use mod_ojt\ojt;
+use mod_ojt\models\completion;
+use mod_ojt\models\ojt;
 use totara_job\job_assignment;
 
 defined('MOODLE_INTERNAL') || die();

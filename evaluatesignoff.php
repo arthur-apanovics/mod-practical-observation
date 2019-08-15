@@ -24,7 +24,7 @@
  * OJT item completion ajax toggler
  */
 
-use mod_ojt\ojt;
+use mod_ojt\models\ojt;
 
 define('AJAX_SCRIPT', true);
 

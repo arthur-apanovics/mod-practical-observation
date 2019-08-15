@@ -8,30 +8,42 @@ use stdClass;
 
 trait record_mapper
 {
-    private function createFromIdOrMapToRecord($id_or_record)
+    /**
+     * Attempts to map existing database record values to class by either fetching record
+     * from database by id or mapping to provided values or existing object
+     * @param $id_or_record
+     * @throws coding_exception
+     */
+    private function create_from_id_or_map_to_record($id_or_record)
     {
-        if (!is_null($id_or_record))
+        if (!is_null($id_or_record) && !empty($id_or_record))
         {
-            if ($id_or_record instanceof stdClass)
+            if (is_object($id_or_record))
             {
-                $this->mapToRecord($id_or_record);
+                $this->map_to_record($id_or_record);
             }
-            else if ((int) $id_or_record !== 0)
+            else if (is_numeric($id_or_record))
             {
-                $this->mapToRecord(
-                    $this->getRecordFromId($id_or_record));
+                $this->map_to_record(
+                    $this->get_record_from_id($id_or_record));
             }
             else
             {
-                throw new coding_exception('Incorrect constructor argument passed ("' . strval($id_or_record) .
-                                            '") when initializing ' . __CLASS__);
+                throw new coding_exception('Incorrect constructor argument passed ("'
+                                           . json_encode($id_or_record) . '") when initializing ' . __CLASS__);
             }
         }
     }
 
-    private function mapToRecord(stdClass $record)
+    /**
+     * Map class properties to database record or existing object
+     *
+     * @param object $record
+     * @throws coding_exception
+     */
+    private function map_to_record($record)
     {
-        if (!is_null($record) || !empty($record))
+        if (!is_null($record) && !empty($record))
         {
             foreach ($record as $key => $val)
             {
@@ -43,7 +55,7 @@ trait record_mapper
         }
         else
         {
-            throw new coding_exception('Cannot create new ' . get_class($this) . 'with id and data supplied');
+            throw new coding_exception('Cannot map supplied record to ' . get_class($this) . ' - no data provided');
         }
     }
 
@@ -52,5 +64,5 @@ trait record_mapper
      * @param int $id
      * @return stdClass|false false if record not found
      */
-    abstract protected function getRecordFromId(int $id);
+    abstract protected function get_record_from_id(int $id);
 }
