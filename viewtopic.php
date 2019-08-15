@@ -28,30 +28,35 @@
 use mod_ojt\event\course_module_viewed;
 use mod_ojt\models\ojt;
 use mod_ojt\user_ojt;
+use mod_ojt\user_topic;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/mod/ojt/lib.php');
 require_once($CFG->dirroot . '/mod/ojt/locallib.php');
 require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
 
-$id = optional_param('id', 0, PARAM_INT); // Course_module ID, or
-$b  = optional_param('n', 0, PARAM_INT);  // ojt instance ID.
+$id      = optional_param('id', 0, PARAM_INT); // Course_module ID, or
+$b       = optional_param('n', 0, PARAM_INT);  // ojt instance ID.
+$topicid = optional_param('topic', 0, PARAM_INT); // Topic id
 
 list($ojt, $course, $cm) = ojt_check_page_id_params_and_init($id, $b); /* @var $ojt ojt */
 
 require_login($course, true, $cm);
 
-$event = course_module_viewed::create(array(
-    'objectid' => $PAGE->cm->instance,
-    'context'  => $PAGE->context,
-));
-$event->add_record_snapshot('course', $PAGE->course);
-$event->add_record_snapshot($PAGE->cm->modname, $ojt->get_record_from_object());
-$event->trigger();
+// TODO topic viewed event?
+// $event =  course_module_viewed::create(array(
+//     'objectid' => $PAGE->cm->instance,
+//     'context'  => $PAGE->context,
+// ));
+// $event->add_record_snapshot('course', $PAGE->course);
+// $event->add_record_snapshot($PAGE->cm->modname, $ojt->get_record_from_object());
+// $event->trigger();
+
+$topic = user_topic::get_user_topic($topicid, $USER->id);
 
 // Print the page header.
-$PAGE->set_url('/mod/ojt/view.php', array('id' => $cm->id));
-$PAGE->set_title(format_string($ojt->name));
+$PAGE->set_url('/mod/ojt/viewtopic.php', array('id' => $cm->id, 'topic' => $topicid));
+$PAGE->set_title(format_string( "$topic->name - $ojt->name"));
 $PAGE->set_heading(format_string($course->fullname));
 
 // Check access - we're assuming only $USER access on this page
@@ -101,17 +106,14 @@ if ($canevalself)
     echo html_writer::end_tag('div');
 }
 
+// Replace the following lines with you own code.
 echo $OUTPUT->heading(format_string($ojt->name));
 
-// Conditions to show the intro can change to look for own settings or whatever.
-if ($ojt->intro)
-{
-    echo $OUTPUT->box(format_module_intro('ojt', $ojt, $cm->id), 'generalbox mod_introbox', 'ojtintro');
-}
+echo $OUTPUT->box('', 'generalbox', 'ojt-padding-box', ['style' => 'height: 2em;']);
 
 $renderer = $PAGE->get_renderer('ojt');
 
-echo $renderer->userojt_topic_summary($userojt, $cm);
+echo $renderer->user_topic($userojt, $topic);
 
 // Finish the page.
 echo $OUTPUT->footer();

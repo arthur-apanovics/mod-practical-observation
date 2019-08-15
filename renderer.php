@@ -26,6 +26,7 @@ use core\output\flex_icon;
 use mod_ojt\models\completion;
 use mod_ojt\models\ojt;
 use mod_ojt\user_ojt;
+use mod_ojt\user_topic;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/mod/ojt/lib.php');
@@ -109,207 +110,253 @@ class mod_ojt_renderer extends plugin_renderer_base
         return $out;
     }
 
-    function user_ojt(user_ojt $userojt, $topicid = 0, $evaluate = false, $signoff = false, $itemwitness = false)
+    /**
+     * @param user_ojt $user_ojt
+     * @param stdClass $cm course module
+     * @return string html
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
+    function userojt_topic_summary(user_ojt $user_ojt, stdClass $cm)
     {
-        global $CFG, $DB, $USER, $PAGE;
+        $out = '';
+        $data = [];
+        $data['has_topics'] = !empty($user_ojt->topics);
 
+        foreach ($user_ojt->topics as $topic)
+        {
+            $topic_data = [];
+            $topic_data['id'] = $topic->id;
+            $topic_data['title'] = $topic->name;
+            $topic_data['completion_icon_html'] = $this->get_completion_icon($topic);
+            $topic_data['url'] = new moodle_url('/mod/ojt/viewtopic.php', ['id' => $cm->id, 'topic' => $topic->id]);
+
+            $data['topics'][] = $topic_data;
+        }
+
+        $out .= $this->render_from_template('mod_ojt/topic_summary', $data);
+
+        return $out;
+    }
+
+    /**
+     * Renders all ojt topic  content
+     *
+     * @param user_ojt $userojt
+     * @param bool     $evaluate
+     * @param bool     $signoff
+     * @param bool     $itemwitness
+     * @return string html
+     * @throws coding_exception
+     * @throws comment_exception
+     * @throws dml_exception
+     * @throws moodle_exception
+     */
+    function user_ojt(user_ojt $userojt, $evaluate = false, $signoff = false, $itemwitness = false)
+    {
         $out = '';
         $out = html_writer::start_tag('div', array('id' => 'mod-ojt-user-ojt'));
+
+        foreach ($userojt->topics as $topic)
+            $out .= $this->user_topic($userojt, $topic, $evaluate, $signoff, $itemwitness);
+
+        $out .= html_writer::end_tag('div');  // mod-ojt-user-ojt
+
+        return $out;
+    }
+
+    /**
+     * @param user_ojt   $userojt
+     * @param user_topic $topic
+     * @param bool       $evaluate
+     * @param bool       $signoff
+     * @param bool       $itemwitness
+     * @return string html
+     * @throws coding_exception
+     * @throws comment_exception
+     * @throws dml_exception
+     * @throws moodle_exception
+     */
+    public function user_topic(user_ojt $userojt, user_topic $topic, $evaluate = false, $signoff = false, $itemwitness = false)
+    {
+        global $CFG, $DB, $USER, $PAGE;
 
         $course  = $DB->get_record('course', array('id' => $userojt->course), '*', MUST_EXIST);
         $cm      = get_coursemodule_from_instance('ojt', $userojt->id, $course->id, false, MUST_EXIST);
         $context = context_module::instance($cm->id);
+        $out = '';
 
-        $topics = $topicid > 0 ? [$userojt->topics[$topicid]] : $userojt->topics;
-        foreach ($topics as $topic)
+        $out .= html_writer::start_tag('div', array('class' => 'mod-ojt-topic', 'id' => "ojt-topic-{$topic->id}"));
+        $completionicon = $this->get_completion_icon($topic);
+        $completionicon = html_writer::tag('span', $completionicon,
+            array('class' => 'ojt-topic-status'));
+        $optionalstr    = $topic->completionreq == completion::REQ_OPTIONAL ?
+            html_writer::tag('em', ' (' . get_string('optional', 'ojt') . ')') : '';
+        $out            .= html_writer::tag('div', format_string($topic->name) . $optionalstr . $completionicon,
+            array('class' => 'mod-ojt-topic-heading expanded'));
+
+        $table = new html_table();
+        $table->attributes['class'] = 'mod-ojt-topic-items generaltable';
+
+        if ($userojt->itemwitness)
         {
-            $out .= html_writer::start_tag('div', array('class' => 'mod-ojt-topic', 'id' => "ojt-topic-{$topic->id}"));
-            switch ($topic->completion_status)
-            {
-                case completion::STATUS_COMPLETE:
-                    $completionicon = 'check-success';
-                    break;
-                case completion::STATUS_REQUIREDCOMPLETE:
-                    $completionicon = 'check-warning';
-                    break;
-                default:
-                    $completionicon = 'times-danger';
-            }
-            if (!empty($completionicon))
-            {
-                $completionicon = $this->output->flex_icon($completionicon,
-                    ['alt' => get_string('completionstatus' . $topic->completion_status, 'ojt')]);
-            }
-            $completionicon = html_writer::tag('span', $completionicon,
-                array('class' => 'ojt-topic-status'));
-            $optionalstr    = $topic->completionreq == completion::REQ_OPTIONAL ?
+            $table->head = array('', '', get_string('witnessed', 'mod_ojt'));
+        }
+        $table->data = array();
+
+        foreach ($topic->topic_items as $item)
+        {
+            $row         = array();
+            $optionalstr = $item->completionreq == completion::REQ_OPTIONAL ?
                 html_writer::tag('em', ' (' . get_string('optional', 'ojt') . ')') : '';
-            $out            .= html_writer::tag('div', format_string($topic->name) . $optionalstr . $completionicon,
-                array('class' => 'mod-ojt-topic-heading expanded'));
+            $row[]       = format_string($item->name) . $optionalstr;
 
-            $table                      = new html_table();
-            $table->attributes['class'] = 'mod-ojt-topic-items generaltable';
-            if ($userojt->itemwitness)
+            if ($evaluate)
             {
-                $table->head = array('', '', get_string('witnessed', 'mod_ojt'));
+                $completionicon =
+                    $item->completion->status == completion::STATUS_COMPLETE ? 'completion-manual-y' : 'completion-manual-n';
+                $cellcontent    =
+                    html_writer::start_tag('div', array('class' => 'ojt-eval-actions', 'ojt-item-id' => $item->id));
+                $cellcontent    .= $this->output->flex_icon($completionicon,
+                    ['classes' => 'ojt-completion-toggle']);
+                $cellcontent    .= html_writer::tag('textarea', $item->completion->comment,
+                    array('name'        => 'comment-' . $item->id,
+                          'rows'        => 3,
+                          'class'       => 'ojt-completion-comment',
+                          'ojt-item-id' => $item->id));
+                $cellcontent    .= html_writer::tag('div', format_text($item->completion->comment, FORMAT_PLAIN),
+                    array('class' => 'ojt-completion-comment-print', 'ojt-item-id' => $item->id));
+                $cellcontent    .= html_writer::end_tag('div');
             }
-            $table->data = array();
-
-            foreach ($topic->topic_items as $item)
+            else
             {
-                $row         = array();
-                $optionalstr = $item->completionreq == completion::REQ_OPTIONAL ?
-                    html_writer::tag('em', ' (' . get_string('optional', 'ojt') . ')') : '';
-                $row[]       = format_string($item->name) . $optionalstr;
-                if ($evaluate)
+                // Show static stuff.
+                $cellcontent = '';
+                if ($item->completion->status == completion::STATUS_COMPLETE)
                 {
-                    $completionicon =
-                        $item->completion->status == completion::STATUS_COMPLETE ? 'completion-manual-y' : 'completion-manual-n';
-                    $cellcontent    =
-                        html_writer::start_tag('div', array('class' => 'ojt-eval-actions', 'ojt-item-id' => $item->id));
-                    $cellcontent    .= $this->output->flex_icon($completionicon,
-                        ['classes' => 'ojt-completion-toggle']);
-                    $cellcontent    .= html_writer::tag('textarea', $item->completion->comment,
-                        array('name'        => 'comment-' . $item->id,
-                              'rows'        => 3,
-                              'class'       => 'ojt-completion-comment',
-                              'ojt-item-id' => $item->id));
-                    $cellcontent    .= html_writer::tag('div', format_text($item->completion->comment, FORMAT_PLAIN),
-                        array('class' => 'ojt-completion-comment-print', 'ojt-item-id' => $item->id));
-                    $cellcontent    .= html_writer::end_tag('div');
+                    $cellcontent .= $this->output->flex_icon('check-success',
+                        ['alt' => get_string('completionstatus' . completion::STATUS_COMPLETE, 'ojt')]);
                 }
                 else
                 {
-                    // Show static stuff.
-                    $cellcontent = '';
-                    if ($item->completion->status == completion::STATUS_COMPLETE)
+                    $cellcontent .= $this->output->flex_icon('times-danger',
+                        ['alt' => get_string('completionstatus' . completion::STATUS_INCOMPLETE, 'ojt')]);
+                }
+
+                $cellcontent .= format_text($item->completion->comment, FORMAT_PLAIN);
+            }
+            $userobj     = new stdClass();
+            $userobj     = username_load_fields_from_object($userobj, $item, $prefix = 'modifier');
+            $cellcontent .= html_writer::tag('div', ojt::get_modifiedstr($item->completion->timemodified, $userobj),
+                array('class' => 'mod-ojt-modifiedstr', 'ojt-item-id' => $item->id));
+
+            if ($item->allowfileuploads || $item->allowselffileuploads)
+            {
+                $cellcontent .= html_writer::tag('div',
+                    $this->list_topic_item_files($context->id, $userojt->userid, $item->id),
+                    array('class' => 'mod-ojt-topicitem-files'));
+
+                if (($evaluate && $item->allowfileuploads) ||
+                    ($userojt->userid == $USER->id && $item->allowselffileuploads))
+                {
+                    $itemfilesurl = new moodle_url('/mod/ojt/uploadfile.php',
+                        array('userid' => $userojt->userid, 'tiid' => $item->id));
+                    $cellcontent  .= $this->output->single_button($itemfilesurl, get_string('updatefiles', 'ojt'),
+                        'get');
+                }
+            }
+
+            $row[] = html_writer::tag('p', $cellcontent, array('class' => 'ojt-completion'));
+
+            if ($userojt->itemwitness)
+            {
+                $cellcontent = '';
+                if ($itemwitness)
+                {
+                    $witnessicon = $item->witness->witnessedby ? 'completion-manual-y' : 'completion-manual-n';
+                    $cellcontent .= html_writer:: start_tag('span',
+                        array('class' => 'ojt-witness-item', 'ojt-item-id' => $item->id));
+                    $cellcontent .= $this->output->flex_icon($witnessicon, ['classes' => 'ojt-witness-toggle']);
+                    $cellcontent .= html_writer::end_tag('div');
+
+                }
+                else
+                {
+                    // Show static witness info
+                    if (!empty($item->witness->witnessedby))
                     {
                         $cellcontent .= $this->output->flex_icon('check-success',
-                            ['alt' => get_string('completionstatus' . completion::STATUS_COMPLETE, 'ojt')]);
+                            ['alt' => get_string('witnessed', 'ojt')]);
                     }
                     else
                     {
                         $cellcontent .= $this->output->flex_icon('times-danger',
-                            ['alt' => get_string('completionstatus' . completion::STATUS_INCOMPLETE, 'ojt')]);
+                            ['alt' => get_string('notwitnessed', 'ojt')]);
                     }
-
-                    $cellcontent .= format_text($item->completion->comment, FORMAT_PLAIN);
                 }
+
                 $userobj     = new stdClass();
-                $userobj     = username_load_fields_from_object($userobj, $item, $prefix = 'modifier');
-                $cellcontent .= html_writer::tag('div', ojt::get_modifiedstr($item->completion->timemodified, $userobj),
-                    array('class' => 'mod-ojt-modifiedstr', 'ojt-item-id' => $item->id));
+                $userobj     = username_load_fields_from_object($userobj, $item, $prefix = 'itemwitness');
+                $cellcontent .= html_writer::tag('div', ojt::get_modifiedstr($item->witness->timewitnessed, $userobj),
+                    array('class' => 'mod-ojt-witnessedstr', 'ojt-item-id' => $item->id));
 
-                if ($item->allowfileuploads || $item->allowselffileuploads)
-                {
-                    $cellcontent .= html_writer::tag('div',
-                        $this->list_topic_item_files($context->id, $userojt->userid, $item->id),
-                        array('class' => 'mod-ojt-topicitem-files'));
-
-                    if (($evaluate && $item->allowfileuploads) ||
-                        ($userojt->userid == $USER->id && $item->allowselffileuploads))
-                    {
-                        $itemfilesurl = new moodle_url('/mod/ojt/uploadfile.php',
-                            array('userid' => $userojt->userid, 'tiid' => $item->id));
-                        $cellcontent  .= $this->output->single_button($itemfilesurl, get_string('updatefiles', 'ojt'),
-                            'get');
-                    }
-                }
-
-                $row[] = html_writer::tag('p', $cellcontent, array('class' => 'ojt-completion'));
-
-                if ($userojt->itemwitness)
-                {
-                    $cellcontent = '';
-                    if ($itemwitness)
-                    {
-                        $witnessicon = $item->witness->witnessedby ? 'completion-manual-y' : 'completion-manual-n';
-                        $cellcontent .= html_writer:: start_tag('span',
-                            array('class' => 'ojt-witness-item', 'ojt-item-id' => $item->id));
-                        $cellcontent .= $this->output->flex_icon($witnessicon, ['classes' => 'ojt-witness-toggle']);
-                        $cellcontent .= html_writer::end_tag('div');
-
-                    }
-                    else
-                    {
-                        // Show static witness info
-                        if (!empty($item->witness->witnessedby))
-                        {
-                            $cellcontent .= $this->output->flex_icon('check-success',
-                                ['alt' => get_string('witnessed', 'ojt')]);
-                        }
-                        else
-                        {
-                            $cellcontent .= $this->output->flex_icon('times-danger',
-                                ['alt' => get_string('notwitnessed', 'ojt')]);
-                        }
-                    }
-
-                    $userobj     = new stdClass();
-                    $userobj     = username_load_fields_from_object($userobj, $item, $prefix = 'itemwitness');
-                    $cellcontent .= html_writer::tag('div', ojt::get_modifiedstr($item->witness->timewitnessed, $userobj),
-                        array('class' => 'mod-ojt-witnessedstr', 'ojt-item-id' => $item->id));
-
-                    $row[] = html_writer::tag('p', $cellcontent, array('class' => 'ojt-item-witness'));
-                }
-
-                $table->data[] = $row;
+                $row[] = html_writer::tag('p', $cellcontent, array('class' => 'ojt-item-witness'));
             }
 
-            $out .= html_writer::table($table);
+            $table->data[] = $row;
+        }
 
-            // Topic signoff
-            if ($userojt->managersignoff)
+        $out .= html_writer::table($table);
+
+        // Topic signoff
+        if ($userojt->managersignoff)
+        {
+            $out .= html_writer::start_tag('div',
+                array('class' => 'mod-ojt-topic-signoff', 'ojt-topic-id' => $topic->id));
+            $out .= get_string('managersignoff', 'ojt');
+            if ($signoff)
             {
-                $out .= html_writer::start_tag('div',
-                    array('class' => 'mod-ojt-topic-signoff', 'ojt-topic-id' => $topic->id));
-                $out .= get_string('managersignoff', 'ojt');
-                if ($signoff)
+                $out .= $this->output->flex_icon($topic->signoff->signedoff ? 'completion-manual-y' : 'completion-manual-n',
+                    ['classes' => 'ojt-topic-signoff-toggle']);
+            }
+            else
+            {
+                if ($topic->signoff->signedoff)
                 {
-                    $out .= $this->output->flex_icon($topic->signoff->signedoff ? 'completion-manual-y' : 'completion-manual-n',
-                        ['classes' => 'ojt-topic-signoff-toggle']);
+                    $out .= $this->output->flex_icon('check-success', ['alt' => get_string('signedoff', 'ojt')]);
                 }
                 else
                 {
-                    if ($topic->signoff->signedoff)
-                    {
-                        $out .= $this->output->flex_icon('check-success', ['alt' => get_string('signedoff', 'ojt')]);
-                    }
-                    else
-                    {
-                        $out .= $this->output->flex_icon('times-danger', ['alt' => get_string('notsignedoff', 'ojt')]);
-                    }
+                    $out .= $this->output->flex_icon('times-danger', ['alt' => get_string('notsignedoff', 'ojt')]);
                 }
-                $userobj = new stdClass();
-                $userobj = username_load_fields_from_object($userobj, $topic, $prefix = 'signoffuser');
-                $out     .= html_writer::tag('div', ojt::get_modifiedstr($topic->signoff->timemodified, $userobj),
-                    array('class' => 'mod-ojt-topic-modifiedstr'));
-                $out     .= html_writer::end_tag('div');
             }
-
-            // Topic comments
-            if ($topic->allowcomments)
-            {
-                $out .= $this->output->heading(get_string('topiccomments', 'ojt'), 4);
-                require_once($CFG->dirroot . '/comment/lib.php');
-                comment::init();
-                $options            = new stdClass();
-                $options->area      = 'ojt_topic_item_' . $topic->id;
-                $options->context   = $context;
-                $options->itemid    = $userojt->userid;
-                $options->showcount = true;
-                $options->component = 'ojt';
-                $options->autostart = true;
-                $options->notoggle  = true;
-                $comment            = new comment($options);
-                $out                .= $comment->output(true);
-            }
-
-
-            $out .= html_writer::end_tag('div');  // mod-ojt-topic
+            $userobj = new stdClass();
+            $userobj = username_load_fields_from_object($userobj, $topic, $prefix = 'signoffuser');
+            $out     .= html_writer::tag('div', ojt::get_modifiedstr($topic->signoff->timemodified, $userobj),
+                array('class' => 'mod-ojt-topic-modifiedstr'));
+            $out     .= html_writer::end_tag('div');
         }
 
-        $out .= html_writer::end_tag('div');  // mod-ojt-user-ojt
+        // Topic comments
+        if ($topic->allowcomments)
+        {
+            $out .= $this->output->heading(get_string('topiccomments', 'ojt'), 4);
+            require_once($CFG->dirroot . '/comment/lib.php');
+            comment::init();
+            $options            = new stdClass();
+            $options->area      = 'ojt_topic_item_' . $topic->id;
+            $options->context   = $context;
+            $options->itemid    = $userojt->userid;
+            $options->showcount = true;
+            $options->component = 'ojt';
+            $options->autostart = true;
+            $options->notoggle  = true;
+            $comment            = new comment($options);
+            $out                .= $comment->output(true);
+        }
+
+
+        $out .= html_writer::end_tag('div');  // mod-ojt-topic
 
         return $out;
     }
@@ -335,5 +382,32 @@ class mod_ojt_renderer extends plugin_renderer_base
         return implode($br, $out);
     }
 
+    /**
+     * @param user_topic $topic
+     * @return string icon html
+     * @throws coding_exception
+     */
+    public function get_completion_icon(user_topic $topic): string
+    {
+        switch ($topic->completion_status)
+        {
+            case completion::STATUS_COMPLETE:
+                $completionicon = 'check-success';
+                break;
+            case completion::STATUS_REQUIREDCOMPLETE:
+                $completionicon = 'check-warning';
+                break;
+            default:
+                $completionicon = 'times-danger';
+        }
+        if (!empty($completionicon))
+        {
+            $completionicon = $this->output->flex_icon($completionicon,
+                ['alt' => get_string('completionstatus' . $topic->completion_status, 'ojt')]);
+        }
+        $completionicon = html_writer::tag('span', $completionicon,  ['class' => 'ojt-topic-status']);
+
+        return $completionicon;
+    }
 }
 

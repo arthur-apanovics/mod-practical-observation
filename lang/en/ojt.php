@@ -77,7 +77,7 @@ $string['modulename_help'] = 'The OJT module allows for student evaluation based
 $string['name'] = 'Name';
 $string['notsignedoff'] = 'Not signed off';
 $string['notopics'] = 'No topics';
-$string['notwitnessed'] = 'Not witnessed';
+$string['notwitnessed'] = 'Not achieved';
 $string['nousers'] = 'No users...';
 $string['optional'] = 'Optional';
 $string['optionalcompletion'] = 'Optional completion';
@@ -94,4 +94,7 @@ $string['type0'] = 'OJT';
 $string['type1'] = 'Topic';
 $string['type2'] = 'Item';
 $string['updatefiles'] = 'Update files';
-$string['witnessed'] = 'Witnessed';
+$string['witnessed'] = 'Achieved';
+
+$string['review_observation'] = 'Review Observation';
+$string['manage_requests'] = 'Manage Requests';

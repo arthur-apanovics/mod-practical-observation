@@ -41,7 +41,7 @@ class ojt
     public $id;
 
     /**
-     * @var stdClass
+     * @var int
      */
     public $course;
 
@@ -84,12 +84,6 @@ class ojt
      * @var bool
      */
     public $itemwitness;
-
-
-    // /**
-    //  * @var topic[]
-    //  */
-    // public $topics;
 
 
     /**

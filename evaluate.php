@@ -35,27 +35,12 @@ require_once($CFG->dirroot . '/mod/ojt/locallib.php');
 require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
 
 $userid = required_param('userid', PARAM_INT);
-$cmid   = optional_param('cmid', 0, PARAM_INT); // Course_module ID
-$ojtid  = optional_param('bid', 0,
-    PARAM_INT);  // ... ojt instance ID - it should be named as the first character of the module.
+$id     = optional_param('cmid', 0, PARAM_INT); // Course_module ID
+$b      = optional_param('bid', 0, PARAM_INT);  // ... ojt instance ID - it should be named as the first character of the module.
 
 $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
-if ($cmid)
-{
-    $cm     = get_coursemodule_from_id('ojt', $cmid, 0, false, MUST_EXIST);
-    $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $ojt    = $DB->get_record('ojt', array('id' => $cm->instance), '*', MUST_EXIST);
-}
-else if ($ojtid)
-{
-    $ojt    = $DB->get_record('ojt', array('id' => $ojtid), '*', MUST_EXIST);
-    $course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
-    $cm     = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
-}
-else
-{
-    error('You must specify a course_module ID or an instance ID');
-}
+
+list($ojt, $course, $cm) = ojt_check_page_id_params_and_init($id, $b); /* @var $ojt ojt */
 
 require_login($course, true, $cm);
 
@@ -94,12 +79,12 @@ $jsmodule = array(
     'requires' => array('json')
 );
 $PAGE->requires->js_init_call('M.mod_ojt_evaluate.init', $args, false, $jsmodule);
-$jsmodule = array(
-    'name'     => 'mod_ojt_expandcollapse',
-    'fullpath' => '/mod/ojt/expandcollapse.js',
-    'requires' => array('json')
-);
-$PAGE->requires->js_init_call('M.mod_ojt_expandcollapse.init', array(), false, $jsmodule);
+// $jsmodule = array(
+//     'name'     => 'mod_ojt_expandcollapse',
+//     'fullpath' => '/mod/ojt/expandcollapse.js',
+//     'requires' => array('json')
+// );
+// $PAGE->requires->js_init_call('M.mod_ojt_expandcollapse.init', array(), false, $jsmodule);
 
 
 // Output starts here.

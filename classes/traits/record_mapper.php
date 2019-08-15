@@ -60,6 +60,20 @@ trait record_mapper
     }
 
     /**
+     * Create and return a moodle database record from current object
+     *
+     * @return stdClass record
+     */
+    public function get_record_from_object()
+    {
+        $rec = [];
+        foreach ($this as $key => $val)
+            $rec[$key] = $val;
+
+        return (object)$rec;
+    }
+
+    /**
      * Fetch record from database.
      * @param int $id
      * @return stdClass|false false if record not found

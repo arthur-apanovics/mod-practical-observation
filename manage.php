@@ -20,28 +20,15 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_ojt\models\ojt;
+
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/lib.php');
 
 $id = optional_param('cmid', 0, PARAM_INT); // Course_module ID
 $b  = optional_param('b', 0, PARAM_INT);  // OJT instance ID
 
-if ($id)
-{
-    $cm     = get_coursemodule_from_id('ojt', $id, 0, false, MUST_EXIST);
-    $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $ojt    = $DB->get_record('ojt', array('id' => $cm->instance), '*', MUST_EXIST);
-}
-else if ($b)
-{
-    $ojt    = $DB->get_record('ojt', array('id' => $b), '*', MUST_EXIST);
-    $course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
-    $cm     = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
-}
-else
-{
-    print_error('You must specify a course_module ID or an instance ID');
-}
+list($ojt, $course, $cm) = ojt_check_page_id_params_and_init($id, $b); /* @var $ojt ojt */
 
 require_login($course, true, $cm);
 require_capability('mod/ojt:manage', context_module::instance($cm->id));

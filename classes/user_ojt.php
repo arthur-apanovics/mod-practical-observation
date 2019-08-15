@@ -28,6 +28,7 @@ use mod_ojt\models\completion;
 use mod_ojt\models\ojt;
 use mod_ojt\models\topic;
 use mod_ojt\traits\record_mapper;
+use stdClass;
 
 class user_ojt extends ojt
 {

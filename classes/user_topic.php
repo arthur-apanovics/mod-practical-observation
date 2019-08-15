@@ -23,6 +23,7 @@
 namespace mod_ojt;
 
 
+use dml_exception;
 use mod_ojt\models\completion;
 use mod_ojt\models\topic_signoff;
 use mod_ojt\models\topic;
@@ -66,6 +67,25 @@ class user_topic extends topic
         $this->completion_status = $this->get_completion_status();
     }
 
+    /**
+     * @param int $topicid
+     * @param int $userid
+     * @return user_topic
+     * @throws dml_exception
+     */
+    public static function get_user_topic(int $topicid, int $userid)
+    {
+        global $DB;
+        return new self($DB->get_record('ojt_topic', ['id' => $topicid]), $userid);
+    }
+
+    /**
+     * Returns all user topics in given ojt instance
+     * @param int $ojtid
+     * @param int $userid
+     * @return user_topic[]
+     * @throws dml_exception
+     */
     public static function get_user_topics(int $ojtid, int $userid): array
     {
         global $DB;
@@ -77,6 +97,14 @@ class user_topic extends topic
         return $topics;
     }
 
+    /**
+     * @param $userid
+     * @param $ojtid
+     * @return array
+     * @throws dml_exception
+     *
+     * @deprecated do not use as this returns an associative array instead of a proper class instance
+     */
     public static function get_user_topic_records($userid, $ojtid)
     {
         global $DB;
