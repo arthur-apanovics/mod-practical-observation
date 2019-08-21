@@ -271,7 +271,7 @@ class mod_ojt_renderer extends plugin_renderer_base
                 }
             }
 
-            $row[] = html_writer::tag('p', $cellcontent, array('class' => 'ojt-completion'));
+            $row[] = html_writer::tag('div', $cellcontent, array('class' => 'ojt-completion'));
 
             if ($userojt->itemwitness)
             {
@@ -282,7 +282,7 @@ class mod_ojt_renderer extends plugin_renderer_base
                     $cellcontent .= html_writer:: start_tag('span',
                         array('class' => 'ojt-witness-item', 'ojt-item-id' => $item->id));
                     $cellcontent .= $this->output->flex_icon($witnessicon, ['classes' => 'ojt-witness-toggle']);
-                    $cellcontent .= html_writer::end_tag('div');
+                    $cellcontent .= html_writer::end_tag('span');
 
                 }
                 else
@@ -305,7 +305,7 @@ class mod_ojt_renderer extends plugin_renderer_base
                 $cellcontent .= html_writer::tag('div', ojt::get_modifiedstr($item->witness->timewitnessed, $userobj),
                     array('class' => 'mod-ojt-witnessedstr', 'ojt-item-id' => $item->id));
 
-                $row[] = html_writer::tag('p', $cellcontent, array('class' => 'ojt-item-witness'));
+                $row[] = html_writer::tag('div', $cellcontent, array('class' => 'ojt-item-witness'));
             }
 
             $table->data[] = $row;
