@@ -34,8 +34,6 @@ require_once($CFG->dirroot . '/mod/ojt/lib.php');
 require_once($CFG->dirroot . '/mod/ojt/locallib.php');
 require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
 
-require_login($course, true, $cm);
-
 $userid = required_param('userid', PARAM_INT);
 $id     = optional_param('cmid', 0, PARAM_INT); // Course_module ID
 $b      = optional_param('bid', 0, PARAM_INT);  // ... ojt instance ID - it should be named as the first character of the module.
@@ -43,6 +41,8 @@ $b      = optional_param('bid', 0, PARAM_INT);  // ... ojt instance ID - it shou
 $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
 
 list($ojt, $course, $cm) = ojt_check_page_id_params_and_init($id, $b); /* @var $ojt ojt */
+
+require_login($course, true, $cm);
 
 $modcontext  = context_module::instance($cm->id);
 $canevaluate = ojt::can_evaluate($userid, $modcontext);
@@ -66,49 +66,23 @@ if (has_capability('mod/ojt:evaluate', $modcontext) || has_capability('mod/ojt:s
 }
 $PAGE->navbar->add(fullname($user));
 
-$args     = array('args' => '{
-       "ojtid":' . $userojt->id .
-                            ', "userid":' . $userid .
-                            ', "OJT_COMPLETE":' . completion::STATUS_COMPLETE .
-                            ', "OJT_REQUIREDCOMPLETE":' . completion::STATUS_REQUIREDCOMPLETE .
-                            ', "OJT_INCOMPLETE":' . completion::STATUS_INCOMPLETE .
-                            '}');
-$jsmodule = array(
-    'name'     => 'mod_ojt_evaluate',
-    'fullpath' => '/mod/ojt/js/evaluate.js',
-    'requires' => array('json')
-);
+/* @var $renderer mod_ojt_renderer */
+$renderer = $PAGE->get_renderer('ojt');
+
+list($args, $jsmodule) = $renderer->get_evaluation_js_args($ojt->id, $userid);
 $PAGE->requires->js_init_call('M.mod_ojt_evaluate.init', $args, false, $jsmodule);
-// $jsmodule = array(
-//     'name'     => 'mod_ojt_expandcollapse',
-//     'fullpath' => '/mod/ojt/js/expandcollapse.js',
-//     'requires' => array('json')
-// );
-// $PAGE->requires->js_init_call('M.mod_ojt_expandcollapse.init', array(), false, $jsmodule);
 
-
-// Output starts here.
+// Output starts here
 echo $OUTPUT->header();
 
-echo html_writer::start_tag('a', array('href' => 'javascript:window.print()', 'class' => 'evalprint'));
-echo html_writer::empty_tag('img',
-    array('src'   => $OUTPUT->pix_url('t/print'),
-          'alt'   => get_string('printthisojt', 'ojt'),
-          'class' => 'icon'));
-echo get_string('printthisojt', 'ojt');
-echo html_writer::end_tag('a');
-echo $OUTPUT->heading(get_string('ojtxforx', 'ojt',
-    (object) array('ojt'  => format_string($ojt->name),
-                   'user' => fullname($user))));
+echo $renderer->get_print_button($ojt->name, fullname($user));
 
 if ($ojt->intro)
 {
     echo $OUTPUT->box(format_module_intro('ojt', $ojt, $cm->id), 'generalbox mod_introbox', 'ojtintro');
 }
 
-// Print the evaluation
-$renderer = $PAGE->get_renderer('ojt');
-echo $renderer->user_ojt($userojt, null, $canevaluate, $cansignoff, $canwitness);
+echo $renderer->user_ojt($userojt, $canevaluate, $cansignoff, $canwitness);
 
 // Finish the page.
 echo $OUTPUT->footer();

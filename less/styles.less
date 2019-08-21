@@ -1,0 +1,142 @@
+#mod-ojt-user-ojt,
+#page-mod-ojt-observe{
+  padding-bottom: 2em;
+
+  & .config-mod-ojt-topic-item,
+  & .mod-ojt-topic-item {
+    padding: 0.3em;
+  }
+
+  .mod-ojt-topic-items {
+    font-size: 1.2em;
+    display:   table;
+  }
+
+  .mod-ojt-modifiedstr,
+  .mod-ojt-witnessedstr,
+  .mod-ojt-topic-modifiedstr {
+    font-size:  0.8em;
+    font-style: italic;
+    color:      grey;
+  }
+
+  .mod-ojt-topic-signoff {
+    padding-left: 1em;
+  }
+
+  .mod-ojt-topic-signoff img {
+    padding-left: 0.4em;
+  }
+
+  textarea.ojt-completion-comment {
+    margin-left: 0.4em;
+    width:       90%;
+  }
+
+  .mod-ojt-topic table td.c0 {
+    width: 40%;
+  }
+
+  .mod-ojt-topic table td.c1 {
+    width: 60%;
+  }
+}
+
+.config-mod-ojt-topic-heading,
+.mod-ojt-topic-heading {
+  font-size:     1.4em;
+  font-weight:   bold;
+  margin-top:    0.5em;
+  margin-bottom: 0.2em;
+}
+
+.mod-ojt-topic-heading {
+  padding-left: 0.8em;
+}
+
+.mod-ojt-topic-addbtn {
+  float: right;
+}
+
+#config-mod-ojt-topics {
+  padding-bottom: 2em;
+}
+
+.config-mod-ojt-topic-items {
+  margin-left: 1em;
+  font-size:   1.2em;
+}
+
+img.ojt-topic-completion-status {
+  vertical-align: baseline;
+}
+
+#ojt-eval-icon-templates {
+  display: none;
+}
+
+.evalprint,
+.ojt-save{
+  float: right;
+}
+
+.user-ojt-comments-warning {
+  display: none;
+}
+
+.mod-ojt-evalstudents-btn,
+.mod-ojt-evalself-btn,
+.mod-ojt-manage-btn {
+  float: right;
+}
+
+.mod-ojt-topicitem-files {
+  font-size: 0.8em;
+}
+
+
+/**
+ * printing styles
+ */
+@media print {
+  @page {
+    margin: 25mm !important;
+  }
+
+  #block-region-side-pre,
+  #block-region-side-post,
+  #page-header,
+  #page-footer,
+  .evalprint,
+  .logininfo,
+  .navbar,
+  textarea.ojt-completion-comment,
+  .user-ojt-comments-warning,
+  #totaramenu {
+    display: none !important;
+  }
+
+  #region-main {
+    width:   100% !important;
+    padding: 0;
+  }
+
+  #mod-ojt-user-ojt {
+    .ojt-completion-comment-print {
+      display: block;
+    }
+
+    .mod-ojt-topic-heading {
+      padding-left: 0;
+    }
+
+    .mod-ojt-topic-items {
+      display: table;
+    }
+
+    .mod-ojt-topic {
+      page-break-inside: avoid;
+    }
+  }
+}
+

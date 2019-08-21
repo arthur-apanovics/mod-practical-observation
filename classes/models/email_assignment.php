@@ -241,6 +241,21 @@ class email_assignment implements crud
     }
 
     /**
+     * Fetch object by email token.
+     * Note: Does not check if record exists!
+     *
+     * @param string $token
+     * @return email_assignment
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public static function fetch_from_token(string $token)
+    {
+        global $DB;
+        return new self($DB->get_record('ojt_email_assignment', array('token' => $token), '*', MUST_EXIST));
+    }
+
+    /**
      * Given an array of emails sorts them into three other arrays based on the following:
      * - 0 => emails in the supplied list that ARE NOT already assigned as responders to this user assignment (new).
      * - 1 => emails in the supplied list that ARE already assigned as responders to this user assignment (keep).
@@ -325,7 +340,7 @@ class email_assignment implements crud
         }
 
         $params          = ['token' => $assignment->token];
-        $url             = new moodle_url('/mod/ojt/feedback.php', $params);
+        $url             = new moodle_url('/mod/ojt/observe.php', $params);
         $emailvars->link = html_writer::link($url, $url->out());
         $emailvars->url  = $url->out();
 

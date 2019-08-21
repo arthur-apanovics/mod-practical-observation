@@ -165,4 +165,22 @@ class user_topic extends topic
 
         return $status;
     }
+
+    /**
+     * Checks if this topic is submitted
+     *
+     * @return bool
+     */
+    public function is_submitted():bool
+    {
+        if (!is_null($this->external_request))
+        {
+            if (!is_null($this->external_request->email_assignments))
+            {
+                return count($this->external_request->email_assignments) > 0;
+            }
+        }
+
+        return false;
+    }
 }

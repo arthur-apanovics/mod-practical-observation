@@ -58,10 +58,10 @@ class user_external_request extends external_request
         }
         else
         {
-            $external_request = new external_request();
-            $external_request->ojtid = $ojtid;
+            $external_request          = new external_request();
+            $external_request->ojtid   = $ojtid;
             $external_request->topicid = $topicid;
-            $external_request->userid = $userid;
+            $external_request->userid  = $userid;
 
             $external_request->id = $external_request->create();
 
@@ -91,8 +91,41 @@ class user_external_request extends external_request
     {
         $emails = [];
         foreach ($this->email_assignments as $assignment)
+        {
             $emails[$assignment->id] = $assignment->email;
+        }
 
         return $emails;
+    }
+
+    /**
+     * Find first assignment date in email assignments
+     *
+     * @return int -1 if no email assignments exist
+     */
+    public function get_first_email_assign_date(): int //has to return int!
+    {
+        if (!is_null($this->email_assignments) && count($this->email_assignments) > 0)
+        {
+            $first_date = -1;
+            foreach ($this->email_assignments as $assignment)
+            {
+                if ($assignment->timeassigned > $first_date)
+                {
+                    $first_date = $assignment->timeassigned;
+                }
+            }
+
+            if ($first_date <= 0)
+            {
+                throw new coding_exception("Incorrect email assignment date found in external request with id $this->id");
+            }
+
+            return $first_date;
+        }
+        else
+        {
+            return -1;
+        }
     }
 }

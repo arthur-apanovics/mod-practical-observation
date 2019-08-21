@@ -96,8 +96,11 @@ $string['type2'] = 'Item';
 $string['updatefiles'] = 'Update files';
 $string['witnessed'] = 'Achieved';
 
+$string['observation'] = 'Observation';
 $string['review_observation'] = 'Review Observation';
 $string['manage_requests'] = 'Manage Requests';
+$string['submissiondate'] = 'Observation submitted on {$a}';
+$string['nosubmissiondate'] = 'Observation has not been submitted yet';
 
 // email
 $string['requestobservation'] = 'Request observation';

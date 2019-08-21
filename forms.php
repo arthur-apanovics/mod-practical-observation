@@ -166,7 +166,7 @@ class ojt_request_select_users extends moodleform
         $mform->setType('oldduedate', PARAM_INT);
 
         // //TODO? A hidden field used by js to popup a preview window.
-        // $popupurl = $CFG->wwwroot . "/mod/ojt/feedback.php?userid={$USER->id}&preview=1&feedback360id=";
+        // $popupurl = $CFG->wwwroot . "/mod/ojt/observe.php?userid={$USER->id}&preview=1&feedback360id=";
         // $mform->addElement('hidden', 'popupurl', $popupurl);
         // $mform->setType('popupurl', PARAM_TEXT);
 
@@ -225,8 +225,8 @@ class ojt_request_select_users extends moodleform
             //     'ojtid'   => $data['cmid'],
             //     'topicid' => $data['topicid'],
             //     'preview' => true);
-            // // TODO FEEDBACK PREVIEW URL
-            // $preview_url  = new moodle_url('/mod/ojt/feedback.php', $preview_params);
+            // // TODO? FEEDBACK PREVIEW URL
+            // $preview_url  = new moodle_url('/mod/ojt/observe.php', $preview_params);
             // $preview_link = html_writer::link(
             //     $preview_url,
             //     get_string('previewencased', 'totara_feedback360'),

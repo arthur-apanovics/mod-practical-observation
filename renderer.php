@@ -25,7 +25,9 @@ defined('MOODLE_INTERNAL') || die();
 use core\output\flex_icon;
 use mod_ojt\models\completion;
 use mod_ojt\models\email_assignment;
+use mod_ojt\models\external_request;
 use mod_ojt\models\ojt;
+use mod_ojt\user_external_request;
 use mod_ojt\user_ojt;
 use mod_ojt\user_topic;
 
@@ -34,7 +36,6 @@ require_once($CFG->dirroot . '/mod/ojt/lib.php');
 
 class mod_ojt_renderer extends plugin_renderer_base
 {
-
     function config_topics($ojt, $config = true)
     {
         global $DB;
@@ -49,22 +50,22 @@ class mod_ojt_renderer extends plugin_renderer_base
         }
         foreach ($topics as $topic)
         {
-            $out         .= html_writer::start_tag('div', array('class' => 'config-mod-ojt-topic'));
-            $out         .= html_writer::start_tag('div', array('class' => 'config-mod-ojt-topic-heading'));
+            $out .= html_writer::start_tag('div', array('class' => 'config-mod-ojt-topic'));
+            $out .= html_writer::start_tag('div', array('class' => 'config-mod-ojt-topic-heading'));
             $optionalstr =
                 $topic->completionreq == completion::REQ_OPTIONAL ? ' (' . get_string('optional', 'ojt') . ')' : '';
-            $out         .= format_string($topic->name) . $optionalstr;
+            $out .= format_string($topic->name) . $optionalstr;
             if ($config)
             {
                 $additemurl = new moodle_url('/mod/ojt/topicitem.php', array('bid' => $ojt->id, 'tid' => $topic->id));
-                $out        .= $this->output->action_icon($additemurl,
+                $out .= $this->output->action_icon($additemurl,
                     new flex_icon('plus', ['alt' => get_string('additem', 'ojt')]));
-                $editurl    = new moodle_url('/mod/ojt/topic.php', array('bid' => $ojt->id, 'id' => $topic->id));
-                $out        .= $this->output->action_icon($editurl,
+                $editurl = new moodle_url('/mod/ojt/topic.php', array('bid' => $ojt->id, 'id' => $topic->id));
+                $out .= $this->output->action_icon($editurl,
                     new flex_icon('edit', ['alt' => get_string('edittopic', 'ojt')]));
-                $deleteurl  =
+                $deleteurl =
                     new moodle_url('/mod/ojt/topic.php', array('bid' => $ojt->id, 'id' => $topic->id, 'delete' => 1));
-                $out        .= $this->output->action_icon($deleteurl,
+                $out .= $this->output->action_icon($deleteurl,
                     new flex_icon('delete', ['alt' => get_string('deletetopic', 'ojt')]));
             }
             $out .= html_writer::end_tag('div');
@@ -89,19 +90,19 @@ class mod_ojt_renderer extends plugin_renderer_base
         $out .= html_writer::start_tag('div', array('class' => 'config-mod-ojt-topic-items'));
         foreach ($items as $item)
         {
-            $out         .= html_writer::start_tag('div', array('class' => 'config-mod-ojt-topic-item'));
+            $out .= html_writer::start_tag('div', array('class' => 'config-mod-ojt-topic-item'));
             $optionalstr =
                 $item->completionreq == completion::REQ_OPTIONAL ? ' (' . get_string('optional', 'ojt') . ')' : '';
-            $out         .= format_string($item->name) . $optionalstr;
+            $out .= format_string($item->name) . $optionalstr;
             if ($config)
             {
-                $editurl   = new moodle_url('/mod/ojt/topicitem.php',
+                $editurl = new moodle_url('/mod/ojt/topicitem.php',
                     array('bid' => $ojtid, 'tid' => $topicid, 'id' => $item->id));
-                $out       .= $this->output->action_icon($editurl,
+                $out .= $this->output->action_icon($editurl,
                     new flex_icon('edit', ['alt' => get_string('edititem', 'ojt')]));
                 $deleteurl = new moodle_url('/mod/ojt/topicitem.php',
                     array('bid' => $ojtid, 'tid' => $topicid, 'id' => $item->id, 'delete' => 1));
-                $out       .= $this->output->action_icon($deleteurl,
+                $out .= $this->output->action_icon($deleteurl,
                     new flex_icon('delete', ['alt' => get_string('deleteitem', 'ojt')]));
             }
             $out .= html_writer::end_tag('div');
@@ -126,9 +127,10 @@ class mod_ojt_renderer extends plugin_renderer_base
 
         foreach ($user_ojt->topics as $topic)
         {
-            $topic_data                         = [];
-            $topic_data['id']                   = $topic->id;
-            $topic_data['title']                = $topic->name;
+            $topic_data = [];
+            $topic_data['id'] = $topic->id;
+            $topic_data['title'] = $topic->name;
+            $topic_data['submission_status_icon'] = $this->get_topic_submission_status_icon($topic);
             $topic_data['completion_icon_html'] = $this->get_completion_icon($topic);
 
             $topic_data['url'] = new moodle_url('/mod/ojt/viewtopic.php',
@@ -163,7 +165,9 @@ class mod_ojt_renderer extends plugin_renderer_base
         $out = html_writer::start_tag('div', array('id' => 'mod-ojt-user-ojt'));
 
         foreach ($userojt->topics as $topic)
+        {
             $out .= $this->user_topic($userojt, $topic, $evaluate, $signoff, $itemwitness);
+        }
 
         $out .= html_writer::end_tag('div');  // mod-ojt-user-ojt
 
@@ -182,22 +186,24 @@ class mod_ojt_renderer extends plugin_renderer_base
      * @throws dml_exception
      * @throws moodle_exception
      */
-    public function user_topic(user_ojt $userojt, user_topic $topic, $evaluate = false, $signoff = false, $itemwitness = false)
+    public function user_topic(user_ojt $userojt, user_topic $topic, $evaluate = false, $signoff = false,
+                               $itemwitness = false)
     {
-        global $CFG, $DB, $USER, $PAGE;
+        global $CFG, $DB, $USER;
 
-        $course  = $DB->get_record('course', array('id' => $userojt->course), '*', MUST_EXIST);
-        $cm      = get_coursemodule_from_instance('ojt', $userojt->id, $course->id, false, MUST_EXIST);
+        $course = $DB->get_record('course', array('id' => $userojt->course), '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('ojt', $userojt->id, $course->id, false, MUST_EXIST);
         $context = context_module::instance($cm->id);
         $out = '';
 
-        $out .= html_writer::start_tag('div', array('class' => 'mod-ojt-topic', 'id' => "ojt-topic-{$topic->id}"));
+        $out .= html_writer::start_tag('div',
+            array('class' => 'mod-ojt-topic', 'id' => "ojt-topic-{$topic->id}"));
         $completionicon = $this->get_completion_icon($topic);
         $completionicon = html_writer::tag('span', $completionicon,
             array('class' => 'ojt-topic-status'));
-        $optionalstr    = $topic->completionreq == completion::REQ_OPTIONAL ?
+        $optionalstr = $topic->completionreq == completion::REQ_OPTIONAL ?
             html_writer::tag('em', ' (' . get_string('optional', 'ojt') . ')') : '';
-        $out            .= html_writer::tag('div', format_string($topic->name) . $optionalstr . $completionicon,
+        $out .= html_writer::tag('div', format_string($topic->name) . $optionalstr . $completionicon,
             array('class' => 'mod-ojt-topic-heading expanded'));
 
         $table = new html_table();
@@ -211,27 +217,29 @@ class mod_ojt_renderer extends plugin_renderer_base
 
         foreach ($topic->topic_items as $item)
         {
-            $row         = array();
+            $row = array();
             $optionalstr = $item->completionreq == completion::REQ_OPTIONAL ?
                 html_writer::tag('em', ' (' . get_string('optional', 'ojt') . ')') : '';
-            $row[]       = format_string($item->name) . $optionalstr;
+            $row[] = format_string($item->name) . $optionalstr;
 
             if ($evaluate)
             {
                 $completionicon =
-                    $item->completion->status == completion::STATUS_COMPLETE ? 'completion-manual-y' : 'completion-manual-n';
-                $cellcontent    =
+                    $item->completion->status == completion::STATUS_COMPLETE ? 'completion-manual-y' :
+                        'completion-manual-n';
+                $cellcontent =
                     html_writer::start_tag('div', array('class' => 'ojt-eval-actions', 'ojt-item-id' => $item->id));
-                $cellcontent    .= $this->output->flex_icon($completionicon,
+                $cellcontent .= $this->output->flex_icon($completionicon,
                     ['classes' => 'ojt-completion-toggle']);
-                $cellcontent    .= html_writer::tag('textarea', $item->completion->comment,
-                    array('name'        => 'comment-' . $item->id,
-                          'rows'        => 3,
-                          'class'       => 'ojt-completion-comment',
-                          'ojt-item-id' => $item->id));
-                $cellcontent    .= html_writer::tag('div', format_text($item->completion->comment, FORMAT_PLAIN),
+                $cellcontent .= html_writer::tag('textarea', $item->completion->comment,
+                    array(
+                        'name'        => 'comment-' . $item->id,
+                        'rows'        => 3,
+                        'class'       => 'ojt-completion-comment',
+                        'ojt-item-id' => $item->id));
+                $cellcontent .= html_writer::tag('div', format_text($item->completion->comment, FORMAT_PLAIN),
                     array('class' => 'ojt-completion-comment-print', 'ojt-item-id' => $item->id));
-                $cellcontent    .= html_writer::end_tag('div');
+                $cellcontent .= html_writer::end_tag('div');
             }
             else
             {
@@ -250,8 +258,9 @@ class mod_ojt_renderer extends plugin_renderer_base
 
                 $cellcontent .= format_text($item->completion->comment, FORMAT_PLAIN);
             }
-            $userobj     = new stdClass();
-            $userobj     = username_load_fields_from_object($userobj, $item, $prefix = 'modifier');
+
+            $userobj = new stdClass();
+            $userobj = username_load_fields_from_object($userobj, $item, $prefix = 'modifier');
             $cellcontent .= html_writer::tag('div', ojt::get_modifiedstr($item->completion->timemodified, $userobj),
                 array('class' => 'mod-ojt-modifiedstr', 'ojt-item-id' => $item->id));
 
@@ -261,12 +270,12 @@ class mod_ojt_renderer extends plugin_renderer_base
                     $this->list_topic_item_files($context->id, $userojt->userid, $item->id),
                     array('class' => 'mod-ojt-topicitem-files'));
 
-                if (($evaluate && $item->allowfileuploads) ||
-                    ($userojt->userid == $USER->id && $item->allowselffileuploads))
+                if (($evaluate && $item->allowfileuploads)
+                    || ($userojt->userid == $USER->id && $item->allowselffileuploads))
                 {
                     $itemfilesurl = new moodle_url('/mod/ojt/uploadfile.php',
                         array('userid' => $userojt->userid, 'tiid' => $item->id));
-                    $cellcontent  .= $this->output->single_button($itemfilesurl, get_string('updatefiles', 'ojt'),
+                    $cellcontent .= $this->output->single_button($itemfilesurl, get_string('updatefiles', 'ojt'),
                         'get');
                 }
             }
@@ -283,7 +292,6 @@ class mod_ojt_renderer extends plugin_renderer_base
                         array('class' => 'ojt-witness-item', 'ojt-item-id' => $item->id));
                     $cellcontent .= $this->output->flex_icon($witnessicon, ['classes' => 'ojt-witness-toggle']);
                     $cellcontent .= html_writer::end_tag('span');
-
                 }
                 else
                 {
@@ -300,8 +308,8 @@ class mod_ojt_renderer extends plugin_renderer_base
                     }
                 }
 
-                $userobj     = new stdClass();
-                $userobj     = username_load_fields_from_object($userobj, $item, $prefix = 'itemwitness');
+                $userobj = new stdClass();
+                $userobj = username_load_fields_from_object($userobj, $item, $prefix = 'itemwitness');
                 $cellcontent .= html_writer::tag('div', ojt::get_modifiedstr($item->witness->timewitnessed, $userobj),
                     array('class' => 'mod-ojt-witnessedstr', 'ojt-item-id' => $item->id));
 
@@ -321,7 +329,8 @@ class mod_ojt_renderer extends plugin_renderer_base
             $out .= get_string('managersignoff', 'ojt');
             if ($signoff)
             {
-                $out .= $this->output->flex_icon($topic->signoff->signedoff ? 'completion-manual-y' : 'completion-manual-n',
+                $out .= $this->output->flex_icon($topic->signoff->signedoff ? 'completion-manual-y' :
+                    'completion-manual-n',
                     ['classes' => 'ojt-topic-signoff-toggle']);
             }
             else
@@ -337,9 +346,9 @@ class mod_ojt_renderer extends plugin_renderer_base
             }
             $userobj = new stdClass();
             $userobj = username_load_fields_from_object($userobj, $topic, $prefix = 'signoffuser');
-            $out     .= html_writer::tag('div', ojt::get_modifiedstr($topic->signoff->timemodified, $userobj),
+            $out .= html_writer::tag('div', ojt::get_modifiedstr($topic->signoff->timemodified, $userobj),
                 array('class' => 'mod-ojt-topic-modifiedstr'));
-            $out     .= html_writer::end_tag('div');
+            $out .= html_writer::end_tag('div');
         }
 
         // Topic comments
@@ -348,43 +357,23 @@ class mod_ojt_renderer extends plugin_renderer_base
             $out .= $this->output->heading(get_string('topiccomments', 'ojt'), 4);
             require_once($CFG->dirroot . '/comment/lib.php');
             comment::init();
-            $options            = new stdClass();
-            $options->area      = 'ojt_topic_item_' . $topic->id;
-            $options->context   = $context;
-            $options->itemid    = $userojt->userid;
+            $options = new stdClass();
+            $options->area = 'ojt_topic_item_' . $topic->id;
+            $options->context = $context;
+            $options->itemid = $userojt->userid;
             $options->showcount = true;
             $options->component = 'ojt';
             $options->autostart = true;
-            $options->notoggle  = true;
-            $comment            = new comment($options);
-            $out                .= $comment->output(true);
+            $options->notoggle = true;
+
+            $comment = new comment($options);
+            $out .= $comment->output(true);
         }
 
 
         $out .= html_writer::end_tag('div');  // mod-ojt-topic
 
         return $out;
-    }
-
-    protected function list_topic_item_files($contextid, $userid, $topicitemid)
-    {
-        $out = array();
-
-        $fs    = get_file_storage();
-        $files = $fs->get_area_files($contextid, 'mod_ojt', 'topicitemfiles' . $topicitemid, $userid,
-            'itemid, filepath, filename', false);
-
-        foreach ($files as $file)
-        {
-            $filename = $file->get_filename();
-            $url      =
-                moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
-                    $file->get_itemid(), $file->get_filepath(), $file->get_filename());
-            $out[]    = html_writer::link($url, $filename);
-        }
-        $br = html_writer::empty_tag('br');
-
-        return implode($br, $out);
     }
 
     /**
@@ -410,16 +399,46 @@ class mod_ojt_renderer extends plugin_renderer_base
             $completionicon = $this->output->flex_icon($completionicon,
                 ['alt' => get_string('completionstatus' . $topic->completion_status, 'ojt')]);
         }
-        $completionicon = html_writer::tag('span', $completionicon,  ['class' => 'ojt-topic-status']);
+        $completionicon = html_writer::tag('span', $completionicon, ['class' => 'ojt-topic-status']);
 
         return $completionicon;
     }
 
-    public function display_userview_header($user) {
+    /**
+     * @param string $ojt_name
+     * @param string $username
+     * @return string
+     * @throws coding_exception
+     */
+    function get_print_button(string $ojt_name, string $username)
+    {
+        global $OUTPUT;
+
+        $out = '';
+
+        $out .= html_writer::start_tag('a', array('href' => 'javascript:window.print()', 'class' => 'evalprint'));
+        $out .= html_writer::empty_tag('img',
+            array(
+                'src'   => $OUTPUT->pix_url('t/print'),
+                'alt'   => get_string('printthisojt', 'ojt'),
+                'class' => 'icon'));
+        $out .= get_string('printthisojt', 'ojt');
+        $out .= html_writer::end_tag('a');
+        $out .= $OUTPUT->heading(get_string('ojtxforx', 'ojt',
+            (object) array(
+                'ojt'  => format_string($ojt_name),
+                'user' => $username)));
+
+        return $out;
+    }
+
+    public function display_userview_header($user)
+    {
         global $USER;
 
         $header = '';
-        if ($USER->id != $user->id) {
+        if ($USER->id != $user->id)
+        {
             $picture = $this->output->user_picture($user);
             $name = fullname($user);
             $url = new moodle_url('/user/profile.php', array('id' => $user->id));
@@ -434,6 +453,75 @@ class mod_ojt_renderer extends plugin_renderer_base
     }
 
     /**
+     * Display feedback header.
+     *
+     * @param feedback360_responder $resp
+     * @param stdClass              $subjectuser The subject of the feedback.
+     * @param int                   $numresponders Total number of users who have been asked to respond to this feedback.
+     * @param email_assignment      $email_assignment
+     * @return string HTML
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
+    public function display_feedback_header(email_assignment $email_assignment, $subjectuser, $numresponders)
+    {
+        global $CFG, $USER;
+
+        // The heading.
+        $a = new stdClass();
+        $a->username = fullname($subjectuser);
+        $a->userid = $subjectuser->id;
+        $a->site = $CFG->wwwroot;
+        $a->profileurl = "{$CFG->wwwroot}/user/profile.php?id={$subjectuser->id}";
+
+        $anonmessage = false;
+        if ($subjectuser->id == $USER->id)
+        {
+            $titlestr = 'userownheaderfeedback';
+        }
+        else
+        {
+            $a->responder = $email_assignment->email;
+            $titlestr = 'userheaderfeedbackbyemail';
+            $anonmessage = true;
+        }
+
+        $message = html_writer::tag('p', get_string($titlestr, 'totara_feedback360', $a));
+
+        if ($anonmessage)
+        {
+            $anonmessage = get_string('feedbacknotanonymous', 'totara_feedback360');
+            $message .= html_writer::tag('p', $anonmessage);
+        }
+
+        $content = $this->output->user_picture($subjectuser, array('link' => false)) . $message;
+
+        if (!$email_assignment->timecompleted)
+        {
+            $savebutton =
+                new single_button(new moodle_url('#'), get_string('saveprogress', 'totara_feedback360'));
+            $savebutton->formid = 'saveprogress';
+            $save =
+                html_writer::tag('div', $this->output->render($savebutton), array('class' => 'ojt-save'));
+            $content = $save . $content;
+        }
+
+        $out = html_writer::tag('div', '', array('class' => "empty", 'id' => 'feedbackhead-anchor'));
+
+        // HACK ALERT: Notifications by default put the content through clean text.
+        // This won't work for the above save progress button, but because they clean it in code the template doesn't attempt to
+        // clean it itself.
+        // We can get around this by using the template directly and making sure that we clean ourselves.
+        $context = array('message' => $content);
+        $out .= html_writer::tag(
+            'div',
+            $this->render_from_template('core/notification_info', $context),
+            array('id' => 'feedbackhead'));
+
+        return $out;
+    }
+
+    /**
      * returns the html for a user item with delete button.
      *
      * @param email_assignment $assignment The associated email assignment.
@@ -442,11 +530,11 @@ class mod_ojt_renderer extends plugin_renderer_base
     {
         $out = '';
 
-        $completestr  = get_string('alreadyreplied', 'totara_feedback360');
+        $completestr = get_string('alreadyreplied', 'totara_feedback360');
 
         // No JS deletion url
         //$deleteparams = array('assignid' => $assignment->id, 'email' => $assignment->email);
-        $deleteurl    = '#';//new moodle_url('/mod/ojt/ext_request/delete.php', $deleteparams);
+        $deleteurl = '#';//new moodle_url('/mod/ojt/ext_request/delete.php', $deleteparams);
 
         $out .= html_writer::start_tag('div',
             array('id' => "external_user_{$assignment->email}", 'class' => 'external_record'));
@@ -459,12 +547,75 @@ class mod_ojt_renderer extends plugin_renderer_base
         else
         {
             $removestr = get_string('removeuserfromrequest', 'totara_feedback360', $assignment->email);
-            $out       .= $this->output->action_icon($deleteurl, new pix_icon('/t/delete', $removestr), null,
+            $out .= $this->output->action_icon($deleteurl, new pix_icon('/t/delete', $removestr), null,
                 array('class' => 'external_record_del', 'id' => $assignment->email));
         }
         $out .= html_writer::end_tag('div');
 
         return $out;
+    }
+
+    protected function list_topic_item_files($contextid, $userid, $topicitemid)
+    {
+        $out = array();
+
+        $fs = get_file_storage();
+        $files = $fs->get_area_files($contextid, 'mod_ojt', 'topicitemfiles' . $topicitemid, $userid,
+            'itemid, filepath, filename', false);
+
+        foreach ($files as $file)
+        {
+            $filename = $file->get_filename();
+            $url =
+                moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
+                    $file->get_itemid(), $file->get_filepath(), $file->get_filename());
+            $out[] = html_writer::link($url, $filename);
+        }
+        $br = html_writer::empty_tag('br');
+
+        return implode($br, $out);
+    }
+
+    /**
+     * @param int $ojtid
+     * @param int $userid
+     * @return array [args[], jsmodule[]]
+     */
+    public function get_evaluation_js_args(int $ojtid, int $userid)
+    {
+        $args     = array(
+            'args' =>
+                '{ "ojtid":' . $ojtid .
+                ', "userid":' . $userid .
+                ', "OJT_COMPLETE":' . completion::STATUS_COMPLETE .
+                ', "OJT_REQUIREDCOMPLETE":' . completion::STATUS_REQUIREDCOMPLETE .
+                ', "OJT_INCOMPLETE":' . completion::STATUS_INCOMPLETE .
+                '}');
+        $jsmodule = array(
+            'name'     => 'mod_ojt_evaluate',
+            'fullpath' => '/mod/ojt/js/evaluate.js',
+            'requires' => array('json')
+        );
+
+        return array($args, $jsmodule);
+    }
+
+    private function get_topic_submission_status_icon(user_topic $topic)
+    {
+        $date_str = get_string('nosubmissiondate', 'mod_ojt');
+        $icon_id = 'square-o';
+
+        if (!is_null($topic->external_request))
+        {
+            $date = $topic->external_request->get_first_email_assign_date();
+            if ($date > 0)
+            {
+                $date_str = get_string('submissiondate', 'mod_ojt', userdate($date));
+                $icon_id = 'check-square-o';
+            }
+        }
+
+        return $this->output->flex_icon($icon_id, ['alt' => $date_str]);
     }
 }
 
