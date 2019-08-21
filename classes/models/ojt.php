@@ -27,11 +27,12 @@ use completion_info;
 use context;
 use dml_exception;
 use dml_transaction_exception;
+use mod_ojt\interfaces\crud;
 use mod_ojt\traits\record_mapper;
 use mod_ojt\user_topic;
 use stdClass;
 
-class ojt
+class ojt implements crud
 {
     use record_mapper;
 
@@ -88,7 +89,7 @@ class ojt
 
     /**
      * ojt constructor.
-     * @param int|object $id_or_record
+     * @param int|object $id_or_record instance id, database record or existing class or base class
      * @throws coding_exception
      */
     public function __construct($id_or_record = null)
@@ -251,9 +252,54 @@ class ojt
         return true;
     }
 
-    protected function get_record_from_id(int $id)
+    public static function fetch_record_from_id(int $id)
     {
         global $DB;
         return $DB->get_record('ojt', array('id' => $id));
+    }
+
+    /**
+     * Create DB entry from current state
+     *
+     * @return bool|int new record id or false if failed
+     */
+    public function create()
+    {
+        global $DB;
+        return $DB->insert_record('ojt', self::get_record_from_object());
+    }
+
+    /**
+     * Read latest values from DB and refresh current object
+     *
+     * @return object
+     */
+    public function read()
+    {
+        global $DB;
+        $this->map_to_record($DB->get_record('ojt', ['id' => $this->id]));
+		return $this;
+    }
+
+    /**
+     * Save current state to DB
+     *
+     * @return bool
+     */
+    public function update()
+    {
+        global $DB;
+        return $DB->update_record('ojt', $this);
+    }
+
+    /**
+     * Delete current object from DB
+     *
+     * @return bool
+     */
+    public function delete()
+    {
+        global $DB;
+        return $DB->delete_records('ojt', ['id' => $this->id]);
     }
 }

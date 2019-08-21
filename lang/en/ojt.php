@@ -98,3 +98,9 @@ $string['witnessed'] = 'Achieved';
 
 $string['review_observation'] = 'Review Observation';
 $string['manage_requests'] = 'Manage Requests';
+
+// email
+$string['requestobservation'] = 'Request observation';
+$string['userxfeedback'] = '{$a}\'s Feedback';
+$string['myfeedback'] = 'My Feedback';
+$string['addemailplaceholder'] = 'Please add one email per line';

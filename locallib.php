@@ -41,20 +41,21 @@ defined('MOODLE_INTERNAL') || die();
  * @throws coding_exception
  * @throws dml_exception
  */
-function ojt_check_page_id_params_and_init(int $cmid, int $instanceid){
+function ojt_check_page_id_params_and_init(int $cmid, int $instanceid)
+{
     global $DB;
 
     if ($cmid)
     {
-        $cm           = get_coursemodule_from_id('ojt', $cmid, 0, false, MUST_EXIST);
-        $course       = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-        $ojt          = new ojt($cm->instance);//$DB->get_record('ojt', array('id' => $cm->instance), '*', MUST_EXIST);
+        $cm     = get_coursemodule_from_id('ojt', $cmid, 0, false, MUST_EXIST);
+        $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+        $ojt    = new ojt($cm->instance);//$DB->get_record('ojt', array('id' => $cm->instance), '*', MUST_EXIST);
     }
     else if ($instanceid)
     {
-        $ojt          = new ojt($instanceid);
-        $course       = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
-        $cm           = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
+        $ojt    = new ojt($instanceid);
+        $course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
+        $cm     = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
     }
     else
     {

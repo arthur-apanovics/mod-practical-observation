@@ -30,7 +30,7 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/totara/plan/lib.php');
 require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
 require_once($CFG->dirroot . '/mod/ojt/locallib.php');
-require_once('uploadfile_form.php');
+require_once(dirname(__FILE__) . '/forms.php');
 require_once('lib.php');
 
 require_login();

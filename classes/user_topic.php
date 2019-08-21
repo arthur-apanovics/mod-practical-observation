@@ -46,6 +46,11 @@ class user_topic extends topic
     public $signoff;
 
     /**
+     * @var user_external_request
+     */
+    public $external_request;
+
+    /**
      * One of 3 possible \mod_ojt\models\completion statuses:
      * STATUS_INCOMPLETE | STATUS_REQUIREDCOMPLETE | STATUS_COMPLETE
      * @var int
@@ -54,7 +59,7 @@ class user_topic extends topic
 
     /**
      * user_topic constructor.
-     * @param int|object $id_or_record
+     * @param int|object $id_or_record instance id, database record or existing class or base class
      * @param int        $userid
      */
     public function __construct($id_or_record, int $userid)
@@ -64,6 +69,8 @@ class user_topic extends topic
         $this->userid      = $userid;
         $this->topic_items = user_topic_item::get_user_topic_items_for_topic($this->id, $this->userid);
         $this->signoff     = topic_signoff::get_user_topic_signoff($this->id, $this->userid);
+        $this->external_request = user_external_request::get_user_request_for_ojt_topic(
+            $this->ojtid, $this->id, $this->userid);
         $this->completion_status = $this->get_completion_status();
     }
 

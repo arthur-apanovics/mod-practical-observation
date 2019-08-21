@@ -34,6 +34,8 @@ require_once($CFG->dirroot . '/mod/ojt/lib.php');
 require_once($CFG->dirroot . '/mod/ojt/locallib.php');
 require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
 
+require_login($course, true, $cm);
+
 $userid = required_param('userid', PARAM_INT);
 $id     = optional_param('cmid', 0, PARAM_INT); // Course_module ID
 $b      = optional_param('bid', 0, PARAM_INT);  // ... ojt instance ID - it should be named as the first character of the module.
@@ -41,8 +43,6 @@ $b      = optional_param('bid', 0, PARAM_INT);  // ... ojt instance ID - it shou
 $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
 
 list($ojt, $course, $cm) = ojt_check_page_id_params_and_init($id, $b); /* @var $ojt ojt */
-
-require_login($course, true, $cm);
 
 $modcontext  = context_module::instance($cm->id);
 $canevaluate = ojt::can_evaluate($userid, $modcontext);
@@ -75,13 +75,13 @@ $args     = array('args' => '{
                             '}');
 $jsmodule = array(
     'name'     => 'mod_ojt_evaluate',
-    'fullpath' => '/mod/ojt/evaluate.js',
+    'fullpath' => '/mod/ojt/js/evaluate.js',
     'requires' => array('json')
 );
 $PAGE->requires->js_init_call('M.mod_ojt_evaluate.init', $args, false, $jsmodule);
 // $jsmodule = array(
 //     'name'     => 'mod_ojt_expandcollapse',
-//     'fullpath' => '/mod/ojt/expandcollapse.js',
+//     'fullpath' => '/mod/ojt/js/expandcollapse.js',
 //     'requires' => array('json')
 // );
 // $PAGE->requires->js_init_call('M.mod_ojt_expandcollapse.init', array(), false, $jsmodule);

@@ -26,9 +26,7 @@ use coding_exception;
 use dml_exception;
 use mod_ojt\models\completion;
 use mod_ojt\models\ojt;
-use mod_ojt\models\topic;
 use mod_ojt\traits\record_mapper;
-use stdClass;
 
 class user_ojt extends ojt
 {
@@ -51,6 +49,11 @@ class user_ojt extends ojt
 
         $this->userid = $userid;
         $this->topics = user_topic::get_user_topics($this->id, $this->userid);
+    }
+
+    public function get_topic_by_id(int $topicid)
+    {
+        return $this->topics[$topicid];
     }
 
     /**

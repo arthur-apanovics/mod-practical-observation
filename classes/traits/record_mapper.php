@@ -25,7 +25,7 @@ trait record_mapper
             else if (is_numeric($id_or_record))
             {
                 $this->map_to_record(
-                    $this->get_record_from_id($id_or_record));
+                    $this->fetch_record_from_id($id_or_record));
             }
             else
             {
@@ -33,6 +33,11 @@ trait record_mapper
                                            . json_encode($id_or_record) . '") when initializing ' . __CLASS__);
             }
         }
+        // else
+        // {
+        //     throw new coding_exception('No data provided when attempting to initialize "'
+        //                                . __CLASS__ . '" object');
+        // }
     }
 
     /**
@@ -78,5 +83,5 @@ trait record_mapper
      * @param int $id
      * @return stdClass|false false if record not found
      */
-    abstract protected function get_record_from_id(int $id);
+    abstract static public function fetch_record_from_id(int $id);
 }

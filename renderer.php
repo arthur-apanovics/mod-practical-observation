@@ -24,6 +24,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use core\output\flex_icon;
 use mod_ojt\models\completion;
+use mod_ojt\models\email_assignment;
 use mod_ojt\models\ojt;
 use mod_ojt\user_ojt;
 use mod_ojt\user_topic;
@@ -125,11 +126,15 @@ class mod_ojt_renderer extends plugin_renderer_base
 
         foreach ($user_ojt->topics as $topic)
         {
-            $topic_data = [];
-            $topic_data['id'] = $topic->id;
-            $topic_data['title'] = $topic->name;
+            $topic_data                         = [];
+            $topic_data['id']                   = $topic->id;
+            $topic_data['title']                = $topic->name;
             $topic_data['completion_icon_html'] = $this->get_completion_icon($topic);
-            $topic_data['url'] = new moodle_url('/mod/ojt/viewtopic.php', ['id' => $cm->id, 'topic' => $topic->id]);
+
+            $topic_data['url'] = new moodle_url('/mod/ojt/viewtopic.php',
+                ['id' => $cm->id, 'topic' => $topic->id]);
+            $topic_data['manage_url'] = new moodle_url('/mod/ojt/request.php',
+                ['cmid' => $cm->id, 'topicid' => $topic->id, 'userid' => $user_ojt->userid]);
 
             $data['topics'][] = $topic_data;
         }
@@ -140,7 +145,7 @@ class mod_ojt_renderer extends plugin_renderer_base
     }
 
     /**
-     * Renders all ojt topic  content
+     * Renders all ojt topic content
      *
      * @param user_ojt $userojt
      * @param bool     $evaluate
@@ -408,6 +413,58 @@ class mod_ojt_renderer extends plugin_renderer_base
         $completionicon = html_writer::tag('span', $completionicon,  ['class' => 'ojt-topic-status']);
 
         return $completionicon;
+    }
+
+    public function display_userview_header($user) {
+        global $USER;
+
+        $header = '';
+        if ($USER->id != $user->id) {
+            $picture = $this->output->user_picture($user);
+            $name = fullname($user);
+            $url = new moodle_url('/user/profile.php', array('id' => $user->id));
+            $link = html_writer::link($url, $name);
+            $viewstr = html_writer::tag('strong', get_string('viewinguserxfeedback360', 'totara_feedback360', $link));
+
+            $header = html_writer::tag('div', $picture . ' ' . $viewstr,
+                array('class' => "plan_box notifymessage totara-feedback360-head-relative", 'id' => 'feedbackhead'));
+        }
+
+        return $header;
+    }
+
+    /**
+     * returns the html for a user item with delete button.
+     *
+     * @param email_assignment $assignment The associated email assignment.
+     */
+    public function external_user_record($assignment)
+    {
+        $out = '';
+
+        $completestr  = get_string('alreadyreplied', 'totara_feedback360');
+
+        // No JS deletion url
+        //$deleteparams = array('assignid' => $assignment->id, 'email' => $assignment->email);
+        $deleteurl    = '#';//new moodle_url('/mod/ojt/ext_request/delete.php', $deleteparams);
+
+        $out .= html_writer::start_tag('div',
+            array('id' => "external_user_{$assignment->email}", 'class' => 'external_record'));
+        $out .= $assignment->email;
+
+        if (!empty($assignment->timecompleted))
+        {
+            $out .= $this->output->pix_icon('/t/delete_gray', $completestr);
+        }
+        else
+        {
+            $removestr = get_string('removeuserfromrequest', 'totara_feedback360', $assignment->email);
+            $out       .= $this->output->action_icon($deleteurl, new pix_icon('/t/delete', $removestr), null,
+                array('class' => 'external_record_del', 'id' => $assignment->email));
+        }
+        $out .= html_writer::end_tag('div');
+
+        return $out;
     }
 }
 

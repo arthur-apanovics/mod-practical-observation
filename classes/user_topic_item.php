@@ -48,7 +48,7 @@ class user_topic_item extends topic_item
 
     /**
      * user_topic_item constructor.
-     * @param int|object $id_or_record
+     * @param int|object $id_or_record instance id, database record or existing class or base class
      * @param int $userid
      * @throws coding_exception
      */

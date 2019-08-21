@@ -24,10 +24,11 @@ namespace mod_ojt\models;
 
 
 use coding_exception;
+use mod_ojt\interfaces\crud;
 use mod_ojt\traits\record_mapper;
 use stdClass;
 
-class item_witness
+class item_witness  implements crud
 {
     use record_mapper;
 
@@ -60,7 +61,7 @@ class item_witness
 
     /**
      * item witness constructor.
-     * @param int|object $id_or_record
+     * @param int|object $id_or_record instance id, database record or existing class or base class
      * @throws coding_exception
      */
     public function __construct($id_or_record = null)
@@ -80,9 +81,54 @@ class item_witness
      * @param int $id
      * @return stdClass|false false if record not found
      */
-    protected function get_record_from_id(int $id)
+    public static function fetch_record_from_id(int $id)
     {
         global $DB;
         return $DB->get_record('ojt_item_witness', array('id' => $id));
+    }
+
+    /**
+     * Create DB entry from current state
+     *
+     * @return bool|int new record id or false if failed
+     */
+    public function create()
+    {
+        global $DB;
+        return $DB->insert_record('ojt_item_witness', self::get_record_from_object());
+    }
+
+    /**
+     * Read latest values from DB and refresh current object
+     *
+     * @return object
+     */
+    public function read()
+    {
+        global $DB;
+        $this->map_to_record($DB->get_record('ojt_item_witness', ['id' => $this->id]));
+		return $this;
+    }
+
+    /**
+     * Save current state to DB
+     *
+     * @return bool
+     */
+    public function update()
+    {
+        global $DB;
+        return $DB->update_record('ojt_item_witness', $this->get_record_from_object());
+    }
+
+    /**
+     * Delete current object from DB
+     *
+     * @return bool
+     */
+    public function delete()
+    {
+        global $DB;
+        return $DB->delete_records('ojt_item_witness', ['id' => $this->id]);
     }
 }

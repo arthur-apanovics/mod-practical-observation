@@ -58,6 +58,7 @@ $topic = user_topic::get_user_topic($topicid, $USER->id);
 $PAGE->set_url('/mod/ojt/viewtopic.php', array('id' => $cm->id, 'topic' => $topicid));
 $PAGE->set_title(format_string( "$topic->name - $ojt->name"));
 $PAGE->set_heading(format_string($course->fullname));
+$PAGE->navbar->add($topic->name);
 
 // Check access - we're assuming only $USER access on this page
 $modcontext  = context_module::instance($cm->id);
