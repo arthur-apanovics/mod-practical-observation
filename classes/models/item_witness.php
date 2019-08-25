@@ -24,6 +24,7 @@ namespace mod_ojt\models;
 
 
 use coding_exception;
+use dml_exception;
 use mod_ojt\interfaces\crud;
 use mod_ojt\traits\record_mapper;
 use stdClass;
@@ -31,7 +32,6 @@ use stdClass;
 class item_witness  implements crud
 {
     use record_mapper;
-
 
     /**
      * @var int
@@ -49,9 +49,15 @@ class item_witness  implements crud
     public $topicitemid;
 
     /**
-     * @var int user id
+     * @var int if of system user that witnessed
      */
     public $witnessedby;
+
+    // incavtive for now, might change name of column
+    // /**
+    //  * @var string email address of external user if item was witnessed externally
+    //  */
+    // public $witnessedbyexternal;
 
     /**
      * @var int timestamp
@@ -69,11 +75,18 @@ class item_witness  implements crud
         self::create_from_id_or_map_to_record($id_or_record);
     }
 
-    public static function getUserItemWitness(int $topicitemid, int $userid)
+    /**
+     * @param int $topicitemid
+     * @param int $userid
+     * @return item_witness|null null if record not found
+     * @throws dml_exception
+     * @throws coding_exception
+     */
+    public static function get_user_item_witness(int $topicitemid, int $userid)
     {
         global $DB;
-        return new item_witness(
-            $DB->get_record('ojt_item_witness', ['topicitemid' => $topicitemid, 'userid' => $userid]));
+        $rec = $DB->get_record('ojt_item_witness', ['topicitemid' => $topicitemid, 'userid' => $userid]);
+        return $rec ? new self($rec) : null;
     }
 
     /**

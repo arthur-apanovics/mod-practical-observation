@@ -103,6 +103,8 @@ class ojt implements crud
      * @return mixed|stdClass
      * @throws dml_exception
      * @throws dml_transaction_exception
+     *
+     * @deprecated do not use
      */
     public static function update_completion(int $userid, int $ojtid)
     {
@@ -212,7 +214,13 @@ class ojt implements crud
         return !$DB->record_exists_sql($sql, array($userid, completion::REQ_REQUIRED, $topicid));
     }
 
-    public static function get_modifiedstr($timemodified, $user = null)
+    /**
+     * @param int           $timemodified
+     * @param stdClass|null $user
+     * @return string
+     * @throws coding_exception
+     */
+    public static function get_modifiedstr_user($timemodified, $user = null)
     {
         global $USER;
 
@@ -227,6 +235,23 @@ class ojt implements crud
         }
 
         return 'by ' . fullname($user) . ' on ' .
+               userdate($timemodified, get_string('strftimedatetimeshort', 'core_langconfig'));
+    }
+
+    /**
+     * @param int  $timemodified
+     * @param string $email
+     * @return string
+     * @throws coding_exception
+     */
+    public static function get_modifiedstr_email($timemodified, $email)
+    {
+        if (empty($timemodified) || empty($email))
+        {
+            return '';
+        }
+
+        return 'by ' . $email . ' on ' .
                userdate($timemodified, get_string('strftimedatetimeshort', 'core_langconfig'));
     }
 
@@ -278,7 +303,7 @@ class ojt implements crud
     {
         global $DB;
         $this->map_to_record($DB->get_record('ojt', ['id' => $this->id]));
-		return $this;
+        return $this;
     }
 
     /**

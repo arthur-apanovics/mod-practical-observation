@@ -41,12 +41,12 @@ class user_topic extends topic
     public $topic_items;
 
     /**
-     * @var topic_signoff
+     * @var topic_signoff|null null if no record exists!
      */
     public $signoff;
 
     /**
-     * @var user_external_request
+     * @var user_external_request|null null if no record exists!
      */
     public $external_request;
 
@@ -137,26 +137,24 @@ class user_topic extends topic
      */
     private function get_completion_status()
     {
-        $topics = $this->topic_items;
-
         $status = completion::STATUS_COMPLETE;
-        foreach ($topics as $topic)
+        foreach ($this->topic_items as $topic_item)
         {
-            if ($topic->completion->status == completion::STATUS_INCOMPLETE)
+            if (is_null($topic_item->completion) || $topic_item->completion->status == completion::STATUS_INCOMPLETE)
             {
-                if ($topic->completionreq == completion::REQ_REQUIRED)
+                if ($topic_item->completionreq == completion::REQ_REQUIRED)
                 {
                     // All required topics not complete - bail!
                     $status = completion::STATUS_INCOMPLETE;
                     break;
                 }
-                else if ($topic->completionreq == completion::REQ_OPTIONAL)
+                else if ($topic_item->completionreq == completion::REQ_OPTIONAL)
                 {
                     // Degrade status a bit
                     $status = completion::STATUS_REQUIREDCOMPLETE;
                 }
             }
-            else if ($topic->completion->status == completion::STATUS_REQUIREDCOMPLETE)
+            else if ($topic_item->completion->status == completion::STATUS_REQUIREDCOMPLETE)
             {
                 // Degrade status a bit
                 $status = completion::STATUS_REQUIREDCOMPLETE;

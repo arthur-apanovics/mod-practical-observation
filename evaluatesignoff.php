@@ -80,7 +80,7 @@ else
     $topicsignoff->id        = $DB->insert_record('ojt_topic_signoff', $topicsignoff);
 }
 
-$modifiedstr = ojt::get_modifiedstr($topicsignoff->timemodified);
+$modifiedstr = ojt::get_modifiedstr_user($topicsignoff->timemodified);
 
 $jsonparams = array(
     'topicsignoff' => $topicsignoff,

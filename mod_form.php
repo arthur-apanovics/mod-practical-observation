@@ -84,6 +84,7 @@ class mod_ojt_mod_form extends moodleform_mod
         $mform =& $this->_form;
 
         $mform->addElement('advcheckbox', 'completiontopics', '', get_string('completiontopics', 'ojt'));
+        $mform->setDefault('completiontopics', true);
         return array('completiontopics');
     }
 

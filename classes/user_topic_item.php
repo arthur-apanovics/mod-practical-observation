@@ -42,7 +42,7 @@ class user_topic_item extends topic_item
     public $completion;
 
     /**
-     * @var item_witness
+     * @var item_witness|null null if no record exists!
      */
     public $witness;
 
@@ -58,7 +58,7 @@ class user_topic_item extends topic_item
 
         $this->userid     = $userid;
         $this->completion = completion::get_user_completion($this->id, $this->userid);
-        $this->witness    = item_witness::getUserItemWitness($this->id, $userid);
+        $this->witness    = item_witness::get_user_item_witness($this->id, $userid);
     }
 
     public static function get_user_topic_items_for_topic(int $topicid, int $userid)

@@ -135,8 +135,6 @@ class ojt_request_select_users extends moodleform
 
     public function definition()
     {
-        global $CFG, $USER;
-
         $mform =& $this->_form;
 
         // Header - Manage users requested.
@@ -317,6 +315,8 @@ class ojt_request_select_users extends moodleform
                     $duplicateerror[] = $email;
                 }
             }
+
+            //TODO CHECK FOR USERS OWN EMAIL
 
             if (!empty($formaterror))
             {

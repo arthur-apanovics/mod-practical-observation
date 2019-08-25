@@ -58,13 +58,15 @@ M.mod_ojt_evaluate = M.mod_ojt_evaluate || {
         // Init ojt completion toggles.
         $('.ojt-completion-toggle').on('click', function () {
             var completionimg = $(this);
-            var itemid = $(this).closest('.ojt-eval-actions').attr('ojt-item-id');
+            // var itemid = $(this).closest('.ojt-eval-actions').attr('ojt-item-id');
+            var itemid = $(this).parents('tr').find('.ojt-eval-actions').attr('ojt-item-id');
             $.ajax({
                 url: M.cfg.wwwroot + '/mod/ojt/evaluatesave.php',
                 type: 'POST',
                 data: {
                     'sesskey': M.cfg.sesskey,
                     'action': 'togglecompletion',
+                    'token': config.token,
                     'bid': config.ojtid,
                     'userid': config.userid,
                     'id': itemid
@@ -104,6 +106,7 @@ M.mod_ojt_evaluate = M.mod_ojt_evaluate || {
                 data: {
                     'sesskey': M.cfg.sesskey,
                     'action': 'savecomment',
+                    'token': config.token,
                     'bid': config.ojtid,
                     'userid': config.userid,
                     'id': itemid,
@@ -134,6 +137,7 @@ M.mod_ojt_evaluate = M.mod_ojt_evaluate || {
                 type: 'POST',
                 data: {
                     'sesskey': M.cfg.sesskey,
+                    'token': config.token,
                     'bid': config.ojtid,
                     'userid': config.userid,
                     'id': itemid

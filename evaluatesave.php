@@ -25,8 +25,10 @@
  */
 
 use mod_ojt\models\completion;
+use mod_ojt\models\email_assignment;
 use mod_ojt\models\ojt;
 use mod_ojt\models\topic;
+use mod_ojt\models\topic_item;
 
 define('AJAX_SCRIPT', true);
 
@@ -35,48 +37,45 @@ require_once($CFG->dirroot . '/mod/ojt/lib.php');
 require_once($CFG->dirroot . '/mod/ojt/locallib.php');
 require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
 
-require_sesskey();
+$userid      = required_param('userid', PARAM_INT);
+$ojtid       = required_param('bid', PARAM_INT);
+$topicitemid = required_param('id', PARAM_INT);
+$action      = required_param('action', PARAM_TEXT);
+$token       = optional_param('token', '', PARAM_ALPHANUM);
 
-$userid = required_param('userid', PARAM_INT);
-$ojtid  = required_param('bid', PARAM_INT);
-$itemid = required_param('id', PARAM_INT);
-$action = required_param('action', PARAM_TEXT);
-
-$user   = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
-$ojt    = $DB->get_record('ojt', array('id' => $ojtid), '*', MUST_EXIST);
+$ojt    = new ojt($ojtid);
 $course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
 $cm     = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
 
-require_login($course, true, $cm);
-
-if (!ojt::can_evaluate($userid, context_module::instance($cm->id)))
+if ($token == '') //system user
 {
-    print_error('access denied');
+    require_login($course, true, $cm);
+    if (!ojt::can_evaluate($userid, context_module::instance($cm->id)))
+    {
+        print_error('access denied');
+    }
+}
+else if (!email_assignment::is_valid_token($ojtid, $userid, $token))
+{
+    print_error('accessdenied', 'ojt');
 }
 
-// Get the ojt item, joining on topic to ensure the item does belong to the ojt
-$sql  = "SELECT i.*, t.id AS topicid
-    FROM {ojt_topic_item} i
-    JOIN {ojt_topic} t ON i.topicid = t.id
-    WHERE t.ojtid = ? AND i.id = ?";
-$item = $DB->get_record_sql($sql, array($ojt->id, $itemid), MUST_EXIST);
-
-$dateformat = get_string('strftimedatetimeshort', 'core_langconfig');
+$topic_item       = new topic_item($topicitemid);
+$email_assignment = email_assignment::get_from_token($token);
+$user             = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
+$dateformat       = get_string('strftimedatetimeshort', 'core_langconfig');
 
 // Update/insert the user completion record
-$params = array('userid'      => $userid,
-                'ojtid'       => $ojtid,
-                'topicid'     => $item->topicid,
-                'topicitemid' => $itemid,
-                'type'        => completion::COMP_TYPE_TOPICITEM);
-if ($completion = $DB->get_record('ojt_completion', $params))
+
+if ($completion = completion::get_user_completion($topicitemid, $userid, completion::COMP_TYPE_TOPICITEM))
 {
     // Update
     switch ($action)
     {
         case 'togglecompletion':
-            $completion->status = $completion->status == completion::STATUS_COMPLETE ? completion::STATUS_INCOMPLETE :
-                completion::STATUS_COMPLETE;
+            $completion->status = $completion->status == completion::STATUS_COMPLETE
+                ? completion::STATUS_INCOMPLETE
+                : completion::STATUS_COMPLETE;
             break;
         case 'savecomment':
             $completion->comment = required_param('comment', PARAM_TEXT);
@@ -85,14 +84,21 @@ if ($completion = $DB->get_record('ojt_completion', $params))
             break;
         default:
     }
-    $completion->timemodified = time();
-    $completion->modifiedby   = $USER->id;
-    $DB->update_record('ojt_completion', $completion);
+
+    $completion->timemodified  = time();
+    $completion->observeremail = $email_assignment->email;
+    $completion->update();
 }
 else
 {
     // Insert
-    $completion = (object) $params;
+    $completion              = new completion();
+    $completion->userid      = $userid;
+    $completion->ojtid       = $ojtid;
+    $completion->topicid     = $topic_item->topicid;
+    $completion->topicitemid = $topicitemid;
+    $completion->type        = completion::COMP_TYPE_TOPICITEM;
+
     switch ($action)
     {
         case 'togglecompletion':
@@ -105,12 +111,13 @@ else
             break;
         default:
     }
-    $completion->timemodified = time();
-    $completion->modifiedby   = $USER->id;
-    $completion->id           = $DB->insert_record('ojt_completion', $completion);
+
+    $completion->timemodified  = time();
+    $completion->observeremail = $email_assignment->email;
+    $completion->id            = $completion->create();
 }
 
-$modifiedstr = ojt::get_modifiedstr($completion->timemodified);
+$modifiedstr = ojt::get_modifiedstr_email($completion->timemodified, $email_assignment->email);
 
 $jsonparams = array(
     'item'        => $completion,
@@ -118,7 +125,7 @@ $jsonparams = array(
 );
 if ($action == 'togglecompletion')
 {
-    $topiccompletion     = topic::update_topic_completion($userid, $ojtid, $item->topicid);
+    $topiccompletion     = topic::update_topic_completion($userid, $ojtid, $topic_item->topicid, $email_assignment->email);
     $jsonparams['topic'] = $topiccompletion;
 }
 

@@ -23,6 +23,7 @@
 namespace mod_ojt\models;
 
 use coding_exception;
+use dml_exception;
 use mod_ojt\interfaces\crud;
 use mod_ojt\traits\record_mapper;
 use stdClass;
@@ -41,8 +42,18 @@ class completion implements crud
     /**
      * OJT completion statuses
      */
+
+    /**
+     * Completion criteria not met
+     */
     const STATUS_INCOMPLETE       = 0;
+    /**
+     * Required topics have been completed
+     */
     const STATUS_REQUIREDCOMPLETE = 1;
+    /**
+     * Completion requirementshave been met
+     */
     const STATUS_COMPLETE         = 2;
 
     /**
@@ -97,9 +108,9 @@ class completion implements crud
     public $timemodified;
 
     /**
-     * @var int userid
+     * @var string external user email
      */
-    public $modifiedby;
+    public $observeremail;
 
 
     /**
@@ -112,11 +123,29 @@ class completion implements crud
         self::create_from_id_or_map_to_record($id_or_record);
     }
 
-    public static function get_user_completion(int $topicitemid, int $userid)
+    /**
+     * @param int $topicitemid
+     * @param int $userid
+     * @param int|null $type COMP_TYPE_OJT | COMP_TYPE_TOPIC | COMP_TYPE_TOPICITEM; Indicates completion requirement type
+     * @return completion
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public static function get_user_completion(int $topicitemid, int $userid, int $type = null)
     {
         global $DB;
-        return new completion(
-            $DB->get_record('ojt_completion', ['topicitemid' => $topicitemid, 'userid' => $userid]));
+        $args = ['topicitemid' => $topicitemid, 'userid' => $userid];
+        $args = is_int($type) ? $args + ['type' => $type] : $args;
+        $rec = $DB->get_record('ojt_completion', $args);
+
+        $completion = new self($rec);
+
+        if (!$rec)
+        {
+            $completion->status = self::STATUS_INCOMPLETE;
+        }
+
+        return $completion;
     }
 
     /**

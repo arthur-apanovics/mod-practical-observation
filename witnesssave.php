@@ -24,8 +24,11 @@
  * OJT witness ajax toggler
  */
 
+use mod_ojt\models\email_assignment;
+use mod_ojt\models\item_witness;
 use mod_ojt\models\ojt;
 use mod_ojt\models\topic;
+use mod_ojt\user_topic_item;
 
 define('AJAX_SCRIPT', true);
 
@@ -36,66 +39,69 @@ require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
 
 require_sesskey();
 
-$userid = required_param('userid', PARAM_INT);
-$ojtid  = required_param('bid', PARAM_INT);
-$itemid = required_param('id', PARAM_INT);
+$userid      = required_param('userid', PARAM_INT);
+$ojtid       = required_param('bid', PARAM_INT);
+$topicitemid = required_param('id', PARAM_INT);
+$token       = optional_param('token', '', PARAM_ALPHANUM);
 
-$user   = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
-$ojt    = $DB->get_record('ojt', array('id' => $ojtid), '*', MUST_EXIST);
-$course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
-$cm     = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
+$external_user = $token !== '';
 
-
-require_login($course, true, $cm);
-
-require_capability('mod/ojt:witnessitem', context_module::instance($cm->id));
-
+if (!email_assignment::is_valid_token($ojtid, $userid, $token))
+{
+    print_error('accessdenied', 'ojt');
+}
+if (!$external_user)
+{
+    require_login($course, true, $cm);
+    require_capability('mod/ojt:witnessitem', context_module::instance($cm->id));
+}
 if (!$ojt->itemwitness)
 {
     print_error('itemwitness disabled for this ojt');
 }
 
-// Get the ojt item, joining on topic to ensure the item does belong to the ojt
-$sql  = "SELECT i.*, t.id AS topicid
-    FROM {ojt_topic_item} i
-    JOIN {ojt_topic} t ON i.topicid = t.id
-    WHERE t.ojtid = ? AND i.id = ?";
-$item = $DB->get_record_sql($sql, array($ojt->id, $itemid), MUST_EXIST);
-
+$course     = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
+$cm         = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
+$topicitem  = new user_topic_item($topicitemid, $userid);
 $dateformat = get_string('strftimedatetimeshort', 'core_langconfig');
 
 // Update/insert the user completion record
 $transaction = $DB->start_delegated_transaction();
 $params      = array(
     'userid'      => $userid,
-    'topicitemid' => $itemid
+    'topicitemid' => $topicitemid
 );
-if ($witness = $DB->get_record('ojt_item_witness', $params))
+
+if (!is_null($topicitem->witness))
 {
     // Update
-    $removewitness          = !empty($witness->witnessedby);
-    $witness->witnessedby   = $removewitness ? 0 : $USER->id;
-    $witness->timewitnessed = $removewitness ? 0 : time();
-    $DB->update_record('ojt_item_witness', $witness);
+    $removewitness                     = !empty($topicitem->witness->witnessedby);
+    $topicitem->witness->witnessedby   = $removewitness ? 0 : $USER->id;
+    $topicitem->witness->timewitnessed = $removewitness ? 0 : time();
+    $topicitem->witness->update();
 }
 else
 {
     // Insert
-    $witness                = (object) $params;
+    $witness                = new item_witness();
+    $witness->userid        = $userid;
+    $witness->topicitemid   = $topicitemid;
     $witness->witnessedby   = $USER->id;
     $witness->timewitnessed = time();
-    $witness->id            = $DB->insert_record('ojt_item_witness', $witness);
+    $witness->id            = $witness->create();
+
+    $topicitem->witness = $witness;
 }
 
 // Update topic completion
-$topiccompletion = topic::update_topic_completion($userid, $ojt->id, $item->topicid);
+$topiccompletion = topic::update_topic_completion($userid, $ojtid, $topicitem->topicid);
 
 $transaction->allow_commit();
 
-$modifiedstr = ojt::get_modifiedstr($witness->timewitnessed);
+$modifiedstr = ojt::get_modifiedstr_user($topicitem->witness->timewitnessed);
 
 $jsonparams = array(
-    'item'        => $witness,
+    'item'        => $topicitem->witness,
     'modifiedstr' => $modifiedstr,
     'topic'       => $topiccompletion
 );

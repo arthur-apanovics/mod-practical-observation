@@ -109,6 +109,7 @@ if ($ojt->intro)
     echo $OUTPUT->box(format_module_intro('ojt', $ojt, $cm->id), 'generalbox mod_introbox', 'ojtintro');
 }
 
+/* @var $renderer mod_ojt_renderer */
 $renderer = $PAGE->get_renderer('ojt');
 
 echo $renderer->userojt_topic_summary($userojt, $cm);

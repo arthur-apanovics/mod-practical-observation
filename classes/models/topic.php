@@ -25,6 +25,7 @@ namespace mod_ojt\models;
 use competency_evidence;
 use mod_ojt\interfaces\crud;
 use mod_ojt\traits\record_mapper;
+use mod_ojt\user_topic_item;
 use stdClass;
 
 class topic implements crud
@@ -71,31 +72,34 @@ class topic implements crud
         self::create_from_id_or_map_to_record($id_or_record);
     }
 
-    public static function update_topic_completion($userid, $ojtid, $topicid)
+    public static function update_topic_completion(int $userid, int $ojtid, int $topicid, string $observeremail)
     {
         global $DB, $USER;
 
-        $ojt = $DB->get_record('ojt', array('id' => $ojtid), '*', MUST_EXIST);
+        $ojt = new ojt($ojtid);
 
-        // Check if all required topic items have been completed
-        $sql   = 'SELECT i.*, CASE WHEN c.status IS NULL THEN ' . completion::STATUS_INCOMPLETE . ' ELSE c.status END AS status
-        FROM {ojt_topic_item} i
-        LEFT JOIN {ojt_completion} c ON i.id = c.topicitemid AND c.ojtid = ? AND c.type = ? AND c.userid = ?
-        WHERE i.topicid = ?';
-        $items = $DB->get_records_sql($sql, array($ojtid, completion::COMP_TYPE_TOPICITEM, $userid, $topicid));
+        // // Check if all required topic items have been completed
+        // $sql   = 'SELECT i.*, CASE WHEN c.status IS NULL THEN '
+        //          . completion::STATUS_INCOMPLETE . ' ELSE c.status END AS status
+        //          FROM {ojt_topic_item} i
+        //          LEFT JOIN {ojt_completion} c ON i.id = c.topicitemid AND c.ojtid = ? AND c.type = ? AND c.userid = ?
+        //          WHERE i.topicid = ?';
+        // $items = $DB->get_records_sql($sql, array($ojtid, completion::COMP_TYPE_TOPICITEM, $userid, $topicid));
+
+        $topic_items = user_topic_item::get_user_topic_items_for_topic($topicid, $userid);
 
         $status = completion::STATUS_COMPLETE;
-        foreach ($items as $item)
+        foreach ($topic_items as $topic_item)
         {
-            if ($item->completion->status == completion::STATUS_INCOMPLETE)
+            if (is_null($topic_item->completion) || $topic_item->completion->status == completion::STATUS_INCOMPLETE)
             {
-                if ($item->completionreq == completion::REQ_REQUIRED)
+                if ($topic_item->completionreq == completion::REQ_REQUIRED)
                 {
                     // All required items not complete - bail!
                     $status = completion::STATUS_INCOMPLETE;
                     break;
                 }
-                else if ($item->completionreq == completion::REQ_OPTIONAL)
+                else if ($topic_item->completionreq == completion::REQ_OPTIONAL)
                 {
                     // Degrade status a bit
                     $status = completion::STATUS_REQUIREDCOMPLETE;
@@ -113,15 +117,17 @@ class topic implements crud
 
         $currentcompletion = $DB->get_record('ojt_completion',
             array('userid' => $userid, 'topicid' => $topicid, 'type' => completion::COMP_TYPE_TOPIC));
+        $currentcompletion = new completion($currentcompletion);
+
         if (empty($currentcompletion->status) || $status != $currentcompletion->status)
         {
             // Update topic completion
             $transaction = $DB->start_delegated_transaction();
 
-            $completion               = empty($currentcompletion) ? new stdClass() : $currentcompletion;
+            $completion               = is_null($currentcompletion->id) ? new completion() : $currentcompletion;
             $completion->status       = $status;
             $completion->timemodified = time();
-            $completion->modifiedby   = $USER->id;
+            $completion->observeremail = $USER->id;
             if (empty($currentcompletion))
             {
                 $completion->userid  = $userid;

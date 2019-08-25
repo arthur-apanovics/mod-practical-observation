@@ -50,6 +50,7 @@ echo html_writer::tag('div', $OUTPUT->single_button($addtopicurl, get_string('ad
     array('class' => 'mod-ojt-topic-addbtn'));
 
 $topics   = $DB->get_records('ojt_topic', array('ojtid' => $ojt->id));
+/* @var $renderer mod_ojt_renderer */
 $renderer = $PAGE->get_renderer('mod_ojt');
 echo $renderer->config_topics($ojt);
 

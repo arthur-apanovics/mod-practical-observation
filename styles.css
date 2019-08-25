@@ -1,48 +1,66 @@
-#mod-ojt-user-ojt,
-#page-mod-ojt-observe {
+[id^=mod-ojt-],
+[id^=page-mod-ojt-] {
   padding-bottom: 2em;
 }
-#mod-ojt-user-ojt .config-mod-ojt-topic-item,
-#page-mod-ojt-observe .config-mod-ojt-topic-item,
-#mod-ojt-user-ojt .mod-ojt-topic-item,
-#page-mod-ojt-observe .mod-ojt-topic-item {
+[id^=mod-ojt-] .config-mod-ojt-topic-item,
+[id^=page-mod-ojt-] .config-mod-ojt-topic-item,
+[id^=mod-ojt-] .mod-ojt-topic-item,
+[id^=page-mod-ojt-] .mod-ojt-topic-item {
   padding: 0.3em;
 }
-#mod-ojt-user-ojt .mod-ojt-topic-items,
-#page-mod-ojt-observe .mod-ojt-topic-items {
+[id^=mod-ojt-] .mod-ojt-topic-items,
+[id^=page-mod-ojt-] .mod-ojt-topic-items {
   font-size: 1.2em;
   display: table;
 }
-#mod-ojt-user-ojt .mod-ojt-modifiedstr,
-#page-mod-ojt-observe .mod-ojt-modifiedstr,
-#mod-ojt-user-ojt .mod-ojt-witnessedstr,
-#page-mod-ojt-observe .mod-ojt-witnessedstr,
-#mod-ojt-user-ojt .mod-ojt-topic-modifiedstr,
-#page-mod-ojt-observe .mod-ojt-topic-modifiedstr {
+[id^=mod-ojt-] .mod-ojt-modifiedstr,
+[id^=page-mod-ojt-] .mod-ojt-modifiedstr,
+[id^=mod-ojt-] .mod-ojt-witnessedstr,
+[id^=page-mod-ojt-] .mod-ojt-witnessedstr,
+[id^=mod-ojt-] .mod-ojt-topic-modifiedstr,
+[id^=page-mod-ojt-] .mod-ojt-topic-modifiedstr {
   font-size: 0.8em;
   font-style: italic;
   color: grey;
 }
-#mod-ojt-user-ojt .mod-ojt-topic-signoff,
-#page-mod-ojt-observe .mod-ojt-topic-signoff {
+[id^=mod-ojt-] .mod-ojt-topic-signoff,
+[id^=page-mod-ojt-] .mod-ojt-topic-signoff {
   padding-left: 1em;
 }
-#mod-ojt-user-ojt .mod-ojt-topic-signoff img,
-#page-mod-ojt-observe .mod-ojt-topic-signoff img {
+[id^=mod-ojt-] .mod-ojt-topic-signoff img,
+[id^=page-mod-ojt-] .mod-ojt-topic-signoff img {
   padding-left: 0.4em;
 }
-#mod-ojt-user-ojt textarea.ojt-completion-comment,
-#page-mod-ojt-observe textarea.ojt-completion-comment {
+[id^=mod-ojt-] textarea.ojt-completion-comment,
+[id^=page-mod-ojt-] textarea.ojt-completion-comment,
+[id^=mod-ojt-] textarea.ojt-completion-submission,
+[id^=page-mod-ojt-] textarea.ojt-completion-submission {
   margin-left: 0.4em;
   width: 90%;
 }
-#mod-ojt-user-ojt .mod-ojt-topic table td.c0,
-#page-mod-ojt-observe .mod-ojt-topic table td.c0 {
+[id^=mod-ojt-] .mod-ojt-topic table td.c0,
+[id^=page-mod-ojt-] .mod-ojt-topic table td.c0 {
   width: 40%;
 }
-#mod-ojt-user-ojt .mod-ojt-topic table td.c1,
-#page-mod-ojt-observe .mod-ojt-topic table td.c1 {
+[id^=mod-ojt-] .mod-ojt-topic table td.c1,
+[id^=page-mod-ojt-] .mod-ojt-topic table td.c1 {
   width: 60%;
+}
+[id^=mod-ojt-] .mod-ojt-topic-signoff .flex-icon,
+[id^=page-mod-ojt-] .mod-ojt-topic-signoff .flex-icon,
+[id^=mod-ojt-] .ojt-item-witness .flex-icon,
+[id^=page-mod-ojt-] .ojt-item-witness .flex-icon {
+  cursor: pointer;
+}
+[id^=mod-ojt-] .ojt-submit,
+[id^=page-mod-ojt-] .ojt-submit {
+  text-align: center;
+}
+[id^=mod-ojt-] .evalprint,
+[id^=page-mod-ojt-] .evalprint,
+[id^=mod-ojt-] .ojt-save,
+[id^=page-mod-ojt-] .ojt-save {
+  float: right;
 }
 .config-mod-ojt-topic-heading,
 .mod-ojt-topic-heading {
@@ -67,14 +85,9 @@
 img.ojt-topic-completion-status {
   vertical-align: baseline;
 }
-#ojt-eval-icon-templates {
-  display: none;
-}
-.evalprint,
-.ojt-save{
-  float: right;
-}
-.user-ojt-comments-warning {
+#ojt-eval-icon-templates,
+.user-ojt-comments-warning,
+.ojt-completion-comment-print {
   display: none;
 }
 .mod-ojt-evalstudents-btn,
@@ -100,6 +113,7 @@ img.ojt-topic-completion-status {
   .logininfo,
   .navbar,
   textarea.ojt-completion-comment,
+  textarea.ojt-completion-submission,
   .user-ojt-comments-warning,
   #totaramenu {
     display: none !important;
@@ -108,7 +122,8 @@ img.ojt-topic-completion-status {
     width: 100% !important;
     padding: 0;
   }
-  #mod-ojt-user-ojt .ojt-completion-comment-print {
+  #mod-ojt-user-ojt .ojt-completion-comment-print,
+  #mod-ojt-user-ojt .ojt-completion-submission-print {
     display: block;
   }
   #mod-ojt-user-ojt .mod-ojt-topic-heading {

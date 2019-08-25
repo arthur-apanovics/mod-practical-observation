@@ -76,11 +76,7 @@ class email_assignment implements crud
      * @throws dml_exception
      * @throws moodle_exception
      */
-    public static function update_and_notify_email(stdClass $form_data,
-                                                   bool $asmanager,
-                                                   stdClass $userfrom,
-                                                   stdClass $strvars = null,
-                                                   user_external_request $external_request = null)
+    public static function update_and_notify_email(stdClass $form_data, bool $asmanager, stdClass $userfrom, stdClass $strvars = null, user_external_request $external_request = null)
     {
         global $USER, $DB;
 
@@ -249,10 +245,19 @@ class email_assignment implements crud
      * @throws coding_exception
      * @throws dml_exception
      */
-    public static function fetch_from_token(string $token)
+    public static function get_from_token(string $token)
     {
         global $DB;
-        return new self($DB->get_record('ojt_email_assignment', array('token' => $token), '*', MUST_EXIST));
+        return new self($DB->get_record('ojt_email_assignment', array('token' => $token), '*'));
+    }
+
+    /**
+     * Marks email assignment as viewed and updates DB record
+     */
+    public function mark_viewed()
+    {
+        $this->viewed = true;
+        $this->update();
     }
 
     /**
@@ -311,6 +316,19 @@ class email_assignment implements crud
     private static function generate_token(string $email, int $userid)
     {
         return sha1($email . 'responder' . $userid . time() . get_site_identifier());
+    }
+
+    public static function is_valid_token(int $ojtid, int $userid, string $token)
+    {
+        global $DB;
+
+        $sql = 'SELECT ea.id
+                FROM {ojt_email_assignment} ea
+                JOIN {ojt_external_request} er on er.id = ea.externalrequestid
+                WHERE er.ojtid = ?
+                AND er.userid = ?
+                AND ea.token = ?';
+        return $DB->record_exists_sql($sql, [$ojtid, $userid, $token]);
     }
 
     /**

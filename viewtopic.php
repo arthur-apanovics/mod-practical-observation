@@ -112,6 +112,7 @@ echo $OUTPUT->heading(format_string($ojt->name));
 
 echo $OUTPUT->box('', 'generalbox', 'ojt-padding-box', ['style' => 'height: 2em;']);
 
+/* @var $renderer mod_ojt_renderer */
 $renderer = $PAGE->get_renderer('ojt');
 
 echo $renderer->user_topic($userojt, $topic);
