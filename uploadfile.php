@@ -116,6 +116,8 @@ else if ($mform->is_cancelled())
     redirect($returnurl);
 }
 
+//TODO BREADCRUMBS FOR EXTERNAL  USER
+//TODO REDIRECT AFTER UPLOAD
 $strheading = get_string('updatefiles', 'ojt');
 $PAGE->navbar->add(get_string('evaluate', 'ojt'));
 $PAGE->navbar->add(fullname($user),

@@ -67,7 +67,8 @@ $dateformat       = get_string('strftimedatetimeshort', 'core_langconfig');
 
 // Update/insert the user completion record
 
-if ($completion = completion::get_user_completion($topicitemid, $userid, completion::COMP_TYPE_TOPICITEM))
+$completion = completion::get_user_completion($topicitemid, $userid, completion::COMP_TYPE_TOPICITEM);
+if ($completion->id)
 {
     // Update
     switch ($action)
