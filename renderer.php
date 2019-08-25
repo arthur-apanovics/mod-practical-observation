@@ -408,7 +408,7 @@ class mod_ojt_renderer extends plugin_renderer_base
         {
             $out .= html_writer::link(
                 new moodle_url('/mod/ojt/request.php',
-                    ['cmid' => $cm->id, 'topicid' => $topic->id, 'userid' => $userojt->userid]),
+                    ['cmid' => $cm->id, 'topicid' => $topic->id, 'userid' => $userojt->userid, 'action' => 'users']),
                 'Submit for observation',
                 ['class' => 'btn btn-secondary', 'style' => 'margin: 2em 0 2em 0']);
         }

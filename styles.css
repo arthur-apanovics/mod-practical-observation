@@ -29,6 +29,7 @@
 }
 [id^=mod-ojt-] .mod-ojt-topic-signoff,
 [id^=page-mod-ojt-] .mod-ojt-topic-signoff {
+  font-size: 1.2em;
   padding-right: 1em;
   text-align: right;
 }
