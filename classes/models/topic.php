@@ -128,7 +128,8 @@ class topic implements crud
             $completion->status       = $status;
             $completion->timemodified = time();
             $completion->observeremail = $USER->id;
-            if (empty($currentcompletion))
+
+            if (empty($currentcompletion) || !$currentcompletion->id)
             {
                 $completion->userid  = $userid;
                 $completion->type    = completion::COMP_TYPE_TOPIC;
