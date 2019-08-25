@@ -46,8 +46,20 @@
                         {{{submission_status_icon}}}
                     </td>
                     <td class="c3">
-                        <a href="{{{manage_url}}}&action=users" class="btn btn-secondary">{{# str}} manage_requests, ojt
-                        {{/str}}</a>
+                        {{!TODO: VALIDATE SUBMISSION STATUS IN manage_url}}
+                        <a
+                            class="btn btn-secondary"
+                            {{^is_submitted}}
+                            href="{{{manage_url}}}"
+                            {{/is_submitted}}
+                            {{#is_submitted}}
+                            href="#"
+                            disabled
+                            title="{{# str}} requests_disabled:title, ojt {{/str}}"
+                            {{/is_submitted}}
+                        >
+                            {{# str}} manage_requests, ojt {{/str}}
+                        </a>
                     </td>
                     <td class="c4">
                         {{{completion_icon_html}}}

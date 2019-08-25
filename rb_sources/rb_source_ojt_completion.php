@@ -49,7 +49,7 @@ class rb_source_ojt_completion extends rb_base_source
         $this->base = "(
             SELECT " . $DB->sql_concat('ub.courseid', "'-'", 'ub.userid', "'-'", 'ub.ojtid', "'-'", 'ub.topicid', "'-'",
                 'ub.type') . " AS id,
-            ub.courseid, ub.userid, ub.ojtid, ub.topicid, ub.type, bc.status, bc.timemodified, bc.modifiedby
+            ub.courseid, ub.userid, ub.ojtid, ub.topicid, ub.type, bc.status, bc.timemodified, bc.observeremail
             FROM (
                 (SELECT ue.courseid, ue.userid, b.id AS ojtid, 0 AS topicid," . completion::COMP_TYPE_OJT . " AS type
                 FROM

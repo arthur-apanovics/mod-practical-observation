@@ -68,7 +68,7 @@ $string['filesupdated']  = 'Files updated';
 $string['itemdeleted'] = 'Topic item deleted';
 $string['itemwitness'] = 'Item completion witness';
 $string['manage'] = 'Manage';
-$string['managersignoff'] = 'Manager sign-off';
+$string['managersignoff'] = 'Assessor sign-off';
 $string['managertasktcompletionsubject'] = '{$a->user}  is awaiting your sign off for completion of topic {$a->topic} in {$a->courseshortname}';
 $string['managertasktcompletionmsg'] = '{$a->user} has completed topic <a href="{$a->topicurl}">{$a->topic}</a>. This topic is now awaiting your sign-off.';
 $string['modulename'] = 'OJT';
@@ -97,12 +97,13 @@ $string['updatefiles'] = 'Update files';
 $string['witnessed'] = 'Achieved';
 
 $string['observation'] = 'Observation';
-$string['review_observation'] = 'Review Observation';
-$string['manage_requests'] = 'Manage Requests';
+$string['review_observation'] = 'View Topic';
+$string['manage_requests'] = 'Request Observation';
 $string['submissiondate'] = 'Observation submitted on {$a}';
 $string['nosubmissiondate'] = 'Observation has not been submitted yet';
 
 // email
+$string['requests_disabled:title'] = 'You cannot assign new emails at the moment';
 $string['requestobservation'] = 'Request observation';
 $string['userxfeedback'] = '{$a}\'s Feedback';
 $string['myfeedback'] = 'My Feedback';

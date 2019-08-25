@@ -92,7 +92,7 @@ list($args, $jsmodule) = $renderer->get_evaluation_js_args($user_ojt->id, $user_
 $PAGE->requires->js_init_call('M.mod_ojt_evaluate.init', $args, false, $jsmodule);
 
 echo $renderer->get_print_button($user_ojt->name, fullname($subjectuser));
-echo $renderer->user_topic_external($user_ojt, $user_ojt->get_topic_by_id($external_request->topicid));
+echo $renderer->user_topic_external($user_ojt, $user_ojt->get_topic_by_id($external_request->topicid), $email_assignment);
 
 echo html_writer::end_div();// .container
 

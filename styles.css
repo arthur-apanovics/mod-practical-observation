@@ -13,6 +13,10 @@
   font-size: 1.2em;
   display: table;
 }
+[id^=mod-ojt-] .ojt-eval-actions,
+[id^=page-mod-ojt-] .ojt-eval-actions {
+  margin-top: 2em;
+}
 [id^=mod-ojt-] .mod-ojt-modifiedstr,
 [id^=page-mod-ojt-] .mod-ojt-modifiedstr,
 [id^=mod-ojt-] .mod-ojt-witnessedstr,
@@ -25,7 +29,8 @@
 }
 [id^=mod-ojt-] .mod-ojt-topic-signoff,
 [id^=page-mod-ojt-] .mod-ojt-topic-signoff {
-  padding-left: 1em;
+  padding-right: 1em;
+  text-align: right;
 }
 [id^=mod-ojt-] .mod-ojt-topic-signoff img,
 [id^=page-mod-ojt-] .mod-ojt-topic-signoff img {
