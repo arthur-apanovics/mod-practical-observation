@@ -49,7 +49,7 @@ function ojt_check_page_id_params_and_init(int $cmid, int $instanceid)
     {
         $cm     = get_coursemodule_from_id('ojt', $cmid, 0, false, MUST_EXIST);
         $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-        $ojt    = new ojt($cm->instance);//$DB->get_record('ojt', array('id' => $cm->instance), '*', MUST_EXIST);
+        $ojt    = new ojt($cm->instance);
     }
     else if ($instanceid)
     {

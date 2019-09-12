@@ -24,18 +24,14 @@ namespace mod_ojt\models;
 
 use competency_evidence;
 use mod_ojt\interfaces\crud;
+use mod_ojt\traits\db_record_base;
 use mod_ojt\traits\record_mapper;
 use mod_ojt\user_topic_item;
 use stdClass;
 
-class topic implements crud
+class topic extends db_record_base
 {
-    use record_mapper;
-
-    /**
-     * @var int
-     */
-    public $id;
+    protected const TABLE = 'ojt_topic';
 
     /**
      * @var int
@@ -62,15 +58,6 @@ class topic implements crud
      */
     public $allowcomments;
 
-
-    /**
-     * topic constructor.
-     * @param int|object $id_or_record instance id, database record or existing class or base class
-     */
-    public function __construct($id_or_record = null)
-    {
-        self::create_from_id_or_map_to_record($id_or_record);
-    }
 
     public static function update_topic_completion(int $userid, int $ojtid, int $topicid, string $observeremail)
     {
@@ -234,61 +221,5 @@ class topic implements crud
         $DB->delete_records('ojt_topic_signoff', array('topicid' => $topicid));
 
         $transaction->allow_commit();
-    }
-
-    /**
-     * Fetch record from database.
-     * @param int $id
-     * @return stdClass|false false if record not found
-     */
-    public static function fetch_record_from_id(int $id)
-    {
-        global $DB;
-        return $DB->get_record('ojt_topic', array('id' => $id));
-    }
-
-    /**
-     * Create DB entry from current state
-     *
-     * @return bool|int new record id or false if failed
-     */
-    public function create()
-    {
-        global $DB;
-        return $DB->insert_record('ojt_topic', self::get_record_from_object());
-    }
-
-    /**
-     * Read latest values from DB and refresh current object
-     *
-     * @return object
-     */
-    public function read()
-    {
-        global $DB;
-        $this->map_to_record($DB->get_record('ojt_topic', ['id' => $this->id]));
-		return $this;
-    }
-
-    /**
-     * Save current state to DB
-     *
-     * @return bool
-     */
-    public function update()
-    {
-        global $DB;
-        return $DB->update_record('ojt_topic', $this->get_record_from_object());
-    }
-
-    /**
-     * Delete current object from DB
-     *
-     * @return bool
-     */
-    public function delete()
-    {
-        global $DB;
-        return $DB->delete_records('ojt_topic', ['id' => $this->id]);
     }
 }

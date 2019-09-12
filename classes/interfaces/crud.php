@@ -1,11 +1,18 @@
 <?php
 
-
-// namespace mod_ojt\models;
 namespace mod_ojt\interfaces;
+
+use stdClass;
 
 interface crud
 {
+    /**
+     * Fetch record from database by it's id.
+     * @param int $id
+     * @return stdClass|false false if record not found
+     */
+    public static function fetch_record_from_id(int $id);
+
     /**
      * Create DB entry from current state
      *

@@ -22,52 +22,35 @@
 
 namespace mod_ojt\models;
 
-
-use coding_exception;
-use mod_ojt\interfaces\crud;
 use mod_ojt\traits\db_record_base;
-use mod_ojt\traits\record_mapper;
-use stdClass;
 
-class topic_signoff extends db_record_base
+class attempt_feedback extends db_record_base
 {
-    protected const TABLE = 'ojt_topic_signoff';
+    private const TABLE = 'ojt_attempt_feedback';
 
     /**
      * @var int
      */
-    public $userid;
+    public $id;
 
     /**
      * @var int
      */
-    public $topicid;
+    public $attemptid;
 
     /**
-     * @var bool
+     * @var int
      */
-    public $signedoff;
+    public $emailassignmentid;
 
     /**
      * @var string
      */
-    public $comment;
+    public $text;
 
     /**
      * @var int
      */
     public $timemodified;
 
-    /**
-     * @var int
-     */
-    public $modifiedby;
-
-
-    public static function get_user_topic_signoff(int $topicid, int $userid)
-    {
-        global $DB;
-        return new topic_signoff(
-            $DB->get_record('ojt_topic_signoff', ['userid' => $userid, 'topicid' => $topicid]));
-    }
 }

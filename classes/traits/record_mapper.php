@@ -52,7 +52,7 @@ trait record_mapper
         {
             foreach ($record as $key => $val)
             {
-                if (property_exists(__CLASS__, $key))
+                if (property_exists($this, $key))
                 {
                     $this->$key = $val;
                 }
@@ -77,11 +77,4 @@ trait record_mapper
 
         return (object)$rec;
     }
-
-    /**
-     * Fetch record from database.
-     * @param int $id
-     * @return stdClass|false false if record not found
-     */
-    abstract static public function fetch_record_from_id(int $id);
 }

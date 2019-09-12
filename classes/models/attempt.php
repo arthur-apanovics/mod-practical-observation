@@ -22,16 +22,12 @@
 
 namespace mod_ojt\models;
 
-
 use coding_exception;
-use mod_ojt\interfaces\crud;
 use mod_ojt\traits\db_record_base;
-use mod_ojt\traits\record_mapper;
-use stdClass;
 
-class topic_signoff extends db_record_base
+class attempt extends db_record_base
 {
-    protected const TABLE = 'ojt_topic_signoff';
+    protected const TABLE = 'ojt_attempt';
 
     /**
      * @var int
@@ -41,33 +37,61 @@ class topic_signoff extends db_record_base
     /**
      * @var int
      */
-    public $topicid;
+    public $topicitemid;
 
     /**
-     * @var bool
+     * attempt sequence number
+     *
+     * @var int
      */
-    public $signedoff;
+    public $sequence;
 
     /**
      * @var string
      */
-    public $comment;
+    public $text;
 
     /**
      * @var int
      */
     public $timemodified;
 
+
     /**
-     * @var int
+     * @param int $topicitemid
+     * @param int $userid
+     * @return attempt[] attempts in ascending order
+     * @throws \dml_exception
+     * @throws coding_exception
      */
-    public $modifiedby;
-
-
-    public static function get_user_topic_signoff(int $topicid, int $userid)
+    public static function get_user_attempts(int $topicitemid, int $userid)
     {
         global $DB;
-        return new topic_signoff(
-            $DB->get_record('ojt_topic_signoff', ['userid' => $userid, 'topicid' => $topicid]));
+
+        $records  = $DB->get_records(self::TABLE, ['topicitemid' => $topicitemid, 'userid' => $userid], 'sequence');
+        $attempts = [];
+        foreach ($records as $record)
+        {
+            $attempts[] = new self($record);
+        }
+
+        return $attempts;
+    }
+
+    /**
+     * @param int $topicitemid
+     * @param int $userid
+     * @return attempt|null null if not attempts found
+     */
+    public static function get_latest_user_attempt(int $topicitemid, int $userid)
+    {
+        if ($recs = self::get_user_attempts($topicitemid, $userid))
+        {
+            return $recs[count($recs) - 1];
+        }
+        else
+        {
+            return null;
+        }
     }
 }
