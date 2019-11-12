@@ -22,13 +22,12 @@
 
 namespace mod_ojt;
 
+
 use coding_exception;
 use mod_ojt\models\attempt;
-use mod_ojt\models\completion;
-use mod_ojt\models\item_witness;
-use mod_ojt\models\topic_item;
+use mod_ojt\models\attempt_feedback;
 
-class user_topic_item extends topic_item
+class user_attempt extends attempt
 {
     /**
      * @var int
@@ -36,22 +35,12 @@ class user_topic_item extends topic_item
     public $userid;
 
     /**
-     * @var completion
+     * @var attempt_feedback
      */
-    public $completion;
+    public $feedback;
 
     /**
-     * @var user_attempt[]
-     */
-    public $attempts;
-
-    /**
-     * @var item_witness|null null if no record exists!
-     */
-    public $witness;
-
-    /**
-     * user_topic_item constructor.
+     * user_attempt constructor.
      * @param int|object $id_or_record instance id, database record or existing class or base class
      * @param int $userid
      * @throws coding_exception
@@ -59,21 +48,46 @@ class user_topic_item extends topic_item
     public function __construct($id_or_record, int $userid)
     {
         parent::__construct($id_or_record);
-
-        $this->userid     = $userid;
-        $this->completion = completion::get_user_completion($this->id, $this->userid);
-        $this->attempts = user_attempt::get_user_attempts($this->id, $userid);
-        $this->witness    = item_witness::get_user_item_witness($this->id, $userid);
+        $this->userid = $userid;
+        $this->feedback = attempt_feedback::get_feedback_for_attempt($this->id);
     }
 
-    public static function get_user_topic_items_for_topic(int $topicid, int $userid)
+    /**
+     * @param int $topicitemid
+     * @param int $userid
+     * @return attempt[] attempts in ascending order
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public static function get_user_attempts(int $topicitemid, int $userid)
     {
         global $DB;
 
-        $topic_items = [];
-        foreach ($DB->get_records('ojt_topic_item', ['topicid' => $topicid]) as $record)
-            $topic_items[$record->id] = new self($record, $userid);
+        $records  = $DB->get_records(self::TABLE, ['topicitemid' => $topicitemid, 'userid' => $userid], 'sequence');
+        $attempts = [];
+        foreach ($records as $record)
+        {
+            $attempts[] = new self($record, $userid);
+        }
 
-        return $topic_items;
+        return $attempts;
+    }
+
+    /**
+     * @param int $topicitemid
+     * @param int $userid
+     * @return attempt|null null if not attempts found
+     */
+    public static function get_latest_user_attempt(int $topicitemid, int $userid)
+    {
+        // TODO Optimise with a sql query
+        if ($recs = self::get_user_attempts($topicitemid, $userid))
+        {
+            return $recs[count($recs) - 1];
+        }
+        else
+        {
+            return null;
+        }
     }
 }

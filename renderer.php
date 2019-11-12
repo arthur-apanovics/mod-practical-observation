@@ -26,6 +26,7 @@ use core\output\flex_icon;
 use mod_ojt\models\completion;
 use mod_ojt\models\email_assignment;
 use mod_ojt\models\ojt;
+use mod_ojt\user_attempt;
 use mod_ojt\user_ojt;
 use mod_ojt\user_topic;
 use mod_ojt\user_topic_item;
@@ -263,6 +264,16 @@ class mod_ojt_renderer extends plugin_renderer_base
 
         // open topic container
         $out .= $this->get_topic_start($topic);
+
+        if ($evaluate)
+        {
+            $out .= html_writer::div(format_text($topic->observerintro, $topic->observerintroformat), 'ojt-topic_intro ojt-topic_observerintro');
+        }
+        else
+        {
+            $out .= html_writer::div(format_text($topic->intro, $topic->introformat), 'ojt-topic_intro');
+        }
+
         // render topic table
         $out .= $this->get_topic_table($userojt, $topic, $evaluate, $submitted);
 
@@ -348,6 +359,8 @@ class mod_ojt_renderer extends plugin_renderer_base
 
         // open topic container
         $out .= $this->get_topic_start($topic);
+
+        $out .= html_writer::div(format_text($topic->observerintro, $topic->observerintroformat), 'ojt-topic_intro ojt-topic_observerintro');
 
         // render topic table
         $table = new html_table();
@@ -695,10 +708,10 @@ class mod_ojt_renderer extends plugin_renderer_base
 
         $out .= html_writer::start_tag('div',  array('class' => 'mod-ojt-topic', 'id' => "ojt-topic-{$topic->id}"));
         $completionicon = $this->get_completion_icon($topic);
-        $completionicon = html_writer::tag('span', $completionicon,
-            array('class' => 'ojt-topic-status'));
-        $optionalstr = $topic->completionreq == completion::REQ_OPTIONAL ?
-            html_writer::tag('em', ' (' . get_string('optional', 'ojt') . ')') : '';
+        $completionicon = html_writer::tag('span', $completionicon, array('class' => 'ojt-topic-status'));
+        $optionalstr = $topic->completionreq == completion::REQ_OPTIONAL
+            ? html_writer::tag('em', ' (' . get_string('optional', 'ojt') . ')')
+            : '';
         $out .= html_writer::tag('div', format_string($topic->name) . $optionalstr . $completionicon,
             array('class' => 'mod-ojt-topic-heading expanded'));
 
@@ -759,11 +772,11 @@ class mod_ojt_renderer extends plugin_renderer_base
         $row[] = format_string($item->name) . $optionalstr;
 
         // COLUMN 2: Topic Item Content (conversation & files)
-        $this->get_conversation();
+        $cellcontent = $this->get_conversation_history($item);
 
         if ($evaluate)
         {
-            $cellcontent = html_writer::start_tag('div', array('class' => 'ojt-eval-actions', 'ojt-item-id' => $item->id));
+            $cellcontent .= html_writer::start_tag('div', array('class' => 'ojt-eval-actions', 'ojt-item-id' => $item->id));
             $cellcontent .= html_writer::tag('textarea', $item->completion->comment,
                 array(
                     'name'        => 'comment-' . $item->id,
@@ -778,7 +791,7 @@ class mod_ojt_renderer extends plugin_renderer_base
         }
         else
         {
-            $cellcontent = format_text($item->completion->comment, FORMAT_PLAIN);
+            $cellcontent .= format_text($item->completion->comment, FORMAT_PLAIN);
             $cellcontent .= html_writer::start_tag('div', array('class' => 'ojt-submission-actions', 'ojt-item-id' => $item->id));
 
             $args = array(
@@ -897,10 +910,21 @@ class mod_ojt_renderer extends plugin_renderer_base
 
         return $out;
     }
-    private function get_conversation()
+    private function get_conversation_history(user_topic_item $topic_item)
     {
-        $out = '';
-        // $attempts
+        $attempts = user_attempt::get_user_attempts($topic_item->id, $topic_item->userid);
+
+        // $data = new stdClass();
+        // $data->attemptnumber = $attempt->sequence;
+        // $data->timemodified = $attempt->timemodified;
+        // $data-> = $attempt->;
+        // $data-> = $attempt->;
+        // $data-> = $attempt->;
+        // $data-> = $attempt->;
+        // $data-> = $attempt->;
+
+        return $this->render_from_template('mod_ojt/topic_item_conversation',
+            ['attempts' => (array)$attempts]);
     }
 }
 

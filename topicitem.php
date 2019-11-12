@@ -67,30 +67,32 @@ $form = new ojt_topic_item_form(null, array('ojtid' => $ojtid, 'topicid' => $top
 if ($data = $form->get_data())
 {
     // Save topic
-    $item                       = new stdClass();
-    $item->topicid              = $data->tid;
-    $item->name                 = $data->name;
-    $item->completionreq        = $data->completionreq;
-    $item->allowfileuploads     = $data->allowfileuploads;
-    $item->allowselffileuploads = $data->allowselffileuploads;
+    $topic_item                       = new topic_item();
+    $topic_item->topicid              = $data->tid;
+    $topic_item->name                 = $data->name;
+    $topic_item->completionreq        = $data->completionreq;
+    $topic_item->allowfileuploads     = $data->allowfileuploads;
+    $topic_item->allowselffileuploads = $data->allowselffileuploads;
 
     if (empty($data->id))
     {
         // Add
-        $DB->insert_record('ojt_topic_item', $item);
+        $topic_item->create();
     }
     else
     {
         // Update
-        $item->id = $data->id;
-        $DB->update_record('ojt_topic_item', $item);
+        $topic_item->id = $data->id;
+        $topic_item->update();
     }
 
     redirect(new moodle_url('/mod/ojt/manage.php', array('cmid' => $cm->id)));
 }
 
 // Print the page header.
-$actionstr = empty($itemid) ? get_string('additem', 'ojt') : get_string('edititem', 'ojt');
+$actionstr = empty($itemid)
+    ? get_string('additem', 'ojt')
+    : get_string('edititem', 'ojt');
 $PAGE->set_title(format_string($ojt->name));
 $PAGE->set_heading(format_string($ojt->name) . ' - ' . $actionstr);
 
@@ -102,8 +104,8 @@ echo $OUTPUT->heading($PAGE->heading);
 
 if (!empty($itemid))
 {
-    $item = $DB->get_record('ojt_topic_item', array('id' => $itemid), '*', MUST_EXIST);
-    $form->set_data($item);
+    $topic_item = new topic_item($itemid);
+    $form->set_data((array)$topic_item);
 }
 
 // Display

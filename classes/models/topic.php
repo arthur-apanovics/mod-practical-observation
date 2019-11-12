@@ -44,6 +44,30 @@ class topic extends db_record_base
     public $name;
 
     /**
+     * Topic description
+     *
+     * @var string
+     */
+    public $intro;
+
+    /**
+     * @var int
+     */
+    public $introformat;
+
+    /**
+     * Observation description
+     *
+     * @var string
+     */
+    public $observerintro;
+
+    /**
+     * @var int
+     */
+    public $observerintroformat;
+
+    /**
      * @var int
      */
     public $completionreq;

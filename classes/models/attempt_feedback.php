@@ -26,7 +26,7 @@ use mod_ojt\traits\db_record_base;
 
 class attempt_feedback extends db_record_base
 {
-    private const TABLE = 'ojt_attempt_feedback';
+    protected const TABLE = 'ojt_attempt_feedback';
 
     /**
      * @var int
@@ -52,5 +52,21 @@ class attempt_feedback extends db_record_base
      * @var int
      */
     public $timemodified;
+
+
+    /**
+     * @param int $id
+     * @return attempt_feedback|null
+     * @throws \coding_exception
+     */
+    public static function get_feedback_for_attempt(int $id)
+    {
+        if ($record = self::fetch_record_from_id($id))
+        {
+            return new self($record);
+        }
+
+        return null;
+    }
 
 }

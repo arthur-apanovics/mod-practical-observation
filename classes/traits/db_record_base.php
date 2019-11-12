@@ -51,7 +51,7 @@ abstract class db_record_base implements crud
     }
 
     /**
-     * Create DB entry from current state
+     * Create DB entry from current state and set id
      *
      * @return bool|int new record id or false if failed
      */
@@ -59,7 +59,11 @@ abstract class db_record_base implements crud
     {
         global $DB;
 
-        return $DB->insert_record(static::TABLE, self::get_record_from_object());
+        // TODO: Check if creation failed
+        $id = $DB->insert_record(static::TABLE, self::get_record_from_object());
+        $this->id = $id;
+
+        return $id;
     }
 
     /**
@@ -71,6 +75,7 @@ abstract class db_record_base implements crud
     {
         global $DB;
         $this->map_to_record($DB->get_record(static::TABLE, ['id' => $this->id]));
+
         return $this;
     }
 

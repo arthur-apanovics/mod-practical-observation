@@ -52,12 +52,6 @@
 [id^=page-mod-ojt-] .mod-ojt-topic table td.c1 {
   width: 60%;
 }
-[id^=mod-ojt-] .mod-ojt-topic-signoff .flex-icon,
-[id^=page-mod-ojt-] .mod-ojt-topic-signoff .flex-icon,
-[id^=mod-ojt-] .ojt-item-witness .flex-icon,
-[id^=page-mod-ojt-] .ojt-item-witness .flex-icon {
-  cursor: pointer;
-}
 [id^=mod-ojt-] .ojt-submit,
 [id^=page-mod-ojt-] .ojt-submit {
   text-align: center;
@@ -67,6 +61,12 @@
 [id^=mod-ojt-] .ojt-save,
 [id^=page-mod-ojt-] .ojt-save {
   float: right;
+}
+#page-mod-ojt-evaluate .mod-ojt-topic-signoff .flex-icon,
+#page-mod-ojt-observe .mod-ojt-topic-signoff .flex-icon,
+#page-mod-ojt-evaluate .ojt-item-witness .flex-icon,
+#page-mod-ojt-observe .ojt-item-witness .flex-icon {
+  cursor: pointer;
 }
 .config-mod-ojt-topic-heading,
 .mod-ojt-topic-heading {
@@ -93,7 +93,8 @@ img.ojt-topic-completion-status {
 }
 #ojt-eval-icon-templates,
 .user-ojt-comments-warning,
-.ojt-completion-comment-print {
+.ojt-completion-comment-print,
+.ojt-completion-submission-print {
   display: none;
 }
 .mod-ojt-evalstudents-btn,

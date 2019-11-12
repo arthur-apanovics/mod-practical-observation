@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/ojt/db" VERSION="2015052902" COMMENT="XMLDB file for Moodle mod/ojt"
+<XMLDB PATH="mod/ojt/db" VERSION="20190912" COMMENT="XMLDB file for Moodle mod/ojt"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -29,6 +29,10 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="ojtid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="254" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Format of the intro field (MOODLE, HTML, MARKDOWN...)"/>
+        <FIELD NAME="observerintro" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="observerintroformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Format of the intro field (MOODLE, HTML, MARKDOWN...)"/>
         <FIELD NAME="completionreq" TYPE="int" LENGTH="2" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="competencies" TYPE="char" LENGTH="150" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="allowcomments" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -79,7 +83,6 @@
         <INDEX NAME="timemodified" UNIQUE="false" FIELDS="timemodified"/>
       </INDEXES>
     </TABLE>
-    <!--TODO RENAME TO OJT_TOPIC_COMPLETION-->
     <TABLE NAME="ojt_completion" COMMENT="OJT completions for a user">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
@@ -91,7 +94,6 @@
         <FIELD NAME="status" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="comment" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <!--TODO LINK TO EMAIL ASSIGN TABLE INSTEAD OF EMAIL STRING-->
         <FIELD NAME="observeremail" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
@@ -106,6 +108,35 @@
         <INDEX NAME="status" UNIQUE="false" FIELDS="status"/>
         <INDEX NAME="timemodified" UNIQUE="false" FIELDS="timemodified"/>
       </INDEXES>
+    </TABLE>
+    <TABLE NAME="ojt_attempt" COMMENT="ojt user attempts for topic items">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="topicitemid" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="sequence" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="attempt sequence number"/>
+        <FIELD NAME="text" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="topicitemid" TYPE="foreign" FIELDS="topicitemid" REFTABLE="ojt_topic_item" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="ojt_attempt_feedback" COMMENT="feedback for ojt user attempts">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="attemptid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="emailassignmentid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="text" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="emailassignmentid" TYPE="foreign" FIELDS="emailassignmentid" REFTABLE="ojt_email_assignment" REFFIELDS="id"/>
+        <KEY NAME="attemptid" TYPE="foreign" FIELDS="attemptid" REFTABLE="ojt_attempt" REFFIELDS="id"/>
+      </KEYS>
     </TABLE>
     <TABLE NAME="ojt_item_witness" COMMENT="OJT item completion witness">
       <FIELDS>

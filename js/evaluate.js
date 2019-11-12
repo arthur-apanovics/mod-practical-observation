@@ -30,8 +30,8 @@ M.mod_ojt_evaluate = M.mod_ojt_evaluate || {
     /**
      * module initialisation method called by php js_init_call()
      *
-     * @param object    YUI instance
-     * @param string    args supplied in JSON format
+     * @param Y object    YUI instance
+     * @param args string    args supplied in JSON format
      */
     init: function (Y, args) {
         // save a reference to the Y instance (all of its dependencies included)

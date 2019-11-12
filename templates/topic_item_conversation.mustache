@@ -1,0 +1,52 @@
+{{#attempts}}
+    <li>
+        <div class="attempt">
+            <div class="attributes">
+        <span class="sequence">
+            Attempt {{{sequence}}}
+        </span>
+                <span class="timestamp">
+            <span class="last-saved">Last saved:</span> {{{attempt.timemodified}}}
+        </span>
+            </div>
+            {{#text}}
+                <div class="content">
+                    <div class="text">
+                        {{{text}}}
+                    </div>
+                    <ul class="attachments">
+                        {{#attachments}}
+                            <li><a target="_blank" href="{{url}}">{{title}}</a></li>
+                        {{/attachments}}
+                    </ul>
+                </div>
+            {{/text}}
+
+            <div class="feedback">
+                {{#feedback}}
+                    <div class="attributes">
+                    <span class="sequence">
+                        Feedback for attempt {{{attemptnumber}}}
+                    </span>
+                        <span class="timestamp">
+                        <span class="last-saved">Last saved:</span>
+                            {{{timemodified}}}
+                    </span>
+                    </div>
+                    {{#feedbacktext}}
+                        <div class="content">
+                            <div class="text">
+                                {{{feedbacktext}}}
+                            </div>
+                            <ul class="attachments">
+                                {{#attachments}}
+                                    <li><a target="_blank" href="{{url}}">{{title}}</a></li>
+                                {{/attachments}}
+                            </ul>
+                        </div>
+                    {{/feedbacktext}}
+                {{/feedback}}
+            </div>
+        </div>
+    </li>
+{{/attempts}}

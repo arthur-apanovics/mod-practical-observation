@@ -63,6 +63,33 @@ function xmldb_ojt_upgrade($oldversion)
         // ojt savepoint reached.
         upgrade_mod_savepoint(true, 2016031400, 'ojt');
     }
+    
+    if ($oldversion < 2017101806)
+    {
+        // Define table ojt_attempt to be created.
+        $table = new xmldb_table('ojt_attempt');
+
+        // Adding fields to table ojt_attempt.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('topicitemid', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('sequence', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('text', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, '0');
+
+        // Adding keys to table ojt_attempt.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('userid', XMLDB_KEY_FOREIGN, array('userid'), 'user', array('id'));
+        $table->add_key('topicitemid', XMLDB_KEY_FOREIGN, array('topicitemid'), 'ojt_topic_item', array('id'));
+
+        // Conditionally launch create table for ojt_attempt.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Ojt savepoint reached.
+        upgrade_mod_savepoint(true, 2017101806, 'ojt');
+    }
 
 
     return true;

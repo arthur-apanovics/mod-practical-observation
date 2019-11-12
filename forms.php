@@ -43,10 +43,26 @@ class ojt_topic_form extends moodleform
         $mform    =& $this->_form;
         $courseid = $this->_customdata['courseid'];
         $ojtid    = $this->_customdata['ojtid'];
+        $cm = get_coursemodule_from_instance('ojt', $ojtid);
+        $context = context_module::instance($cm->id);
 
         $mform->addElement('text', 'name', get_string('name', 'ojt'));
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
+
+        //TODO: FILE UPLOAD
+        $editor_params = [
+            'maxfiles' => EDITOR_UNLIMITED_FILES,
+            'noclean'  => true,
+            'context'  => $context,
+            'subdirs'  => true
+        ];
+
+        $mform->addElement('editor', 'intro', get_string('todo_langstring-topic_intro_desc', 'mod_ojt'), $editor_params);
+        $mform->setType('intro', PARAM_RAW); // no XSS prevention here, users must be trusted
+
+        $mform->addElement('editor', 'observerintro', get_string('todo_langstring-topic_observerintro_desc', 'mod_ojt'), $editor_params);
+        $mform->setType('observerintro', PARAM_RAW); // no XSS prevention here, users must be trusted
 
         $mform->addElement('advcheckbox', 'completionreq', get_string('optionalcompletion', 'ojt'));
 
@@ -98,7 +114,6 @@ class ojt_topic_item_form extends moodleform
 {
     function definition()
     {
-        global $CFG;
         $mform   =& $this->_form;
         $ojtid   = $this->_customdata['ojtid'];
         $topicid = $this->_customdata['topicid'];
