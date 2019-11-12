@@ -1,23 +1,23 @@
 <?php
 
 
-namespace mod_ojt\models;
+namespace mod_observation\models;
 
 
 use coding_exception;
-use mod_ojt\interfaces\crud;
-use mod_ojt\traits\db_record_base;
-use mod_ojt\traits\record_mapper;
+use mod_observation\interfaces\crud;
+use mod_observation\traits\db_record_base;
+use mod_observation\traits\record_mapper;
 use stdClass;
 
 class external_request extends db_record_base
 {
-    protected const TABLE = 'ojt_external_request';
+    protected const TABLE = 'observation_external_request';
 
     /**
      * @var int
      */
-    var $ojtid;
+    var $observationid;
 
     /**
      * @var int
@@ -35,12 +35,12 @@ class external_request extends db_record_base
     var $timedue;
 
 
-    public static function get_request_for_ojt_topic(int $ojtid, int $topicid, int $userid)
+    public static function get_request_for_observation_topic(int $observationid, int $topicid, int $userid)
     {
         global $DB;
 
-        $record = $DB->get_record('ojt_external_request',
-            ['ojtid' => $ojtid, 'topicid' => $topicid, 'userid' => $userid]);
+        $record = $DB->get_record('observation_external_request',
+            ['observationid' => $observationid, 'topicid' => $topicid, 'userid' => $userid]);
 
         return $record ? new self($record) : null;
     }
@@ -53,21 +53,21 @@ class external_request extends db_record_base
      *
      * 0 is equivalent to not set. This allows timestamps to go from being set to not set.
      *
-     * @param int $ojtid
+     * @param int $observationid
      * @param int $topicid
      * @param int $userid
      * @param int $newduedate
      * @return array array containing error strings
      * @throws coding_exception
      */
-    public static function validate_new_timedue(int $ojtid, int $topicid, int $userid, int $newduedate)
+    public static function validate_new_timedue(int $observationid, int $topicid, int $userid, int $newduedate)
     {
         $errors = array();
 
         // We currently allow setting of empty values.
         if (!empty($newduedate))
         {
-            $request = self::get_request_for_ojt_topic($ojtid, $topicid, $userid);
+            $request = self::get_request_for_observation_topic($observationid, $topicid, $userid);
 
             // If they have set a due date check that it is in the future.
             if ($newduedate < time())

@@ -16,22 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 global $CFG;
 
-use mod_ojt\models\completion;
+use mod_observation\models\completion;
 
 require_once($CFG->dirroot . '/totara/reportbuilder/classes/rb_base_content.php');
 
-# Include the ojt rb source, to ensure all default settings get created upon report creation
-require_once($CFG->dirroot . '/mod/ojt/rb_sources/rb_source_ojt_completion.php');
+# Include the observation rb source, to ensure all default settings get created upon report creation
+require_once($CFG->dirroot . '/mod/observation/rb_sources/rb_source_observation_completion.php');
 
-require_once($CFG->dirroot . '/mod/ojt/lib.php');
+require_once($CFG->dirroot . '/mod/observation/lib.php');
 
-class rb_ojt_evaluation_embedded extends rb_base_embedded
+class rb_observation_evaluation_embedded extends rb_base_embedded
 {
 
     public $url, $source, $fullname, $filters, $columns;
@@ -41,14 +41,14 @@ class rb_ojt_evaluation_embedded extends rb_base_embedded
 
     public function __construct($data)
     {
-        $ojtid = array_key_exists('ojtid', $data) ? $data['ojtid'] : null;
+        $observationid = array_key_exists('observationid', $data) ? $data['observationid'] : null;
 
-        $url                     = new moodle_url('/mod/ojt/report.php', $data);
+        $url                     = new moodle_url('/mod/observation/report.php', $data);
         $this->url               = $url->out_as_local_url();
-        $this->source            = 'ojt_completion';
+        $this->source            = 'observation_completion';
         $this->defaultsortcolumn = 'user_namelink';
-        $this->shortname         = 'ojt_evaluation';
-        $this->fullname          = get_string('ojtevaluation', 'rb_source_ojt_completion');
+        $this->shortname         = 'observation_evaluation';
+        $this->fullname          = get_string('observationevaluation', 'rb_source_observation_completion');
         $this->columns           = array(
             array(
                 'type'    => 'user',
@@ -58,10 +58,10 @@ class rb_ojt_evaluation_embedded extends rb_base_embedded
             array(
                 'type'    => 'base',
                 'value'   => 'status',
-                'heading' => get_string('status', 'rb_source_ojt_completion'),
+                'heading' => get_string('status', 'rb_source_observation_completion'),
             ),
             array(
-                'type'    => 'ojt',
+                'type'    => 'observation',
                 'value'   => 'evaluatelink',
                 'heading' => ' ',
             ),
@@ -83,17 +83,17 @@ class rb_ojt_evaluation_embedded extends rb_base_embedded
 
         $this->contentmode     = REPORT_BUILDER_CONTENT_MODE_ALL;
         $this->contentsettings = array(
-            'ojt_completion_type' => array(
+            'observation_completion_type' => array(
                 'enable'         => 1,
-                'completiontype' => completion::COMP_TYPE_OJT
+                'completiontype' => completion::COMP_TYPE_Observation
             )
         );
 
         // only show non-deleted users
         $this->embeddedparams = array();
-        if (!empty($ojtid))
+        if (!empty($observationid))
         {
-            $this->embeddedparams['ojtid'] = $ojtid;
+            $this->embeddedparams['observationid'] = $observationid;
         }
 
         parent::__construct($data);

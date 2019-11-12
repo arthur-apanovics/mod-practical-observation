@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,7 +29,7 @@
 /**
  * Custom uninstallation procedure
  */
-function xmldb_ojt_uninstall()
+function xmldb_observation_uninstall()
 {
     return true;
 }

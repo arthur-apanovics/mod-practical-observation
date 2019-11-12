@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,7 +29,7 @@
  *
  * @see upgrade_plugins_modules()
  */
-function xmldb_ojt_install()
+function xmldb_observation_install()
 {
 }
 
@@ -38,6 +38,6 @@ function xmldb_ojt_install()
  *
  * @see upgrade_plugins_modules()
  */
-function xmldb_ojt_install_recovery()
+function xmldb_observation_install_recovery()
 {
 }

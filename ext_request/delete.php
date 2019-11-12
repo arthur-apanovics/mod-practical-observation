@@ -22,8 +22,8 @@
 //  * @subpackage totara_feedback360
 //  */
 //
-// use mod_ojt\models\email_assignment;
-// use mod_ojt\models\external_request;
+// use mod_observation\models\email_assignment;
+// use mod_observation\models\external_request;
 //
 // require_once(__DIR__ . '/../../../config.php');
 //
@@ -50,8 +50,8 @@
 // }
 //
 // $external_request =
-//     new external_request($email_assignment->externalrequestid); //$DB->get_record('ojt_external_request', ['id' => $email_assignment->externalrequestid]);
-// // $user_ojt = new user_ojt($ojtid, $userid);
+//     new external_request($email_assignment->externalrequestid); //$DB->get_record('observation_external_request', ['id' => $email_assignment->externalrequestid]);
+// // $user_observation = new user_observation($observationid, $userid);
 //
 // $usercontext   = context_user::instance($user_assignment->userid);
 // $systemcontext = context_system::instance();
@@ -59,24 +59,24 @@
 // // // Check user has permission to request feedback.
 // // if ($USER->id == $external_request->userid)
 // // {
-// //     require_capability('mod/ojt:', $systemcontext);
+// //     require_capability('mod/observation:', $systemcontext);
 // // }
 // // else
 // // {
 // //     print_error('error:accessdenied', 'totara_feedback360');
 // // }
 //
-// $returnurl = new moodle_url('/mod/ojt/request.php',
+// $returnurl = new moodle_url('/mod/observation/request.php',
 //     array(
 //         'action' => 'users',
-//         'cmid'   => $external_request->ojtid,
+//         'cmid'   => $external_request->observationid,
 //         'topicid' => $external_request->topicid,
 //         'userid' => $external_request->userid
 //     ));
 //
 // // Set up the page.
 // $urlparams = array('assignid' => $email_assignment->id, 'email' => $email_assignment->email);
-// $PAGE->set_url(new moodle_url('/mod/ojt/ext_request/delete.php'), $urlparams);
+// $PAGE->set_url(new moodle_url('/mod/observation/ext_request/delete.php'), $urlparams);
 // $PAGE->set_context($systemcontext);
 // $PAGE->set_pagelayout('admin');
 // $PAGE->set_title($strdelrequest);

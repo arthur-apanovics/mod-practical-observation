@@ -21,9 +21,9 @@
     }
 </style>
 
-<div id="mod-ojt-user-ojt-topics">
+<div id="mod-observation-user-observation-topics">
     {{#has_topics}}
-        <table class="mod-ojt-topic-items generaltable">
+        <table class="mod-observation-topic-items generaltable">
             <thead>
             <tr>
                 <th></th>
@@ -40,7 +40,7 @@
                         <h4>{{title}}</h4>
                     </td>
                     <td class="c1">
-                        <a href="{{{url}}}" class="btn btn-secondary">{{# str}} review_observation, ojt {{/str}}</a>
+                        <a href="{{{url}}}" class="btn btn-secondary">{{# str}} review_observation, observation {{/str}}</a>
                     </td>
                     <td class="c2">
                         {{{submission_status_icon}}}
@@ -55,10 +55,10 @@
                             {{#is_submitted}}
                             href="#"
                             disabled
-                            title="{{# str}} requests_disabled:title, ojt {{/str}}"
+                            title="{{# str}} requests_disabled:title, observation {{/str}}"
                             {{/is_submitted}}
                         >
-                            {{# str}} manage_requests, ojt {{/str}}
+                            {{# str}} manage_requests, observation {{/str}}
                         </a>
                     </td>
                     <td class="c4">

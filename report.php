@@ -16,36 +16,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * Prints a particular instance of ojt
+ * Prints a particular instance of observation
  */
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once($CFG->dirroot . '/mod/ojt/lib.php');
+require_once($CFG->dirroot . '/mod/observation/lib.php');
 require_once($CFG->dirroot . '/totara/reportbuilder/lib.php');
 
 $cmid   = optional_param('cmid', 0, PARAM_INT); // Course_module ID
-$ojtid  = optional_param('bid', 0,
-    PARAM_INT);  // ... ojt instance ID - it should be named as the first character of the module.
+$observationid  = optional_param('bid', 0,
+    PARAM_INT);  // ... observation instance ID - it should be named as the first character of the module.
 $format = optional_param('format', '', PARAM_TEXT);
 $sid    = optional_param('sid', '0', PARAM_INT);
 $debug  = optional_param('debug', 0, PARAM_INT);
 
 if ($cmid)
 {
-    $cm     = get_coursemodule_from_id('ojt', $cmid, 0, false, MUST_EXIST);
+    $cm     = get_coursemodule_from_id('observation', $cmid, 0, false, MUST_EXIST);
     $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $ojt    = $DB->get_record('ojt', array('id' => $cm->instance), '*', MUST_EXIST);
+    $observation    = $DB->get_record('observation', array('id' => $cm->instance), '*', MUST_EXIST);
 }
-else if ($ojtid)
+else if ($observationid)
 {
-    $ojt    = $DB->get_record('ojt', array('id' => $ojtid), '*', MUST_EXIST);
-    $course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
-    $cm     = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
+    $observation    = $DB->get_record('observation', array('id' => $observationid), '*', MUST_EXIST);
+    $course = $DB->get_record('course', array('id' => $observation->course), '*', MUST_EXIST);
+    $cm     = get_coursemodule_from_instance('observation', $observation->id, $course->id, false, MUST_EXIST);
 }
 else
 {
@@ -55,19 +55,19 @@ else
 require_login($course, true, $cm);
 
 $modcontext = context_module::instance($cm->id);
-if (!(has_capability('mod/ojt:evaluate', $modcontext) || has_capability('mod/ojt:signoff', $modcontext)))
+if (!(has_capability('mod/observation:evaluate', $modcontext) || has_capability('mod/observation:signoff', $modcontext)))
 {
-    print_error('accessdenied', 'ojt');
+    print_error('accessdenied', 'observation');
 }
 
-if (!$report = reportbuilder_get_embedded_report('ojt_evaluation', array('ojtid' => $ojt->id), false, $sid))
+if (!$report = reportbuilder_get_embedded_report('observation_evaluation', array('observationid' => $observation->id), false, $sid))
 {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 
-$PAGE->set_url('/mod/ojt/report.php', array('cmid' => $cm->id));
-$PAGE->set_title(format_string($ojt->name));
-$headingstr = format_string($ojt->name) . ' - ' . get_string('evaluate', 'ojt');
+$PAGE->set_url('/mod/observation/report.php', array('cmid' => $cm->id));
+$PAGE->set_title(format_string($observation->name));
+$headingstr = format_string($observation->name) . ' - ' . get_string('evaluate', 'observation');
 $PAGE->set_heading($headingstr);
 
 
@@ -86,7 +86,7 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading($headingstr);
 
 // Standard report stuff.
-echo $OUTPUT->container_start('', 'ojt_evaluation');
+echo $OUTPUT->container_start('', 'observation_evaluation');
 
 if ($debug)
 {

@@ -16,21 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt\models;
+namespace mod_observation\models;
 
 use coding_exception;
-use mod_ojt\interfaces\crud;
-use mod_ojt\traits\db_record_base;
-use mod_ojt\traits\record_mapper;
+use mod_observation\interfaces\crud;
+use mod_observation\traits\db_record_base;
+use mod_observation\traits\record_mapper;
 use stdClass;
 
 class topic_item extends db_record_base
 {
-    protected const TABLE = 'ojt_topic_item';
+    protected const TABLE = 'observation_topic_item';
 
     /**
      * @var int
@@ -63,7 +63,7 @@ class topic_item extends db_record_base
         global $DB;
 
         $topic_items = [];
-        foreach ($DB->get_records('ojt_topic_item', ['topicid' => $topicid]) as $record)
+        foreach ($DB->get_records('observation_topic_item', ['topicid' => $topicid]) as $record)
         {
             $topic_items[] = new self($record);
         }
@@ -77,13 +77,13 @@ class topic_item extends db_record_base
 
         $transaction = $DB->start_delegated_transaction();
 
-        $DB->delete_records('ojt_topic_item', array('id' => $itemid));
-        $DB->delete_records('ojt_completion', array('topicitemid' => $itemid));
-        $DB->delete_records('ojt_item_witness', array('topicitemid' => $itemid));
+        $DB->delete_records('observation_topic_item', array('id' => $itemid));
+        $DB->delete_records('observation_completion', array('topicitemid' => $itemid));
+        $DB->delete_records('observation_item_witness', array('topicitemid' => $itemid));
 
         // Delete item files
         $fs = get_file_storage();
-        $fs->delete_area_files($context->id, 'mod_ojt', 'topicitemfiles' . $itemid);
+        $fs->delete_area_files($context->id, 'mod_observation', 'topicitemfiles' . $itemid);
 
         $transaction->allow_commit();
     }

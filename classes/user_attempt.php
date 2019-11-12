@@ -16,16 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt;
+namespace mod_observation;
 
 
 use coding_exception;
-use mod_ojt\models\attempt;
-use mod_ojt\models\attempt_feedback;
+use mod_observation\models\attempt;
+use mod_observation\models\attempt_feedback;
 
 class user_attempt extends attempt
 {

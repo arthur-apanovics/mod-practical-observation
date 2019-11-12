@@ -16,20 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/ojt/backup/moodle2/restore_ojt_stepslib.php');
+require_once($CFG->dirroot . '/mod/observation/backup/moodle2/restore_observation_stepslib.php');
 
 /**
- * Restore task for the ojt activity module
+ * Restore task for the observation activity module
  *
  * Provides all the settings and steps to perform complete restore of the activity.
  */
-class restore_ojt_activity_task extends restore_activity_task
+class restore_observation_activity_task extends restore_activity_task
 {
 
     /**
@@ -46,7 +46,7 @@ class restore_ojt_activity_task extends restore_activity_task
     protected function define_my_steps()
     {
         // We have just one structure step here.
-        $this->add_step(new restore_ojt_activity_structure_step('ojt_structure', 'ojt.xml'));
+        $this->add_step(new restore_observation_activity_structure_step('observation_structure', 'observation.xml'));
     }
 
     /**
@@ -57,7 +57,7 @@ class restore_ojt_activity_task extends restore_activity_task
     {
         $contents = array();
 
-        $contents[] = new restore_decode_content('ojt', array('intro'), 'ojt');
+        $contents[] = new restore_decode_content('observation', array('intro'), 'observation');
 
         return $contents;
     }
@@ -70,8 +70,8 @@ class restore_ojt_activity_task extends restore_activity_task
     {
         $rules = array();
 
-        $rules[] = new restore_decode_rule('OJTVIEWBYID', '/mod/ojt/view.php?id=$1', 'course_module');
-        $rules[] = new restore_decode_rule('OJTINDEX', '/mod/ojt/index.php?id=$1', 'course');
+        $rules[] = new restore_decode_rule('ObservationVIEWBYID', '/mod/observation/view.php?id=$1', 'course_module');
+        $rules[] = new restore_decode_rule('ObservationINDEX', '/mod/observation/index.php?id=$1', 'course');
 
         return $rules;
 
@@ -80,16 +80,16 @@ class restore_ojt_activity_task extends restore_activity_task
     /**
      * Define the restore log rules that will be applied
      * by the {@link restore_logs_processor} when restoring
-     * ojt logs. It must return one array
+     * observation logs. It must return one array
      * of {@link restore_log_rule} objects
      */
     static public function define_restore_log_rules()
     {
         $rules = array();
 
-        $rules[] = new restore_log_rule('ojt', 'add', 'view.php?id={course_module}', '{ojt}');
-        $rules[] = new restore_log_rule('ojt', 'update', 'view.php?id={course_module}', '{ojt}');
-        $rules[] = new restore_log_rule('ojt', 'view', 'view.php?id={course_module}', '{ojt}');
+        $rules[] = new restore_log_rule('observation', 'add', 'view.php?id={course_module}', '{observation}');
+        $rules[] = new restore_log_rule('observation', 'update', 'view.php?id={course_module}', '{observation}');
+        $rules[] = new restore_log_rule('observation', 'view', 'view.php?id={course_module}', '{observation}');
 
         return $rules;
     }
@@ -108,7 +108,7 @@ class restore_ojt_activity_task extends restore_activity_task
     {
         $rules = array();
 
-        $rules[] = new restore_log_rule('ojt', 'view all', 'index.php?id={course}', null);
+        $rules[] = new restore_log_rule('observation', 'view all', 'index.php?id={course}', null);
 
         return $rules;
     }

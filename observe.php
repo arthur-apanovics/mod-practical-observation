@@ -21,9 +21,9 @@
  * @package totara_feedback360
  */
 
-use mod_ojt\models\email_assignment;
-use mod_ojt\models\external_request;
-use mod_ojt\user_ojt;
+use mod_observation\models\email_assignment;
+use mod_observation\models\external_request;
+use mod_observation\user_observation;
 
 require_once(__DIR__ . '/../../config.php');
 require_once(dirname(__FILE__) . '/forms.php');
@@ -54,21 +54,21 @@ if (isloggedin())
     }
 }
 
-$user_ojt         = new user_ojt($external_request->ojtid, $external_request->userid);
+$user_observation         = new user_observation($external_request->observationid, $external_request->userid);
 
-// This is a hack to get around authenticating anonymous users when viewing files in ojt.
-unset($SESSION->ojt_usertoken);
-$SESSION->ojt_usertoken = $token;
+// This is a hack to get around authenticating anonymous users when viewing files in observation.
+unset($SESSION->observation_usertoken);
+$SESSION->observation_usertoken = $token;
 
-$returnurl = new moodle_url('/mod/ojt/observe.php', array('token' => $token));
+$returnurl = new moodle_url('/mod/observation/observe.php', array('token' => $token));
 
 // Set up the page.
-$pageurl = new moodle_url('/mod/ojt/observe.php');
+$pageurl = new moodle_url('/mod/observation/observe.php');
 $PAGE->set_context(null);
 $PAGE->set_url($pageurl);
 $PAGE->set_pagelayout('popup');
 
-$heading = get_string('observation', 'mod_ojt');
+$heading = get_string('observation', 'mod_observation');
 
 $PAGE->set_title($heading);
 $PAGE->set_heading($heading);
@@ -78,8 +78,8 @@ $PAGE->navbar->add(get_string('givefeedback', 'totara_feedback360'));
 
 $email_assignment->mark_viewed();
 
-/* @var $renderer mod_ojt_renderer */
-$renderer = $PAGE->get_renderer('ojt');
+/* @var $renderer mod_observation_renderer */
+$renderer = $PAGE->get_renderer('observation');
 
 // echo $renderer->header();
 echo $OUTPUT->header();
@@ -88,11 +88,11 @@ echo html_writer::start_div('container');
 
 echo $renderer->display_feedback_header($email_assignment, $subjectuser);
 
-list($args, $jsmodule) = $renderer->get_evaluation_js_args($user_ojt->id, $user_ojt->userid, $token);
-$PAGE->requires->js_init_call('M.mod_ojt_evaluate.init', $args, false, $jsmodule);
+list($args, $jsmodule) = $renderer->get_evaluation_js_args($user_observation->id, $user_observation->userid, $token);
+$PAGE->requires->js_init_call('M.mod_observation_evaluate.init', $args, false, $jsmodule);
 
-echo $renderer->get_print_button($user_ojt->name, fullname($subjectuser));
-echo $renderer->user_topic_external($user_ojt, $user_ojt->get_topic_by_id($external_request->topicid), $email_assignment);
+echo $renderer->get_print_button($user_observation->name, fullname($subjectuser));
+echo $renderer->user_topic_external($user_observation, $user_observation->get_topic_by_id($external_request->topicid), $email_assignment);
 
 echo html_writer::end_div();// .container
 

@@ -16,51 +16,51 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * Internal library of functions for module ojt
+ * Internal library of functions for module observation
  *
- * All the ojt specific functions, needed to implement the module
+ * All the observation specific functions, needed to implement the module
  * logic, should go here. Never include this file from your lib.php!
  */
 
-use mod_ojt\models\ojt;
+use mod_observation\models\observation;
 
 defined('MOODLE_INTERNAL') || die();
 
 
 /**
- * Check ojt id when initializing page
+ * Check observation id when initializing page
  *
  * @param int $cmid
  * @param int $instanceid
- * @return array [mod_ojt\model\ojt, stdClass course, stdClass cm]
+ * @return array [mod_observation\model\observation, stdClass course, stdClass cm]
  * @throws coding_exception
  * @throws dml_exception
  */
-function ojt_check_page_id_params_and_init(int $cmid, int $instanceid)
+function observation_check_page_id_params_and_init(int $cmid, int $instanceid)
 {
     global $DB;
 
     if ($cmid)
     {
-        $cm     = get_coursemodule_from_id('ojt', $cmid, 0, false, MUST_EXIST);
+        $cm     = get_coursemodule_from_id('observation', $cmid, 0, false, MUST_EXIST);
         $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-        $ojt    = new ojt($cm->instance);
+        $observation    = new observation($cm->instance);
     }
     else if ($instanceid)
     {
-        $ojt    = new ojt($instanceid);
-        $course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
-        $cm     = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
+        $observation    = new observation($instanceid);
+        $course = $DB->get_record('course', array('id' => $observation->course), '*', MUST_EXIST);
+        $cm     = get_coursemodule_from_instance('observation', $observation->id, $course->id, false, MUST_EXIST);
     }
     else
     {
         throw new coding_exception('You must specify a course_module ID or an instance ID');
     }
 
-    return [$ojt, $course, $cm];
+    return [$observation, $course, $cm];
 }

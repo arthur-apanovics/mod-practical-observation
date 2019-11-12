@@ -16,21 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt\event;
+namespace mod_observation\event;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_ojt instance list viewed event class
+ * The mod_observation instance list viewed event class
  *
  * If the view mode needs to be stored as well, you may need to
  * override methods get_url() and get_legacy_log_data(), too.
  *
- * @package    mod_ojt
+ * @package    mod_observation
  * @copyright  2015 Eugene Venter <eugene@catalyst.net.nz>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -44,6 +44,6 @@ class course_module_viewed extends \core\event\course_module_viewed
     {
         $this->data['crud']        = 'r';
         $this->data['edulevel']    = self::LEVEL_PARTICIPATING;
-        $this->data['objecttable'] = 'ojt';
+        $this->data['objecttable'] = 'observation';
     }
 }

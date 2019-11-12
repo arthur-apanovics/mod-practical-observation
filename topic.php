@@ -16,30 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_ojt\models\completion;
-use mod_ojt\models\topic;
+use mod_observation\models\completion;
+use mod_observation\models\topic;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/lib.php');
 require_once(dirname(__FILE__) . '/locallib.php');
 require_once(dirname(__FILE__) . '/forms.php');
 
-$ojtid   = required_param('bid', PARAM_INT); // OJT instance id.
+$observationid   = required_param('bid', PARAM_INT); // Observation instance id.
 $topicid = optional_param('id', 0, PARAM_INT);  // Topic id.
 $delete  = optional_param('delete', 0, PARAM_BOOL);
 
-$ojt    = $DB->get_record('ojt', array('id' => $ojtid), '*', MUST_EXIST);
-$course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
-$cm     = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
+$observation    = $DB->get_record('observation', array('id' => $observationid), '*', MUST_EXIST);
+$course = $DB->get_record('course', array('id' => $observation->course), '*', MUST_EXIST);
+$cm     = get_coursemodule_from_instance('observation', $observation->id, $course->id, false, MUST_EXIST);
 
 require_login($course, true, $cm);
-require_capability('mod/ojt:manage', context_module::instance($cm->id));
+require_capability('mod/observation:manage', context_module::instance($cm->id));
 
-$PAGE->set_url('/mod/ojt/topic.php', array('bid' => $ojtid, 'id' => $topicid));
+$PAGE->set_url('/mod/observation/topic.php', array('bid' => $observationid, 'id' => $topicid));
 
 // Handle actions
 if ($delete)
@@ -50,22 +50,22 @@ if ($delete)
         echo $OUTPUT->header();
         $confirmurl = $PAGE->url;
         $confirmurl->params(array('delete' => 1, 'confirm' => 1, 'sesskey' => sesskey()));
-        echo $OUTPUT->confirm(get_string('confirmtopicdelete', 'ojt'), $confirmurl, $PAGE->url);
+        echo $OUTPUT->confirm(get_string('confirmtopicdelete', 'observation'), $confirmurl, $PAGE->url);
         echo $OUTPUT->footer();
         die();
     }
 
     topic::delete_topic($topicid);
-    $redirecturl = new moodle_url('/mod/ojt/manage.php', array('cmid' => $cm->id));
-    totara_set_notification(get_string('topicdeleted', 'ojt'), $redirecturl, array('class' => 'notifysuccess'));
+    $redirecturl = new moodle_url('/mod/observation/manage.php', array('cmid' => $cm->id));
+    totara_set_notification(get_string('topicdeleted', 'observation'), $redirecturl, array('class' => 'notifysuccess'));
 }
 
-$form = new ojt_topic_form(null, array('courseid' => $course->id, 'ojtid' => $ojtid));
+$form = new observation_topic_form(null, array('courseid' => $course->id, 'observationid' => $observationid));
 if ($data = $form->get_data())
 {
     // Save topic
     $topic                      = new topic();
-    $topic->ojtid               = $data->bid;
+    $topic->observationid               = $data->bid;
     $topic->name                = $data->name;
     $topic->intro               = $data->intro['text'];
     $topic->introformat         = $data->intro['format'];
@@ -91,7 +91,7 @@ if ($data = $form->get_data())
         if (!empty($topic->competencies))
         {
             // We need to add 'proficient' competency records for any historical user topic completions
-            $topiccompletions = $DB->get_records_select('ojt_completion', 'topicid = ? AND type = ? AND status IN(?,?)',
+            $topiccompletions = $DB->get_records_select('observation_completion', 'topicid = ? AND type = ? AND status IN(?,?)',
                 array(
                     $data->id,
                     completion::COMP_TYPE_TOPIC,
@@ -107,13 +107,13 @@ if ($data = $form->get_data())
         $transaction->allow_commit();
     }
 
-    redirect(new moodle_url('/mod/ojt/manage.php', array('cmid' => $cm->id)));
+    redirect(new moodle_url('/mod/observation/manage.php', array('cmid' => $cm->id)));
 }
 
 // Print the page header.
-$actionstr = empty($topicid) ? get_string('addtopic', 'ojt') : get_string('edittopic', 'ojt');
-$PAGE->set_title(format_string($ojt->name));
-$PAGE->set_heading(format_string($ojt->name) . ' - ' . $actionstr);
+$actionstr = empty($topicid) ? get_string('addtopic', 'observation') : get_string('edittopic', 'observation');
+$PAGE->set_title(format_string($observation->name));
+$PAGE->set_heading(format_string($observation->name) . ' - ' . $actionstr);
 
 // Output starts here.
 echo $OUTPUT->header();

@@ -16,12 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * The main ojt configuration form
+ * The main observation configuration form
  *
  * It uses the standard core Moodle formslib. For more info about them, please
  * visit: http://docs.moodle.org/en/Development:lib/formslib.php
@@ -34,7 +34,7 @@ require_once($CFG->dirroot . '/course/moodleform_mod.php');
 /**
  * Module instance settings form
  */
-class mod_ojt_mod_form extends moodleform_mod
+class mod_observation_mod_form extends moodleform_mod
 {
 
     /**
@@ -49,7 +49,7 @@ class mod_ojt_mod_form extends moodleform_mod
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('ojtname', 'ojt'), array('size' => '64'));
+        $mform->addElement('text', 'name', get_string('observationname', 'observation'), array('size' => '64'));
         if (!empty($CFG->formatstringstriptags))
         {
             $mform->setType('name', PARAM_TEXT);
@@ -60,14 +60,14 @@ class mod_ojt_mod_form extends moodleform_mod
         }
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
-        $mform->addHelpButton('name', 'ojtname', 'ojt');
+        $mform->addHelpButton('name', 'observationname', 'observation');
 
         // Adding the standard "intro" and "introformat" fields.
         $this->standard_intro_elements();
 
         // Workflow
-        $mform->addElement('advcheckbox', 'managersignoff', get_string('managersignoff', 'ojt'));
-        $mform->addElement('advcheckbox', 'itemwitness', get_string('itemwitness', 'ojt'));
+        $mform->addElement('advcheckbox', 'managersignoff', get_string('managersignoff', 'observation'));
+        $mform->addElement('advcheckbox', 'itemwitness', get_string('itemwitness', 'observation'));
 
         // Add standard grading elements.
         $this->standard_grading_coursemodule_elements();
@@ -83,7 +83,7 @@ class mod_ojt_mod_form extends moodleform_mod
     {
         $mform =& $this->_form;
 
-        $mform->addElement('advcheckbox', 'completiontopics', '', get_string('completiontopics', 'ojt'));
+        $mform->addElement('advcheckbox', 'completiontopics', '', get_string('completiontopics', 'observation'));
         $mform->setDefault('completiontopics', true);
         return array('completiontopics');
     }

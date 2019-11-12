@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 
-M.mod_ojt_expandcollapse = M.mod_ojt_expandcollapse || {
+M.mod_observation_expandcollapse = M.mod_observation_expandcollapse || {
 
     Y: null,
 
@@ -50,20 +50,20 @@ M.mod_ojt_expandcollapse = M.mod_ojt_expandcollapse || {
 
         // check jQuery dependency is available
         if (typeof $ === 'undefined') {
-            throw new Error('M.mod_ojt_expandcollapse.init()-> jQuery dependency required for this module.');
+            throw new Error('M.mod_observation_expandcollapse.init()-> jQuery dependency required for this module.');
         }
 
         var config = this.config;
 
         // Init topic expand/collapse
-        $('.mod-ojt-topic-heading').on('click', function () {
+        $('.mod-observation-topic-heading').on('click', function () {
             var topicheading = $(this);
             if (topicheading.hasClass('expanded')) {
                 topicheading.removeClass('expanded').addClass('collapsed');
             } else {
                 topicheading.removeClass('collapsed').addClass('expanded');
             }
-            $(this).next('.mod-ojt-topic-items').fadeToggle();
+            $(this).next('.mod-observation-topic-items').fadeToggle();
         });
 
     },  // init

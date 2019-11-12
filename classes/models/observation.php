@@ -16,26 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt\models;
+namespace mod_observation\models;
 
 use coding_exception;
 use completion_info;
 use context;
 use dml_exception;
 use dml_transaction_exception;
-use mod_ojt\interfaces\crud;
-use mod_ojt\traits\db_record_base;
-use mod_ojt\traits\record_mapper;
-use mod_ojt\user_topic;
+use mod_observation\interfaces\crud;
+use mod_observation\traits\db_record_base;
+use mod_observation\traits\record_mapper;
+use mod_observation\user_topic;
 use stdClass;
 
-class ojt extends db_record_base
+class observation extends db_record_base
 {
-    protected const TABLE = 'ojt';
+    protected const TABLE = 'observation';
 
     /**
      * @var int
@@ -85,19 +85,19 @@ class ojt extends db_record_base
 
     /**
      * @param int $userid
-     * @param int $ojtid
+     * @param int $observationid
      * @return mixed|stdClass
      * @throws dml_exception
      * @throws dml_transaction_exception
      *
      * @deprecated do not use
      */
-    public static function update_completion(int $userid, int $ojtid)
+    public static function update_completion(int $userid, int $observationid)
     {
         global $DB, $USER;
 
-        // Check if all required ojt topics have been completed, then complete the ojt
-        $topics = user_topic::get_user_topic_records($userid, $ojtid);
+        // Check if all required observation topics have been completed, then complete the observation
+        $topics = user_topic::get_user_topic_records($userid, $observationid);
 
         $status = completion::STATUS_COMPLETE;
         foreach ($topics as $topic)
@@ -124,11 +124,11 @@ class ojt extends db_record_base
         }
 
         $transaction       = $DB->start_delegated_transaction();
-        $currentcompletion = $DB->get_record('ojt_completion',
-            array('userid' => $userid, 'ojtid' => $ojtid, 'type' => completion::COMP_TYPE_OJT));
+        $currentcompletion = $DB->get_record('observation_completion',
+            array('userid' => $userid, 'observationid' => $observationid, 'type' => completion::COMP_TYPE_Observation));
         if (empty($currentcompletion->status) || $status != $currentcompletion->status)
         {
-            // Update ojt completion
+            // Update observation completion
             $completion               = empty($currentcompletion) ? new stdClass() : $currentcompletion;
             $completion->status       = $status;
             $completion->timemodified = time();
@@ -136,37 +136,37 @@ class ojt extends db_record_base
             if (empty($currentcompletion))
             {
                 $completion->userid = $userid;
-                $completion->type   = completion::COMP_TYPE_OJT;
-                $completion->ojtid  = $ojtid;
-                $completion->id     = $DB->insert_record('ojt_completion', $completion);
+                $completion->type   = completion::COMP_TYPE_Observation;
+                $completion->observationid  = $observationid;
+                $completion->id     = $DB->insert_record('observation_completion', $completion);
             }
             else
             {
-                $DB->update_record('ojt_completion', $completion);
+                $DB->update_record('observation_completion', $completion);
             }
 
             // Update activity completion state
-            self::update_activity_completion($ojtid, $userid, $status);
+            self::update_activity_completion($observationid, $userid, $status);
         }
         $transaction->allow_commit();
 
         return empty($completion) ? $currentcompletion : $completion;
     }
 
-    public static function update_activity_completion($ojtid, $userid, $ojtstatus)
+    public static function update_activity_completion($observationid, $userid, $observationstatus)
     {
         global $DB;
 
-        $ojt = $DB->get_record('ojt', array('id' => $ojtid), '*', MUST_EXIST);
-        if ($ojt->completiontopics)
+        $observation = $DB->get_record('observation', array('id' => $observationid), '*', MUST_EXIST);
+        if ($observation->completiontopics)
         {
-            $course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
+            $course = $DB->get_record('course', array('id' => $observation->course), '*', MUST_EXIST);
 
-            $cm          = get_coursemodule_from_instance('ojt', $ojt->id, $ojt->course, false, MUST_EXIST);
+            $cm          = get_coursemodule_from_instance('observation', $observation->id, $observation->course, false, MUST_EXIST);
             $ccompletion = new completion_info($course);
             if ($ccompletion->is_enabled($cm))
             {
-                if (in_array($ojtstatus, array(completion::STATUS_COMPLETE, completion::STATUS_REQUIREDCOMPLETE)))
+                if (in_array($observationstatus, array(completion::STATUS_COMPLETE, completion::STATUS_REQUIREDCOMPLETE)))
                 {
                     $ccompletion->update_state($cm, COMPLETION_COMPLETE, $userid);
                 }
@@ -191,8 +191,8 @@ class ojt extends db_record_base
         global $DB;
 
         $sql = "SELECT ti.id
-                FROM {ojt_topic_item} ti
-                LEFT JOIN {ojt_item_witness} iw ON ti.id = iw.topicitemid AND iw.witnessedby != 0 AND iw.userid = ?
+                FROM {observation_topic_item} ti
+                LEFT JOIN {observation_item_witness} iw ON ti.id = iw.topicitemid AND iw.witnessedby != 0 AND iw.userid = ?
                 WHERE ti.completionreq = ? 
                 AND ti.topicid = ? 
                 AND iw.witnessedby IS NULL";
@@ -242,7 +242,7 @@ class ojt extends db_record_base
     }
 
     /**
-     * Checks if a user has capabilities to evaluate an ojt activity
+     * Checks if a user has capabilities to evaluate an observation activity
      *
      * @param int     $userid
      * @param context $context
@@ -253,8 +253,8 @@ class ojt extends db_record_base
     {
         global $USER;
 
-        if (!has_capability('mod/ojt:evaluate', $context)
-            && !(has_capability('mod/ojt:evaluateself', $context)
+        if (!has_capability('mod/observation:evaluate', $context)
+            && !(has_capability('mod/observation:evaluateself', $context)
                  && $USER->id == $userid))
         {
             return false;

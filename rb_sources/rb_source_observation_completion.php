@@ -16,15 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_ojt\models\completion;
+use mod_observation\models\completion;
 
 defined('MOODLE_INTERNAL') || die();
 
-class rb_source_ojt_completion extends rb_base_source
+class rb_source_observation_completion extends rb_base_source
 {
     public $base, $joinlist, $columnoptions, $filteroptions;
     public $contentoptions, $paramoptions, $defaultcolumns;
@@ -44,34 +44,34 @@ class rb_source_ojt_completion extends rb_base_source
         $this->add_global_report_restriction_join('base', 'userid');
 
         global $CFG, $DB;
-        require_once($CFG->dirroot . '/mod/ojt/lib.php');
+        require_once($CFG->dirroot . '/mod/observation/lib.php');
 
         $this->base = "(
-            SELECT " . $DB->sql_concat('ub.courseid', "'-'", 'ub.userid', "'-'", 'ub.ojtid', "'-'", 'ub.topicid', "'-'",
+            SELECT " . $DB->sql_concat('ub.courseid', "'-'", 'ub.userid', "'-'", 'ub.observationid', "'-'", 'ub.topicid', "'-'",
                 'ub.type') . " AS id,
-            ub.courseid, ub.userid, ub.ojtid, ub.topicid, ub.type, bc.status, bc.timemodified, bc.observeremail
+            ub.courseid, ub.userid, ub.observationid, ub.topicid, ub.type, bc.status, bc.timemodified, bc.observeremail
             FROM (
-                (SELECT ue.courseid, ue.userid, b.id AS ojtid, 0 AS topicid," . completion::COMP_TYPE_OJT . " AS type
+                (SELECT ue.courseid, ue.userid, b.id AS observationid, 0 AS topicid," . completion::COMP_TYPE_Observation . " AS type
                 FROM
                     (SELECT distinct courseid, userid
                     FROM {enrol} e
                     JOIN {user_enrolments} ue ON e.id = ue.enrolid) ue
-                JOIN {ojt} b ON ue.courseid = b.course)
+                JOIN {observation} b ON ue.courseid = b.course)
                 UNION
-                (SELECT ue.courseid, ue.userid, b.id AS ojtid, t.id AS topicid," . completion::COMP_TYPE_TOPIC . " AS type
+                (SELECT ue.courseid, ue.userid, b.id AS observationid, t.id AS topicid," . completion::COMP_TYPE_TOPIC . " AS type
                 FROM
                     (SELECT DISTINCT courseid, userid
                     FROM {enrol} e
                     JOIN {user_enrolments} ue ON e.id = ue.enrolid) ue
-                JOIN {ojt} b ON ue.courseid = b.course
-                JOIN {ojt_topic} t ON b.id = t.ojtid)
+                JOIN {observation} b ON ue.courseid = b.course
+                JOIN {observation_topic} t ON b.id = t.observationid)
             ) AS ub
-            LEFT JOIN {ojt_completion} bc
+            LEFT JOIN {observation_completion} bc
                 ON bc.userid = ub.userid
-                AND bc.ojtid = ub.ojtid
+                AND bc.observationid = ub.observationid
                 AND bc.topicid = ub.topicid
                 AND bc.type = ub.type
-            ORDER BY courseid, userid, ojtid, topicid
+            ORDER BY courseid, userid, observationid, topicid
         )";
 
         $this->joinlist        = $this->define_joinlist();
@@ -82,7 +82,7 @@ class rb_source_ojt_completion extends rb_base_source
         $this->defaultcolumns  = $this->define_defaultcolumns();
         $this->defaultfilters  = $this->define_defaultfilters();
         $this->requiredcolumns = $this->define_requiredcolumns();
-        $this->sourcetitle     = get_string('ojtcompletion', 'rb_source_ojt_completion');
+        $this->sourcetitle     = get_string('observationcompletion', 'rb_source_observation_completion');
 
         parent::__construct();
     }
@@ -108,30 +108,30 @@ class rb_source_ojt_completion extends rb_base_source
         global $CFG;
 
         // to get access to constants
-        require_once($CFG->dirroot . '/mod/ojt/lib.php');
+        require_once($CFG->dirroot . '/mod/observation/lib.php');
         require_once($CFG->dirroot . '/completion/criteria/completion_criteria.php');
 
         $joinlist = array(
             new rb_join(
-                'ojt',
+                'observation',
                 'LEFT',
-                '{ojt}',
-                'base.ojtid = ojt.id',
+                '{observation}',
+                'base.observationid = observation.id',
                 REPORT_BUILDER_RELATION_ONE_TO_ONE
             ),
             new rb_join(
-                'ojt_topic',
+                'observation_topic',
                 'LEFT',
-                '{ojt_topic}',
-                'base.topicid = ojt_topic.id',
+                '{observation_topic}',
+                'base.topicid = observation_topic.id',
                 REPORT_BUILDER_RELATION_ONE_TO_ONE
             ),
             new rb_join(
-                'ojt_topic_signoff',
+                'observation_topic_signoff',
                 'LEFT',
-                '{ojt_topic_signoff}',
-                'base.topicid = ojt_topic_signoff.topicid
-                    AND base.userid = ojt_topic_signoff.userid',
+                '{observation_topic_signoff}',
+                'base.topicid = observation_topic_signoff.topicid
+                    AND base.userid = observation_topic_signoff.userid',
                 REPORT_BUILDER_RELATION_ONE_TO_ONE
             ),
             new rb_join(
@@ -145,9 +145,9 @@ class rb_source_ojt_completion extends rb_base_source
                 'topicsignoffuser',
                 'LEFT',
                 '{user}',
-                'ojt_topic_signoff.modifiedby = topicsignoffuser.id',
+                'observation_topic_signoff.modifiedby = topicsignoffuser.id',
                 REPORT_BUILDER_RELATION_ONE_TO_ONE,
-                'ojt_topic_signoff'
+                'observation_topic_signoff'
             ),
         );
 
@@ -170,49 +170,49 @@ class rb_source_ojt_completion extends rb_base_source
 
         $columnoptions = array(
             new rb_column_option(
-                'ojt',
+                'observation',
                 'name',
-                get_string('ojt', 'rb_source_ojt_completion'),
-                'ojt.name',
-                array('joins'       => 'ojt',
-                      'displayfunc' => 'ojt_link',
-                      'extrafields' => array('userid' => 'base.userid', 'ojtid' => 'base.ojtid'))
+                get_string('observation', 'rb_source_observation_completion'),
+                'observation.name',
+                array('joins'       => 'observation',
+                      'displayfunc' => 'observation_link',
+                      'extrafields' => array('userid' => 'base.userid', 'observationid' => 'base.observationid'))
             ),
             new rb_column_option(
-                'ojt',
+                'observation',
                 'evaluatelink',
-                get_string('evaluatelink', 'rb_source_ojt_completion'),
-                'ojt.name',
-                array('joins'       => 'ojt',
-                      'displayfunc' => 'ojt_evaluate_link',
-                      'extrafields' => array('userid' => 'base.userid', 'ojtid' => 'base.ojtid'))
+                get_string('evaluatelink', 'rb_source_observation_completion'),
+                'observation.name',
+                array('joins'       => 'observation',
+                      'displayfunc' => 'observation_evaluate_link',
+                      'extrafields' => array('userid' => 'base.userid', 'observationid' => 'base.observationid'))
             ),
 
             new rb_column_option(
-                'ojt_topic',
+                'observation_topic',
                 'name',
-                get_string('topic', 'rb_source_ojt_completion'),
-                'ojt_topic.name',
-                array('joins' => 'ojt_topic')
+                get_string('topic', 'rb_source_observation_completion'),
+                'observation_topic.name',
+                array('joins' => 'observation_topic')
             ),
             new rb_column_option(
-                'ojt_topic_signoff',
+                'observation_topic_signoff',
                 'signedoff',
-                get_string('topicsignedoff', 'rb_source_ojt_completion'),
-                'ojt_topic_signoff.signedoff',
-                array('joins' => 'ojt_topic_signoff', 'displayfunc' => 'ojt_topic_signedoff')
+                get_string('topicsignedoff', 'rb_source_observation_completion'),
+                'observation_topic_signoff.signedoff',
+                array('joins' => 'observation_topic_signoff', 'displayfunc' => 'observation_topic_signedoff')
             ),
             new rb_column_option(
-                'ojt_topic_signoff',
+                'observation_topic_signoff',
                 'timemodified',
-                get_string('topicsignedofftime', 'rb_source_ojt_completion'),
-                'ojt_topic_signoff.timemodified',
-                array('joins' => 'ojt_topic_signoff', 'displayfunc' => 'nice_datetime')
+                get_string('topicsignedofftime', 'rb_source_observation_completion'),
+                'observation_topic_signoff.timemodified',
+                array('joins' => 'observation_topic_signoff', 'displayfunc' => 'nice_datetime')
             ),
             new rb_column_option(
-                'ojt_topic_signoff',
+                'observation_topic_signoff',
                 'topicsignoffuser',
-                get_string('topicsignoffuser', 'rb_source_ojt_completion'),
+                get_string('topicsignoffuser', 'rb_source_observation_completion'),
                 $DB->sql_fullname("topicsignoffuser.firstname", "topicsignoffuser.lastname"),
                 array(
                     'joins'       => 'topicsignoffuser',
@@ -224,28 +224,28 @@ class rb_source_ojt_completion extends rb_base_source
             new rb_column_option(
                 'base',
                 'status',
-                get_string('completionstatus', 'rb_source_ojt_completion'),
+                get_string('completionstatus', 'rb_source_observation_completion'),
                 'base.status',
-                array('displayfunc' => 'ojt_completion_status')
+                array('displayfunc' => 'observation_completion_status')
             ),
             new rb_column_option(
                 'base',
                 'type',
-                get_string('type', 'rb_source_ojt_completion'),
+                get_string('type', 'rb_source_observation_completion'),
                 'base.type',
-                array('displayfunc' => 'ojt_type')
+                array('displayfunc' => 'observation_type')
             ),
             new rb_column_option(
                 'base',
                 'timemodified',
-                get_string('timemodified', 'rb_source_ojt_completion'),
+                get_string('timemodified', 'rb_source_observation_completion'),
                 'base.timemodified',
                 array('displayfunc' => 'nice_datetime')
             ),
             new rb_column_option(
                 'base',
                 'modifiedby',
-                get_string('modifiedby', 'rb_source_ojt_completion'),
+                get_string('modifiedby', 'rb_source_observation_completion'),
                 $DB->sql_fullname("modifyuser.firstname", "modifyuser.lastname"),
                 array(
                     'joins'       => 'modifyuser',
@@ -271,39 +271,39 @@ class rb_source_ojt_completion extends rb_base_source
         $filteroptions = array(
 
             new rb_filter_option(
-                'ojt',
+                'observation',
                 'name',
-                get_string('ojtname', 'rb_source_ojt_completion'),
+                get_string('observationname', 'rb_source_observation_completion'),
                 'text'
             ),
             new rb_filter_option(
-                'ojt_topic',
+                'observation_topic',
                 'name',
-                get_string('topicname', 'rb_source_ojt_completion'),
+                get_string('topicname', 'rb_source_observation_completion'),
                 'text'
             ),
             new rb_filter_option(
                 'base',
                 'timemodified',
-                get_string('timemodified', 'rb_source_ojt_completion'),
+                get_string('timemodified', 'rb_source_observation_completion'),
                 'date'
             ),
             new rb_filter_option(
                 'base',
                 'status',
-                get_string('completionstatus', 'rb_source_ojt_completion'),
+                get_string('completionstatus', 'rb_source_observation_completion'),
                 'select',
                 array(
-                    'selectfunc' => 'ojt_completion_status_list',
+                    'selectfunc' => 'observation_completion_status_list',
                 )
             ),
             new rb_filter_option(
                 'base',
                 'type',
-                get_string('type', 'rb_source_ojt_completion'),
+                get_string('type', 'rb_source_observation_completion'),
                 'select',
                 array(
-                    'selectfunc' => 'ojt_type_list',
+                    'selectfunc' => 'observation_type_list',
                 )
             ),
 
@@ -325,8 +325,8 @@ class rb_source_ojt_completion extends rb_base_source
         $contentoptions = array();
         $this->add_basic_user_content_options($contentoptions);
         $contentoptions[] = new rb_content_option(
-            'ojt_completion_type',
-            get_string('ojtcompletiontype', 'rb_source_ojt_completion'),
+            'observation_completion_type',
+            get_string('observationcompletiontype', 'rb_source_observation_completion'),
             'base.type',
             'base'
         );
@@ -337,8 +337,8 @@ class rb_source_ojt_completion extends rb_base_source
     {
         $paramoptions = array(
             new rb_param_option(
-                'ojtid',
-                'base.ojtid'
+                'observationid',
+                'base.observationid'
             ),
         );
 
@@ -357,11 +357,11 @@ class rb_source_ojt_completion extends rb_base_source
                 'value' => 'courselink',
             ),
             array(
-                'type'  => 'ojt',
+                'type'  => 'observation',
                 'value' => 'name',
             ),
             array(
-                'type'  => 'ojt_topic',
+                'type'  => 'observation_topic',
                 'value' => 'name',
             ),
             array(
@@ -381,11 +381,11 @@ class rb_source_ojt_completion extends rb_base_source
     {
         $defaultfilters = array(
             array(
-                'type'  => 'ojt',
+                'type'  => 'observation',
                 'value' => 'name',
             ),
             array(
-                'type'  => 'ojt_topic',
+                'type'  => 'observation_topic',
                 'value' => 'name',
             ),
             array(
@@ -422,38 +422,38 @@ class rb_source_ojt_completion extends rb_base_source
     //
     //
 
-    function rb_display_ojt_completion_status($status, $row, $isexport)
+    function rb_display_observation_completion_status($status, $row, $isexport)
     {
         if (empty($status))
         {
-            return get_string('completionstatus' . completion::STATUS_INCOMPLETE, 'ojt');
+            return get_string('completionstatus' . completion::STATUS_INCOMPLETE, 'observation');
         }
         else
         {
-            return get_string('completionstatus' . $status, 'ojt');
+            return get_string('completionstatus' . $status, 'observation');
         }
     }
 
-    function rb_display_ojt_type($type, $row, $isexport)
+    function rb_display_observation_type($type, $row, $isexport)
     {
-        return get_string('type' . $type, 'ojt');
+        return get_string('type' . $type, 'observation');
     }
 
-    function rb_display_ojt_link($ojtname, $row, $isexport)
+    function rb_display_observation_link($observationname, $row, $isexport)
     {
-        return html_writer::link(new moodle_url('/mod/ojt/evaluate.php',
-            array('userid' => $row->userid, 'bid' => $row->ojtid)), $ojtname);
-
-    }
-
-    function rb_display_ojt_evaluate_link($ojtname, $row, $isexport)
-    {
-        return html_writer::link(new moodle_url('/mod/ojt/evaluate.php',
-            array('userid' => $row->userid, 'bid' => $row->ojtid)), get_string('evaluate', 'rb_source_ojt_completion'));
+        return html_writer::link(new moodle_url('/mod/observation/evaluate.php',
+            array('userid' => $row->userid, 'bid' => $row->observationid)), $observationname);
 
     }
 
-    function rb_display_ojt_topic_signedoff($signedoff, $row, $isexport)
+    function rb_display_observation_evaluate_link($observationname, $row, $isexport)
+    {
+        return html_writer::link(new moodle_url('/mod/observation/evaluate.php',
+            array('userid' => $row->userid, 'bid' => $row->observationid)), get_string('evaluate', 'rb_source_observation_completion'));
+
+    }
+
+    function rb_display_observation_topic_signedoff($signedoff, $row, $isexport)
     {
 
         return !empty($signedoff) ? get_string('yes') : get_string('no');
@@ -469,26 +469,26 @@ class rb_source_ojt_completion extends rb_base_source
     //
     //
 
-    function rb_filter_ojt_completion_status_list()
+    function rb_filter_observation_completion_status_list()
     {
         $statuses   =
             array(completion::STATUS_INCOMPLETE, completion::STATUS_REQUIREDCOMPLETE, completion::STATUS_COMPLETE);
         $statuslist = array();
         foreach ($statuses as $status)
         {
-            $statuslist[$status] = get_string('completionstatus' . $status, 'ojt');
+            $statuslist[$status] = get_string('completionstatus' . $status, 'observation');
         }
 
         return $statuslist;
     }
 
-    function rb_filter_ojt_type_list()
+    function rb_filter_observation_type_list()
     {
-        $types    = array(completion::COMP_TYPE_OJT, completion::COMP_TYPE_TOPIC);
+        $types    = array(completion::COMP_TYPE_Observation, completion::COMP_TYPE_TOPIC);
         $typelist = array();
         foreach ($types as $type)
         {
-            $typelist[$type] = get_string('type' . $type, 'ojt');
+            $typelist[$type] = get_string('type' . $type, 'observation');
         }
 
         return $typelist;
@@ -511,20 +511,20 @@ class rb_source_ojt_completion extends rb_base_source
             throw new coding_exception('phpunit_prepare_test_data() cannot be used outside of unit tests');
         }
         $data = array(
-            'ojt'             => array(
-                array('id' => 1, 'course' => 1, 'name' => 'test ojt', 'intro' => '', 'timecreated' => 1)
+            'observation'             => array(
+                array('id' => 1, 'course' => 1, 'name' => 'test observation', 'intro' => '', 'timecreated' => 1)
             ),
-            'ojt_topic'       => array(
-                array('id' => 1, 'ojtid' => 1, 'name' => 'test ojt topic')
+            'observation_topic'       => array(
+                array('id' => 1, 'observationid' => 1, 'name' => 'test observation topic')
             ),
-            'ojt_topic_item'  => array(
-                array('id' => 1, 'ojtid' => 1, 'topicid' => 1, 'name' => 'test ojt topic item')
+            'observation_topic_item'  => array(
+                array('id' => 1, 'observationid' => 1, 'topicid' => 1, 'name' => 'test observation topic item')
             ),
-            'ojt_completion'  => array(
+            'observation_completion'  => array(
                 array('id'          => 1,
                       'userid'      => 2,
                       'type'        => 0,
-                      'ojtid'       => 1,
+                      'observationid'       => 1,
                       'topicid'     => 0,
                       'topicitemid' => 0,
                       'status'      => 1,
@@ -532,7 +532,7 @@ class rb_source_ojt_completion extends rb_base_source
                 array('id'          => 2,
                       'userid'      => 2,
                       'type'        => 1,
-                      'ojtid'       => 1,
+                      'observationid'       => 1,
                       'topicid'     => 1,
                       'topicitemid' => 0,
                       'status'      => 1,
@@ -540,7 +540,7 @@ class rb_source_ojt_completion extends rb_base_source
                 array('id'          => 3,
                       'userid'      => 2,
                       'type'        => 2,
-                      'ojtid'       => 1,
+                      'observationid'       => 1,
                       'topicid'     => 1,
                       'topicitemid' => 1,
                       'status'      => 1,
@@ -578,11 +578,11 @@ class rb_source_ojt_completion extends rb_base_source
 
 
 /**
- * Restrict content by ojt completion type
+ * Restrict content by observation completion type
  *
- * Pass in an integer that represents a ojt completion type, e.g OJT_CTYPE_TOPIC
+ * Pass in an integer that represents a observation completion type, e.g Observation_CTYPE_TOPIC
  */
-class rb_ojt_completion_type_content extends rb_base_content
+class rb_observation_completion_type_content extends rb_base_content
 {
 
     /**
@@ -597,7 +597,7 @@ class rb_ojt_completion_type_content extends rb_base_content
     {
         global $CFG, $DB;
 
-        require_once($CFG->dirroot . '/mod/ojt/lib.php');
+        require_once($CFG->dirroot . '/mod/observation/lib.php');
 
         // remove rb_ from start of classname
         $type     = substr(get_class($this), 3);
@@ -623,7 +623,7 @@ class rb_ojt_completion_type_content extends rb_base_content
         $settings = reportbuilder::get_all_settings($reportid, $type);
 
         return !empty($settings['completiontype']) ?
-            $title . ' - ' . get_string('type' . $settings['completiontype'], 'ojt') : '';
+            $title . ' - ' . get_string('type' . $settings['completiontype'], 'observation') : '';
     }
 
 
@@ -642,24 +642,24 @@ class rb_ojt_completion_type_content extends rb_base_content
         $enable         = reportbuilder::get_setting($reportid, $type, 'enable');
         $completiontype = reportbuilder::get_setting($reportid, $type, 'completiontype');
 
-        $mform->addElement('header', 'ojt_completion_type_header',
+        $mform->addElement('header', 'observation_completion_type_header',
             get_string('showbyx', 'totara_reportbuilder', lcfirst($title)));
-        $mform->setExpanded('ojt_completion_type_header');
-        $mform->addElement('checkbox', 'ojt_completion_type_enable', '',
-            get_string('completiontypeenable', 'rb_source_ojt_completion'));
-        $mform->setDefault('ojt_completion_type_enable', $enable);
-        $mform->disabledIf('ojt_completion_type_enable', 'contentenabled', 'eq', 0);
+        $mform->setExpanded('observation_completion_type_header');
+        $mform->addElement('checkbox', 'observation_completion_type_enable', '',
+            get_string('completiontypeenable', 'rb_source_observation_completion'));
+        $mform->setDefault('observation_completion_type_enable', $enable);
+        $mform->disabledIf('observation_completion_type_enable', 'contentenabled', 'eq', 0);
         $radiogroup   = array();
-        $radiogroup[] =& $mform->createElement('radio', 'ojt_completion_type_completiontype',
-            '', get_string('type' . completion::COMP_TYPE_OJT, 'ojt'), completion::COMP_TYPE_OJT);
-        $radiogroup[] =& $mform->createElement('radio', 'ojt_completion_type_completiontype',
-            '', get_string('type' . completion::COMP_TYPE_TOPIC, 'ojt'), completion::COMP_TYPE_TOPIC);
-        $mform->addGroup($radiogroup, 'ojt_completion_type_completiontype_group',
-            get_string('includecompltyperecords', 'rb_source_ojt_completion'), html_writer::empty_tag('br'), false);
-        $mform->setDefault('ojt_completion_type_completiontype', $completiontype);
-        $mform->disabledIf('ojt_completion_type_completiontype_group', 'contentenabled',
+        $radiogroup[] =& $mform->createElement('radio', 'observation_completion_type_completiontype',
+            '', get_string('type' . completion::COMP_TYPE_Observation, 'observation'), completion::COMP_TYPE_Observation);
+        $radiogroup[] =& $mform->createElement('radio', 'observation_completion_type_completiontype',
+            '', get_string('type' . completion::COMP_TYPE_TOPIC, 'observation'), completion::COMP_TYPE_TOPIC);
+        $mform->addGroup($radiogroup, 'observation_completion_type_completiontype_group',
+            get_string('includecompltyperecords', 'rb_source_observation_completion'), html_writer::empty_tag('br'), false);
+        $mform->setDefault('observation_completion_type_completiontype', $completiontype);
+        $mform->disabledIf('observation_completion_type_completiontype_group', 'contentenabled',
             'eq', 0);
-        $mform->disabledIf('ojt_completion_type_completiontype_group', 'ojt_completion_type_enable',
+        $mform->disabledIf('observation_completion_type_completiontype_group', 'observation_completion_type_enable',
             'notchecked');
     }
 
@@ -679,14 +679,14 @@ class rb_ojt_completion_type_content extends rb_base_content
         $type = substr(get_class($this), 3);
 
         // enable checkbox option
-        $enable = (isset($fromform->ojt_completion_type_enable) &&
-                   $fromform->ojt_completion_type_enable) ? 1 : 0;
+        $enable = (isset($fromform->observation_completion_type_enable) &&
+                   $fromform->observation_completion_type_enable) ? 1 : 0;
         $status = $status && reportbuilder::update_setting($reportid, $type,
                 'enable', $enable);
 
         // recursive radio option
-        $recursive = isset($fromform->ojt_completion_type_completiontype) ?
-            $fromform->ojt_completion_type_completiontype : 0;
+        $recursive = isset($fromform->observation_completion_type_completiontype) ?
+            $fromform->observation_completion_type_completiontype : 0;
         $status    = $status && reportbuilder::update_setting($reportid, $type,
                 'completiontype', $recursive);
 

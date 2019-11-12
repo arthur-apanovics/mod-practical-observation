@@ -16,13 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 
-class backup_ojt_activity_structure_step extends backup_activity_structure_step
+class backup_observation_activity_structure_step extends backup_activity_structure_step
 {
 
     /**
@@ -36,8 +36,8 @@ class backup_ojt_activity_structure_step extends backup_activity_structure_step
         // Get know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
 
-        // Define the root element describing the ojt instance.
-        $ojt = new backup_nested_element('ojt', array('id'), array(
+        // Define the root element describing the observation instance.
+        $observation = new backup_nested_element('observation', array('id'), array(
             'name',
             'intro',
             'introformat',
@@ -86,32 +86,32 @@ class backup_ojt_activity_structure_step extends backup_activity_structure_step
             'timewitnessed'));
 
         // Build the tree
-        $ojt->add_child($topics);
+        $observation->add_child($topics);
         $topics->add_child($topic);
         $topic->add_child($items);
         $items->add_child($item);
 
-        $ojt->add_child($completions);
+        $observation->add_child($completions);
         $completions->add_child($completion);
 
-        $ojt->add_child($topic_signoffs);
+        $observation->add_child($topic_signoffs);
         $topic_signoffs->add_child($topic_signoff);
 
-        $ojt->add_child($item_witnesses);
+        $observation->add_child($item_witnesses);
         $item_witnesses->add_child($item_witness);
 
         // Define data sources.
-        $ojt->set_source_table('ojt', array('id' => backup::VAR_ACTIVITYID));
+        $observation->set_source_table('observation', array('id' => backup::VAR_ACTIVITYID));
 
         $topic->set_source_sql('
             SELECT *
-              FROM {ojt_topic}
-             WHERE ojtid = ?',
+              FROM {observation_topic}
+             WHERE observationid = ?',
             array(backup::VAR_PARENTID));
 
         $item->set_source_sql('
             SELECT *
-              FROM {ojt_topic_item}
+              FROM {observation_topic_item}
              WHERE topicid = ?',
             array(backup::VAR_PARENTID));
 
@@ -119,28 +119,28 @@ class backup_ojt_activity_structure_step extends backup_activity_structure_step
         {
             $completion->set_source_sql('
                 SELECT *
-                  FROM {ojt_completion}
-                 WHERE ojtid = ?',
+                  FROM {observation_completion}
+                 WHERE observationid = ?',
                 array(backup::VAR_ACTIVITYID));
 
             $topic_signoff->set_source_sql('
                 SELECT *
-                  FROM {ojt_topic_signoff}
+                  FROM {observation_topic_signoff}
                   WHERE topicid IN (
                       SELECT id
-                      FROM {ojt_topic}
-                      WHERE ojtid = ?
+                      FROM {observation_topic}
+                      WHERE observationid = ?
                   )',
                 array(backup::VAR_ACTIVITYID));
 
             $item_witness->set_source_sql('
                 SELECT *
-                  FROM {ojt_item_witness}
+                  FROM {observation_item_witness}
                   WHERE topicitemid IN (
                       SELECT ti.id
-                      FROM {ojt_topic} t
-                      JOIN {ojt_topic_item} ti ON t.id = ti.topicid
-                      WHERE t.ojtid = ?
+                      FROM {observation_topic} t
+                      JOIN {observation_topic_item} ti ON t.id = ti.topicid
+                      WHERE t.observationid = ?
                   )',
                 array(backup::VAR_ACTIVITYID));
 
@@ -157,9 +157,9 @@ class backup_ojt_activity_structure_step extends backup_activity_structure_step
         $item_witness->annotate_ids('user', 'userid');
 
         // Define file annotations (we do not use itemid in this example).
-        $ojt->annotate_files('mod_ojt', 'intro', null);
+        $observation->annotate_files('mod_observation', 'intro', null);
 
-        // Return the root element (ojt), wrapped into standard activity structure.
-        return $this->prepare_activity_structure($ojt);
+        // Return the root element (observation), wrapped into standard activity structure.
+        return $this->prepare_activity_structure($observation);
     }
 }

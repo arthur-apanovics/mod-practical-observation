@@ -16,28 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_ojt\models\ojt;
+use mod_observation\models\observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/lib.php');
 require_once(dirname(__FILE__) . '/locallib.php');
 
 $id = optional_param('cmid', 0, PARAM_INT); // Course_module ID
-$b  = optional_param('b', 0, PARAM_INT);  // OJT instance ID
+$b  = optional_param('b', 0, PARAM_INT);  // Observation instance ID
 
-list($ojt, $course, $cm) = ojt_check_page_id_params_and_init($id, $b); /* @var $ojt ojt */
+list($observation, $course, $cm) = observation_check_page_id_params_and_init($id, $b); /* @var $observation observation */
 
 require_login($course, true, $cm);
-require_capability('mod/ojt:manage', context_module::instance($cm->id));
+require_capability('mod/observation:manage', context_module::instance($cm->id));
 
 // Print the page header.
-$PAGE->set_url('/mod/ojt/view.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/observation/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($course->fullname));
-$PAGE->set_heading(format_string($ojt->name) . ' - ' . get_string('manage', 'ojt'));
+$PAGE->set_heading(format_string($observation->name) . ' - ' . get_string('manage', 'observation'));
 
 // Output starts here.
 echo $OUTPUT->header();
@@ -45,14 +45,14 @@ echo $OUTPUT->header();
 // Replace the following lines with you own code.
 echo $OUTPUT->heading($PAGE->heading);
 
-$addtopicurl = new moodle_url('/mod/ojt/topic.php', array('bid' => $ojt->id));
-echo html_writer::tag('div', $OUTPUT->single_button($addtopicurl, get_string('addtopic', 'ojt')),
-    array('class' => 'mod-ojt-topic-addbtn'));
+$addtopicurl = new moodle_url('/mod/observation/topic.php', array('bid' => $observation->id));
+echo html_writer::tag('div', $OUTPUT->single_button($addtopicurl, get_string('addtopic', 'observation')),
+    array('class' => 'mod-observation-topic-addbtn'));
 
-$topics   = $DB->get_records('ojt_topic', array('ojtid' => $ojt->id));
-/* @var $renderer mod_ojt_renderer */
-$renderer = $PAGE->get_renderer('mod_ojt');
-echo $renderer->config_topics($ojt);
+$topics   = $DB->get_records('observation_topic', array('observationid' => $observation->id));
+/* @var $renderer mod_observation_renderer */
+$renderer = $PAGE->get_renderer('mod_observation');
+echo $renderer->config_topics($observation);
 
 // Finish the page.
 echo $OUTPUT->footer();

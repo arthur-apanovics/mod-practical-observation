@@ -1,13 +1,13 @@
 <?php
 /*
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  */
 
 /* Developer documentation is in /pix/flex_icons.php file. */
 
 $icons = array(
-    'mod_ojt|icon' =>
+    'mod_observation|icon' =>
         array(
             'data' =>
                 array(

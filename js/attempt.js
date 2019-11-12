@@ -15,11 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-M.mod_ojt_attempt = M.mod_ojt_attempt || {
+M.mod_observation_attempt = M.mod_observation_attempt || {
 
     Y: null,
 
@@ -49,21 +49,21 @@ M.mod_ojt_attempt = M.mod_ojt_attempt || {
 
         // check jQuery dependency is available
         if (typeof $ === 'undefined') {
-            throw new Error('M.mod_ojt_evaluate.init()-> jQuery dependency required for this module.');
+            throw new Error('M.mod_observation_evaluate.init()-> jQuery dependency required for this module.');
         }
 
         var config = this.config;
 
         // Init comment inputs
-        $('.ojt-completion-submission').change(function () {
+        $('.observation-completion-submission').change(function () {
             var attemptText = this;
-            var itemid = $(this).attr('ojt-item-id');
+            var itemid = $(this).attr('observation-item-id');
             $.ajax({
-                url: M.cfg.wwwroot + '/mod/ojt/attemptsave.php',
+                url: M.cfg.wwwroot + '/mod/observation/attemptsave.php',
                 type: 'POST',
                 data: {
                     'sesskey': M.cfg.sesskey,
-                    'bid': config.ojtid,
+                    'bid': config.observationid,
                     'userid': config.userid,
                     'id': itemid,
                     'attempttext': $(attemptText).val()
@@ -72,7 +72,7 @@ M.mod_ojt_attempt = M.mod_ojt_attempt || {
                     // Update comment text box, so we can get the date in there too
                     $(attemptText).val(data.attempt.text);
                     // Update the comment print box
-                    $('.ojt-completion-submission-print[ojt-item-id=' + itemid + ']').html(data.attempt.text);
+                    $('.observation-completion-submission-print[observation-item-id=' + itemid + ']').html(data.attempt.text);
                 },
                 error: function (data) {
                     console.log(data);

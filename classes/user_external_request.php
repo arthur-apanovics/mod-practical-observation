@@ -1,13 +1,13 @@
 <?php
 
 
-namespace mod_ojt;
+namespace mod_observation;
 
 
 use coding_exception;
 use dml_exception;
-use mod_ojt\models\email_assignment;
-use mod_ojt\models\external_request;
+use mod_observation\models\email_assignment;
+use mod_observation\models\external_request;
 
 class user_external_request extends external_request
 {
@@ -34,23 +34,23 @@ class user_external_request extends external_request
         parent::__construct($id_or_record);
 
         $this->userid            = $userid;
-        $this->email_assignments = email_assignment::get_assignments($this->ojtid, $this->topicid, $this->userid);
+        $this->email_assignments = email_assignment::get_assignments($this->observationid, $this->topicid, $this->userid);
     }
 
     /**
-     * @param int $ojtid
+     * @param int $observationid
      * @param int $topicid
      * @param int $userid
      * @return user_external_request
      * @throws coding_exception
      * @throws dml_exception
      */
-    public static function get_or_create_user_external_request_for_ojt_topic(int $ojtid, int $topicid, int $userid)
+    public static function get_or_create_user_external_request_for_observation_topic(int $observationid, int $topicid, int $userid)
     {
         global $DB;
 
-        $record = $DB->get_record('ojt_external_request',
-            ['ojtid' => $ojtid, 'topicid' => $topicid, 'userid' => $userid]);
+        $record = $DB->get_record('observation_external_request',
+            ['observationid' => $observationid, 'topicid' => $topicid, 'userid' => $userid]);
 
         if ($record)
         {
@@ -59,7 +59,7 @@ class user_external_request extends external_request
         else
         {
             $external_request          = new external_request();
-            $external_request->ojtid   = $ojtid;
+            $external_request->observationid   = $observationid;
             $external_request->topicid = $topicid;
             $external_request->userid  = $userid;
 
@@ -70,19 +70,19 @@ class user_external_request extends external_request
     }
 
     /**
-     * @param int $ojtid
+     * @param int $observationid
      * @param int $topicid
      * @param int $userid
      * @return user_external_request|null Returns null if no record found
      * @throws dml_exception
      * @throws coding_exception
      */
-    public static function get_user_request_for_ojt_topic(int $ojtid, int $topicid, int $userid)
+    public static function get_user_request_for_observation_topic(int $observationid, int $topicid, int $userid)
     {
         global $DB;
 
-        $record = $DB->get_record('ojt_external_request',
-            ['ojtid' => $ojtid, 'topicid' => $topicid, 'userid' => $userid]);
+        $record = $DB->get_record('observation_external_request',
+            ['observationid' => $observationid, 'topicid' => $topicid, 'userid' => $userid]);
 
         return $record ? new self($record, $userid) : null;
     }

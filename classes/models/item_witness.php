@@ -16,23 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt\models;
+namespace mod_observation\models;
 
 
 use coding_exception;
 use dml_exception;
-use mod_ojt\interfaces\crud;
-use mod_ojt\traits\db_record_base;
-use mod_ojt\traits\record_mapper;
+use mod_observation\interfaces\crud;
+use mod_observation\traits\db_record_base;
+use mod_observation\traits\record_mapper;
 use stdClass;
 
 class item_witness extends db_record_base
 {
-    protected const TABLE = 'ojt_item_witness';
+    protected const TABLE = 'observation_item_witness';
 
     /**
      * @var int
@@ -71,7 +71,7 @@ class item_witness extends db_record_base
     public static function get_user_item_witness(int $topicitemid, int $userid)
     {
         global $DB;
-        $rec = $DB->get_record('ojt_item_witness', ['topicitemid' => $topicitemid, 'userid' => $userid]);
+        $rec = $DB->get_record('observation_item_witness', ['topicitemid' => $topicitemid, 'userid' => $userid]);
         return $rec ? new self($rec) : null;
     }
 }

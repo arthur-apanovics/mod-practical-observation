@@ -16,73 +16,73 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 
 /**
- * OJT evaluation for a user
+ * Observation evaluation for a user
  */
 
-use mod_ojt\models\completion;
-use mod_ojt\models\ojt;
-use mod_ojt\user_ojt;
+use mod_observation\models\completion;
+use mod_observation\models\observation;
+use mod_observation\user_observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once($CFG->dirroot . '/mod/ojt/lib.php');
-require_once($CFG->dirroot . '/mod/ojt/locallib.php');
+require_once($CFG->dirroot . '/mod/observation/lib.php');
+require_once($CFG->dirroot . '/mod/observation/locallib.php');
 require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
 
 $userid = required_param('userid', PARAM_INT);
 $id     = optional_param('cmid', 0, PARAM_INT); // Course_module ID
-$b      = optional_param('bid', 0, PARAM_INT);  // ... ojt instance ID - it should be named as the first character of the module.
+$b      = optional_param('bid', 0, PARAM_INT);  // ... observation instance ID - it should be named as the first character of the module.
 
 $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
 
-list($ojt, $course, $cm) = ojt_check_page_id_params_and_init($id, $b); /* @var $ojt ojt */
+list($observation, $course, $cm) = observation_check_page_id_params_and_init($id, $b); /* @var $observation observation */
 
 require_login($course, true, $cm);
 
 $modcontext  = context_module::instance($cm->id);
-$canevaluate = ojt::can_evaluate($userid, $modcontext);
-$cansignoff  = has_capability('mod/ojt:signoff', $modcontext);
-$canwitness  = has_capability('mod/ojt:witnessitem', $modcontext);
+$canevaluate = observation::can_evaluate($userid, $modcontext);
+$cansignoff  = has_capability('mod/observation:signoff', $modcontext);
+$canwitness  = has_capability('mod/observation:witnessitem', $modcontext);
 if (!($canevaluate || $cansignoff || $canwitness))
 {
-    print_error('accessdenied', 'ojt');
+    print_error('accessdenied', 'observation');
 }
 
-$userojt = new user_ojt($ojt, $userid);
+$userobservation = new user_observation($observation, $userid);
 
 // Print the page header.
-$PAGE->set_url('/mod/ojt/evaluate.php', array('cmid' => $cm->id, 'userid' => $userid));
-$PAGE->set_title(format_string($ojt->name));
-$PAGE->set_heading(format_string($ojt->name) . ' - ' . get_string('evaluate', 'ojt'));
-if (has_capability('mod/ojt:evaluate', $modcontext) || has_capability('mod/ojt:signoff', $modcontext))
+$PAGE->set_url('/mod/observation/evaluate.php', array('cmid' => $cm->id, 'userid' => $userid));
+$PAGE->set_title(format_string($observation->name));
+$PAGE->set_heading(format_string($observation->name) . ' - ' . get_string('evaluate', 'observation'));
+if (has_capability('mod/observation:evaluate', $modcontext) || has_capability('mod/observation:signoff', $modcontext))
 {
-    $PAGE->navbar->add(get_string('evaluatestudents', 'ojt'),
-        new moodle_url('/mod/ojt/report.php', array('cmid' => $cm->id)));
+    $PAGE->navbar->add(get_string('evaluatestudents', 'observation'),
+        new moodle_url('/mod/observation/report.php', array('cmid' => $cm->id)));
 }
 $PAGE->navbar->add(fullname($user));
 
-/* @var $renderer mod_ojt_renderer */
-$renderer = $PAGE->get_renderer('ojt');
+/* @var $renderer mod_observation_renderer */
+$renderer = $PAGE->get_renderer('observation');
 
-list($args, $jsmodule) = $renderer->get_evaluation_js_args($ojt->id, $userid);
-$PAGE->requires->js_init_call('M.mod_ojt_evaluate.init', $args, false, $jsmodule);
+list($args, $jsmodule) = $renderer->get_evaluation_js_args($observation->id, $userid);
+$PAGE->requires->js_init_call('M.mod_observation_evaluate.init', $args, false, $jsmodule);
 
 // Output starts here
 echo $OUTPUT->header();
 
-echo $renderer->get_print_button($ojt->name, fullname($user));
+echo $renderer->get_print_button($observation->name, fullname($user));
 
-if ($ojt->intro)
+if ($observation->intro)
 {
-    echo $OUTPUT->box(format_module_intro('ojt', $ojt, $cm->id), 'generalbox mod_introbox', 'ojtintro');
+    echo $OUTPUT->box(format_module_intro('observation', $observation, $cm->id), 'generalbox mod_introbox', 'observationintro');
 }
 
-echo $renderer->user_ojt($userojt, $canevaluate, $cansignoff, $canwitness);
+echo $renderer->user_observation($userobservation, $canevaluate, $cansignoff, $canwitness);
 
 // Finish the page.
 echo $OUTPUT->footer();

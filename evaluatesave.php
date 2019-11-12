@@ -16,48 +16,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * OJT item completion ajax toggler
+ * Observation item completion ajax toggler
  */
 
-use mod_ojt\models\completion;
-use mod_ojt\models\email_assignment;
-use mod_ojt\models\ojt;
-use mod_ojt\models\topic;
-use mod_ojt\models\topic_item;
+use mod_observation\models\completion;
+use mod_observation\models\email_assignment;
+use mod_observation\models\observation;
+use mod_observation\models\topic;
+use mod_observation\models\topic_item;
 
 define('AJAX_SCRIPT', true);
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once($CFG->dirroot . '/mod/ojt/lib.php');
-require_once($CFG->dirroot . '/mod/ojt/locallib.php');
+require_once($CFG->dirroot . '/mod/observation/lib.php');
+require_once($CFG->dirroot . '/mod/observation/locallib.php');
 require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
 
 $userid      = required_param('userid', PARAM_INT);
-$ojtid       = required_param('bid', PARAM_INT);
+$observationid       = required_param('bid', PARAM_INT);
 $topicitemid = required_param('id', PARAM_INT);
 $action      = required_param('action', PARAM_TEXT);
 $token       = optional_param('token', '', PARAM_ALPHANUM);
 
-$ojt    = new ojt($ojtid);
-$course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
-$cm     = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
+$observation    = new observation($observationid);
+$course = $DB->get_record('course', array('id' => $observation->course), '*', MUST_EXIST);
+$cm     = get_coursemodule_from_instance('observation', $observation->id, $course->id, false, MUST_EXIST);
 
 if ($token == '') //system user
 {
     require_login($course, true, $cm);
-    if (!ojt::can_evaluate($userid, context_module::instance($cm->id)))
+    if (!observation::can_evaluate($userid, context_module::instance($cm->id)))
     {
         print_error('access denied');
     }
 }
-else if (!email_assignment::is_valid_token($ojtid, $userid, $token))
+else if (!email_assignment::is_valid_token($observationid, $userid, $token))
 {
-    print_error('accessdenied', 'ojt');
+    print_error('accessdenied', 'observation');
 }
 
 $topic_item       = new topic_item($topicitemid);
@@ -95,7 +95,7 @@ else
     // Insert
     $completion              = new completion();
     $completion->userid      = $userid;
-    $completion->ojtid       = $ojtid;
+    $completion->observationid       = $observationid;
     $completion->topicid     = $topic_item->topicid;
     $completion->topicitemid = $topicitemid;
     $completion->type        = completion::COMP_TYPE_TOPICITEM;
@@ -118,7 +118,7 @@ else
     $completion->id            = $completion->create();
 }
 
-$modifiedstr = ojt::get_modifiedstr_email($completion->timemodified, $email_assignment->email);
+$modifiedstr = observation::get_modifiedstr_email($completion->timemodified, $email_assignment->email);
 
 $jsonparams = array(
     'item'        => $completion,
@@ -126,7 +126,7 @@ $jsonparams = array(
 );
 if ($action == 'togglecompletion')
 {
-    $topiccompletion     = topic::update_topic_completion($userid, $ojtid, $topic_item->topicid, $email_assignment->email);
+    $topiccompletion     = topic::update_topic_completion($userid, $observationid, $topic_item->topicid, $email_assignment->email);
     $jsonparams['topic'] = $topiccompletion;
 }
 

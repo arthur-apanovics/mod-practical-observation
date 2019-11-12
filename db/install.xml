@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/ojt/db" VERSION="20190912" COMMENT="XMLDB file for Moodle mod/ojt"
+<XMLDB PATH="mod/observation/db" VERSION="20190912" COMMENT="XMLDB file for Moodle mod/observation"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="ojt" COMMENT="Table for ojt module.">
+    <TABLE NAME="observation" COMMENT="Table for observation module.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Course ojt activity belongs to"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Course observation activity belongs to"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="name field for moodle instances"/>
-        <FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General introduction of the ojt activity"/>
+        <FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General introduction of the observation activity"/>
         <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Format of the intro field (MOODLE, HTML, MARKDOWN...)"/>
         <FIELD NAME="completiontopics" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -24,10 +24,10 @@
         <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="ojt_topic" COMMENT="OJT topics">
+    <TABLE NAME="observation_topic" COMMENT="Observation topics">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="ojtid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="observationid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="254" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Format of the intro field (MOODLE, HTML, MARKDOWN...)"/>
@@ -39,13 +39,13 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="ojt" TYPE="foreign" FIELDS="ojtid" REFTABLE="ojt" REFFIELDS="id"/>
+        <KEY NAME="observation" TYPE="foreign" FIELDS="observationid" REFTABLE="observation" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="completionreq" UNIQUE="false" FIELDS="completionreq"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="ojt_topic_item" COMMENT="OJT topic items">
+    <TABLE NAME="observation_topic_item" COMMENT="Observation topic items">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="topicid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
@@ -56,13 +56,13 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="topicid" TYPE="foreign" FIELDS="topicid" REFTABLE="ojt_topic" REFFIELDS="id"/>
+        <KEY NAME="topicid" TYPE="foreign" FIELDS="topicid" REFTABLE="observation_topic" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="completionreq" UNIQUE="false" FIELDS="completionreq"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="ojt_topic_signoff" COMMENT="topic sign-offs">
+    <TABLE NAME="observation_topic_signoff" COMMENT="topic sign-offs">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
@@ -74,7 +74,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="topicid" TYPE="foreign" FIELDS="topicid" REFTABLE="ojt_topic" REFFIELDS="id"/>
+        <KEY NAME="topicid" TYPE="foreign" FIELDS="topicid" REFTABLE="observation_topic" REFFIELDS="id"/>
         <KEY NAME="modifiedby" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
@@ -83,12 +83,12 @@
         <INDEX NAME="timemodified" UNIQUE="false" FIELDS="timemodified"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="ojt_completion" COMMENT="OJT completions for a user">
+    <TABLE NAME="observation_completion" COMMENT="Observation completions for a user">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="type" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="ojtid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="observationid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="topicid" TYPE="int" LENGTH="11" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="topicitemid" TYPE="int" LENGTH="11" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="status" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -99,9 +99,9 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
-        <KEY NAME="ojtid" TYPE="foreign" FIELDS="ojtid" REFTABLE="ojt" REFFIELDS="id"/>
-        <KEY NAME="topicid" TYPE="foreign" FIELDS="topicid" REFTABLE="ojt_topic" REFFIELDS="id"/>
-        <KEY NAME="topicitemid" TYPE="foreign" FIELDS="topicitemid" REFTABLE="ojt_topic_item" REFFIELDS="id"/>
+        <KEY NAME="observationid" TYPE="foreign" FIELDS="observationid" REFTABLE="observation" REFFIELDS="id"/>
+        <KEY NAME="topicid" TYPE="foreign" FIELDS="topicid" REFTABLE="observation_topic" REFFIELDS="id"/>
+        <KEY NAME="topicitemid" TYPE="foreign" FIELDS="topicitemid" REFTABLE="observation_topic_item" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="type" UNIQUE="false" FIELDS="type"/>
@@ -109,7 +109,7 @@
         <INDEX NAME="timemodified" UNIQUE="false" FIELDS="timemodified"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="ojt_attempt" COMMENT="ojt user attempts for topic items">
+    <TABLE NAME="observation_attempt" COMMENT="observation user attempts for topic items">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
@@ -121,10 +121,10 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
-        <KEY NAME="topicitemid" TYPE="foreign" FIELDS="topicitemid" REFTABLE="ojt_topic_item" REFFIELDS="id"/>
+        <KEY NAME="topicitemid" TYPE="foreign" FIELDS="topicitemid" REFTABLE="observation_topic_item" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="ojt_attempt_feedback" COMMENT="feedback for ojt user attempts">
+    <TABLE NAME="observation_attempt_feedback" COMMENT="feedback for observation user attempts">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="attemptid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
@@ -134,11 +134,11 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="emailassignmentid" TYPE="foreign" FIELDS="emailassignmentid" REFTABLE="ojt_email_assignment" REFFIELDS="id"/>
-        <KEY NAME="attemptid" TYPE="foreign" FIELDS="attemptid" REFTABLE="ojt_attempt" REFFIELDS="id"/>
+        <KEY NAME="emailassignmentid" TYPE="foreign" FIELDS="emailassignmentid" REFTABLE="observation_email_assignment" REFFIELDS="id"/>
+        <KEY NAME="attemptid" TYPE="foreign" FIELDS="attemptid" REFTABLE="observation_attempt" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="ojt_item_witness" COMMENT="OJT item completion witness">
+    <TABLE NAME="observation_item_witness" COMMENT="Observation item completion witness">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
@@ -151,7 +151,7 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
-        <KEY NAME="topicitemid" TYPE="foreign" FIELDS="topicitemid" REFTABLE="ojt_topic_item" REFFIELDS="id"/>
+        <KEY NAME="topicitemid" TYPE="foreign" FIELDS="topicitemid" REFTABLE="observation_topic_item" REFFIELDS="id"/>
         <KEY NAME="witnessedby" TYPE="foreign" FIELDS="witnessedby" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
@@ -159,22 +159,22 @@
         <INDEX NAME="timewitnessed" UNIQUE="false" FIELDS="timewitnessed"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="ojt_external_request" COMMENT="ojt requests for feedback/observations from external users">
+    <TABLE NAME="observation_external_request" COMMENT="observation requests for feedback/observations from external users">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="ojtid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="observationid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="topicid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="ojtid" TYPE="foreign" FIELDS="ojtid" REFTABLE="ojt" REFFIELDS="id"/>
-        <KEY NAME="topicid" TYPE="foreign" FIELDS="topicid" REFTABLE="ojt_topic" REFFIELDS="id"/>
+        <KEY NAME="observationid" TYPE="foreign" FIELDS="observationid" REFTABLE="observation" REFFIELDS="id"/>
+        <KEY NAME="topicid" TYPE="foreign" FIELDS="topicid" REFTABLE="observation_topic" REFFIELDS="id"/>
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="ojt_email_assignment" COMMENT="ojt email assignments">
+    <TABLE NAME="observation_email_assignment" COMMENT="observation email assignments">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="externalrequestid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -186,7 +186,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="externalrequestid" TYPE="foreign" FIELDS="externalrequestid" REFTABLE="ojt_external_request" REFFIELDS="id"/>
+        <KEY NAME="externalrequestid" TYPE="foreign" FIELDS="externalrequestid" REFTABLE="observation_external_request" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
   </TABLES>

@@ -16,19 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt;
+namespace mod_observation;
 
 use coding_exception;
 use dml_exception;
-use mod_ojt\models\completion;
-use mod_ojt\models\ojt;
-use mod_ojt\traits\record_mapper;
+use mod_observation\models\completion;
+use mod_observation\models\observation;
+use mod_observation\traits\record_mapper;
 
-class user_ojt extends ojt
+class user_observation extends observation
 {
     use record_mapper;
 

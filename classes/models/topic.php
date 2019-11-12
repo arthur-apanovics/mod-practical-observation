@@ -16,27 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt\models;
+namespace mod_observation\models;
 
 use competency_evidence;
-use mod_ojt\interfaces\crud;
-use mod_ojt\traits\db_record_base;
-use mod_ojt\traits\record_mapper;
-use mod_ojt\user_topic_item;
+use mod_observation\interfaces\crud;
+use mod_observation\traits\db_record_base;
+use mod_observation\traits\record_mapper;
+use mod_observation\user_topic_item;
 use stdClass;
 
 class topic extends db_record_base
 {
-    protected const TABLE = 'ojt_topic';
+    protected const TABLE = 'observation_topic';
 
     /**
      * @var int
      */
-    public $ojtid;
+    public $observationid;
 
     /**
      * @var string
@@ -83,19 +83,19 @@ class topic extends db_record_base
     public $allowcomments;
 
 
-    public static function update_topic_completion(int $userid, int $ojtid, int $topicid, string $observeremail)
+    public static function update_topic_completion(int $userid, int $observationid, int $topicid, string $observeremail)
     {
         global $DB, $USER;
 
-        $ojt = new ojt($ojtid);
+        $observation = new observation($observationid);
 
         // // Check if all required topic items have been completed
         // $sql   = 'SELECT i.*, CASE WHEN c.status IS NULL THEN '
         //          . completion::STATUS_INCOMPLETE . ' ELSE c.status END AS status
-        //          FROM {ojt_topic_item} i
-        //          LEFT JOIN {ojt_completion} c ON i.id = c.topicitemid AND c.ojtid = ? AND c.type = ? AND c.userid = ?
+        //          FROM {observation_topic_item} i
+        //          LEFT JOIN {observation_completion} c ON i.id = c.topicitemid AND c.observationid = ? AND c.type = ? AND c.userid = ?
         //          WHERE i.topicid = ?';
-        // $items = $DB->get_records_sql($sql, array($ojtid, completion::COMP_TYPE_TOPICITEM, $userid, $topicid));
+        // $items = $DB->get_records_sql($sql, array($observationid, completion::COMP_TYPE_TOPICITEM, $userid, $topicid));
 
         $topic_items = user_topic_item::get_user_topic_items_for_topic($topicid, $userid);
 
@@ -119,14 +119,14 @@ class topic extends db_record_base
         }
 
         if (in_array($status, array(completion::STATUS_COMPLETE, completion::STATUS_REQUIREDCOMPLETE))
-            && $ojt->itemwitness && !ojt::topic_items_witnessed($topicid, $userid))
+            && $observation->itemwitness && !observation::topic_items_witnessed($topicid, $userid))
         {
 
             // All required items must also be witnessed - degrade status
             $status = completion::STATUS_INCOMPLETE;
         }
 
-        $currentcompletion = $DB->get_record('ojt_completion',
+        $currentcompletion = $DB->get_record('observation_completion',
             array('userid' => $userid, 'topicid' => $topicid, 'type' => completion::COMP_TYPE_TOPIC));
         $currentcompletion = new completion($currentcompletion);
 
@@ -144,17 +144,17 @@ class topic extends db_record_base
             {
                 $completion->userid  = $userid;
                 $completion->type    = completion::COMP_TYPE_TOPIC;
-                $completion->ojtid   = $ojtid;
+                $completion->observationid   = $observationid;
                 $completion->topicid = $topicid;
-                $completion->id      = $DB->insert_record('ojt_completion', $completion);
+                $completion->id      = $DB->insert_record('observation_completion', $completion);
             }
             else
             {
-                $DB->update_record('ojt_completion', $completion);
+                $DB->update_record('observation_completion', $completion);
             }
 
-            // Also update ojt completion.
-            ojt::update_completion($userid, $ojtid);
+            // Also update observation completion.
+            observation::update_completion($userid, $observationid);
 
             topic::update_topic_competency_proficiency($userid, $topicid, $status);
 
@@ -175,7 +175,7 @@ class topic extends db_record_base
             return;
         }
 
-        $competencies = $DB->get_field('ojt_topic', 'competencies', array('id' => $topicid));
+        $competencies = $DB->get_field('observation_topic', 'competencies', array('id' => $topicid));
         if (empty($competencies))
         {
             // Nothing to do here :)
@@ -192,7 +192,7 @@ class topic extends db_record_base
                     'userid'         => $userid,
                     'manual'         => 0,
                     'reaggregate'    => 1,
-                    'assessmenttype' => 'ojt'
+                    'assessmenttype' => 'observation'
                 )
             );
 
@@ -239,10 +239,10 @@ class topic extends db_record_base
 
         $transaction = $DB->start_delegated_transaction();
 
-        $DB->delete_records('ojt_topic', array('id' => $topicid));
-        $DB->delete_records('ojt_topic_item', array('topicid' => $topicid));
-        $DB->delete_records('ojt_completion', array('topicid' => $topicid));
-        $DB->delete_records('ojt_topic_signoff', array('topicid' => $topicid));
+        $DB->delete_records('observation_topic', array('id' => $topicid));
+        $DB->delete_records('observation_topic_item', array('topicid' => $topicid));
+        $DB->delete_records('observation_completion', array('topicid' => $topicid));
+        $DB->delete_records('observation_topic_signoff', array('topicid' => $topicid));
 
         $transaction->allow_commit();
     }

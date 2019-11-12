@@ -16,30 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt\models;
+namespace mod_observation\models;
 
 use coding_exception;
 use dml_exception;
-use mod_ojt\interfaces\crud;
-use mod_ojt\traits\db_record_base;
-use mod_ojt\traits\record_mapper;
+use mod_observation\interfaces\crud;
+use mod_observation\traits\db_record_base;
+use mod_observation\traits\record_mapper;
 use stdClass;
 
 class completion extends db_record_base
 {
     /**
-     * OJT completion types
+     * Observation completion types
      */
-    const COMP_TYPE_OJT       = 0;
+    const COMP_TYPE_Observation       = 0;
     const COMP_TYPE_TOPIC     = 1;
     const COMP_TYPE_TOPICITEM = 2;
 
     /**
-     * OJT completion statuses
+     * Observation completion statuses
      */
 
     /**
@@ -56,12 +56,12 @@ class completion extends db_record_base
     const STATUS_COMPLETE         = 2;
 
     /**
-     * OJT completion requirements
+     * Observation completion requirements
      */
     const REQ_REQUIRED = 0;
     const REQ_OPTIONAL = 1;
 
-    protected const TABLE = 'ojt_completion';
+    protected const TABLE = 'observation_completion';
 
     /**
      * @var int
@@ -76,7 +76,7 @@ class completion extends db_record_base
     /**
      * @var int
      */
-    public $ojtid;
+    public $observationid;
 
     /**
      * @var topic
@@ -112,7 +112,7 @@ class completion extends db_record_base
     /**
      * @param int $topicitemid
      * @param int $userid
-     * @param int|null $type COMP_TYPE_OJT | COMP_TYPE_TOPIC | COMP_TYPE_TOPICITEM; Indicates completion requirement type
+     * @param int|null $type COMP_TYPE_Observation | COMP_TYPE_TOPIC | COMP_TYPE_TOPICITEM; Indicates completion requirement type
      * @return completion
      * @throws coding_exception
      * @throws dml_exception
@@ -122,7 +122,7 @@ class completion extends db_record_base
         global $DB;
         $args = ['topicitemid' => $topicitemid, 'userid' => $userid];
         $args = is_int($type) ? $args + ['type' => $type] : $args;
-        $rec = $DB->get_record('ojt_completion', $args);
+        $rec = $DB->get_record('observation_completion', $args);
 
         $completion = new self($rec);
 

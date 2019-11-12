@@ -1,108 +1,108 @@
-[id^=mod-ojt-],
-[id^=page-mod-ojt-] {
+[id^=mod-observation-],
+[id^=page-mod-observation-] {
   padding-bottom: 2em;
 }
-[id^=mod-ojt-] .config-mod-ojt-topic-item,
-[id^=page-mod-ojt-] .config-mod-ojt-topic-item,
-[id^=mod-ojt-] .mod-ojt-topic-item,
-[id^=page-mod-ojt-] .mod-ojt-topic-item {
+[id^=mod-observation-] .config-mod-observation-topic-item,
+[id^=page-mod-observation-] .config-mod-observation-topic-item,
+[id^=mod-observation-] .mod-observation-topic-item,
+[id^=page-mod-observation-] .mod-observation-topic-item {
   padding: 0.3em;
 }
-[id^=mod-ojt-] .mod-ojt-topic-items,
-[id^=page-mod-ojt-] .mod-ojt-topic-items {
+[id^=mod-observation-] .mod-observation-topic-items,
+[id^=page-mod-observation-] .mod-observation-topic-items {
   font-size: 1.2em;
   display: table;
 }
-[id^=mod-ojt-] .ojt-eval-actions,
-[id^=page-mod-ojt-] .ojt-eval-actions {
+[id^=mod-observation-] .observation-eval-actions,
+[id^=page-mod-observation-] .observation-eval-actions {
   margin-top: 2em;
 }
-[id^=mod-ojt-] .mod-ojt-modifiedstr,
-[id^=page-mod-ojt-] .mod-ojt-modifiedstr,
-[id^=mod-ojt-] .mod-ojt-witnessedstr,
-[id^=page-mod-ojt-] .mod-ojt-witnessedstr,
-[id^=mod-ojt-] .mod-ojt-topic-modifiedstr,
-[id^=page-mod-ojt-] .mod-ojt-topic-modifiedstr {
+[id^=mod-observation-] .mod-observation-modifiedstr,
+[id^=page-mod-observation-] .mod-observation-modifiedstr,
+[id^=mod-observation-] .mod-observation-witnessedstr,
+[id^=page-mod-observation-] .mod-observation-witnessedstr,
+[id^=mod-observation-] .mod-observation-topic-modifiedstr,
+[id^=page-mod-observation-] .mod-observation-topic-modifiedstr {
   font-size: 0.8em;
   font-style: italic;
   color: grey;
 }
-[id^=mod-ojt-] .mod-ojt-topic-signoff,
-[id^=page-mod-ojt-] .mod-ojt-topic-signoff {
+[id^=mod-observation-] .mod-observation-topic-signoff,
+[id^=page-mod-observation-] .mod-observation-topic-signoff {
   font-size: 1.2em;
   padding-right: 1em;
   text-align: right;
 }
-[id^=mod-ojt-] .mod-ojt-topic-signoff img,
-[id^=page-mod-ojt-] .mod-ojt-topic-signoff img {
+[id^=mod-observation-] .mod-observation-topic-signoff img,
+[id^=page-mod-observation-] .mod-observation-topic-signoff img {
   padding-left: 0.4em;
 }
-[id^=mod-ojt-] textarea.ojt-completion-comment,
-[id^=page-mod-ojt-] textarea.ojt-completion-comment,
-[id^=mod-ojt-] textarea.ojt-completion-submission,
-[id^=page-mod-ojt-] textarea.ojt-completion-submission {
+[id^=mod-observation-] textarea.observation-completion-comment,
+[id^=page-mod-observation-] textarea.observation-completion-comment,
+[id^=mod-observation-] textarea.observation-completion-submission,
+[id^=page-mod-observation-] textarea.observation-completion-submission {
   margin-left: 0.4em;
   width: 90%;
 }
-[id^=mod-ojt-] .mod-ojt-topic table td.c0,
-[id^=page-mod-ojt-] .mod-ojt-topic table td.c0 {
+[id^=mod-observation-] .mod-observation-topic table td.c0,
+[id^=page-mod-observation-] .mod-observation-topic table td.c0 {
   width: 40%;
 }
-[id^=mod-ojt-] .mod-ojt-topic table td.c1,
-[id^=page-mod-ojt-] .mod-ojt-topic table td.c1 {
+[id^=mod-observation-] .mod-observation-topic table td.c1,
+[id^=page-mod-observation-] .mod-observation-topic table td.c1 {
   width: 60%;
 }
-[id^=mod-ojt-] .ojt-submit,
-[id^=page-mod-ojt-] .ojt-submit {
+[id^=mod-observation-] .observation-submit,
+[id^=page-mod-observation-] .observation-submit {
   text-align: center;
 }
-[id^=mod-ojt-] .evalprint,
-[id^=page-mod-ojt-] .evalprint,
-[id^=mod-ojt-] .ojt-save,
-[id^=page-mod-ojt-] .ojt-save {
+[id^=mod-observation-] .evalprint,
+[id^=page-mod-observation-] .evalprint,
+[id^=mod-observation-] .observation-save,
+[id^=page-mod-observation-] .observation-save {
   float: right;
 }
-#page-mod-ojt-evaluate .mod-ojt-topic-signoff .flex-icon,
-#page-mod-ojt-observe .mod-ojt-topic-signoff .flex-icon,
-#page-mod-ojt-evaluate .ojt-item-witness .flex-icon,
-#page-mod-ojt-observe .ojt-item-witness .flex-icon {
+#page-mod-observation-evaluate .mod-observation-topic-signoff .flex-icon,
+#page-mod-observation-observe .mod-observation-topic-signoff .flex-icon,
+#page-mod-observation-evaluate .observation-item-witness .flex-icon,
+#page-mod-observation-observe .observation-item-witness .flex-icon {
   cursor: pointer;
 }
-.config-mod-ojt-topic-heading,
-.mod-ojt-topic-heading {
+.config-mod-observation-topic-heading,
+.mod-observation-topic-heading {
   font-size: 1.4em;
   font-weight: bold;
   margin-top: 0.5em;
   margin-bottom: 0.2em;
 }
-.mod-ojt-topic-heading {
+.mod-observation-topic-heading {
   padding-left: 0.8em;
 }
-.mod-ojt-topic-addbtn {
+.mod-observation-topic-addbtn {
   float: right;
 }
-#config-mod-ojt-topics {
+#config-mod-observation-topics {
   padding-bottom: 2em;
 }
-.config-mod-ojt-topic-items {
+.config-mod-observation-topic-items {
   margin-left: 1em;
   font-size: 1.2em;
 }
-img.ojt-topic-completion-status {
+img.observation-topic-completion-status {
   vertical-align: baseline;
 }
-#ojt-eval-icon-templates,
-.user-ojt-comments-warning,
-.ojt-completion-comment-print,
-.ojt-completion-submission-print {
+#observation-eval-icon-templates,
+.user-observation-comments-warning,
+.observation-completion-comment-print,
+.observation-completion-submission-print {
   display: none;
 }
-.mod-ojt-evalstudents-btn,
-.mod-ojt-evalself-btn,
-.mod-ojt-manage-btn {
+.mod-observation-evalstudents-btn,
+.mod-observation-evalself-btn,
+.mod-observation-manage-btn {
   float: right;
 }
-.mod-ojt-topicitem-files {
+.mod-observation-topicitem-files {
   font-size: 0.8em;
 }
 /**
@@ -119,9 +119,9 @@ img.ojt-topic-completion-status {
   .evalprint,
   .logininfo,
   .navbar,
-  textarea.ojt-completion-comment,
-  textarea.ojt-completion-submission,
-  .user-ojt-comments-warning,
+  textarea.observation-completion-comment,
+  textarea.observation-completion-submission,
+  .user-observation-comments-warning,
   #totaramenu {
     display: none !important;
   }
@@ -129,17 +129,17 @@ img.ojt-topic-completion-status {
     width: 100% !important;
     padding: 0;
   }
-  #mod-ojt-user-ojt .ojt-completion-comment-print,
-  #mod-ojt-user-ojt .ojt-completion-submission-print {
+  #mod-observation-user-observation .observation-completion-comment-print,
+  #mod-observation-user-observation .observation-completion-submission-print {
     display: block;
   }
-  #mod-ojt-user-ojt .mod-ojt-topic-heading {
+  #mod-observation-user-observation .mod-observation-topic-heading {
     padding-left: 0;
   }
-  #mod-ojt-user-ojt .mod-ojt-topic-items {
+  #mod-observation-user-observation .mod-observation-topic-items {
     display: table;
   }
-  #mod-ojt-user-ojt .mod-ojt-topic {
+  #mod-observation-user-observation .mod-observation-topic {
     page-break-inside: avoid;
   }
 }

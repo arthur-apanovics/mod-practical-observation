@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,7 +29,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component    = 'mod_ojt';
+$plugin->component    = 'mod_observation';
 $plugin->version      = 2017101806;
 $plugin->release      = 'v1.0';
 $plugin->requires     = 2015111606.00;

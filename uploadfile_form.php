@@ -16,7 +16,7 @@
 //  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //  *
 //  * @author  Eugene Venter <eugene@catalyst.net.nz>
-//  * @package mod_ojt
+//  * @package mod_observation
 //  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 //  */
 //
@@ -32,7 +32,7 @@
 // require_once("{$CFG->libdir}/formslib.php");
 // require_once("{$CFG->libdir}/uploadlib.php");
 //
-// class ojt_topicitem_files_form extends moodleform
+// class observation_topicitem_files_form extends moodleform
 // {
 //
 //     /**
@@ -61,8 +61,8 @@
 //         $mform->setType('userid', PARAM_INT);
 //
 //         $mform->addElement('filemanager', 'topicitemfiles_filemanager',
-//             get_string('topicitemfiles', 'ojt'), null, $fileoptions);
+//             get_string('topicitemfiles', 'observation'), null, $fileoptions);
 //
-//         $this->add_action_buttons(true, get_string('updatefiles', 'ojt'));
+//         $this->add_action_buttons(true, get_string('updatefiles', 'observation'));
 //     }
 // }

@@ -16,12 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * Capability definitions for the ojt module
+ * Capability definitions for the observation module
  *
  * The capabilities are loaded into the database table when the module is
  * installed or updated. Whenever the capability definitions are updated,
@@ -51,7 +51,7 @@ defined('MOODLE_INTERNAL') || die();
 
 // Modify capabilities as needed and remove this comment.
 $capabilities = array(
-    'mod/ojt:addinstance' => array(
+    'mod/observation:addinstance' => array(
         'riskbitmask'          => RISK_XSS,
         'captype'              => 'write',
         'contextlevel'         => CONTEXT_COURSE,
@@ -62,7 +62,7 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
 
-    'mod/ojt:view' => array(
+    'mod/observation:view' => array(
         'captype'      => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'legacy'       => array(
@@ -73,7 +73,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/ojt:evaluate' => array(
+    'mod/observation:evaluate' => array(
         'riskbitmask'  => RISK_SPAM,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -83,13 +83,13 @@ $capabilities = array(
         )
     ),
 
-    'mod/ojt:evaluateself' => array(
+    'mod/observation:evaluateself' => array(
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'legacy'       => array()
     ),
 
-    'mod/ojt:signoff' => array(
+    'mod/observation:signoff' => array(
         'riskbitmask'  => RISK_SPAM,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -98,7 +98,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/ojt:manage'      => array(
+    'mod/observation:manage'      => array(
         'riskbitmask'  => RISK_XSS,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -106,7 +106,7 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
         )
     ),
-    'mod/ojt:witnessitem' => array(
+    'mod/observation:witnessitem' => array(
         'riskbitmask'  => RISK_SPAM,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,

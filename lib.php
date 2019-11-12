@@ -16,23 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * Library of interface functions and constants for module ojt
+ * Library of interface functions and constants for module observation
  *
  * All the core Moodle functions, neeeded to allow the module to work
  * integrated in Moodle should be placed here.
  *
- * All the ojt specific functions, needed to implement all the module
+ * All the observation specific functions, needed to implement all the module
  * logic, should go to locallib.php. This will help to save some memory when
  * Moodle is performing actions across all modules.
  */
 
-use mod_ojt\models\completion;
-use mod_ojt\models\ojt;
+use mod_observation\models\completion;
+use mod_observation\models\observation;
 use totara_job\job_assignment;
 
 defined('MOODLE_INTERNAL') || die();
@@ -47,7 +47,7 @@ defined('MOODLE_INTERNAL') || die();
  * @param string $feature FEATURE_xx constant for requested feature
  * @return mixed true if the feature is supported, null if unknown
  */
-function ojt_supports($feature)
+function observation_supports($feature)
 {
 
     switch ($feature)
@@ -63,57 +63,57 @@ function ojt_supports($feature)
 }
 
 /**
- * Saves a new instance of the ojt into the database
+ * Saves a new instance of the observation into the database
  *
  * Given an object containing all the necessary data,
  * (defined by the form in mod_form.php) this function
  * will create a new instance and return the id number
  * of the new instance.
  *
- * @param stdClass         $ojt Submitted data from the form in mod_form.php
- * @param mod_ojt_mod_form $mform The form instance itself (if needed)
- * @return int The id of the newly inserted ojt record
+ * @param stdClass         $observation Submitted data from the form in mod_form.php
+ * @param mod_observation_mod_form $mform The form instance itself (if needed)
+ * @return int The id of the newly inserted observation record
  */
-function ojt_add_instance(stdClass $ojt, mod_ojt_mod_form $mform = null)
+function observation_add_instance(stdClass $observation, mod_observation_mod_form $mform = null)
 {
     global $DB;
 
-    $ojt->timecreated = time();
+    $observation->timecreated = time();
 
     // You may have to add extra stuff in here.
 
-    $ojt->id = $DB->insert_record('ojt', $ojt);
+    $observation->id = $DB->insert_record('observation', $observation);
 
-    return $ojt->id;
+    return $observation->id;
 }
 
 /**
- * Updates an instance of the ojt in the database
+ * Updates an instance of the observation in the database
  *
  * Given an object containing all the necessary data,
  * (defined by the form in mod_form.php) this function
  * will update an existing instance with new data.
  *
- * @param stdClass         $ojt An object from the form in mod_form.php
- * @param mod_ojt_mod_form $mform The form instance itself (if needed)
+ * @param stdClass         $observation An object from the form in mod_form.php
+ * @param mod_observation_mod_form $mform The form instance itself (if needed)
  * @return boolean Success/Fail
  */
-function ojt_update_instance(stdClass $ojt, mod_ojt_mod_form $mform = null)
+function observation_update_instance(stdClass $observation, mod_observation_mod_form $mform = null)
 {
     global $DB;
 
-    $ojt->timemodified = time();
-    $ojt->id           = $ojt->instance;
+    $observation->timemodified = time();
+    $observation->id           = $observation->instance;
 
     // You may have to add extra stuff in here.
 
-    $result = $DB->update_record('ojt', $ojt);
+    $result = $DB->update_record('observation', $observation);
 
     return $result;
 }
 
 /**
- * Removes an instance of the ojt from the database
+ * Removes an instance of the observation from the database
  *
  * Given an ID of an instance of this module,
  * this function will permanently delete the instance
@@ -122,11 +122,11 @@ function ojt_update_instance(stdClass $ojt, mod_ojt_mod_form $mform = null)
  * @param int $id Id of the module instance
  * @return boolean Success/Failure
  */
-function ojt_delete_instance($id)
+function observation_delete_instance($id)
 {
     global $DB;
 
-    if (!$ojt = $DB->get_record('ojt', array('id' => $id)))
+    if (!$observation = $DB->get_record('observation', array('id' => $id)))
     {
         return false;
     }
@@ -134,33 +134,33 @@ function ojt_delete_instance($id)
     $transaction = $DB->start_delegated_transaction();
 
     // Delete witnesses
-    $DB->delete_records_select('ojt_item_witness',
-        'topicitemid IN (SELECT ti.id FROM {ojt_topic_item} ti JOIN {ojt_topic} t ON ti.topicid = t.id WHERE t.ojtid = ?)',
-        array($ojt->id));
+    $DB->delete_records_select('observation_item_witness',
+        'topicitemid IN (SELECT ti.id FROM {observation_topic_item} ti JOIN {observation_topic} t ON ti.topicid = t.id WHERE t.observationid = ?)',
+        array($observation->id));
 
     // Delete signoffs
-    $DB->delete_records_select('ojt_topic_signoff', 'topicid IN (SELECT id FROM {ojt_topic} WHERE ojtid = ?)',
-        array($ojt->id));
+    $DB->delete_records_select('observation_topic_signoff', 'topicid IN (SELECT id FROM {observation_topic} WHERE observationid = ?)',
+        array($observation->id));
 
     // Delete completions
-    $DB->delete_records('ojt_completion', array('ojtid' => $ojt->id));
+    $DB->delete_records('observation_completion', array('observationid' => $observation->id));
 
     // Delete comments
-    $topics = $DB->get_records('ojt_topic', array('ojtid' => $ojt->id));
+    $topics = $DB->get_records('observation_topic', array('observationid' => $observation->id));
     foreach ($topics as $topic)
     {
-        $DB->delete_records('comments', array('commentarea' => 'ojt_topic_item_' . $topic->id));
+        $DB->delete_records('comments', array('commentarea' => 'observation_topic_item_' . $topic->id));
     }
 
     // Delete topic items
-    $DB->delete_records_select('ojt_topic_item', 'topicid IN (SELECT id FROM {ojt_topic} WHERE ojtid = ?)',
-        array($ojt->id));
+    $DB->delete_records_select('observation_topic_item', 'topicid IN (SELECT id FROM {observation_topic} WHERE observationid = ?)',
+        array($observation->id));
 
     // Delete topics
-    $DB->delete_records('ojt_topic', array('ojtid' => $ojt->id));
+    $DB->delete_records('observation_topic', array('observationid' => $observation->id));
 
-    // Finally, delete the ojt ;)
-    $DB->delete_records('ojt', array('id' => $ojt->id));
+    // Finally, delete the observation ;)
+    $DB->delete_records('observation', array('id' => $observation->id));
 
     $transaction->allow_commit();
 
@@ -178,10 +178,10 @@ function ojt_delete_instance($id)
  * @param stdClass         $course The course record
  * @param stdClass         $user The user record
  * @param cm_info|stdClass $mod The course module info object or record
- * @param stdClass         $ojt The ojt instance record
+ * @param stdClass         $observation The observation instance record
  * @return stdClass|null
  */
-function ojt_user_outline($course, $user, $mod, $ojt)
+function observation_user_outline($course, $user, $mod, $observation)
 {
 
     $return       = new stdClass();
@@ -199,9 +199,9 @@ function ojt_user_outline($course, $user, $mod, $ojt)
  * @param stdClass $course the current course record
  * @param stdClass $user the record of the user we are generating report for
  * @param cm_info  $mod course module info
- * @param stdClass $ojt the module instance record
+ * @param stdClass $observation the module instance record
  */
-function ojt_user_complete($course, $user, $mod, $ojt)
+function observation_user_complete($course, $user, $mod, $observation)
 {
 }
 
@@ -211,17 +211,17 @@ function ojt_user_complete($course, $user, $mod, $ojt)
  * @param object $cm Course-module
  * @return array Requirements for completion
  */
-function ojt_get_completion_requirements($cm)
+function observation_get_completion_requirements($cm)
 {
     global $DB;
 
-    $ojt = $DB->get_record('ojt', array('id' => $cm->instance));
+    $observation = $DB->get_record('observation', array('id' => $cm->instance));
 
     $result = array();
 
-    if ($ojt->completiontopics)
+    if ($observation->completiontopics)
     {
-        $result[] = get_string('completiontopics', 'ojt');
+        $result[] = get_string('completiontopics', 'observation');
     }
 
     return $result;
@@ -234,27 +234,27 @@ function ojt_get_completion_requirements($cm)
  * @param int    $userid User ID
  * @return string The current status of completion for the user
  */
-function ojt_get_completion_progress($cm, $userid)
+function observation_get_completion_progress($cm, $userid)
 {
     global $DB;
 
-    // Get ojt details.
-    $ojt = $DB->get_record('ojt', array('id' => $cm->instance), '*', MUST_EXIST);
+    // Get observation details.
+    $observation = $DB->get_record('observation', array('id' => $cm->instance), '*', MUST_EXIST);
 
     $result = array();
 
-    if ($ojt->completiontopics)
+    if ($observation->completiontopics)
     {
-        $ojtcomplete = $DB->record_exists_select('ojt_completion',
-            'ojtid = ? AND userid =? AND type = ? AND status IN (?, ?)',
-            array($ojt->id,
+        $observationcomplete = $DB->record_exists_select('observation_completion',
+            'observationid = ? AND userid =? AND type = ? AND status IN (?, ?)',
+            array($observation->id,
                   $userid,
-                  completion::COMP_TYPE_OJT,
+                  completion::COMP_TYPE_Observation,
                   completion::STATUS_COMPLETE,
                   completion::STATUS_REQUIREDCOMPLETE));
-        if ($ojtcomplete)
+        if ($observationcomplete)
         {
-            $result[] = get_string('completiontopics', 'ojt');
+            $result[] = get_string('completiontopics', 'observation');
         }
     }
 
@@ -263,8 +263,8 @@ function ojt_get_completion_progress($cm, $userid)
 
 
 /**
- * Obtains the automatic completion state for this ojt activity based on any conditions
- * in ojt settings.
+ * Obtains the automatic completion state for this observation activity based on any conditions
+ * in observation settings.
  *
  * @param object $course Course
  * @param object $cm Course-module
@@ -273,24 +273,24 @@ function ojt_get_completion_progress($cm, $userid)
  * @return bool True if completed, false if not. (If no conditions, then return
  *   value depends on comparison type)
  */
-function ojt_get_completion_state($course, $cm, $userid, $type)
+function observation_get_completion_state($course, $cm, $userid, $type)
 {
     global $DB;
 
-    // Get ojt.
-    $ojt = $DB->get_record('ojt', array('id' => $cm->instance), '*', MUST_EXIST);
+    // Get observation.
+    $observation = $DB->get_record('observation', array('id' => $cm->instance), '*', MUST_EXIST);
 
     // This means that if only view is required we don't end up with a false state.
-    if (empty($ojt->completiontopics))
+    if (empty($observation->completiontopics))
     {
         return $type;
     }
 
-    return $DB->record_exists_select('ojt_completion',
-        'ojtid = ? AND userid =? AND type = ? AND status IN (?, ?)',
-        array($ojt->id,
+    return $DB->record_exists_select('observation_completion',
+        'observationid = ? AND userid =? AND type = ? AND status IN (?, ?)',
+        array($observation->id,
               $userid,
-              completion::COMP_TYPE_OJT,
+              completion::COMP_TYPE_Observation,
               completion::STATUS_COMPLETE,
               completion::STATUS_REQUIREDCOMPLETE));
 
@@ -301,7 +301,7 @@ function ojt_get_completion_state($course, $cm, $userid, $type)
  *
  * This callback function is supposed to populate the passed array with
  * custom activity records. These records are then rendered into HTML via
- * {@link ojt_print_recent_mod_activity()}.
+ * {@link observation_print_recent_mod_activity()}.
  *
  * Returns void, it adds items into $activities and increases $index.
  *
@@ -313,12 +313,12 @@ function ojt_get_completion_state($course, $cm, $userid, $type)
  * @param int   $userid check for a particular user's activity only, defaults to 0 (all users)
  * @param int   $groupid check for a particular group's activity only, defaults to 0 (all groups)
  */
-function ojt_get_recent_mod_activity(&$activities, &$index, $timestart, $courseid, $cmid, $userid = 0, $groupid = 0)
+function observation_get_recent_mod_activity(&$activities, &$index, $timestart, $courseid, $cmid, $userid = 0, $groupid = 0)
 {
 }
 
 /**
- * Prints single activity item prepared by {@link ojt_get_recent_mod_activity()}
+ * Prints single activity item prepared by {@link observation_get_recent_mod_activity()}
  *
  * @param stdClass $activity activity record with added 'cmid' property
  * @param int      $courseid the id of the course we produce the report for
@@ -326,7 +326,7 @@ function ojt_get_recent_mod_activity(&$activities, &$index, $timestart, $coursei
  * @param array    $modnames as returned by {@link get_module_types_names()}
  * @param bool     $viewfullnames display users' full names
  */
-function ojt_print_recent_mod_activity($activity, $courseid, $detail, $modnames, $viewfullnames)
+function observation_print_recent_mod_activity($activity, $courseid, $detail, $modnames, $viewfullnames)
 {
 }
 
@@ -335,28 +335,28 @@ function ojt_print_recent_mod_activity($activity, $courseid, $detail, $modnames,
  *
  * @return boolean
  */
-function ojt_cron()
+function observation_cron()
 {
     global $CFG, $DB;
 
     require_once($CFG->dirroot . '/totara/message/messagelib.php');
 
-    $lastcron = $DB->get_field('modules', 'lastcron', array('name' => 'ojt'));
+    $lastcron = $DB->get_field('modules', 'lastcron', array('name' => 'observation'));
 
     // Send topic completion task to managers
     // Get all topic completions that happended after last cron run.
     // We can safely use the timemodified field here, as topics don't have comments ;)
     $sql          = "SELECT bc.id AS completionid, u.id AS userid, u.*,
-        b.id AS ojtid, b.name AS ojtname,
+        b.id AS observationid, b.name AS observationname,
         t.id AS topicid, t.name AS topicname,
         c.shortname AS courseshortname
-        FROM {ojt_completion} bc
-        JOIN {ojt} b ON bc.ojtid = b.id
+        FROM {observation_completion} bc
+        JOIN {observation} b ON bc.observationid = b.id
         JOIN {course} c ON b.course = c.id
-        JOIN {ojt_topic} t ON bc.topicid = t.id
+        JOIN {observation_topic} t ON bc.topicid = t.id
         JOIN {user} u ON bc.userid = u.id
         WHERE bc.type = ? AND bc.status = ? AND bc.timemodified > ?
-        AND b.id IN (SELECT id FROM {ojt} WHERE managersignoff = 1)";
+        AND b.id IN (SELECT id FROM {observation} WHERE managersignoff = 1)";
     $tcompletions =
         $DB->get_records_sql($sql, array(completion::COMP_TYPE_TOPIC, completion::STATUS_COMPLETE, $lastcron));
     foreach ($tcompletions as $completion)
@@ -369,17 +369,17 @@ function ojt_cron()
             $eventdata->userto       = $manager;
             $eventdata->userfrom     = $completion;
             $eventdata->icon         = 'elearning-complete';
-            $eventdata->contexturl   = new moodle_url('/mod/ojt/evaluate.php',
-                array('userid' => $completion->userid, 'bid' => $completion->ojtid));
+            $eventdata->contexturl   = new moodle_url('/mod/observation/evaluate.php',
+                array('userid' => $completion->userid, 'bid' => $completion->observationid));
             $eventdata->contexturl   = $eventdata->contexturl->out();
             $strobj                  = new stdClass();
             $strobj->user            = fullname($completion);
-            $strobj->ojt             = format_string($completion->ojtname);
+            $strobj->observation             = format_string($completion->observationname);
             $strobj->topic           = format_string($completion->topicname);
             $strobj->topicurl        = $eventdata->contexturl;
             $strobj->courseshortname = format_string($completion->courseshortname);
-            $eventdata->subject      = get_string('managertasktcompletionsubject', 'ojt', $strobj);
-            $eventdata->fullmessage  = get_string('managertasktcompletionmsg', 'ojt', $strobj);
+            $eventdata->subject      = get_string('managertasktcompletionsubject', 'observation', $strobj);
+            $eventdata->fullmessage  = get_string('managertasktcompletionmsg', 'observation', $strobj);
             // $eventdata->sendemail = TOTARA_MSG_EMAIL_NO;
 
             tm_task_send($eventdata);
@@ -397,12 +397,12 @@ function ojt_cron()
  *
  * @return array
  */
-function ojt_get_extra_capabilities()
+function observation_get_extra_capabilities()
 {
     return array(
-        'mod/ojt:evaluate',
-        'mod/ojt:signoff',
-        'mod/ojt:manage'
+        'mod/observation:evaluate',
+        'mod/observation:signoff',
+        'mod/observation:manage'
     );
 }
 
@@ -420,13 +420,13 @@ function ojt_get_extra_capabilities()
  * @param stdClass $context
  * @return array of [(string)filearea] => (string)description
  */
-function ojt_get_file_areas($course, $cm, $context)
+function observation_get_file_areas($course, $cm, $context)
 {
     return array();
 }
 
 /**
- * File browsing support for ojt file areas
+ * File browsing support for observation file areas
  *
  * @param file_browser $browser
  * @param array        $areas
@@ -438,30 +438,30 @@ function ojt_get_file_areas($course, $cm, $context)
  * @param string       $filepath
  * @param string       $filename
  * @return file_info instance or null if not found
- * @package mod_ojt
+ * @package mod_observation
  * @category files
  *
  */
-function ojt_get_file_info($browser, $areas, $course, $cm, $context, $filearea, $itemid, $filepath, $filename)
+function observation_get_file_info($browser, $areas, $course, $cm, $context, $filearea, $itemid, $filepath, $filename)
 {
     return null;
 }
 
 /**
- * Serves the files from the ojt file areas
+ * Serves the files from the observation file areas
  *
  * @param stdClass $course the course object
  * @param stdClass $cm the course module object
- * @param stdClass $context the ojt's context
+ * @param stdClass $context the observation's context
  * @param string   $filearea the name of the file area
  * @param array    $args extra arguments (itemid, path)
  * @param bool     $forcedownload whether or not force download
  * @param array    $options additional options affecting the file serving
  * @category files
  *
- * @package mod_ojt
+ * @package mod_observation
  */
-function ojt_pluginfile($course, $cm, $context, $filearea, array $args, $forcedownload, array $options = array())
+function observation_pluginfile($course, $cm, $context, $filearea, array $args, $forcedownload, array $options = array())
 {
     global $DB, $CFG, $USER;
 
@@ -473,8 +473,8 @@ function ojt_pluginfile($course, $cm, $context, $filearea, array $args, $forcedo
     require_login($course, true, $cm);
 
     $userid = $args[0];
-    require_once($CFG->dirroot . '/mod/ojt/locallib.php');
-    if (!(ojt::can_evaluate($userid, $context) || $userid == $USER->id))
+    require_once($CFG->dirroot . '/mod/observation/locallib.php');
+    if (!(observation::can_evaluate($userid, $context) || $userid == $USER->id))
     {
         // Only evaluators and/or owners have access to files
         return false;
@@ -482,7 +482,7 @@ function ojt_pluginfile($course, $cm, $context, $filearea, array $args, $forcedo
 
     $fs           = get_file_storage();
     $relativepath = implode('/', $args);
-    $fullpath     = "/$context->id/mod_ojt/$filearea/$relativepath";
+    $fullpath     = "/$context->id/mod_observation/$filearea/$relativepath";
     if ((!$file = $fs->get_file_by_hash(sha1($fullpath))) || $file->is_directory())
     {
         send_file_not_found();
@@ -495,56 +495,56 @@ function ojt_pluginfile($course, $cm, $context, $filearea, array $args, $forcedo
 /* Navigation API */
 
 /**
- * Extends the global navigation tree by adding ojt nodes if there is a relevant content
+ * Extends the global navigation tree by adding observation nodes if there is a relevant content
  *
  * This can be called by an AJAX request so do not rely on $PAGE as it might not be set up properly.
  *
- * @param navigation_node $navref An object representing the navigation tree node of the ojt module instance
+ * @param navigation_node $navref An object representing the navigation tree node of the observation module instance
  * @param stdClass        $course current course record
- * @param stdClass        $module current ojt instance record
+ * @param stdClass        $module current observation instance record
  * @param cm_info         $cm course module information
  */
-function ojt_extend_navigation(navigation_node $navref, stdClass $course, stdClass $module, cm_info $cm)
+function observation_extend_navigation(navigation_node $navref, stdClass $course, stdClass $module, cm_info $cm)
 {
     $context = context_module::instance($cm->id);
-    if (has_capability('mod/ojt:evaluate', $context) || has_capability('mod/ojt:signoff', $context))
+    if (has_capability('mod/observation:evaluate', $context) || has_capability('mod/observation:signoff', $context))
     {
-        $link = new moodle_url('/mod/ojt/report.php', array('cmid' => $cm->id));
-        $node = $navref->add(get_string('evaluatestudents', 'ojt'), $link, navigation_node::TYPE_SETTING);
+        $link = new moodle_url('/mod/observation/report.php', array('cmid' => $cm->id));
+        $node = $navref->add(get_string('evaluatestudents', 'observation'), $link, navigation_node::TYPE_SETTING);
     }
 
 }
 
 /**
- * Extends the settings navigation with the ojt settings
+ * Extends the settings navigation with the observation settings
  *
- * This function is called when the context for the page is a ojt module. This is not called by AJAX
+ * This function is called when the context for the page is a observation module. This is not called by AJAX
  * so it is safe to rely on the $PAGE.
  *
  * @param settings_navigation $settingsnav complete settings navigation tree
- * @param navigation_node     $ojtnode ojt administration node
+ * @param navigation_node     $observationnode observation administration node
  */
-function ojt_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $ojtnode = null)
+function observation_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $observationnode = null)
 {
     global $PAGE;
 
-    if (has_capability('mod/ojt:evaluate', $PAGE->cm->context) || has_capability('mod/ojt:signoff', $PAGE->cm->context))
+    if (has_capability('mod/observation:evaluate', $PAGE->cm->context) || has_capability('mod/observation:signoff', $PAGE->cm->context))
     {
-        $link = new moodle_url('/mod/ojt/report.php', array('cmid' => $PAGE->cm->id));
-        $node = navigation_node::create(get_string('evaluatestudents', 'ojt'),
-            new moodle_url('/mod/ojt/report.php', array('cmid' => $PAGE->cm->id)),
-            navigation_node::TYPE_SETTING, null, 'mod_ojt_evaluate',
+        $link = new moodle_url('/mod/observation/report.php', array('cmid' => $PAGE->cm->id));
+        $node = navigation_node::create(get_string('evaluatestudents', 'observation'),
+            new moodle_url('/mod/observation/report.php', array('cmid' => $PAGE->cm->id)),
+            navigation_node::TYPE_SETTING, null, 'mod_observation_evaluate',
             new pix_icon('i/valid', ''));
-        $ojtnode->add_node($node);
+        $observationnode->add_node($node);
     }
 
-    if (has_capability('mod/ojt:manage', $PAGE->cm->context))
+    if (has_capability('mod/observation:manage', $PAGE->cm->context))
     {
-        $node = navigation_node::create(get_string('edittopics', 'ojt'),
-            new moodle_url('/mod/ojt/manage.php', array('cmid' => $PAGE->cm->id)),
-            navigation_node::TYPE_SETTING, null, 'mod_ojt_manage',
+        $node = navigation_node::create(get_string('edittopics', 'observation'),
+            new moodle_url('/mod/observation/manage.php', array('cmid' => $PAGE->cm->id)),
+            navigation_node::TYPE_SETTING, null, 'mod_observation_manage',
             new pix_icon('t/edit', ''));
-        $ojtnode->add_node($node);
+        $observationnode->add_node($node);
     }
 }
 
@@ -569,9 +569,9 @@ function ojt_extend_settings_navigation(settings_navigation $settingsnav, naviga
  * @category comment
  *
  */
-function ojt_comment_validate($comment_param)
+function observation_comment_validate($comment_param)
 {
-    if (!strstr($comment_param->commentarea, 'ojt_topic_item_'))
+    if (!strstr($comment_param->commentarea, 'observation_topic_item_'))
     {
         throw new comment_exception('invalidcommentarea');
     }
@@ -592,12 +592,12 @@ function ojt_comment_validate($comment_param)
  * @category comment
  *
  */
-function ojt_comment_permissions($args)
+function observation_comment_permissions($args)
 {
     global $CFG;
-    require_once($CFG->dirroot . '/mod/ojt/locallib.php');
+    require_once($CFG->dirroot . '/mod/observation/locallib.php');
 
-    if (!ojt::can_evaluate($args->itemid, $args->context))
+    if (!observation::can_evaluate($args->itemid, $args->context))
     {
         return array('post' => false, 'view' => true);
     }
@@ -605,7 +605,7 @@ function ojt_comment_permissions($args)
     return array('post' => true, 'view' => true);
 }
 
-function ojt_comment_template()
+function observation_comment_template()
 {
     global $OUTPUT, $PAGE;
 

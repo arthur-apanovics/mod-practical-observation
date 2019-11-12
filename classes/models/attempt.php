@@ -16,17 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt\models;
+namespace mod_observation\models;
 
-use mod_ojt\traits\db_record_base;
+use mod_observation\traits\db_record_base;
 
 class attempt extends db_record_base
 {
-    protected const TABLE = 'ojt_attempt';
+    protected const TABLE = 'observation_attempt';
 
     /**
      * @var int

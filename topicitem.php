@@ -16,31 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_ojt\models\topic_item;
+use mod_observation\models\topic_item;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/lib.php');
 require_once(dirname(__FILE__) . '/locallib.php');
 require_once(dirname(__FILE__) . '/forms.php');
 
-$ojtid   = required_param('bid', PARAM_INT); // OJT instance id.
+$observationid   = required_param('bid', PARAM_INT); // Observation instance id.
 $topicid = required_param('tid', PARAM_INT);  // Topic id.
 $itemid  = optional_param('id', 0, PARAM_INT);  // Topic item id.
 $delete  = optional_param('delete', 0, PARAM_BOOL);
 
-$ojt    = $DB->get_record('ojt', array('id' => $ojtid), '*', MUST_EXIST);
-$course = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
-$cm     = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
+$observation    = $DB->get_record('observation', array('id' => $observationid), '*', MUST_EXIST);
+$course = $DB->get_record('course', array('id' => $observation->course), '*', MUST_EXIST);
+$cm     = get_coursemodule_from_instance('observation', $observation->id, $course->id, false, MUST_EXIST);
 
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
-require_capability('mod/ojt:manage', $context);
+require_capability('mod/observation:manage', $context);
 
-$PAGE->set_url('/mod/ojt/topicitem.php', array('bid' => $ojtid, 'tid' => $topicid, 'id' => $itemid));
+$PAGE->set_url('/mod/observation/topicitem.php', array('bid' => $observationid, 'tid' => $topicid, 'id' => $itemid));
 
 // Handle actions
 if ($delete)
@@ -51,7 +51,7 @@ if ($delete)
         echo $OUTPUT->header();
         $confirmurl = $PAGE->url;
         $confirmurl->params(array('delete' => 1, 'confirm' => 1, 'sesskey' => sesskey()));
-        echo $OUTPUT->confirm(get_string('confirmitemdelete', 'ojt'), $confirmurl, $PAGE->url);
+        echo $OUTPUT->confirm(get_string('confirmitemdelete', 'observation'), $confirmurl, $PAGE->url);
         echo $OUTPUT->footer();
         die();
     }
@@ -59,11 +59,11 @@ if ($delete)
     require_sesskey();
 
     topic_item::delete_topic_item($itemid, $context);
-    $redirecturl = new moodle_url('/mod/ojt/manage.php', array('cmid' => $cm->id));
-    totara_set_notification(get_string('itemdeleted', 'ojt'), $redirecturl, array('class' => 'notifysuccess'));
+    $redirecturl = new moodle_url('/mod/observation/manage.php', array('cmid' => $cm->id));
+    totara_set_notification(get_string('itemdeleted', 'observation'), $redirecturl, array('class' => 'notifysuccess'));
 }
 
-$form = new ojt_topic_item_form(null, array('ojtid' => $ojtid, 'topicid' => $topicid));
+$form = new observation_topic_item_form(null, array('observationid' => $observationid, 'topicid' => $topicid));
 if ($data = $form->get_data())
 {
     // Save topic
@@ -86,15 +86,15 @@ if ($data = $form->get_data())
         $topic_item->update();
     }
 
-    redirect(new moodle_url('/mod/ojt/manage.php', array('cmid' => $cm->id)));
+    redirect(new moodle_url('/mod/observation/manage.php', array('cmid' => $cm->id)));
 }
 
 // Print the page header.
 $actionstr = empty($itemid)
-    ? get_string('additem', 'ojt')
-    : get_string('edititem', 'ojt');
-$PAGE->set_title(format_string($ojt->name));
-$PAGE->set_heading(format_string($ojt->name) . ' - ' . $actionstr);
+    ? get_string('additem', 'observation')
+    : get_string('edititem', 'observation');
+$PAGE->set_title(format_string($observation->name));
+$PAGE->set_heading(format_string($observation->name) . ' - ' . $actionstr);
 
 // Output starts here.
 echo $OUTPUT->header();

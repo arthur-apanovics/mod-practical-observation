@@ -16,13 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 
 /**
- * English strings for ojt
+ * English strings for observation
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -35,18 +35,18 @@ $string['allowfileuploads'] = 'Allow \'evaluator\' file uploads';
 $string['allowselffileuploads'] = 'Allow \'owner\' file uploads';
 $string['edititem'] = 'Edit topic item';
 $string['evaluate'] = 'Evaluate';
-$string['ojt:addinstance'] = 'Add instance';
-$string['ojt:evaluate'] = 'Evaluate';
-$string['ojt:evaluateself'] = 'Evaluate self';
-$string['ojt:manage'] = 'Manage';
-$string['ojt:view'] = 'View';
-$string['ojt:signoff'] = 'Sign-off';
-$string['ojt:witnessitem'] = 'Witness topic item completion';
-$string['ojtfieldset'] = 'Custom example fieldset';
-$string['ojtname'] = 'Observation name';
-$string['ojtname_help'] = 'The title of your Observation activity.';
-$string['ojt'] = 'Observation';
-$string['ojtxforx'] = '{$a->ojt} - {$a->user}';
+$string['observation:addinstance'] = 'Add instance';
+$string['observation:evaluate'] = 'Evaluate';
+$string['observation:evaluateself'] = 'Evaluate self';
+$string['observation:manage'] = 'Manage';
+$string['observation:view'] = 'View';
+$string['observation:signoff'] = 'Sign-off';
+$string['observation:witnessitem'] = 'Witness topic item completion';
+$string['observationfieldset'] = 'Custom example fieldset';
+$string['observationname'] = 'Observation name';
+$string['observationname_help'] = 'The title of your Observation activity.';
+$string['observation'] = 'Observation';
+$string['observationxforx'] = '{$a->observation} - {$a->user}';
 $string['competencies'] = 'Competencies';
 $string['competencies_help'] = 'Here you can select which of the assigned course competencies should be marked as proficient upon completion of this topic.
 
@@ -62,7 +62,7 @@ $string['deleteitem'] = 'Delete topic item';
 $string['deletetopic'] = 'Delete topic';
 $string['edittopic'] = 'Edit topic';
 $string['edittopics'] = 'Edit topics';
-$string['error:ojtnotfound'] = 'Observation not found';
+$string['error:observationnotfound'] = 'Observation not found';
 $string['evaluatestudents'] = 'Evaluate students';
 $string['filesupdated']  = 'Files updated';
 $string['itemdeleted'] = 'Topic item deleted';
@@ -83,7 +83,7 @@ $string['optional'] = 'Optional';
 $string['optionalcompletion'] = 'Optional completion';
 $string['pluginadministration'] = 'Observation administration';
 $string['pluginname'] = 'Observation';
-$string['printthisojt'] = 'Print this Observation';
+$string['printthisobservation'] = 'Print this Observation';
 $string['report'] = 'Report';
 $string['signedoff'] = 'Signed off';
 $string['topicdeleted'] = 'Topic deleted';

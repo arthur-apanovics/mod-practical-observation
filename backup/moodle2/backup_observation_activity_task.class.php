@@ -16,18 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot . '/mod/ojt/backup/moodle2/backup_ojt_stepslib.php');
+require_once($CFG->dirroot . '/mod/observation/backup/moodle2/backup_observation_stepslib.php');
 
 /**
- * Provides the steps to perform one complete backup of the ojt instance
+ * Provides the steps to perform one complete backup of the observation instance
  */
-class backup_ojt_activity_task extends backup_activity_task
+class backup_observation_activity_task extends backup_activity_task
 {
 
     /**
@@ -38,11 +38,11 @@ class backup_ojt_activity_task extends backup_activity_task
     }
 
     /**
-     * Defines a backup step to store the instance data in the ojt.xml file
+     * Defines a backup step to store the instance data in the observation.xml file
      */
     protected function define_my_steps()
     {
-        $this->add_step(new backup_ojt_activity_structure_step('ojt_structure', 'ojt.xml'));
+        $this->add_step(new backup_observation_activity_structure_step('observation_structure', 'observation.xml'));
     }
 
     /**
@@ -57,13 +57,13 @@ class backup_ojt_activity_task extends backup_activity_task
 
         $base = preg_quote($CFG->wwwroot, '/');
 
-        // Link to the list of ojts.
-        $search  = '/(' . $base . '\/mod\/ojt\/index.php\?id\=)([0-9]+)/';
-        $content = preg_replace($search, '$@OJTINDEX*$2@$', $content);
+        // Link to the list of observations.
+        $search  = '/(' . $base . '\/mod\/observation\/index.php\?id\=)([0-9]+)/';
+        $content = preg_replace($search, '$@ObservationINDEX*$2@$', $content);
 
-        // Link to ojt view by moduleid.
-        $search  = '/(' . $base . '\/mod\/ojt\/view.php\?id\=)([0-9]+)/';
-        $content = preg_replace($search, '$@OJTVIEWBYID*$2@$', $content);
+        // Link to observation view by moduleid.
+        $search  = '/(' . $base . '\/mod\/observation\/view.php\?id\=)([0-9]+)/';
+        $content = preg_replace($search, '$@ObservationVIEWBYID*$2@$', $content);
 
         return $content;
     }

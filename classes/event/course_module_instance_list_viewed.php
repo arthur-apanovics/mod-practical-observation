@@ -16,20 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt\event;
+namespace mod_observation\event;
 
 use core\event\course_module_instances_list_viewed;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_ojt instance list viewed event class.
+ * The mod_observation instance list viewed event class.
  *
- * @package    mod_ojt
+ * @package    mod_observation
  * @copyright  2015 Eugene Venter <eugene@catalyst.net.nz>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

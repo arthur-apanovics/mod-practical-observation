@@ -16,12 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_ojt\models\external_request;
-use mod_ojt\user_external_request;
+use mod_observation\models\external_request;
+use mod_observation\user_external_request;
 
 if (!defined('MOODLE_INTERNAL'))
 {
@@ -30,23 +30,23 @@ if (!defined('MOODLE_INTERNAL'))
 
 require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->libdir . '/uploadlib.php');
-require_once($CFG->dirroot . '/mod/ojt/locallib.php');
+require_once($CFG->dirroot . '/mod/observation/locallib.php');
 
 /**
- * OJT topic form
+ * Observation topic form
  */
-class ojt_topic_form extends moodleform
+class observation_topic_form extends moodleform
 {
     function definition()
     {
         global $CFG;
         $mform    =& $this->_form;
         $courseid = $this->_customdata['courseid'];
-        $ojtid    = $this->_customdata['ojtid'];
-        $cm = get_coursemodule_from_instance('ojt', $ojtid);
+        $observationid    = $this->_customdata['observationid'];
+        $cm = get_coursemodule_from_instance('observation', $observationid);
         $context = context_module::instance($cm->id);
 
-        $mform->addElement('text', 'name', get_string('name', 'ojt'));
+        $mform->addElement('text', 'name', get_string('name', 'observation'));
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
@@ -58,13 +58,13 @@ class ojt_topic_form extends moodleform
             'subdirs'  => true
         ];
 
-        $mform->addElement('editor', 'intro', get_string('todo_langstring-topic_intro_desc', 'mod_ojt'), $editor_params);
+        $mform->addElement('editor', 'intro', get_string('todo_langstring-topic_intro_desc', 'mod_observation'), $editor_params);
         $mform->setType('intro', PARAM_RAW); // no XSS prevention here, users must be trusted
 
-        $mform->addElement('editor', 'observerintro', get_string('todo_langstring-topic_observerintro_desc', 'mod_ojt'), $editor_params);
+        $mform->addElement('editor', 'observerintro', get_string('todo_langstring-topic_observerintro_desc', 'mod_observation'), $editor_params);
         $mform->setType('observerintro', PARAM_RAW); // no XSS prevention here, users must be trusted
 
-        $mform->addElement('advcheckbox', 'completionreq', get_string('optionalcompletion', 'ojt'));
+        $mform->addElement('advcheckbox', 'completionreq', get_string('optionalcompletion', 'observation'));
 
         if (!empty($CFG->enablecompetencies))
         {
@@ -78,17 +78,17 @@ class ojt_topic_form extends moodleform
             }
             if (!empty($competencies))
             {
-                $select = $mform->addElement('select', 'competencies', get_string('competencies', 'ojt'), $competencies,
+                $select = $mform->addElement('select', 'competencies', get_string('competencies', 'observation'), $competencies,
                     array('size' => 7));
                 $select->setMultiple(true);
                 $mform->setType('competencies', PARAM_INT);
-                $mform->addHelpButton('competencies', 'competencies', 'ojt');
+                $mform->addHelpButton('competencies', 'competencies', 'observation');
             }
         }
 
         if ($CFG->usecomments)
         {
-            $mform->addElement('advcheckbox', 'allowcomments', get_string('allowcomments', 'ojt'));
+            $mform->addElement('advcheckbox', 'allowcomments', get_string('allowcomments', 'observation'));
         }
         else
         {
@@ -100,7 +100,7 @@ class ojt_topic_form extends moodleform
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'bid');
         $mform->setType('bid', PARAM_INT);
-        $mform->setDefault('bid', $ojtid);
+        $mform->setDefault('bid', $observationid);
 
         $this->add_action_buttons(false);
     }
@@ -108,33 +108,33 @@ class ojt_topic_form extends moodleform
 
 
 /**
- * OJT topic item form
+ * Observation topic item form
  */
-class ojt_topic_item_form extends moodleform
+class observation_topic_item_form extends moodleform
 {
     function definition()
     {
         $mform   =& $this->_form;
-        $ojtid   = $this->_customdata['ojtid'];
+        $observationid   = $this->_customdata['observationid'];
         $topicid = $this->_customdata['topicid'];
 
-        $mform->addElement('text', 'name', get_string('name', 'ojt'));
+        $mform->addElement('text', 'name', get_string('name', 'observation'));
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
-        $mform->addElement('advcheckbox', 'completionreq', get_string('optionalcompletion', 'ojt'));
+        $mform->addElement('advcheckbox', 'completionreq', get_string('optionalcompletion', 'observation'));
 
-        $mform->addElement('advcheckbox', 'allowfileuploads', get_string('allowfileuploads', 'ojt'));
+        $mform->addElement('advcheckbox', 'allowfileuploads', get_string('allowfileuploads', 'observation'));
         $mform->setType('allowfileuploads', PARAM_BOOL);
 
-        $mform->addElement('advcheckbox', 'allowselffileuploads', get_string('allowselffileuploads', 'ojt'));
+        $mform->addElement('advcheckbox', 'allowselffileuploads', get_string('allowselffileuploads', 'observation'));
         $mform->setType('allowselffileuploads', PARAM_BOOL);
 
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'bid');
         $mform->setType('bid', PARAM_INT);
-        $mform->setDefault('bid', $ojtid);
+        $mform->setDefault('bid', $observationid);
         $mform->addElement('hidden', 'tid');
         $mform->setType('tid', PARAM_INT);
         $mform->setDefault('tid', $topicid);
@@ -144,7 +144,7 @@ class ojt_topic_item_form extends moodleform
 }
 
 
-class ojt_request_select_users extends moodleform
+class observation_request_select_users extends moodleform
 {
     private $emailsexisting = null;
 
@@ -179,13 +179,13 @@ class ojt_request_select_users extends moodleform
         $mform->setType('oldduedate', PARAM_INT);
 
         // //TODO? A hidden field used by js to popup a preview window.
-        // $popupurl = $CFG->wwwroot . "/mod/ojt/observe.php?userid={$USER->id}&preview=1&feedback360id=";
+        // $popupurl = $CFG->wwwroot . "/mod/observation/observe.php?userid={$USER->id}&preview=1&feedback360id=";
         // $mform->addElement('hidden', 'popupurl', $popupurl);
         // $mform->setType('popupurl', PARAM_TEXT);
 
         // Text area to add new emails.
         $emailnew_attributes = 'wrap="virtual" rows="5" cols="50" placeholder="'
-                               . get_string('addemailplaceholder', 'mod_ojt') . '"';
+                               . get_string('addemailplaceholder', 'mod_observation') . '"';
         $mform->addElement('textarea', 'emailnew', get_string('emailrequestsnew', 'totara_feedback360'),
             $emailnew_attributes);
         $mform->addHelpButton('emailnew', 'emailrequestsnew', 'totara_feedback360');
@@ -205,8 +205,8 @@ class ojt_request_select_users extends moodleform
         global $USER, $PAGE;
 
         $mform    =& $this->_form;
-        $renderer = $PAGE->get_renderer('mod_ojt');
-        /* @var $renderer mod_ojt_renderer */
+        $renderer = $PAGE->get_renderer('mod_observation');
+        /* @var $renderer mod_observation_renderer */
 
         if (!empty($data['userid']))
         {
@@ -226,7 +226,7 @@ class ojt_request_select_users extends moodleform
             print_error('error:noformselected', 'totara_feedback360');
         }
 
-        $cm = get_coursemodule_from_id('ojt', $data['cmid']);
+        $cm = get_coursemodule_from_id('observation', $data['cmid']);
 
         if (!empty($data['topicid']) && !empty($data['topicname']))
         {
@@ -235,11 +235,11 @@ class ojt_request_select_users extends moodleform
 
             // $preview_params = array(
             //     'userid'  => $USER->id,
-            //     'ojtid'   => $data['cmid'],
+            //     'observationid'   => $data['cmid'],
             //     'topicid' => $data['topicid'],
             //     'preview' => true);
             // // TODO? FEEDBACK PREVIEW URL
-            // $preview_url  = new moodle_url('/mod/ojt/observe.php', $preview_params);
+            // $preview_url  = new moodle_url('/mod/observation/observe.php', $preview_params);
             // $preview_link = html_writer::link(
             //     $preview_url,
             //     get_string('previewencased', 'totara_feedback360'),
@@ -252,7 +252,7 @@ class ojt_request_select_users extends moodleform
         if (!empty($data['emailexisting']))
         {
             $existing_html    = array();
-            $external_request = user_external_request::get_user_request_for_ojt_topic(
+            $external_request = user_external_request::get_user_request_for_observation_topic(
                 $cm->instance, $data['topicid'], $data['userid']);
 
             foreach ($external_request->email_assignments as $assignment)
@@ -287,7 +287,7 @@ class ojt_request_select_users extends moodleform
 
     public function validation($data, $files)
     {
-        $cm     = get_coursemodule_from_id('ojt', $data['cmid']);
+        $cm     = get_coursemodule_from_id('observation', $data['cmid']);
         $errors = array();
 
         // Check form is defined.
@@ -355,7 +355,7 @@ class ojt_request_select_users extends moodleform
     }
 }
 
-class ojt_request_confirmation extends moodleform
+class observation_request_confirmation extends moodleform
 {
     public function definition()
     {
@@ -522,7 +522,7 @@ class ojt_request_confirmation extends moodleform
                 $strdata        = ['from' => userdate($oldduedate), 'to' => userdate($newduedate)];
                 $duedateupdated = html_writer::start_tag('div', array('class' => 'duedate_update'));
                 //TODO lang string
-                $duedateupdated .= get_string('requestupdateduedate', 'mod_ojt', $strdata);
+                $duedateupdated .= get_string('requestupdateduedate', 'mod_observation', $strdata);
                 $duedateupdated .= html_writer::end_tag('div');
                 $changesstr     .= $duedateupdated;
             }
@@ -531,7 +531,7 @@ class ojt_request_confirmation extends moodleform
                 // due date removed
                 $duedateupdated = html_writer::start_tag('div', array('class' => 'duedate_update'));
                 //TODO lang string
-                $duedateupdated .= get_string('requestdeleteduedate', 'mod_ojt', userdate($oldduedate));
+                $duedateupdated .= get_string('requestdeleteduedate', 'mod_observation', userdate($oldduedate));
                 $duedateupdated .= html_writer::end_tag('div');
                 $changesstr     .= $duedateupdated;
             }
@@ -556,7 +556,7 @@ class ojt_request_confirmation extends moodleform
 /**
  * The form for editing evidence
  */
-class ojt_topicitem_files_form extends moodleform
+class observation_topicitem_files_form extends moodleform
 {
 
     /**
@@ -585,8 +585,8 @@ class ojt_topicitem_files_form extends moodleform
         $mform->setType('userid', PARAM_INT);
 
         $mform->addElement('filemanager', 'topicitemfiles_filemanager',
-            get_string('topicitemfiles', 'ojt'), null, $fileoptions);
+            get_string('topicitemfiles', 'observation'), null, $fileoptions);
 
-        $this->add_action_buttons(true, get_string('updatefiles', 'ojt'));
+        $this->add_action_buttons(true, get_string('updatefiles', 'observation'));
     }
 }

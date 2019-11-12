@@ -23,20 +23,20 @@
  * @subpackage totara_feedback360
  */
 
-use mod_ojt\models\email_assignment;
-use mod_ojt\models\external_request;
-use mod_ojt\user_external_request;
-use mod_ojt\user_ojt;
+use mod_observation\models\email_assignment;
+use mod_observation\models\external_request;
+use mod_observation\user_external_request;
+use mod_observation\user_observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once($CFG->dirroot . '/mod/ojt/lib.php');
-require_once($CFG->dirroot . '/mod/ojt/locallib.php');
+require_once($CFG->dirroot . '/mod/observation/lib.php');
+require_once($CFG->dirroot . '/mod/observation/locallib.php');
 require_once(dirname(__FILE__) . '/forms.php');
 
 require_login();
 
 $cmid    = required_param('cmid', PARAM_INT); // Course_module ID
-$topicid = required_param('topicid', PARAM_INT); // ojt topic id
+$topicid = required_param('topicid', PARAM_INT); // observation topic id
 $action  = required_param('action', PARAM_ALPHA);
 $userid  = required_param('userid', PARAM_INT);
 
@@ -52,21 +52,21 @@ $PAGE->set_cacheable(true);
 // TODO REQUEST PAGE BREADCRUMBS
 $PAGE->navbar->add('TODO: BREADCRUMBS');
 
-$cm         = get_coursemodule_from_id('ojt', $cmid);
+$cm         = get_coursemodule_from_id('observation', $cmid);
 $modcontext = context_module::instance($cm->id);
-$asmanager  = $USER->id != $userid && has_capability('mod/ojt:evaluate', $modcontext);
+$asmanager  = $USER->id != $userid && has_capability('mod/observation:evaluate', $modcontext);
 $owner      = $DB->get_record('user', array('id' => $userid));
 
 //Now we can set up the rest of the page.
 if ($asmanager)
 {
-    $userxfeedback = get_string('userxfeedback', 'mod_ojt', fullname($owner));
+    $userxfeedback = get_string('userxfeedback', 'mod_observation', fullname($owner));
     $PAGE->set_title($userxfeedback);
     $PAGE->set_heading($userxfeedback);
 }
 else
 {
-    $strrequestfeedback = get_string('requestobservation', 'mod_ojt');
+    $strrequestfeedback = get_string('requestobservation', 'mod_observation');
     $PAGE->set_title($strrequestfeedback);
     $PAGE->set_heading($strrequestfeedback);
 }
@@ -82,14 +82,14 @@ local_js(array(
 
 $PAGE->requires->js('/totara/feedback360/js/preview.js', false);
 
-$user_ojt = new user_ojt($cm->instance, $userid);
-$topic    = $user_ojt->get_topic_by_id($topicid);
+$user_observation = new user_observation($cm->instance, $userid);
+$topic    = $user_observation->get_topic_by_id($topicid);
 // Set up the forms based off of the action.
 if ($action == 'users')
 {
     $update           = optional_param('update', 0, PARAM_INT);
     $selected         = optional_param('selected', '', PARAM_SEQUENCE);
-    $external_request = user_external_request::get_or_create_user_external_request_for_ojt_topic(
+    $external_request = user_external_request::get_or_create_user_external_request_for_observation_topic(
         $cm->instance, $topicid, $userid);
 
     $data              = array();
@@ -108,7 +108,7 @@ if ($action == 'users')
     }
 
     $args = array('args' => '{"userid":' . $userid . ','
-                            . '"ojtid":' . $cmid . ','
+                            . '"observationid":' . $cmid . ','
                             . '"topicid":' . $topicid . ','
                             . '"sesskey":"' . sesskey()
                             . '"}'
@@ -116,7 +116,7 @@ if ($action == 'users')
 
     $PAGE->requires->js('/totara/feedback360/js/delete.js', false);
 
-    $mform = new ojt_request_select_users();
+    $mform = new observation_request_select_users();
     $mform->set_data($data);
 }
 else if ($action == 'confirm')
@@ -126,7 +126,7 @@ else if ($action == 'confirm')
     $emailkeep   = required_param('emailkeep', PARAM_TEXT);
     $newduedate  = required_param('duedate', PARAM_INT);
     $oldduedate  = required_param('oldduedate', PARAM_INT);
-    $mform       = new ojt_request_confirmation();
+    $mform       = new observation_request_confirmation();
 
     $data                = array();
     $data['userid']      = $userid;
@@ -144,13 +144,13 @@ else if ($action == 'confirm')
 }
 else
 {
-    print_error('error:unrecognisedaction', 'mod_ojt', null, $action);
+    print_error('error:unrecognisedaction', 'mod_observation', null, $action);
 }
 
 // Handle forms being submitted.
 if ($mform->is_cancelled())
 {
-    $cancelurl = new moodle_url('/mod/ojt/view.php', array('id' => $cmid, 'userid' => $userid));
+    $cancelurl = new moodle_url('/mod/observation/view.php', array('id' => $cmid, 'userid' => $userid));
     redirect($cancelurl);
 }
 else if ($data = $mform->get_data())
@@ -209,7 +209,7 @@ else if ($data = $mform->get_data())
                 'oldduedate'  => $data->oldduedate,
             );
 
-            $url = new moodle_url('/mod/ojt/request.php', $params);
+            $url = new moodle_url('/mod/observation/request.php', $params);
             redirect($url);
         }
         else
@@ -221,7 +221,7 @@ else if ($data = $mform->get_data())
                 'action'  => 'users'
             );
 
-            $url = new moodle_url('/mod/ojt/request.php', $params);
+            $url = new moodle_url('/mod/observation/request.php', $params);
 
             totara_set_notification(
                 get_string('nochangestobemade', 'totara_feedback360'),
@@ -233,7 +233,7 @@ else if ($data = $mform->get_data())
     {
         // Update the timedue in the request.
 
-        $external_request = user_external_request::get_user_request_for_ojt_topic($cm->instance, $topicid, $userid);
+        $external_request = user_external_request::get_user_request_for_observation_topic($cm->instance, $topicid, $userid);
 
         $timeduevalidation = external_request::validate_new_timedue(
             $cm->instance, $topicid, $userid, $data->duedate);
@@ -252,7 +252,7 @@ else if ($data = $mform->get_data())
         {
             $strvars               = new stdClass();
             $strvars->userfrom     = fullname($userfrom);
-            $strvars->feedbackname = "$topic->name - $user_ojt->name";
+            $strvars->feedbackname = "$topic->name - $user_observation->name";
             $strvars->timedue      = userdate($data->duedate, get_string('strftimedatetime'));
 
             if ($asmanager)
@@ -270,7 +270,7 @@ else if ($data = $mform->get_data())
 
         email_assignment::update_and_notify_email($data, $asmanager, $userfrom, $strvars, $external_request);
 
-        // Redirect to the ojt page with a success notification.
+        // Redirect to the observation page with a success notification.
         if (empty($emailkeep) && empty($emailcancel))
         {
             $successstr = get_string('requestcreatedsuccessfully', 'totara_feedback360');
@@ -280,7 +280,7 @@ else if ($data = $mform->get_data())
             $successstr = get_string('requestupdatedsuccessfully', 'totara_feedback360');
         }
 
-        $returnurl = new moodle_url('/mod/ojt/view.php', array('id' => $cmid));
+        $returnurl = new moodle_url('/mod/observation/view.php', array('id' => $cmid));
         totara_set_notification($successstr, $returnurl, array('class' => 'notifysuccess'));
     }
     else
@@ -289,8 +289,8 @@ else if ($data = $mform->get_data())
     }
 }
 
-$renderer = $PAGE->get_renderer('mod_ojt');
-/* @var $renderer mod_ojt_renderer */
+$renderer = $PAGE->get_renderer('mod_observation');
+/* @var $renderer mod_observation_renderer */
 
 echo $renderer->header();
 

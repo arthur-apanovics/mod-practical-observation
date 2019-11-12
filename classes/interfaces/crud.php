@@ -1,6 +1,6 @@
 <?php
 
-namespace mod_ojt\interfaces;
+namespace mod_observation\interfaces;
 
 use stdClass;
 

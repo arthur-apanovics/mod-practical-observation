@@ -16,15 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * Page showing OJT instances in a course
+ * Page showing Observation instances in a course
  */
 
-use mod_ojt\event\course_module_instance_list_viewed;
+use mod_observation\event\course_module_instance_list_viewed;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/lib.php');
@@ -42,8 +42,8 @@ $event  = course_module_instance_list_viewed::create($params);
 $event->add_record_snapshot('course', $course);
 $event->trigger();
 
-$strname = get_string('modulenameplural', 'mod_ojt');
-$PAGE->set_url('/mod/ojt/index.php', array('id' => $id));
+$strname = get_string('modulenameplural', 'mod_observation');
+$PAGE->set_url('/mod/observation/index.php', array('id' => $id));
 $PAGE->navbar->add($strname);
 $PAGE->set_title("$course->shortname: $strname");
 $PAGE->set_heading($course->fullname);
@@ -52,9 +52,9 @@ $PAGE->set_pagelayout('incourse');
 echo $OUTPUT->header();
 echo $OUTPUT->heading($strname);
 
-if (!$ojts = get_all_instances_in_course('ojt', $course))
+if (!$observations = get_all_instances_in_course('observation', $course))
 {
-    notice(get_string('noojts', 'ojt'), new moodle_url('/course/view.php', array('id' => $course->id)));
+    notice(get_string('noobservations', 'observation'), new moodle_url('/course/view.php', array('id' => $course->id)));
 }
 
 $usesections = course_format_uses_sections($course->format);
@@ -76,7 +76,7 @@ else
 
 $modinfo        = get_fast_modinfo($course);
 $currentsection = '';
-foreach ($modinfo->instances['ojt'] as $cm)
+foreach ($modinfo->instances['observation'] as $cm)
 {
     $row = array();
     if ($usesections)

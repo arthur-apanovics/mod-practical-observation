@@ -16,17 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_ojt;
+namespace mod_observation;
 
 
 use dml_exception;
-use mod_ojt\models\completion;
-use mod_ojt\models\topic_signoff;
-use mod_ojt\models\topic;
+use mod_observation\models\completion;
+use mod_observation\models\topic_signoff;
+use mod_observation\models\topic;
 
 class user_topic extends topic
 {
@@ -51,7 +51,7 @@ class user_topic extends topic
     public $external_request;
 
     /**
-     * One of 3 possible \mod_ojt\models\completion statuses:
+     * One of 3 possible \mod_observation\models\completion statuses:
      * STATUS_INCOMPLETE | STATUS_REQUIREDCOMPLETE | STATUS_COMPLETE
      * @var int
      */
@@ -69,8 +69,8 @@ class user_topic extends topic
         $this->userid      = $userid;
         $this->topic_items = user_topic_item::get_user_topic_items_for_topic($this->id, $this->userid);
         $this->signoff     = topic_signoff::get_user_topic_signoff($this->id, $this->userid);
-        $this->external_request = user_external_request::get_user_request_for_ojt_topic(
-            $this->ojtid, $this->id, $this->userid);
+        $this->external_request = user_external_request::get_user_request_for_observation_topic(
+            $this->observationid, $this->id, $this->userid);
         $this->completion_status = $this->get_completion_status();
     }
 
@@ -83,22 +83,22 @@ class user_topic extends topic
     public static function get_user_topic(int $topicid, int $userid)
     {
         global $DB;
-        return new self($DB->get_record('ojt_topic', ['id' => $topicid]), $userid);
+        return new self($DB->get_record('observation_topic', ['id' => $topicid]), $userid);
     }
 
     /**
-     * Returns all user topics in given ojt instance
-     * @param int $ojtid
+     * Returns all user topics in given observation instance
+     * @param int $observationid
      * @param int $userid
      * @return user_topic[]
      * @throws dml_exception
      */
-    public static function get_user_topics(int $ojtid, int $userid): array
+    public static function get_user_topics(int $observationid, int $userid): array
     {
         global $DB;
 
         $topics = [];
-        foreach ($DB->get_records('ojt_topic', ['ojtid' => $ojtid]) as $record)
+        foreach ($DB->get_records('observation_topic', ['observationid' => $observationid]) as $record)
             $topics[$record->id] = new self($record, $userid);
 
         return $topics;
@@ -106,13 +106,13 @@ class user_topic extends topic
 
     /**
      * @param $userid
-     * @param $ojtid
+     * @param $observationid
      * @return array
      * @throws dml_exception
      *
      * @deprecated do not use as this returns an associative array instead of a proper class instance
      */
-    public static function get_user_topic_records($userid, $ojtid)
+    public static function get_user_topic_records($userid, $observationid)
     {
         global $DB;
 
@@ -120,20 +120,20 @@ class user_topic extends topic
                . completion::STATUS_INCOMPLETE .
                ' ELSE c.status END AS status, s.signedoff, s.modifiedby AS signoffmodifiedby, s.timemodified AS signofftimemodified,'
                . get_all_user_name_fields(true, 'su', '', 'signoffuser') . '
-               FROM {ojt_topic} t
-               LEFT JOIN {ojt_completion} c ON t.id = c.topicid AND c.type = ? AND c.userid = ?
-               LEFT JOIN {ojt_topic_signoff} s ON t.id = s.topicid AND s.userid = ?
+               FROM {observation_topic} t
+               LEFT JOIN {observation_completion} c ON t.id = c.topicid AND c.type = ? AND c.userid = ?
+               LEFT JOIN {observation_topic_signoff} s ON t.id = s.topicid AND s.userid = ?
                LEFT JOIN {user} su ON s.modifiedby = su.id
-               WHERE t.ojtid = ?
+               WHERE t.observationid = ?
                ORDER BY t.id';
 
-        return $DB->get_records_sql($sql, array(completion::COMP_TYPE_TOPIC, $userid, $userid, $ojtid));
+        return $DB->get_records_sql($sql, array(completion::COMP_TYPE_TOPIC, $userid, $userid, $observationid));
     }
 
     /**
      * Returns current topic completion status
      *
-     * @return int One of 3 possible \mod_ojt\models\completion statuses: STATUS_INCOMPLETE | STATUS_REQUIREDCOMPLETE | STATUS_COMPLETE
+     * @return int One of 3 possible \mod_observation\models\completion statuses: STATUS_INCOMPLETE | STATUS_REQUIREDCOMPLETE | STATUS_COMPLETE
      */
     private function get_completion_status()
     {

@@ -16,52 +16,52 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * OJT witness ajax toggler
+ * Observation witness ajax toggler
  */
 
-use mod_ojt\models\email_assignment;
-use mod_ojt\models\item_witness;
-use mod_ojt\models\ojt;
-use mod_ojt\models\topic;
-use mod_ojt\user_topic_item;
+use mod_observation\models\email_assignment;
+use mod_observation\models\item_witness;
+use mod_observation\models\observation;
+use mod_observation\models\topic;
+use mod_observation\user_topic_item;
 
 define('AJAX_SCRIPT', true);
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once($CFG->dirroot . '/mod/ojt/lib.php');
-require_once($CFG->dirroot . '/mod/ojt/locallib.php');
+require_once($CFG->dirroot . '/mod/observation/lib.php');
+require_once($CFG->dirroot . '/mod/observation/locallib.php');
 require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
 
 require_sesskey();
 
 $userid      = required_param('userid', PARAM_INT);
-$ojtid       = required_param('bid', PARAM_INT);
+$observationid       = required_param('bid', PARAM_INT);
 $topicitemid = required_param('id', PARAM_INT);
 $token       = optional_param('token', '', PARAM_ALPHANUM);
 
 $external_user = $token !== '';
 
-if (!email_assignment::is_valid_token($ojtid, $userid, $token))
+if (!email_assignment::is_valid_token($observationid, $userid, $token))
 {
-    print_error('accessdenied', 'ojt');
+    print_error('accessdenied', 'observation');
 }
 if (!$external_user)
 {
     require_login($course, true, $cm);
-    require_capability('mod/ojt:witnessitem', context_module::instance($cm->id));
+    require_capability('mod/observation:witnessitem', context_module::instance($cm->id));
 }
-if (!$ojt->itemwitness)
+if (!$observation->itemwitness)
 {
-    print_error('itemwitness disabled for this ojt');
+    print_error('itemwitness disabled for this observation');
 }
 
-$course     = $DB->get_record('course', array('id' => $ojt->course), '*', MUST_EXIST);
-$cm         = get_coursemodule_from_instance('ojt', $ojt->id, $course->id, false, MUST_EXIST);
+$course     = $DB->get_record('course', array('id' => $observation->course), '*', MUST_EXIST);
+$cm         = get_coursemodule_from_instance('observation', $observation->id, $course->id, false, MUST_EXIST);
 $topicitem  = new user_topic_item($topicitemid, $userid);
 $dateformat = get_string('strftimedatetimeshort', 'core_langconfig');
 
@@ -94,11 +94,11 @@ else
 }
 
 // Update topic completion
-$topiccompletion = topic::update_topic_completion($userid, $ojtid, $topicitem->topicid);
+$topiccompletion = topic::update_topic_completion($userid, $observationid, $topicitem->topicid);
 
 $transaction->allow_commit();
 
-$modifiedstr = ojt::get_modifiedstr_user($topicitem->witness->timewitnessed);
+$modifiedstr = observation::get_modifiedstr_user($topicitem->witness->timewitnessed);
 
 $jsonparams = array(
     'item'        => $topicitem->witness,

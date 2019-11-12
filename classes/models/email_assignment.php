@@ -1,23 +1,23 @@
 <?php
 
 
-namespace mod_ojt\models;
+namespace mod_observation\models;
 
 
 use coding_exception;
 use dml_exception;
 use html_writer;
-use mod_ojt\interfaces\crud;
-use mod_ojt\traits\db_record_base;
-use mod_ojt\traits\record_mapper;
-use mod_ojt\user_external_request;
+use mod_observation\interfaces\crud;
+use mod_observation\traits\db_record_base;
+use mod_observation\traits\record_mapper;
+use mod_observation\user_external_request;
 use moodle_exception;
 use moodle_url;
 use stdClass;
 
 class email_assignment extends db_record_base
 {
-    protected const TABLE = 'ojt_email_assignment';
+    protected const TABLE = 'observation_email_assignment';
 
     /**
      * @var int
@@ -73,8 +73,8 @@ class email_assignment extends db_record_base
 
         if (is_null($external_request))
         {
-            $external_request = user_external_request::get_user_request_for_ojt_topic(
-                $form_data->ojtid, $form_data->topicid, $form_data->userid);
+            $external_request = user_external_request::get_user_request_for_observation_topic(
+                $form_data->observationid, $form_data->topicid, $form_data->userid);
         }
 
         list($emailnew, $emailkeep, $emailcancel) =
@@ -138,24 +138,24 @@ class email_assignment extends db_record_base
     }
 
     /**
-     * @param int $ojtid
+     * @param int $observationid
      * @param int $topicid
      * @param int $userid
      * @return email_assignment[]
      * @throws dml_exception
      * @throws coding_exception
      */
-    public static function get_assignments(int $ojtid, int $topicid, int $userid)
+    public static function get_assignments(int $observationid, int $topicid, int $userid)
     {
         global $DB;
 
         $sql     = 'SELECT ea.* 
-                FROM {ojt_email_assignment} ea
-                JOIN {ojt_external_request} ef ON ef.id = ea.externalrequestid
-                WHERE ef.ojtid = ?
+                FROM {observation_email_assignment} ea
+                JOIN {observation_external_request} ef ON ef.id = ea.externalrequestid
+                WHERE ef.observationid = ?
                 AND ef.topicid = ?
                 AND ef.userid = ?';
-        $records = $DB->get_records_sql($sql, [$ojtid, $topicid, $userid]);
+        $records = $DB->get_records_sql($sql, [$observationid, $topicid, $userid]);
 
         $email_assignments = [];
         foreach ($records as $record)
@@ -178,7 +178,7 @@ class email_assignment extends db_record_base
     public static function get_from_token(string $token)
     {
         global $DB;
-        return new self($DB->get_record('ojt_email_assignment', array('token' => $token), '*'));
+        return new self($DB->get_record('observation_email_assignment', array('token' => $token), '*'));
     }
 
     /**
@@ -198,7 +198,7 @@ class email_assignment extends db_record_base
      *
      * @param string[] $submitted_emails - should be for emails that are intended to be assigned, including new and existing.
      * @param string[] $existing_emails
-     * @return array (array new, array keep, array cancel) with keys as ojt_email_assignment id's
+     * @return array (array new, array keep, array cancel) with keys as observation_email_assignment id's
      */
     private static function sort_submitted_emails(array $submitted_emails, array $existing_emails)
     {
@@ -248,17 +248,17 @@ class email_assignment extends db_record_base
         return sha1($email . 'responder' . $userid . time() . get_site_identifier());
     }
 
-    public static function is_valid_token(int $ojtid, int $userid, string $token)
+    public static function is_valid_token(int $observationid, int $userid, string $token)
     {
         global $DB;
 
         $sql = 'SELECT ea.id
-                FROM {ojt_email_assignment} ea
-                JOIN {ojt_external_request} er on er.id = ea.externalrequestid
-                WHERE er.ojtid = ?
+                FROM {observation_email_assignment} ea
+                JOIN {observation_external_request} er on er.id = ea.externalrequestid
+                WHERE er.observationid = ?
                 AND er.userid = ?
                 AND ea.token = ?';
-        return $DB->record_exists_sql($sql, [$ojtid, $userid, $token]);
+        return $DB->record_exists_sql($sql, [$observationid, $userid, $token]);
     }
 
     /**
@@ -288,7 +288,7 @@ class email_assignment extends db_record_base
         }
 
         $params          = ['token' => $assignment->token];
-        $url             = new moodle_url('/mod/ojt/observe.php', $params);
+        $url             = new moodle_url('/mod/observation/observe.php', $params);
         $emailvars->link = html_writer::link($url, $url->out());
         $emailvars->url  = $url->out();
 

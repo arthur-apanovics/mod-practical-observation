@@ -1,11 +1,11 @@
 <?php
 
 
-namespace mod_ojt\traits;
+namespace mod_observation\traits;
 
 
 use coding_exception;
-use mod_ojt\interfaces\crud;
+use mod_observation\interfaces\crud;
 use stdClass;
 
 abstract class db_record_base implements crud

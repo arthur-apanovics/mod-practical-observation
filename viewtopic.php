@@ -16,30 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * Prints a particular instance of ojt for the current user.
+ * Prints a particular instance of observation for the current user.
  *
  */
 
-use mod_ojt\event\course_module_viewed;
-use mod_ojt\models\ojt;
-use mod_ojt\user_ojt;
-use mod_ojt\user_topic;
+use mod_observation\event\course_module_viewed;
+use mod_observation\models\observation;
+use mod_observation\user_observation;
+use mod_observation\user_topic;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once($CFG->dirroot . '/mod/ojt/lib.php');
-require_once($CFG->dirroot . '/mod/ojt/locallib.php');
+require_once($CFG->dirroot . '/mod/observation/lib.php');
+require_once($CFG->dirroot . '/mod/observation/locallib.php');
 require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
 
 $id      = optional_param('id', 0, PARAM_INT); // Course_module ID, or
-$b       = optional_param('n', 0, PARAM_INT);  // ojt instance ID.
+$b       = optional_param('n', 0, PARAM_INT);  // observation instance ID.
 $topicid = optional_param('topic', 0, PARAM_INT); // Topic id
 
-list($ojt, $course, $cm) = ojt_check_page_id_params_and_init($id, $b); /* @var $ojt ojt */
+list($observation, $course, $cm) = observation_check_page_id_params_and_init($id, $b); /* @var $observation observation */
 
 require_login($course, true, $cm);
 
@@ -49,29 +49,29 @@ require_login($course, true, $cm);
 //     'context'  => $PAGE->context,
 // ));
 // $event->add_record_snapshot('course', $PAGE->course);
-// $event->add_record_snapshot($PAGE->cm->modname, $ojt->get_record_from_object());
+// $event->add_record_snapshot($PAGE->cm->modname, $observation->get_record_from_object());
 // $event->trigger();
 
 $topic = user_topic::get_user_topic($topicid, $USER->id);
 
 // Print the page header.
-$PAGE->set_url('/mod/ojt/viewtopic.php', array('id' => $cm->id, 'topic' => $topicid));
-$PAGE->set_title(format_string( "$topic->name - $ojt->name"));
+$PAGE->set_url('/mod/observation/viewtopic.php', array('id' => $cm->id, 'topic' => $topicid));
+$PAGE->set_title(format_string( "$topic->name - $observation->name"));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->navbar->add($topic->name);
 
 // Check access - we're assuming only $USER access on this page
 $modcontext  = context_module::instance($cm->id);
-$canevaluate = has_capability('mod/ojt:evaluate', $modcontext);
-$canevalself = has_capability('mod/ojt:evaluateself', $modcontext);
-$cansignoff  = has_capability('mod/ojt:signoff', $modcontext);
-$canmanage   = has_capability('mod/ojt:manage', $modcontext);
+$canevaluate = has_capability('mod/observation:evaluate', $modcontext);
+$canevalself = has_capability('mod/observation:evaluateself', $modcontext);
+$cansignoff  = has_capability('mod/observation:signoff', $modcontext);
+$canmanage   = has_capability('mod/observation:manage', $modcontext);
 
 if ($canevalself && !($canevaluate || $cansignoff))
 {
     // Seeing as the user can only self-evaluate, but nothing else, redirect them straight to the eval page
-    redirect(new moodle_url($CFG->wwwroot . '/mod/ojt/evaluate.php',
-        array('userid' => $USER->id, 'bid' => $ojt->id)));
+    redirect(new moodle_url($CFG->wwwroot . '/mod/observation/evaluate.php',
+        array('userid' => $USER->id, 'bid' => $observation->id)));
 }
 
 // Output starts here.
@@ -80,42 +80,42 @@ echo $OUTPUT->header();
 // Manage topics button.
 if ($canmanage)
 {
-    echo html_writer::start_tag('div', array('class' => 'mod-ojt-manage-btn'));
-    echo $OUTPUT->single_button(new moodle_url('/mod/ojt/manage.php', array('cmid' => $cm->id)),
-        get_string('edittopics', 'ojt'), 'get');
+    echo html_writer::start_tag('div', array('class' => 'mod-observation-manage-btn'));
+    echo $OUTPUT->single_button(new moodle_url('/mod/observation/manage.php', array('cmid' => $cm->id)),
+        get_string('edittopics', 'observation'), 'get');
     echo html_writer::end_tag('div');
 }
 
 // "Evaluate students" button
 if (($canevaluate || $cansignoff))
 {
-    echo html_writer::start_tag('div', array('class' => 'mod-ojt-evalstudents-btn'));
-    echo $OUTPUT->single_button(new moodle_url('/mod/ojt/report.php', array('cmid' => $cm->id)),
-        get_string('evaluatestudents', 'ojt'), 'get');
+    echo html_writer::start_tag('div', array('class' => 'mod-observation-evalstudents-btn'));
+    echo $OUTPUT->single_button(new moodle_url('/mod/observation/report.php', array('cmid' => $cm->id)),
+        get_string('evaluatestudents', 'observation'), 'get');
     echo html_writer::end_tag('div');
 }
 
-$userojt = new user_ojt($ojt, $USER->id);
+$userobservation = new user_observation($observation, $USER->id);
 
 // "Evaluate self" button
 if ($canevalself)
 {
-    echo html_writer::start_tag('div', array('class' => 'mod-ojt-evalself-btn'));
-    echo $OUTPUT->single_button(new moodle_url('/mod/ojt/evaluate.php',
-        array('userid' => $USER->id, 'bid' => $userojt->id)),
-        get_string('evaluate', 'ojt'), 'get');
+    echo html_writer::start_tag('div', array('class' => 'mod-observation-evalself-btn'));
+    echo $OUTPUT->single_button(new moodle_url('/mod/observation/evaluate.php',
+        array('userid' => $USER->id, 'bid' => $userobservation->id)),
+        get_string('evaluate', 'observation'), 'get');
     echo html_writer::end_tag('div');
 }
 
 // Replace the following lines with you own code.
-echo $OUTPUT->heading(format_string($ojt->name));
+echo $OUTPUT->heading(format_string($observation->name));
 
-echo $OUTPUT->box('', 'generalbox', 'ojt-padding-box', ['style' => 'height: 2em;']);
+echo $OUTPUT->box('', 'generalbox', 'observation-padding-box', ['style' => 'height: 2em;']);
 
-/* @var $renderer mod_ojt_renderer */
-$renderer = $PAGE->get_renderer('ojt');
+/* @var $renderer mod_observation_renderer */
+$renderer = $PAGE->get_renderer('observation');
 
-echo $renderer->user_topic($userojt, $topic);
+echo $renderer->user_topic($userobservation, $topic);
 
 // Finish the page.
 echo $OUTPUT->footer();

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace mod_ojt\traits;
+namespace mod_observation\traits;
 
 use coding_exception;
 use stdClass;

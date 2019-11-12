@@ -16,12 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author  Eugene Venter <eugene@catalyst.net.nz>
- * @package mod_ojt
+ * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * This file keeps track of upgrades to the ojt module
+ * This file keeps track of upgrades to the observation module
  *
  * Sometimes, changes between versions involve alterations to database
  * structures and other major things that may break installations. The upgrade
@@ -34,12 +34,12 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Execute ojt upgrade from the given old version
+ * Execute observation upgrade from the given old version
  *
  * @param int $oldversion
  * @return bool
  */
-function xmldb_ojt_upgrade($oldversion)
+function xmldb_observation_upgrade($oldversion)
 {
     global $DB;
 
@@ -48,9 +48,9 @@ function xmldb_ojt_upgrade($oldversion)
     if ($oldversion < 2016031400)
     {
 
-        $table = new xmldb_table('ojt_topic_item');
+        $table = new xmldb_table('observation_topic_item');
 
-        // Define field allowselffileuploads to be added to ojt_topic_item.
+        // Define field allowselffileuploads to be added to observation_topic_item.
         $field = new xmldb_field('allowselffileuploads', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0',
             'allowfileuploads');
 
@@ -60,16 +60,16 @@ function xmldb_ojt_upgrade($oldversion)
             $dbman->add_field($table, $field);
         }
 
-        // ojt savepoint reached.
-        upgrade_mod_savepoint(true, 2016031400, 'ojt');
+        // observation savepoint reached.
+        upgrade_mod_savepoint(true, 2016031400, 'observation');
     }
     
     if ($oldversion < 2017101806)
     {
-        // Define table ojt_attempt to be created.
-        $table = new xmldb_table('ojt_attempt');
+        // Define table observation_attempt to be created.
+        $table = new xmldb_table('observation_attempt');
 
-        // Adding fields to table ojt_attempt.
+        // Adding fields to table observation_attempt.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('userid', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
         $table->add_field('topicitemid', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, '0');
@@ -77,18 +77,18 @@ function xmldb_ojt_upgrade($oldversion)
         $table->add_field('text', XMLDB_TYPE_TEXT, null, null, null, null, null);
         $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, '0');
 
-        // Adding keys to table ojt_attempt.
+        // Adding keys to table observation_attempt.
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
         $table->add_key('userid', XMLDB_KEY_FOREIGN, array('userid'), 'user', array('id'));
-        $table->add_key('topicitemid', XMLDB_KEY_FOREIGN, array('topicitemid'), 'ojt_topic_item', array('id'));
+        $table->add_key('topicitemid', XMLDB_KEY_FOREIGN, array('topicitemid'), 'observation_topic_item', array('id'));
 
-        // Conditionally launch create table for ojt_attempt.
+        // Conditionally launch create table for observation_attempt.
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }
 
-        // Ojt savepoint reached.
-        upgrade_mod_savepoint(true, 2017101806, 'ojt');
+        // Observation savepoint reached.
+        upgrade_mod_savepoint(true, 2017101806, 'observation');
     }
 
 
