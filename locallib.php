@@ -27,7 +27,7 @@
  * logic, should go here. Never include this file from your lib.php!
  */
 
-use mod_observation\models\observation;
+use mod_observation\db_model\obsolete\observation;
 
 defined('MOODLE_INTERNAL') || die();
 

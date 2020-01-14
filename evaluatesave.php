@@ -24,11 +24,11 @@
  * Observation item completion ajax toggler
  */
 
-use mod_observation\models\completion;
-use mod_observation\models\email_assignment;
-use mod_observation\models\observation;
-use mod_observation\models\topic;
-use mod_observation\models\topic_item;
+use mod_observation\db_model\obsolete\completion;
+use mod_observation\db_model\obsolete\email_assignment;
+use mod_observation\db_model\obsolete\observation;
+use mod_observation\db_model\obsolete\topic;
+use mod_observation\db_model\obsolete\topic_item;
 
 define('AJAX_SCRIPT', true);
 

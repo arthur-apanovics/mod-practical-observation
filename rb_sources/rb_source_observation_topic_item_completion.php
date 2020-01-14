@@ -23,8 +23,6 @@
  * @subpackage observation
  */
 
-use mod_observation\models\completion;
-
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_observation_topic_item_completion extends rb_base_source
@@ -59,7 +57,7 @@ class rb_source_observation_topic_item_completion extends rb_base_source
         $this->defaultfilters  = $this->define_defaultfilters();
         $this->requiredcolumns = $this->define_requiredcolumns();
         $this->sourcetitle     = get_string('observationtopicitemcompletion', 'rb_source_observation_topic_item_completion');
-        $this->sourcewhere     = 'base.type = ' . completion::COMP_TYPE_TOPICITEM;
+        $this->sourcewhere     = 'base.type = ' . completion::COMP_TYPE_TOPICITEM; //TODO
 
         parent::__construct();
     }

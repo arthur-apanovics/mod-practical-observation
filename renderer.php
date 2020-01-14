@@ -23,9 +23,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 use core\output\flex_icon;
-use mod_observation\models\completion;
-use mod_observation\models\email_assignment;
-use mod_observation\models\observation;
+use mod_observation\db_model\obsolete\completion;
+use mod_observation\db_model\obsolete\email_assignment;
+use mod_observation\db_model\obsolete\observation;
 use mod_observation\user_attempt;
 use mod_observation\user_observation;
 use mod_observation\user_topic;

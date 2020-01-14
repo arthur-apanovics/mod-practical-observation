@@ -20,19 +20,28 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_observation\event;
+namespace mod_observation\db_model\obsolete;
 
-use core\event\course_module_instances_list_viewed;
+use mod_observation\db_model\db_model_base;
 
-defined('MOODLE_INTERNAL') || die();
-
-/**
- * The mod_observation instance list viewed event class.
- *
- * @package    mod_observation
- * @copyright  2015 Eugene Venter <eugene@catalyst.net.nz>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class course_module_instance_list_viewed extends course_module_instances_list_viewed
+class observer_model extends db_model_base
 {
+    protected const TABLE = 'observer';
+
+    /**
+     * @var varchar
+     */
+    protected $fullname;
+    /**
+     * @var varchar
+     */
+    protected $phone;
+    /**
+     * @var varchar
+     */
+    protected $email;
+    /**
+     * @var varchar
+     */
+    protected $position_title;
 }

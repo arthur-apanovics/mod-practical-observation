@@ -1,14 +1,14 @@
 <?php
 
 
-namespace mod_observation\traits;
-
+namespace mod_observation\db_model;
 
 use coding_exception;
 use mod_observation\interfaces\crud;
+use mod_observation\traits\record_mapper;
 use stdClass;
 
-abstract class db_record_base implements crud
+abstract class db_model_base implements crud
 {
     use record_mapper;
 
@@ -21,11 +21,11 @@ abstract class db_record_base implements crud
     /**
      * @var int
      */
-    public $id;
+    protected $id;
 
 
     /**
-     * db_record_base constructor.
+     * db_model_base constructor.
      * @param int|object|null $id_or_record
      * @throws coding_exception
      */

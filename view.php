@@ -26,7 +26,7 @@
  */
 
 use mod_observation\event\course_module_viewed;
-use mod_observation\models\observation;
+use mod_observation\db_model\obsolete\observation;
 use mod_observation\user_observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');

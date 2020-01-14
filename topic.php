@@ -20,8 +20,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_observation\models\completion;
-use mod_observation\models\topic;
+use mod_observation\db_model\obsolete\completion;
+use mod_observation\db_model\obsolete\topic;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/lib.php');

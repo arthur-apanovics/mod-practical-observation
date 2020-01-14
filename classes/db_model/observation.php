@@ -20,39 +20,72 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_observation\models;
+namespace mod_observation\db_model\obsolete;
 
-use mod_observation\traits\db_record_base;
+use mod_observation\db_model\db_model_base;
 
-class attempt extends db_record_base
+class observation_model extends db_model_base
 {
-    protected const TABLE = 'observation_attempt';
+    protected const TABLE = 'observation';
 
     /**
      * @var int
      */
-    public $userid;
-
-    /**
-     * @var int
-     */
-    public $topicitemid;
-
-    /**
-     * attempt sequence number
-     *
-     * @var int
-     */
-    public $sequence;
-
+    protected $course; // fk course
     /**
      * @var string
      */
-    public $text;
-
+    protected $name;
+    /**
+     * @var string
+     */
+    protected $intro;
     /**
      * @var int
      */
-    public $timemodified;
-
+    protected $intro_format;
+    /**
+     * @var bool
+     */
+    protected $alwaysshowdescription;
+    /**
+     * @var int
+     */
+    protected $timeopen;
+    /**
+     * @var int
+     */
+    protected $timeclose;
+    /**
+     * @var int
+     */
+    protected $timecreated;
+    /**
+     * @var int
+     */
+    protected $timemodified;
+    /**
+     * @var int
+     */
+    protected $lastmodifiedby; // fk user
+    /**
+     * @var bool
+     */
+    protected $deleted;
+    /**
+     * @var string
+     */
+    protected $default_intro_observer;
+    /**
+     * @var int
+     */
+    protected $default_intro_observer_format;
+    /**
+     * @var string
+     */
+    protected $default_intro_assign;
+    /**
+     * @var int
+     */
+    protected $default_intro_assign_format;
 }

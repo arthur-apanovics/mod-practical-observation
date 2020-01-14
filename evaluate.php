@@ -25,8 +25,8 @@
  * Observation evaluation for a user
  */
 
-use mod_observation\models\completion;
-use mod_observation\models\observation;
+use mod_observation\db_model\obsolete\completion;
+use mod_observation\db_model\obsolete\observation;
 use mod_observation\user_observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');

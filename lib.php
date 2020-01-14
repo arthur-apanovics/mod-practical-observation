@@ -31,8 +31,8 @@
  * Moodle is performing actions across all modules.
  */
 
-use mod_observation\models\completion;
-use mod_observation\models\observation;
+use mod_observation\db_model\obsolete\completion;
+use mod_observation\db_model\obsolete\observation;
 use totara_job\job_assignment;
 
 defined('MOODLE_INTERNAL') || die();

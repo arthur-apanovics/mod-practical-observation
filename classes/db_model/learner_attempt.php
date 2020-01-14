@@ -20,54 +20,39 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_observation\models;
+namespace mod_observation\db_model\obsolete;
 
+use mod_observation\db_model\db_model_base;
 
-use coding_exception;
-use mod_observation\interfaces\crud;
-use mod_observation\traits\db_record_base;
-use mod_observation\traits\record_mapper;
-use stdClass;
-
-class topic_signoff extends db_record_base
+class learner_attempt_model extends db_model_base
 {
-    protected const TABLE = 'observation_topic_signoff';
+    protected const TABLE = 'learner_attempt';
 
     /**
      * @var int
      */
-    public $userid;
-
+    protected $learner_submission;
     /**
+     * @var bigint
+     */
+    protected $timestarted;
+    /**
+     * @var bigint
+     */
+    protected $timesubmitted;
+    /**
+     * @var longtext
+     */
+    protected $text;
+    /**
+     * @var int2
+     */
+    protected $text_format;
+    /**
+     * attempt number in order of sequence.
+     * todo: redundant?
+     *
      * @var int
      */
-    public $topicid;
-
-    /**
-     * @var bool
-     */
-    public $signedoff;
-
-    /**
-     * @var string
-     */
-    public $comment;
-
-    /**
-     * @var int
-     */
-    public $timemodified;
-
-    /**
-     * @var int
-     */
-    public $modifiedby;
-
-
-    public static function get_user_topic_signoff(int $topicid, int $userid)
-    {
-        global $DB;
-        return new topic_signoff(
-            $DB->get_record('observation_topic_signoff', ['userid' => $userid, 'topicid' => $topicid]));
-    }
+    protected $attempt_number;
 }

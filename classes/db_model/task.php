@@ -20,53 +20,28 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_observation\models;
+namespace mod_observation\db_model\obsolete;
 
-use mod_observation\traits\db_record_base;
+use mod_observation\db_model\db_model_base;
 
-class attempt_feedback extends db_record_base
+class task_model extends db_model_base
 {
-    protected const TABLE = 'observation_attempt_feedback';
+    protected const TABLE = 'task';
 
     /**
      * @var int
      */
-    public $id;
-
+    protected $observation;
     /**
-     * @var int
+     * @var longtext
      */
-    public $attemptid;
-
+    protected $intro_learner;
     /**
-     * @var int
+     * @var longtext
      */
-    public $emailassignmentid;
-
+    protected $intro_observer;
     /**
-     * @var string
+     * @var longtext
      */
-    public $text;
-
-    /**
-     * @var int
-     */
-    public $timemodified;
-
-
-    /**
-     * @param int $id
-     * @return attempt_feedback|null
-     * @throws \coding_exception
-     */
-    public static function get_feedback_for_attempt(int $id)
-    {
-        if ($record = self::fetch_record_from_id($id))
-        {
-            return new self($record);
-        }
-
-        return null;
-    }
-
+    protected $intro_assessor;
 }

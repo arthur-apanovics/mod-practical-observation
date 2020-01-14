@@ -24,7 +24,7 @@
  * Observation item completion ajax toggler
  */
 
-use mod_observation\models\observation;
+use mod_observation\db_model\obsolete\observation;
 
 define('AJAX_SCRIPT', true);
 

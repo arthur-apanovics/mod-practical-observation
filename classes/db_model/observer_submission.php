@@ -20,39 +20,24 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_observation;
+namespace mod_observation\db_model\obsolete;
 
-use coding_exception;
-use dml_exception;
-use mod_observation\models\completion;
-use mod_observation\models\observation;
-use mod_observation\traits\record_mapper;
+use mod_observation\db_model\db_model_base;
 
-class user_observation extends observation
+class observer_submission_model extends db_model_base
 {
-    use record_mapper;
+    protected const TABLE = 'observer_submission';
 
     /**
      * @var int
      */
-    public $userid;
-
+    protected $observer_assignment;
     /**
-     * @var user_topic[]
+     * @var bigint
      */
-    public $topics;
-
-
-    public function __construct($id_or_record, $userid)
-    {
-        parent::__construct($id_or_record);
-
-        $this->userid = $userid;
-        $this->topics = user_topic::get_user_topics($this->id, $this->userid);
-    }
-
-    public function get_topic_by_id(int $topicid)
-    {
-        return $this->topics[$topicid];
-    }
+    protected $timestarted;
+    /**
+     * @var bigint
+     */
+    protected $timesubmitted;
 }
