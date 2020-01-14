@@ -23,8 +23,11 @@ $renderer = $PAGE->get_renderer('observation');
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string('Template test'));
 
+//$PAGE->requires->css('mod/observation/styles_temp.css');
+
 // template name must include component name, e.g. 'component/template_name'
-$templatename = 'observation/topic_item_conversation';
+//$templatename = 'observation/activity_view';
+$templatename = 'observation/task_observer_view';
 // declare any data your template might need here
 $context_data = [];
 // this method renders the template via mustache engine
