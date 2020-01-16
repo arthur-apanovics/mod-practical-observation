@@ -43,7 +43,7 @@ class observer_assignment_model extends db_model_base
      */
     protected $change_explain;
     /**
-     * false if observer declined observation, true if accepted and observer requirements confirmed
+     * null if no decision made yet, false if observer declined observation, true if accepted and observer requirements confirmed
      *
      * @var tinyint
      */

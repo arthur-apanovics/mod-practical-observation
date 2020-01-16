@@ -71,12 +71,19 @@ abstract class db_model_base implements crud
      *
      * @return object
      */
-    public function read()
+    public function read(int $id = null)
     {
         global $DB;
-        $this->map_to_record($DB->get_record(static::TABLE, ['id' => $this->id]));
 
-        return $this;
+        if (is_null($id))
+        {
+            $this->map_to_record($DB->get_record(static::TABLE, ['id' => $this->id]));
+            return $this;
+        }
+        else
+        {
+            return new $this($id);
+        }
     }
 
     /**

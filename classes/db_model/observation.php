@@ -45,10 +45,6 @@ class observation_model extends db_model_base
      */
     protected $intro_format;
     /**
-     * @var bool
-     */
-    protected $alwaysshowdescription;
-    /**
      * @var int
      */
     protected $timeopen;

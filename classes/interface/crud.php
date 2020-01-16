@@ -25,7 +25,7 @@ interface crud
      *
      * @return object
      */
-    public function read();
+    public function read(int $id = null);
 
     /**
      * Save current state to DB
