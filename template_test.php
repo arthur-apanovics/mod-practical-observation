@@ -20,16 +20,18 @@ $PAGE->set_heading(format_string('Template test'));
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
 
+$PAGE->requires->css('/mod/observation/styles_temp.css');
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string('Template test'));
 
-//$PAGE->requires->css('mod/observation/styles_temp.css');
-
 // template name must include component name, e.g. 'component/template_name'
 //$templatename = 'observation/activity_view';
-$templatename = 'observation/task_observer_view';
+//$templatename = 'observation/task_observer_view';
+$templatename = 'observation/task_view';
+
 // declare any data your template might need here
 $context_data = [];
+$context_data['log_entries'] = ['value' => 'test value1','value' => 'test value2'];
 // this method renders the template via mustache engine
 echo $renderer->render_from_template($templatename, $context_data);
 
