@@ -20,28 +20,26 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_observation\db_model\obsolete;
+namespace mod_observation;
 
-use mod_observation\db_model\db_model_base;
-
-class task_model extends db_model_base
+class observer_submission extends db_model_base
 {
-    protected const TABLE = 'task';
+    public const TABLE = OBSERVATION . '_observer_submission';
+
+    public const COL_OBSERVER_ASSIGNMENT = 'observer_assignment';
+    public const COL_TIMESTARTED         = 'timestarted';
+    public const COL_TIMESUBMITTED       = 'timesubmitted';
 
     /**
      * @var int
      */
-    protected $observation;
+    protected $observer_assignment;
     /**
-     * @var longtext
+     * @var int
      */
-    protected $intro_learner;
+    protected $timestarted;
     /**
-     * @var longtext
+     * @var int
      */
-    protected $intro_observer;
-    /**
-     * @var longtext
-     */
-    protected $intro_assessor;
+    protected $timesubmitted;
 }

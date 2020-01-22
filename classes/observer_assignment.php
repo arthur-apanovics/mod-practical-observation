@@ -20,41 +20,47 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_observation\db_model\obsolete;
+namespace mod_observation;
 
-use mod_observation\db_model\db_model_base;
+use mod_observation;
 
-class observer_criteria_feedback_model extends db_model_base
+class observer_assignment extends db_model_base
 {
-    protected const TABLE = 'observer_criteria_feedback';
+    public const TABLE = OBSERVATION . '_observer_assignment';
 
-    public const STATUS_NOT_COMPLETE = 'not_complete';
-    public const STATUS_COMPLETE = 'complete';
+    public const COL_LEARNER_TASK_SUBMISSION = 'learner_task_submission';
+    public const COL_OBSERVER                = 'observer';
+    public const COL_CHANGE_EXPLAIN          = 'change_explain';
+    public const COL_OBSERVATION_ACCEPTED    = 'observation_accepted';
+    public const COL_TIMEASSIGNED            = 'timeassigned';
+    public const COL_TOKEN                   = 'token';
 
     /**
      * @var int
      */
-    protected $attempt;
+    protected $learner_task_submission;
     /**
      * @var int
      */
-    protected $criteria;
+    protected $observer;
     /**
-     * @var int
-     */
-    protected $observer_submission;
-    /**
-     * ENUM ('not_complete', 'complete')
+     * optional. used when observer change is requested
      *
-     * @var criteria_status
+     * @var string
      */
-    protected $status;
+    protected $change_explain;
     /**
-     * @var longtext
+     * null if no decision made yet, false if observer declined observation, true if accepted and observer requirements confirmed
+     *
+     * @var bool
      */
-    protected $text;
+    protected $observation_accepted;
     /**
-     * @var int2
+     * @var int
      */
-    protected $text_format;
+    protected $timeassigned;
+    /**
+     * @var string
+     */
+    protected $token;
 }

@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpUnused */
 /*
  * Copyright (C) 2015 onwards Catalyst IT
  *
@@ -31,11 +32,14 @@
  * Moodle is performing actions across all modules.
  */
 
-use mod_observation\db_model\obsolete\completion;
-use mod_observation\db_model\obsolete\observation;
+use mod_observation\observation;
 use totara_job\job_assignment;
 
 defined('MOODLE_INTERNAL') || die();
+
+define('OBSERVATION', 'observation');
+define('OBSERVATION_MODULE', 'mod_observation');
+define('OBSERVATION_MODULE_PATH', '/mod/converse/');
 
 /* Moodle core API */
 
@@ -49,13 +53,13 @@ defined('MOODLE_INTERNAL') || die();
  */
 function observation_supports($feature)
 {
-
     switch ($feature)
     {
-        case FEATURE_SHOW_DESCRIPTION:
-        case FEATURE_BACKUP_MOODLE2:
-        case FEATURE_COMPLETION_HAS_RULES:
         case FEATURE_MOD_INTRO:
+        case FEATURE_SHOW_DESCRIPTION:
+        case FEATURE_COMPLETION_HAS_RULES:
+        case FEATURE_GROUPS:
+            // case FEATURE_GRADE_HAS_GRADE:
             return true;
         default:
             return null;
@@ -70,21 +74,28 @@ function observation_supports($feature)
  * will create a new instance and return the id number
  * of the new instance.
  *
- * @param stdClass         $observation Submitted data from the form in mod_form.php
+ * @param stdClass                 $observation Submitted data from the form in mod_form.php
  * @param mod_observation_mod_form $mform The form instance itself (if needed)
  * @return int The id of the newly inserted observation record
+ * @throws dml_exception
+ * @throws coding_exception
  */
 function observation_add_instance(stdClass $observation, mod_observation_mod_form $mform = null)
 {
-    global $DB;
+    global $USER;
 
-    $observation->timecreated = time();
+    $time        = time();
+    $observation = new observation();
+
+    $observation->set(observation::COL_TIMECREATED, $time);
+    $observation->set($observation::COL_TIMEMODIFIED, $time);
+    $observation->set($observation::COL_LASTMODIFIEDBY, $USER->id);
 
     // You may have to add extra stuff in here.
 
-    $observation->id = $DB->insert_record('observation', $observation);
+    $observation->create();
 
-    return $observation->id;
+    return $observation->get_id();
 }
 
 /**
@@ -94,22 +105,24 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
  * (defined by the form in mod_form.php) this function
  * will update an existing instance with new data.
  *
- * @param stdClass         $observation An object from the form in mod_form.php
+ * @param stdClass                 $observation An object from the form in mod_form.php
  * @param mod_observation_mod_form $mform The form instance itself (if needed)
  * @return boolean Success/Fail
+ * @throws dml_exception
+ * @throws coding_exception
  */
 function observation_update_instance(stdClass $observation, mod_observation_mod_form $mform = null)
 {
-    global $DB;
+    global $USER;
 
-    $observation->timemodified = time();
-    $observation->id           = $observation->instance;
+    $observation = new observation($observation);
+    $observation->set(observation::COL_TIMEMODIFIED, time());
+    $observation->set(observation::COL_LASTMODIFIEDBY, $USER->id);
+    // $observation->id             = $observation->instance; // ?!
 
     // You may have to add extra stuff in here.
 
-    $result = $DB->update_record('observation', $observation);
-
-    return $result;
+    return $observation->update();
 }
 
 /**
@@ -121,48 +134,27 @@ function observation_update_instance(stdClass $observation, mod_observation_mod_
  *
  * @param int $id Id of the module instance
  * @return boolean Success/Failure
+ * @throws coding_exception
+ * @throws dml_exception
  */
 function observation_delete_instance($id)
 {
-    global $DB;
-
-    if (!$observation = $DB->get_record('observation', array('id' => $id)))
+    try
+    {
+        $observation = new observation($id);
+    }
+    catch (dml_missing_record_exception $ex)
     {
         return false;
     }
 
-    $transaction = $DB->start_delegated_transaction();
+    // $transaction = $DB->start_delegated_transaction();
 
-    // Delete witnesses
-    $DB->delete_records_select('observation_item_witness',
-        'topicitemid IN (SELECT ti.id FROM {observation_topic_item} ti JOIN {observation_topic} t ON ti.topicid = t.id WHERE t.observationid = ?)',
-        array($observation->id));
+    // Normally, this is where all data related to activity instance is deleted,
+    // however, we will simply mark the instance as deleted instead.
+    $observation->delete();
 
-    // Delete signoffs
-    $DB->delete_records_select('observation_topic_signoff', 'topicid IN (SELECT id FROM {observation_topic} WHERE observationid = ?)',
-        array($observation->id));
-
-    // Delete completions
-    $DB->delete_records('observation_completion', array('observationid' => $observation->id));
-
-    // Delete comments
-    $topics = $DB->get_records('observation_topic', array('observationid' => $observation->id));
-    foreach ($topics as $topic)
-    {
-        $DB->delete_records('comments', array('commentarea' => 'observation_topic_item_' . $topic->id));
-    }
-
-    // Delete topic items
-    $DB->delete_records_select('observation_topic_item', 'topicid IN (SELECT id FROM {observation_topic} WHERE observationid = ?)',
-        array($observation->id));
-
-    // Delete topics
-    $DB->delete_records('observation_topic', array('observationid' => $observation->id));
-
-    // Finally, delete the observation ;)
-    $DB->delete_records('observation', array('id' => $observation->id));
-
-    $transaction->allow_commit();
+    // $transaction->allow_commit();
 
     return true;
 }
@@ -181,9 +173,8 @@ function observation_delete_instance($id)
  * @param stdClass         $observation The observation instance record
  * @return stdClass|null
  */
-function observation_user_outline($course, $user, $mod, $observation)
+function observation_user_outline($course, $user, $mod, $observation) // TODO: User outline?
 {
-
     $return       = new stdClass();
     $return->time = 0;
     $return->info = '';
@@ -210,16 +201,16 @@ function observation_user_complete($course, $user, $mod, $observation)
  *
  * @param object $cm Course-module
  * @return array Requirements for completion
+ * @throws coding_exception
+ * @throws dml_exception
  */
 function observation_get_completion_requirements($cm)
 {
-    global $DB;
-
-    $observation = $DB->get_record('observation', array('id' => $cm->instance));
+    $observation = new observation($cm->instance);
 
     $result = array();
 
-    if ($observation->completiontopics)
+    if ($observation->get(observation::COL_COMPLETIONTOPICS))
     {
         $result[] = get_string('completiontopics', 'observation');
     }
@@ -232,27 +223,20 @@ function observation_get_completion_requirements($cm)
  *
  * @param object $cm Course-module
  * @param int    $userid User ID
- * @return string The current status of completion for the user
+ * @return array The current status of completion for the user
+ * @throws coding_exception
+ * @throws dml_exception
  */
 function observation_get_completion_progress($cm, $userid)
 {
-    global $DB;
-
     // Get observation details.
-    $observation = $DB->get_record('observation', array('id' => $cm->instance), '*', MUST_EXIST);
+    $observation = new observation($cm->instance);
 
     $result = array();
 
-    if ($observation->completiontopics)
+    if ($observation->get(observation::COL_COMPLETIONTOPICS))
     {
-        $observationcomplete = $DB->record_exists_select('observation_completion',
-            'observationid = ? AND userid =? AND type = ? AND status IN (?, ?)',
-            array($observation->id,
-                  $userid,
-                  completion::COMP_TYPE_Observation,
-                  completion::STATUS_COMPLETE,
-                  completion::STATUS_REQUIREDCOMPLETE));
-        if ($observationcomplete)
+        if ($observation->is_activity_complete())
         {
             $result[] = get_string('completiontopics', 'observation');
         }
@@ -272,27 +256,21 @@ function observation_get_completion_progress($cm, $userid)
  * @param bool   $type Type of comparison (or/and; can be used as return value if no conditions)
  * @return bool True if completed, false if not. (If no conditions, then return
  *   value depends on comparison type)
+ * @throws dml_exception
+ * @throws coding_exception
  */
 function observation_get_completion_state($course, $cm, $userid, $type)
 {
-    global $DB;
-
     // Get observation.
-    $observation = $DB->get_record('observation', array('id' => $cm->instance), '*', MUST_EXIST);
+    $observation = new observation($cm->instance);
 
     // This means that if only view is required we don't end up with a false state.
-    if (empty($observation->completiontopics))
+    if (empty($observation->get(observation::COL_COMPLETIONTOPICS)))
     {
         return $type;
     }
 
-    return $DB->record_exists_select('observation_completion',
-        'observationid = ? AND userid =? AND type = ? AND status IN (?, ?)',
-        array($observation->id,
-              $userid,
-              completion::COMP_TYPE_Observation,
-              completion::STATUS_COMPLETE,
-              completion::STATUS_REQUIREDCOMPLETE));
+    return $observation->is_activity_complete();
 
 }
 
@@ -313,7 +291,8 @@ function observation_get_completion_state($course, $cm, $userid, $type)
  * @param int   $userid check for a particular user's activity only, defaults to 0 (all users)
  * @param int   $groupid check for a particular group's activity only, defaults to 0 (all groups)
  */
-function observation_get_recent_mod_activity(&$activities, &$index, $timestart, $courseid, $cmid, $userid = 0, $groupid = 0)
+function observation_get_recent_mod_activity(
+    &$activities, &$index, $timestart, $courseid, $cmid, $userid = 0, $groupid = 0)
 {
 }
 
@@ -337,55 +316,6 @@ function observation_print_recent_mod_activity($activity, $courseid, $detail, $m
  */
 function observation_cron()
 {
-    global $CFG, $DB;
-
-    require_once($CFG->dirroot . '/totara/message/messagelib.php');
-
-    $lastcron = $DB->get_field('modules', 'lastcron', array('name' => 'observation'));
-
-    // Send topic completion task to managers
-    // Get all topic completions that happended after last cron run.
-    // We can safely use the timemodified field here, as topics don't have comments ;)
-    $sql          = "SELECT bc.id AS completionid, u.id AS userid, u.*,
-        b.id AS observationid, b.name AS observationname,
-        t.id AS topicid, t.name AS topicname,
-        c.shortname AS courseshortname
-        FROM {observation_completion} bc
-        JOIN {observation} b ON bc.observationid = b.id
-        JOIN {course} c ON b.course = c.id
-        JOIN {observation_topic} t ON bc.topicid = t.id
-        JOIN {user} u ON bc.userid = u.id
-        WHERE bc.type = ? AND bc.status = ? AND bc.timemodified > ?
-        AND b.id IN (SELECT id FROM {observation} WHERE managersignoff = 1)";
-    $tcompletions =
-        $DB->get_records_sql($sql, array(completion::COMP_TYPE_TOPIC, completion::STATUS_COMPLETE, $lastcron));
-    foreach ($tcompletions as $completion)
-    {
-        $managerids = job_assignment::get_all_manager_userids($completion->userid);
-        foreach ($managerids as $managerid)
-        {
-            $manager                 = core_user::get_user($managerid);
-            $eventdata               = new stdClass();
-            $eventdata->userto       = $manager;
-            $eventdata->userfrom     = $completion;
-            $eventdata->icon         = 'elearning-complete';
-            $eventdata->contexturl   = new moodle_url('/mod/observation/evaluate.php',
-                array('userid' => $completion->userid, 'bid' => $completion->observationid));
-            $eventdata->contexturl   = $eventdata->contexturl->out();
-            $strobj                  = new stdClass();
-            $strobj->user            = fullname($completion);
-            $strobj->observation             = format_string($completion->observationname);
-            $strobj->topic           = format_string($completion->topicname);
-            $strobj->topicurl        = $eventdata->contexturl;
-            $strobj->courseshortname = format_string($completion->courseshortname);
-            $eventdata->subject      = get_string('managertasktcompletionsubject', 'observation', $strobj);
-            $eventdata->fullmessage  = get_string('managertasktcompletionmsg', 'observation', $strobj);
-            // $eventdata->sendemail = TOTARA_MSG_EMAIL_NO;
-
-            tm_task_send($eventdata);
-        }
-    }
-
     return true;
 }
 
@@ -399,13 +329,8 @@ function observation_cron()
  */
 function observation_get_extra_capabilities()
 {
-    return array(
-        'mod/observation:evaluate',
-        'mod/observation:signoff',
-        'mod/observation:manage'
-    );
+    return [];
 }
-
 
 /* File API */
 
@@ -419,10 +344,17 @@ function observation_get_extra_capabilities()
  * @param stdClass $cm
  * @param stdClass $context
  * @return array of [(string)filearea] => (string)description
+ * @throws coding_exception
  */
 function observation_get_file_areas($course, $cm, $context)
 {
-    return array();
+    $areas = [];
+
+    $areas[observation::FILE_AREA_TRAINEE]  = get_string(observation::FILE_AREA_TRAINEE, OBSERVATION);
+    $areas[observation::FILE_AREA_OBSERVER] = get_string(observation::FILE_AREA_OBSERVER, OBSERVATION);
+    $areas[observation::FILE_AREA_ASSESSOR] = get_string(observation::FILE_AREA_ASSESSOR, OBSERVATION);
+
+    return $areas;
 }
 
 /**
@@ -432,19 +364,57 @@ function observation_get_file_areas($course, $cm, $context)
  * @param array        $areas
  * @param stdClass     $course
  * @param stdClass     $cm
- * @param stdClass     $context
- * @param string       $filearea
+ * @param context      $context
+ * @param string       $file_area
  * @param int          $itemid
- * @param string       $filepath
- * @param string       $filename
+ * @param string       $file_path
+ * @param string       $file_name
  * @return file_info instance or null if not found
+ * @throws coding_exception
  * @package mod_observation
  * @category files
  *
  */
-function observation_get_file_info($browser, $areas, $course, $cm, $context, $filearea, $itemid, $filepath, $filename)
+function observation_get_file_info(
+    $browser, $areas, $course, $cm, $context, $file_area, $itemid, $file_path, $file_name)
 {
-    return null;
+    global $CFG;
+    require_once($CFG->dirroot . OBSERVATION_MODULE_PATH . 'locallib.php');
+
+    if ($context->contextlevel != CONTEXT_MODULE)
+    {
+        return null;
+    }
+
+    $url_base  = $CFG->wwwroot . '/pluginfile.php';
+    $fs        = get_file_storage();
+    $file_path = is_null($file_path)
+        ? '/'
+        : $file_path;
+    $file_name = is_null($file_name)
+        ? '.'
+        : $file_name;
+
+    if ($file_area === observation::FILE_AREA_INTRO)
+    {
+        if (!has_capability('moodle/course:managefiles', $context))
+        {
+            // Students not allowed
+            return null;
+        }
+
+        if (!($stored_file = $fs->get_file($context->id, 'mod_converse', $file_area, 0, $file_path, $file_name)))
+        {
+            return null;
+        }
+
+        return new file_info_stored(
+            $browser, $context, $stored_file, $url_base, $file_area, $itemid, true, true, false);
+    }
+    else
+    {
+        return null;
+    }
 }
 
 /**
@@ -452,18 +422,23 @@ function observation_get_file_info($browser, $areas, $course, $cm, $context, $fi
  *
  * @param stdClass $course the course object
  * @param stdClass $cm the course module object
- * @param stdClass $context the observation's context
+ * @param context  $context the observation's context
  * @param string   $filearea the name of the file area
  * @param array    $args extra arguments (itemid, path)
  * @param bool     $forcedownload whether or not force download
  * @param array    $options additional options affecting the file serving
+ * @return bool
+ * @throws coding_exception
+ * @throws moodle_exception
+ * @throws require_login_exception
  * @category files
  *
  * @package mod_observation
  */
-function observation_pluginfile($course, $cm, $context, $filearea, array $args, $forcedownload, array $options = array())
+function observation_pluginfile(
+    $course, $cm, $context, $filearea, array $args, $forcedownload, array $options = array())
 {
-    global $DB, $CFG, $USER;
+    global $USER;
 
     if ($context->contextlevel != CONTEXT_MODULE)
     {
@@ -472,24 +447,27 @@ function observation_pluginfile($course, $cm, $context, $filearea, array $args, 
 
     require_login($course, true, $cm);
 
-    $userid = $args[0];
-    require_once($CFG->dirroot . '/mod/observation/locallib.php');
-    if (!(observation::can_evaluate($userid, $context) || $userid == $USER->id))
+    $user_id = $args[0];
+    if (!(has_capability(observation::CAP_MANAGE, $context) || $user_id == $USER->id))
     {
         // Only evaluators and/or owners have access to files
         return false;
     }
 
-    $fs           = get_file_storage();
-    $relativepath = implode('/', $args);
-    $fullpath     = "/$context->id/mod_observation/$filearea/$relativepath";
-    if ((!$file = $fs->get_file_by_hash(sha1($fullpath))) || $file->is_directory())
+    $fs            = get_file_storage();
+    $relative_path = implode('/', $args);
+    $full_path     = "/$context->id/" . OBSERVATION_MODULE . "/$filearea/$relative_path";
+    if ((!$file = $fs->get_file_by_hash(sha1($full_path))) || $file->is_directory())
     {
         send_file_not_found();
+        return false;
     }
-
-    // finally send the file
-    send_stored_file($file, null, 0, $forcedownload, $options);
+    else
+    {
+        // finally send the file
+        send_stored_file($file, null, 0, $forcedownload, $options);
+        return true;
+    }
 }
 
 /* Navigation API */
@@ -506,13 +484,13 @@ function observation_pluginfile($course, $cm, $context, $filearea, array $args, 
  */
 function observation_extend_navigation(navigation_node $navref, stdClass $course, stdClass $module, cm_info $cm)
 {
-    $context = context_module::instance($cm->id);
-    if (has_capability('mod/observation:evaluate', $context) || has_capability('mod/observation:signoff', $context))
-    {
-        $link = new moodle_url('/mod/observation/report.php', array('cmid' => $cm->id));
-        $node = $navref->add(get_string('evaluatestudents', 'observation'), $link, navigation_node::TYPE_SETTING);
-    }
-
+    // $context = context_module::instance($cm->id);
+    // if (has_capability(observation::CAP_ASSESS, $context))
+    // {
+    //     $link = new moodle_url('/mod/observation/report.php', array('cmid' => $cm->id));
+    //     $node = $navref->add(get_string('evaluatestudents', 'observation'), $link, navigation_node::TYPE_SETTING);
+    //     $node->mainnavonly = true;
+    // }
 }
 
 /**
@@ -524,94 +502,21 @@ function observation_extend_navigation(navigation_node $navref, stdClass $course
  * @param settings_navigation $settingsnav complete settings navigation tree
  * @param navigation_node     $observationnode observation administration node
  */
-function observation_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $observationnode = null)
+function observation_extend_settings_navigation(
+    settings_navigation $settingsnav, navigation_node $observationnode = null)
 {
-    global $PAGE;
-
-    if (has_capability('mod/observation:evaluate', $PAGE->cm->context) || has_capability('mod/observation:signoff', $PAGE->cm->context))
-    {
-        $link = new moodle_url('/mod/observation/report.php', array('cmid' => $PAGE->cm->id));
-        $node = navigation_node::create(get_string('evaluatestudents', 'observation'),
-            new moodle_url('/mod/observation/report.php', array('cmid' => $PAGE->cm->id)),
-            navigation_node::TYPE_SETTING, null, 'mod_observation_evaluate',
-            new pix_icon('i/valid', ''));
-        $observationnode->add_node($node);
-    }
-
-    if (has_capability('mod/observation:manage', $PAGE->cm->context))
-    {
-        $node = navigation_node::create(get_string('edittopics', 'observation'),
-            new moodle_url('/mod/observation/manage.php', array('cmid' => $PAGE->cm->id)),
-            navigation_node::TYPE_SETTING, null, 'mod_observation_manage',
-            new pix_icon('t/edit', ''));
-        $observationnode->add_node($node);
-    }
+    // global $PAGE;
+    //
+    // if (has_capability('', $PAGE->cm->context))
+    // {
+    //     $link = new moodle_url('/mod/observation/report.php', array('cmid' => $PAGE->cm->id));
+    //     $node = navigation_node::create(
+    //         get_string('', OBSERVATION),
+    //         new moodle_url('/mod/observation/report.php', array('cmid' => $PAGE->cm->id)),
+    //         navigation_node::TYPE_SETTING,
+    //         null,
+    //         'mod_observation_evaluate',
+    //         new pix_icon('i/valid', ''));
+    //     $observationnode->add_node($node);
+    // }
 }
-
-
-/**
- * Comments helper functions and callbacks
- *
- */
-
-/**
- * Validate comment parameters, before other comment actions are performed
- *
- * @param stdClass $comment_param {
- *              context  => context the context object
- *              courseid => int course id
- *              cm       => stdClass course module object
- *              commentarea => string comment area
- *              itemid      => int itemid
- * }
- * @return boolean
- * @package  block_comments
- * @category comment
- *
- */
-function observation_comment_validate($comment_param)
-{
-    if (!strstr($comment_param->commentarea, 'observation_topic_item_'))
-    {
-        throw new comment_exception('invalidcommentarea');
-    }
-    if (empty($comment_param->itemid))
-    {
-        throw new comment_exception('invalidcommentitemid');
-    }
-
-    return true;
-}
-
-/**
- * Running addtional permission check on plugins
- *
- * @param stdClass $args
- * @return array
- * @package  block_comments
- * @category comment
- *
- */
-function observation_comment_permissions($args)
-{
-    global $CFG;
-    require_once($CFG->dirroot . '/mod/observation/locallib.php');
-
-    if (!observation::can_evaluate($args->itemid, $args->context))
-    {
-        return array('post' => false, 'view' => true);
-    }
-
-    return array('post' => true, 'view' => true);
-}
-
-function observation_comment_template()
-{
-    global $OUTPUT, $PAGE;
-
-    // Use the totara default comment template
-    $renderer = $PAGE->get_renderer('totara_core');
-
-    return $renderer->comment_template();
-}
-

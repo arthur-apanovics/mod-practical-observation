@@ -26,7 +26,7 @@
  */
 
 use mod_observation\event\course_module_viewed;
-use mod_observation\db_model\obsolete\observation;
+use mod_observation\observation;
 use mod_observation\user_observation;
 use mod_observation\user_topic;
 

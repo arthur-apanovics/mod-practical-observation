@@ -20,26 +20,19 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_observation\db_model\obsolete;
+namespace mod_observation;
 
-use mod_observation\db_model\db_model_base;
+use coding_exception;
 
-class task_submission_status
+class learner_task_submission extends db_model_base
 {
-    const NOT_STARTED             = 'not_started';
-    const LEARNER_IN_PROGRESS     = 'learner_in_progress';
-    const OBSERVATION_PENDING     = 'observation_pending';
-    const OBSERVATION_IN_PROGRESS = 'observation_in_progress';
-    const OBSERVATION_INCOMPLETE  = 'observation_incomplete';
-    const ASSESSMENT_PENDING      = 'assessment_pending';
-    const ASSESSMENT_IN_PROGRESS  = 'assessment_in_progress';
-    const ASSESSMENT_INCOMPLETE   = 'assessment_incomplete';
-    const COMPLETE                = 'complete';
-}
+    public const TABLE = OBSERVATION . '_learner_task_submission';
 
-class learner_task_submission_model extends db_model_base
-{
-    protected const TABLE = 'learner_task_submission';
+    public const COL_USER          = 'user';
+    public const COL_TASK          = 'task';
+    public const COL_STATUS        = 'status';
+    public const COL_TIMESTARTED   = 'timestarted';
+    public const COL_TIMECOMPLETED = 'timecompleted';
 
     public const STATUS_NOT_STARTED             = 'not_started';
     public const STATUS_LEARNER_IN_PROGRESS     = 'learner_in_progress';
@@ -54,22 +47,49 @@ class learner_task_submission_model extends db_model_base
     /**
      * @var int
      */
-    protected $user; // fk user
+    protected $user;
     /**
      * @var int
      */
-    protected $task;
+    protected $task; // fk user
     /**
-     * ENUM ('not_started', 'learner_in_progress', 'observation_pending', 'observation_in_progress', 'observation_incomplete', 'assessment_pending', 'assessment_in_progress', 'assessment_incomplete', 'complete')
-     * @var task_submission_status
+     * ENUM ('not_started', 'learner_in_progress', 'observation_pending', 'observation_in_progress',
+     * 'observation_incomplete', 'assessment_pending', 'assessment_in_progress', 'assessment_incomplete', 'complete')
+     *
+     * @var string
      */
     protected $status;
     /**
-     * @var bigint
+     * @var int
      */
     protected $timestarted;
     /**
-     * @var bigint
+     * @var int
      */
     protected $timecompleted;
+
+    public function set(string $prop, $value, bool $save = false): db_model_base
+    {
+        if ($prop == self::COL_STATUS)
+        {
+            // validate status is correctly set
+            $allowed = [
+                self::STATUS_NOT_STARTED,
+                self::STATUS_LEARNER_IN_PROGRESS,
+                self::STATUS_OBSERVATION_PENDING,
+                self::STATUS_OBSERVATION_IN_PROGRESS,
+                self::STATUS_OBSERVATION_INCOMPLETE,
+                self::STATUS_ASSESSMENT_PENDING,
+                self::STATUS_ASSESSMENT_IN_PROGRESS,
+                self::STATUS_ASSESSMENT_INCOMPLETE,
+                self::STATUS_COMPLETE,
+            ];
+            if (!in_array($value, $allowed))
+            {
+                throw new coding_exception(
+                    sprintf("'$value' is not a valid value for '%s' in '%s'", self::COL_STATUS, __CLASS__));
+            }
+        }
+        return parent::set($prop, $value, $save);
+    }
 }

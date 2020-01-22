@@ -20,28 +20,33 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_observation\db_model\obsolete;
+namespace mod_observation;
 
-use mod_observation\db_model\db_model_base;
+use mod_observation;
 
-class observer_model extends db_model_base
+class observer extends db_model_base
 {
-    protected const TABLE = 'observer';
+    public const TABLE = OBSERVATION . '_observer';
+
+    public const COL_FULLNAME       = 'fullname';
+    public const COL_PHONE          = 'phone';
+    public const COL_EMAIL          = 'email';
+    public const COL_POSITION_TITLE = 'position_title';
 
     /**
-     * @var varchar
+     * @var string
      */
     protected $fullname;
     /**
-     * @var varchar
+     * @var string
      */
     protected $phone;
     /**
-     * @var varchar
+     * @var string
      */
     protected $email;
     /**
-     * @var varchar
+     * @var string
      */
     protected $position_title;
 }

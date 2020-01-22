@@ -20,17 +20,21 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_observation\db_model\obsolete;
+namespace mod_observation;
 
-use mod_observation\db_model\db_model_base;
+use coding_exception;
 
-class assessor_task_submission_model extends db_model_base
+class assessor_task_submission extends db_model_base
 {
-    protected const TABLE = 'assessor_task_submission';
+    public const TABLE = OBSERVATION . '_assessor_task_submission';
+
+    public const COL_ASSESSOR                = 'assessor';
+    public const COL_LEARNER_TASK_SUBMISSION = 'learner_task_submission';
+    public const COL_STATUS                  = 'status';
 
     public const STATUS_REQUESTED_NEW_OBSERVATION = 'requested_new_observation';
-    public const STATUS_NOT_COMPLETE = 'not_complete';
-    public const STATUS_COMPLETE = 'complete';
+    public const STATUS_NOT_COMPLETE              = 'not_complete';
+    public const STATUS_COMPLETE                  = 'complete';
 
     /**
      * @var int
@@ -43,7 +47,23 @@ class assessor_task_submission_model extends db_model_base
     /**
      * ENUM ('requested_new_observation', 'not_complete', 'complete')
      *
-     * @var task_status
+     * @var
      */
     protected $status;
+
+    public function set(string $prop, $value, bool $save = false): db_model_base
+    {
+        if ($prop == self::COL_STATUS)
+        {
+            // validate status is correctly set
+            $allowed = [self::STATUS_REQUESTED_NEW_OBSERVATION, self::STATUS_NOT_COMPLETE, self::STATUS_COMPLETE];
+            if (!in_array($value, $allowed))
+            {
+                throw new coding_exception(
+                    sprintf("'$value' is not a valid value for '%s' in '%s'", self::COL_STATUS, __CLASS__));
+            }
+        }
+
+        return parent::set($prop, $value, $save);
+    }
 }

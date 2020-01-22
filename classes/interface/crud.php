@@ -11,7 +11,7 @@ interface crud
      * @param int $id
      * @return stdClass|false false if record not found
      */
-    public static function fetch_record_from_id(int $id);
+    public static function read(int $id);
 
     /**
      * Create DB entry from current state
@@ -25,7 +25,7 @@ interface crud
      *
      * @return object
      */
-    public function read(int $id = null);
+    public function refresh();
 
     /**
      * Save current state to DB

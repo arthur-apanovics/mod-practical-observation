@@ -13,6 +13,7 @@ trait record_mapper
      * from database by id or mapping to provided values or existing object
      * @param $id_or_record
      * @throws coding_exception
+     * @throws \dml_missing_record_exception
      */
     private function create_from_id_or_map_to_record($id_or_record)
     {
@@ -24,8 +25,14 @@ trait record_mapper
             }
             else if (is_numeric($id_or_record))
             {
-                $this->map_to_record(
-                    $this->fetch_record_from_id($id_or_record));
+                if ($record = $this->refresh($id_or_record))
+                {
+                    $this->map_to_record($record);
+                }
+                else
+                {
+                    throw new \dml_missing_record_exception(self::TABLE, 'SELECT', ['id' => $id_or_record]);
+                }
             }
             else
             {
@@ -33,11 +40,11 @@ trait record_mapper
                                            . json_encode($id_or_record) . '") when initializing ' . __CLASS__);
             }
         }
-        // else
-        // {
-        //     throw new coding_exception('No data provided when attempting to initialize "'
-        //                                . __CLASS__ . '" object');
-        // }
+        else
+        {
+            throw new coding_exception('No data provided when attempting to initialize "'
+                                       . __CLASS__ . '" object');
+        }
     }
 
     /**

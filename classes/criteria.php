@@ -20,28 +20,28 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_observation\db_model\obsolete;
+namespace mod_observation;
 
-use mod_observation\db_model\db_model_base;
+use mod_observation;
 
-class assessor_feedback_model extends db_model_base
+class criteria extends db_model_base
 {
-    protected const TABLE = 'assessor_feedback';
+    public const TABLE = OBSERVATION . '_criteria';
+
+    public const COL_TASK               = 'task';
+    public const COL_DESCRIPTION        = 'description';
+    public const COL_DESCRIPTION_FORMAT = 'description_format';
 
     /**
      * @var int
      */
-    protected $assessor_task_submission;
+    protected $task;
     /**
-     * @var longtext
+     * @var string
      */
-    protected $text;
+    protected $description;
     /**
-     * @var int2
+     * @var int
      */
-    protected $text_format;
-    /**
-     * @var bigint
-     */
-    protected $timesubmitted;
+    protected $description_format;
 }

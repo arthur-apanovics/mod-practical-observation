@@ -20,37 +20,43 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_observation\db_model\obsolete;
+namespace mod_observation;
 
-use mod_observation\db_model\db_model_base;
+use mod_observation;
 
-class learner_attempt_model extends db_model_base
+class learner_attempt extends db_model_base
 {
-    protected const TABLE = 'learner_attempt';
+    public const TABLE = OBSERVATION . '_learner_attempt';
+
+    public const COL_LEARNER_SUBMISSION = 'learner_submission';
+    public const COL_TIMESTARTED        = 'timestarted';
+    public const COL_TIMESUBMITTED      = 'timesubmitted';
+    public const COL_TEXT               = 'text';
+    public const COL_TEXT_FORMAT        = 'text_format';
+    public const COL_ATTEMPT_NUMBER     = 'attempt_number';
 
     /**
      * @var int
      */
     protected $learner_submission;
     /**
-     * @var bigint
+     * @var int
      */
     protected $timestarted;
     /**
-     * @var bigint
+     * @var int
      */
     protected $timesubmitted;
     /**
-     * @var longtext
+     * @var string
      */
     protected $text;
     /**
-     * @var int2
+     * @var int
      */
     protected $text_format;
     /**
      * attempt number in order of sequence.
-     * todo: redundant?
      *
      * @var int
      */

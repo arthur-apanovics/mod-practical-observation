@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection SpellCheckingInspection */
 /*
  * Copyright (C) 2015 onwards Catalyst IT
  *
@@ -27,84 +27,55 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// MOODLE & PLUGIN SPECIFIC
+$string['modulename'] = 'Observation';
+$string['modulenameplural'] = 'Observations';
+$string['modulename_help'] = 'The Observation module allows for student evaluation based on pre-configured Observation tasks and criterias.';
+$string['pluginadministration'] = 'Observation administration';
+$string['pluginname'] = 'Observation';
+$string['observation'] = 'Observation';
 $string['accessdenied'] = 'Access denied';
-$string['additem'] = 'Add topic item';
-$string['addtopic'] = 'Add topic';
-$string['allowcomments'] = 'Allow comments';
-$string['allowfileuploads'] = 'Allow \'evaluator\' file uploads';
-$string['allowselffileuploads'] = 'Allow \'owner\' file uploads';
-$string['edititem'] = 'Edit topic item';
-$string['evaluate'] = 'Evaluate';
+
+// SETTINGS FORM
 $string['observation:addinstance'] = 'Add instance';
 $string['observation:evaluate'] = 'Evaluate';
 $string['observation:evaluateself'] = 'Evaluate self';
 $string['observation:manage'] = 'Manage';
 $string['observation:view'] = 'View';
-$string['observation:signoff'] = 'Sign-off';
-$string['observation:witnessitem'] = 'Witness topic item completion';
-$string['observationfieldset'] = 'Custom example fieldset';
+
+// $string['observationfieldset'] = 'Custom example fieldset';
 $string['observationname'] = 'Observation name';
 $string['observationname_help'] = 'The title of your Observation activity.';
 $string['observation'] = 'Observation';
-$string['observationxforx'] = '{$a->observation} - {$a->user}';
-$string['competencies'] = 'Competencies';
-$string['competencies_help'] = 'Here you can select which of the assigned course competencies should be marked as proficient upon completion of this topic.
+// $string['competencies'] = 'Competencies';
+// $string['competencies_help'] = 'Here you can select which of the assigned course competencies should be marked as proficient upon completion of this task.
+//
+// Multiple competencies can be selected by holding down \<CTRL\> and and selecting the criterias.';
 
-Multiple competencies can be selected by holding down \<CTRL\> and and selecting the items.';
 $string['completionstatus'] = 'Completion status';
-$string['completionstatus0'] = 'Incomplete';
-$string['completionstatus1'] = 'Required complete';
-$string['completionstatus2'] = 'Complete';
-$string['completiontopics'] = 'All required topics are complete and, if enabled, witnessed.';
-$string['confirmtopicdelete'] = 'Are you sure you want to delete this topic?';
-$string['confirmitemdelete'] = 'Are you sure you want to delete this topic item?';
-$string['deleteitem'] = 'Delete topic item';
-$string['deletetopic'] = 'Delete topic';
-$string['edittopic'] = 'Edit topic';
-$string['edittopics'] = 'Edit topics';
-$string['error:observationnotfound'] = 'Observation not found';
-$string['evaluatestudents'] = 'Evaluate students';
-$string['filesupdated']  = 'Files updated';
-$string['itemdeleted'] = 'Topic item deleted';
-$string['itemwitness'] = 'Item completion witness';
-$string['manage'] = 'Manage';
-$string['managersignoff'] = 'Assessor sign-off';
-$string['managertasktcompletionsubject'] = '{$a->user}  is awaiting your sign off for completion of topic {$a->topic} in {$a->courseshortname}';
-$string['managertasktcompletionmsg'] = '{$a->user} has completed topic <a href="{$a->topicurl}">{$a->topic}</a>. This topic is now awaiting your sign-off.';
-$string['modulename'] = 'Observation';
-$string['modulenameplural'] = 'Observations';
-$string['modulename_help'] = 'The Observation module allows for student evaluation based on pre-configured Observation topics and items.';
-$string['name'] = 'Name';
-$string['notsignedoff'] = 'Not signed off';
-$string['notopics'] = 'No topics';
-$string['notwitnessed'] = 'Not achieved';
-$string['nousers'] = 'No users...';
-$string['optional'] = 'Optional';
-$string['optionalcompletion'] = 'Optional completion';
-$string['pluginadministration'] = 'Observation administration';
-$string['pluginname'] = 'Observation';
-$string['printthisobservation'] = 'Print this Observation';
+$string['completionstatus_incomplete'] = 'Incomplete';
+$string['completionstatus_complete'] = 'Complete';
+
+// $string['confirmtaskdelete'] = 'Are you sure you want to delete this task?';
+// $string['confirmcriteriadelete'] = 'Are you sure you want to delete this criteria?';
+// $string['deletecriteria'] = 'Delete criteria';
+// $string['deletetask'] = 'Delete task';
+// $string['taskdeleted'] = 'Task deleted';
+// $string['edittask'] = 'Edit task';
+// $string['edittasks'] = 'Edit tasks';
+// $string['error:observationnotfound'] = 'Observation not found';
+$string['assessstudents'] = 'Assess students';
+$string['criteriadeleted'] = 'Criteria deleted';
+// $string['manage'] = 'Manage';
+$string['notasks'] = 'No tasks';
+
+// $string['printthisobservation'] = 'Print this Observation';
 $string['report'] = 'Report';
-$string['signedoff'] = 'Signed off';
-$string['topicdeleted'] = 'Topic deleted';
-$string['topiccomments'] = 'Comments';
-$string['topicitemfiles'] = 'Files';
-$string['topicitemdeleted'] = 'Topic item deleted';
-$string['type0'] = 'Observation';
-$string['type1'] = 'Topic';
-$string['type2'] = 'Item';
-$string['updatefiles'] = 'Update files';
-$string['witnessed'] = 'Achieved';
 
-$string['observation'] = 'Observation';
-$string['review_observation'] = 'View Topic';
-$string['manage_requests'] = 'Request Observation';
-$string['submissiondate'] = 'Observation submitted on {$a}';
-$string['nosubmissiondate'] = 'Observation has not been submitted yet';
+// $string['submissiondate'] = 'Observation submitted on {$a}';
+// $string['nosubmissiondate'] = 'Observation has not been submitted yet';
 
-// email
-$string['requests_disabled:title'] = 'You cannot assign new emails at the moment';
-$string['requestobservation'] = 'Request observation';
-$string['userxfeedback'] = '{$a}\'s Feedback';
-$string['myfeedback'] = 'My Feedback';
-$string['addemailplaceholder'] = 'Please add one email per line';
+// EMAIL
+// $string['requests_disabled:title'] = 'You cannot assign new emails at the moment';
+// $string['requestobservation'] = 'Request observation';
+// $string['userxfeedback'] = '{$a}\'s Feedback';

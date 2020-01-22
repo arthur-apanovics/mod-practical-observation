@@ -50,7 +50,7 @@ class mod_observation_mod_form extends moodleform_mod
 
         // Adding the standard "name" field.
         $mform->addElement('text', 'name', get_string('observationname', 'observation'), array('size' => '64'));
-        if (!empty($CFG->formatstringstriptags))
+        if (!empty($CFG->formatstringstriptags)) // 'Remove HTML tags from all activity names'
         {
             $mform->setType('name', PARAM_TEXT);
         }
@@ -64,10 +64,6 @@ class mod_observation_mod_form extends moodleform_mod
 
         // Adding the standard "intro" and "introformat" fields.
         $this->standard_intro_elements();
-
-        // Workflow
-        $mform->addElement('advcheckbox', 'managersignoff', get_string('managersignoff', 'observation'));
-        $mform->addElement('advcheckbox', 'itemwitness', get_string('itemwitness', 'observation'));
 
         // Add standard grading elements.
         $this->standard_grading_coursemodule_elements();

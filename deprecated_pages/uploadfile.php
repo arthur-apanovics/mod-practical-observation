@@ -24,7 +24,7 @@
  * Upload a file to a observation topic item
  */
 
-use mod_observation\db_model\obsolete\observation;
+use mod_observation\observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/totara/plan/lib.php');

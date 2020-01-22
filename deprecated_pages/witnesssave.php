@@ -24,10 +24,10 @@
  * Observation witness ajax toggler
  */
 
-use mod_observation\db_model\obsolete\email_assignment;
-use mod_observation\db_model\obsolete\item_witness;
-use mod_observation\db_model\obsolete\observation;
-use mod_observation\db_model\obsolete\topic;
+use mod_observation\email_assignment;
+use mod_observation\item_witness;
+use mod_observation\observation;
+use mod_observation\topic;
 use mod_observation\user_topic_item;
 
 define('AJAX_SCRIPT', true);
