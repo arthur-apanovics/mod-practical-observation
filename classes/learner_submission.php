@@ -24,9 +24,9 @@ namespace mod_observation;
 
 use coding_exception;
 
-class learner_task_submission extends db_model_base
+class learner_submission extends db_model_base
 {
-    public const TABLE = OBSERVATION . '_learner_task_submission';
+    public const TABLE = OBSERVATION . '_learner_submission';
 
     public const COL_USER          = 'user';
     public const COL_TASK          = 'task';

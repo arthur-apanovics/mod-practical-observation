@@ -24,15 +24,14 @@ namespace mod_observation;
 
 use coding_exception;
 
-class assessor_task_submission extends db_model_base
+class assessor_submission extends db_model_base
 {
-    public const TABLE = OBSERVATION . '_assessor_task_submission';
+    public const TABLE = OBSERVATION . '_assessor_submission';
 
     public const COL_ASSESSOR                = 'assessor';
     public const COL_LEARNER_TASK_SUBMISSION = 'learner_task_submission';
     public const COL_STATUS                  = 'status';
 
-    public const STATUS_REQUESTED_NEW_OBSERVATION = 'requested_new_observation';
     public const STATUS_NOT_COMPLETE              = 'not_complete';
     public const STATUS_COMPLETE                  = 'complete';
 
@@ -47,7 +46,7 @@ class assessor_task_submission extends db_model_base
     /**
      * ENUM ('requested_new_observation', 'not_complete', 'complete')
      *
-     * @var
+     * @var string
      */
     protected $status;
 
@@ -56,7 +55,7 @@ class assessor_task_submission extends db_model_base
         if ($prop == self::COL_STATUS)
         {
             // validate status is correctly set
-            $allowed = [self::STATUS_REQUESTED_NEW_OBSERVATION, self::STATUS_NOT_COMPLETE, self::STATUS_COMPLETE];
+            $allowed = [self::STATUS_NOT_COMPLETE, self::STATUS_COMPLETE];
             if (!in_array($value, $allowed))
             {
                 throw new coding_exception(

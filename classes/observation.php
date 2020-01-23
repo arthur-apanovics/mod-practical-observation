@@ -22,6 +22,10 @@
 
 namespace mod_observation;
 
+use cm_info;
+use coding_exception;
+use dml_exception;
+
 class observation extends db_model_base
 {
     // DATABASE CONSTANTS:
@@ -57,6 +61,8 @@ class observation extends db_model_base
     public const FILE_AREA_TRAINEE  = 'learner_attachments';
     public const FILE_AREA_OBSERVER = 'observer_attachments';
     public const FILE_AREA_ASSESSOR = 'assessor_attachments';
+
+    // DATABASE PROPERTIES
 
     /**
      * @var int
@@ -118,14 +124,86 @@ class observation extends db_model_base
      * @var bool
      */
     protected $completiontopics;
+}
 
+/**
+ * An instance of the observation activity with all related data
+ *
+ * @package mod_observation
+ */
+class observation_instance extends observation
+{
+    /**
+     * @var cm_info
+     */
+    private $cm;
+
+    // task related
+    /**
+     * @var task[]
+     */
+    private $tasks;
+    /**
+     * @var criteria[]
+     */
+    private $criterias;
+
+    // learner related
+    /**
+     * @var learner_submission[]
+     */
+    private $learner_submissions;
+    /**
+     * @var learner_attempt[]
+     */
+    private $learner_attempts;
+
+    // observer related
+    /**
+     * @var observer[]
+     */
+    private $observers;
+    /**
+     * @var observer_assignment[]
+     */
+    private $observer_assignments;
+    /**
+     * @var observer_submission[]
+     */
+    private $observer_submissions;
+    /**
+     * @var observer_feedback[]
+     */
+    private $observer_feedbacks;
+
+    // assessor related
+    /**
+     * @var assessor_submission[]
+     */
+    private $assessor_submissions;
+    /**
+     * @var assessor_feedback[]
+     */
+    private $assessor_feedbacks;
+
+    // GETTERS:
+
+    // TODO
+
+    // CLASS METHODS:
+
+    public function __construct(cm_info $course_module)
+    {
+        $this->cm = $course_module;
+        parent::__construct($this->cm->instance);
+    }
 
     /**
      * Marks as deleted and updates db record
      *
-     * @return observation|bool
-     * @throws \dml_exception
-     * @throws \coding_exception
+     * @return self
+     * @throws dml_exception
+     * @throws coding_exception
      */
     public function delete()
     {
@@ -136,11 +214,11 @@ class observation extends db_model_base
 
     /**
      * Checks if all criteria for completing this observation are complete
-     *
-     * @return bool
+     * @return bool complete or not
+     * @todo perform completion check
      */
-    public function is_activity_complete(): bool // TODO perform completion check
+    public function is_activity_complete(): bool
     {
-        throw new \coding_exception(__METHOD__ . ' not defined');
+        throw new coding_exception(__METHOD__ . ' not defined');
     }
 }

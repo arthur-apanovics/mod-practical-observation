@@ -95,7 +95,7 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
 
     $observation->create();
 
-    return $observation->get_id();
+    return $observation->get_id();//todo test if create() updated object reference
 }
 
 /**

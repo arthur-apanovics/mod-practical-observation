@@ -4,6 +4,8 @@
 namespace mod_observation;
 
 use coding_exception;
+use dml_exception;
+use dml_missing_record_exception;
 use mod_observation\interfaces\crud;
 use mod_observation\traits\record_mapper;
 use stdClass;
@@ -28,6 +30,24 @@ abstract class db_model_base implements crud
      * @var int
      */
     protected $id;
+
+    /**
+     * db_model_base constructor.
+     * @param int|object|null $id_or_record
+     * @throws coding_exception
+     * @throws dml_missing_record_exception
+     */
+    public function __construct($id_or_record = null)
+    {
+        if (is_null(static::TABLE))
+        {
+            throw new coding_exception('TABLE not declared for ' . get_class($this));
+        }
+        if (!is_null($id_or_record))
+        {
+            self::create_from_id_or_map_to_record($id_or_record);
+        }
+    }
 
     public function get($prop)
     {
@@ -67,24 +87,8 @@ abstract class db_model_base implements crud
         }
         else
         {
-            throw new coding_exception("Cannot set non-existent property '$prop' in " . __CLASS__ );
+            throw new coding_exception("Cannot set non-existent property '$prop' in " . __CLASS__);
         }
-    }
-
-    /**
-     * db_model_base constructor.
-     * @param int|object|null $id_or_record
-     * @throws coding_exception
-     * @throws \dml_missing_record_exception
-     */
-    public function __construct($id_or_record = null)
-    {
-        if (is_null(static::TABLE))
-        {
-            throw new coding_exception('TABLE not declared for ' . get_class($this));
-        }
-
-        self::create_from_id_or_map_to_record($id_or_record);
     }
 
     /**
@@ -98,14 +102,13 @@ abstract class db_model_base implements crud
     }
 
     /**
-     * Fetch record from database.
+     * Fetch record from database
      * @param int $id
      * @return stdClass|false false if record not found
      *
-     * @throws \dml_exception
-     * @deprecated Use read(id) instead.
+     * @throws dml_exception
      */
-    public static function read(int $id)
+    public static function read_raw(int $id)
     {
         global $DB;
 
@@ -113,19 +116,38 @@ abstract class db_model_base implements crud
     }
 
     /**
+     * Fetch record from database and instantiate class.
+     * @param int $id
+     * @return static|false false if record not found
+     *
+     * @throws dml_exception
+     * @throws coding_exception
+     */
+    public static function read(int $id)
+    {
+        if ($record = self::read_raw($id))
+        {
+            // overwrite with class instance
+            $record = new static($record);
+        }
+
+        return $record;
+    }
+
+    /**
      * Create DB entry from current state and set id
      *
-     * @return bool|int new record id or false if failed
-     * @throws \dml_exception
+     * @return static
+     * @throws dml_exception
+     * @throws coding_exception
      */
     public function create()
     {
         global $DB;
 
-        $id = $DB->insert_record(static::TABLE, self::get_record_from_object());
-        $this->id = $id;
+        $this->id = $DB->insert_record(static::TABLE, self::get_record_from_object());
 
-        return $id;
+        return $this->refresh();
     }
 
     /**
@@ -134,8 +156,8 @@ abstract class db_model_base implements crud
      * If $id parameter supplied - reads values from DB by provided id
      * and maps them to a NEW instance of current object.
      *
-     * @return object
-     * @throws \dml_exception
+     * @return static
+     * @throws dml_exception
      * @throws coding_exception
      */
     public function refresh()
@@ -145,8 +167,7 @@ abstract class db_model_base implements crud
         $this->validate();
 
         $this->map_to_record(
-            $DB->get_record(static::TABLE, ['id' => $this->id])
-        );
+            $DB->get_record(static::TABLE, ['id' => $this->id]));
 
         return $this;
     }
@@ -154,24 +175,25 @@ abstract class db_model_base implements crud
     /**
      * Save current state to DB
      *
-     * @return bool
-     * @throws \dml_exception
+     * @return static
      * @throws coding_exception
+     * @throws dml_exception
      */
     public function update()
     {
         global $DB;
 
         $this->validate();
+        $DB->update_record(static::TABLE, $this->get_record_from_object());
 
-        return $DB->update_record(static::TABLE, $this->get_record_from_object());
+        return $this->refresh();
     }
 
     /**
      * Delete current object from DB
      *
      * @return bool
-     * @throws \dml_exception
+     * @throws dml_exception
      * @throws coding_exception
      */
     public function delete()
@@ -181,6 +203,27 @@ abstract class db_model_base implements crud
         $this->validate();
 
         return $DB->delete_records(static::TABLE, ['id' => $this->id]);
+    }
+
+    /**
+     * Convert array of database records to array of class instances of those records
+     *
+     * @param stdClass[] $records db records (bool also accepted)
+     * @return static[]
+     */
+    protected static function to_class_instances($records): array
+    {
+        if (empty($records))
+        {
+            return [];
+        }
+
+        return array_map(
+            function ($rec)
+            {
+                return new $this($rec);
+            },
+            $records);
     }
 
     private function validate(): void

@@ -27,40 +27,4 @@
  * logic, should go here. Never include this file from your lib.php!
  */
 
-use mod_observation\observation;
-
 defined('MOODLE_INTERNAL') || die();
-
-
-/**
- * Check observation id when initializing page
- *
- * @param int $cmid
- * @param int $instanceid
- * @return array [mod_observation\model\observation, stdClass course, stdClass cm]
- * @throws coding_exception
- * @throws dml_exception
- */
-function observation_check_page_id_params_and_init(int $cmid, int $instanceid)
-{
-    // global $DB;
-    //
-    // if ($cmid)
-    // {
-    //     $cm     = get_coursemodule_from_id('observation', $cmid, 0, false, MUST_EXIST);
-    //     $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    //     $observation    = new observation($cm->instance);
-    // }
-    // else if ($instanceid)
-    // {
-    //     $observation    = new observation($instanceid);
-    //     $course = $DB->get_record('course', array('id' => $observation->course), '*', MUST_EXIST);
-    //     $cm     = get_coursemodule_from_instance('observation', $observation->id, $course->id, false, MUST_EXIST);
-    // }
-    // else
-    // {
-    //     throw new coding_exception('You must specify a course_module ID or an instance ID');
-    // }
-    //
-    // return [$observation, $course, $cm];
-}

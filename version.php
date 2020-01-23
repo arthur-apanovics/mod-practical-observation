@@ -29,7 +29,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component    = OBSERVATION_MODULE;
+$plugin->component    = 'mod_observation';
 $plugin->version      = 2017101806;
 $plugin->release      = 'v0.1';
 $plugin->requires     = 2015111606.00;
