@@ -20,19 +20,34 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/**
- * Defines the version and other meta-info about the plugin
- *
- * Setting the $plugin->version to 0 prevents the plugin from being installed.
- * See https://docs.moodle.org/dev/version.php for more info.
- */
+namespace mod_observation;
 
-defined('MOODLE_INTERNAL') || die();
+class task extends db_model_base
+{
+    public const TABLE = OBSERVATION . '_task';
 
-$plugin->component    = 'mod_observation';
-$plugin->version      = 2017101806;
-$plugin->release      = 'v0.1';
-$plugin->requires     = 2015111606.00;
-$plugin->maturity     = MATURITY_ALPHA;
-$plugin->cron         = 900;
-$plugin->dependencies = array();
+    public const COL_OBSERVATION           = 'observation';
+    public const COL_INTRO_LEARNER         = 'intro_learner';
+    public const COL_INTRO_LEARNER_FORMAT  = 'intro_learner_format';
+    public const COL_INTRO_OBSERVER        = 'intro_observer';
+    public const COL_INTRO_OBSERVER_FORMAT = 'intro_observer_format';
+    public const COL_INTRO_ASSESSOR        = 'intro_assessor';
+    public const COL_INTRO_ASSESSOR_FORMAT = 'intro_assessor_format';
+
+    /**
+     * @var int
+     */
+    protected $observation;
+    /**
+     * @var string
+     */
+    protected $intro_learner;
+    /**
+     * @var string
+     */
+    protected $intro_observer;
+    /**
+     * @var string
+     */
+    protected $intro_assessor;
+}

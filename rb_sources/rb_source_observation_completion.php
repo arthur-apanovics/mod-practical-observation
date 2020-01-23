@@ -20,8 +20,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_observation\models\completion;
-
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_observation_completion extends rb_base_source
@@ -426,7 +424,7 @@ class rb_source_observation_completion extends rb_base_source
     {
         if (empty($status))
         {
-            return get_string('completionstatus' . completion::STATUS_INCOMPLETE, 'observation');
+            return get_string('completionstatus' . completion::STATUS_INCOMPLETE, 'observation'); //TODO
         }
         else
         {
