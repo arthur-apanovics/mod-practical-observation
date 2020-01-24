@@ -25,8 +25,9 @@ namespace mod_observation;
 use cm_info;
 use coding_exception;
 use dml_exception;
+use dml_missing_record_exception;
 
-class observation extends db_model_base
+class observation_base extends db_model_base
 {
     // DATABASE CONSTANTS:
 
@@ -131,7 +132,7 @@ class observation extends db_model_base
  *
  * @package mod_observation
  */
-class observation_instance extends observation
+class observation extends observation_base
 {
     /**
      * @var cm_info
@@ -140,49 +141,49 @@ class observation_instance extends observation
 
     // task related
     /**
-     * @var task[]
+     * @var task_base[]
      */
     private $tasks;
     /**
-     * @var criteria[]
+     * @var criteria_base[]
      */
     private $criterias;
 
     // learner related
     /**
-     * @var learner_submission[]
+     * @var learner_submission_base[]
      */
     private $learner_submissions;
     /**
-     * @var learner_attempt[]
+     * @var learner_attempt_base[]
      */
     private $learner_attempts;
 
     // observer related
     /**
-     * @var observer[]
+     * @var observer_base[]
      */
     private $observers;
     /**
-     * @var observer_assignment[]
+     * @var observer_assignment_base[]
      */
     private $observer_assignments;
     /**
-     * @var observer_submission[]
+     * @var observer_submission_base[]
      */
     private $observer_submissions;
     /**
-     * @var observer_feedback[]
+     * @var observer_feedback_base[]
      */
     private $observer_feedbacks;
 
     // assessor related
     /**
-     * @var assessor_submission[]
+     * @var assessor_submission_base[]
      */
     private $assessor_submissions;
     /**
-     * @var assessor_feedback[]
+     * @var assessor_feedback_base[]
      */
     private $assessor_feedbacks;
 
@@ -192,10 +193,40 @@ class observation_instance extends observation
 
     // CLASS METHODS:
 
-    public function __construct(cm_info $course_module)
+    /**
+     * observation_instance constructor.
+     *
+     * @param cm_info $course_module
+     * @param int     $userid
+     * @param int     $taskid
+     * @throws dml_missing_record_exception
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public function __construct(cm_info $course_module, int $userid = null, int $taskid = null)
     {
         $this->cm = $course_module;
         parent::__construct($this->cm->instance);
+
+        $instanceid = $this->cm->instance;
+
+        $this->tasks = array_map(
+            function ($record) use ($userid)
+            {
+                return new task($record, $userid);
+            },
+            task::read_all_by_condition([task::COL_OBSERVATIONID => $instanceid]));
+
+        // $this->learner_submissions = learner_submission::get_submissions($instanceid, $userid, $taskid);
+        // $this->learner_attempts = learner_attempt::get_attempts($instanceid, $userid, $taskid);
+        //
+        // $this->observers = observer::get_observers($instanceid, $userid, $taskid);
+        // $this->observer_assignments = observer_assignment::get_assignments($instanceid, $userid, $taskid);
+        // $this->observer_submissions = observer_submission::get_submissions($instanceid, $userid, $taskid);
+        // $this->observer_feedbacks = observer_feedback::get_feedback($instanceid, $userid, $taskid);
+        //
+        // $this->assessor_submissions = assessor_submission::get_submissions($instanceid, $userid, $taskid);
+        // $this->assessor_feedbacks = assessor_feedback::get_feedback($instanceid, $userid, $taskid);
     }
 
     /**

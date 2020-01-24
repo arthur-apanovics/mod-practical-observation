@@ -24,7 +24,7 @@
  * Observation item completion ajax toggler
  */
 
-use mod_observation\observation;
+use mod_observation\observation_base;
 
 define('AJAX_SCRIPT', true);
 
@@ -80,7 +80,7 @@ else
     $topicsignoff->id        = $DB->insert_record('observation_topic_signoff', $topicsignoff);
 }
 
-$modifiedstr = observation::get_modifiedstr_user($topicsignoff->timemodified);
+$modifiedstr = observation_base::get_modifiedstr_user($topicsignoff->timemodified);
 
 $jsonparams = array(
     'topicsignoff' => $topicsignoff,

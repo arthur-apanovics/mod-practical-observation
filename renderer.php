@@ -23,7 +23,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 use core\output\flex_icon;
-use mod_observation\observation;
+use mod_observation\observation_base;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 // require_once($CFG->dirroot . '/mod/observation/lib.php');

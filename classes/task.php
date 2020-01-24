@@ -22,11 +22,11 @@
 
 namespace mod_observation;
 
-class task extends db_model_base
+class task_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_task';
 
-    public const COL_OBSERVATION           = 'observation';
+    public const COL_OBSERVATIONID         = 'observationid';
     public const COL_INTRO_LEARNER         = 'intro_learner';
     public const COL_INTRO_LEARNER_FORMAT  = 'intro_learner_format';
     public const COL_INTRO_OBSERVER        = 'intro_observer';
@@ -37,7 +37,7 @@ class task extends db_model_base
     /**
      * @var int
      */
-    protected $observation;
+    protected $observationid;
     /**
      * @var string
      */
@@ -50,4 +50,36 @@ class task extends db_model_base
      * @var string
      */
     protected $intro_assessor;
+}
+
+class task extends task_base
+{
+    /**
+     * @var criteria_base[]
+     */
+    private $criteria;
+    /**
+     * @var learner_submission[]
+     */
+    private $learner_submissions;
+
+    public function __construct($id_or_record, int $userid = null)
+    {
+        parent::__construct($id_or_record);
+
+        $this->criteria = array_map(
+            function ($record) use ($userid)
+            {
+                return new criteria($record, $userid);
+            },
+            criteria::read_all_by_condition([criteria::COL_TASKID => $this->id]));
+
+        $this->learner_submissions = array_map(
+            function ($record) use ($userid)
+            {
+                return new learner_submission($record, $userid);
+            },
+            learner_submission::read_all_by_condition(
+                [learner_submission::COL_TASKID => $this->id, learner_submission::COL_USERID => $userid]));
+    }
 }

@@ -24,25 +24,26 @@ namespace mod_observation;
 
 use mod_observation;
 
-class observer_assignment extends db_model_base
+class observer_assignment_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_observer_assignment';
 
-    public const COL_LEARNER_TASK_SUBMISSION = 'learner_task_submission';
-    public const COL_OBSERVER                = 'observer';
-    public const COL_CHANGE_EXPLAIN          = 'change_explain';
-    public const COL_OBSERVATION_ACCEPTED    = 'observation_accepted';
-    public const COL_TIMEASSIGNED            = 'timeassigned';
-    public const COL_TOKEN                   = 'token';
+    public const COL_LEARNER_SUBMISSIONID = 'learner_submissionid';
+    public const COL_OBSERVERID           = 'observerid';
+    public const COL_CHANGE_EXPLAIN       = 'change_explain';
+    public const COL_OBSERVATION_ACCEPTED = 'observation_accepted';
+    public const COL_TIMEASSIGNED         = 'timeassigned';
+    public const COL_TOKEN                = 'token';
+    public const COL_ACTIVE               = 'active';
 
     /**
      * @var int
      */
-    protected $learner_task_submission;
+    protected $learner_submissionid;
     /**
      * @var int
      */
-    protected $observer;
+    protected $observerid;
     /**
      * optional. used when observer change is requested
      *
@@ -63,4 +64,50 @@ class observer_assignment extends db_model_base
      * @var string
      */
     protected $token;
+    /**
+     * indicates if this is the current assignment for related learner_submission
+     *
+     * @var bool
+     */
+    protected $active;
+}
+
+class observer_assignment extends observer_assignment_base
+{
+    /**
+     * @var observer
+     */
+    private $observer;
+    /**
+     * @var observer_submission
+     */
+    private $observer_submission;
+
+    public function __construct($id_or_record)
+    {
+        parent::__construct($id_or_record);
+
+        $this->observer = new observer($this->observerid);
+
+        $this->observer_submission = observer_submission::read_by_condition(
+            [observer_submission::COL_OBSERVER_ASSIGNMENTID => $this->id],
+            $this->observation_accepted // must exist if observation has been accepted
+        );
+    }
+
+    /**
+     * @return observer
+     */
+    public function get_observer(): observer
+    {
+        return $this->observer;
+    }
+
+    /**
+     * @return observer_submission
+     */
+    public function get_observer_submission(): observer_submission
+    {
+        return $this->observer_submission;
+    }
 }

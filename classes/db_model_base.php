@@ -8,6 +8,7 @@ use dml_exception;
 use dml_missing_record_exception;
 use mod_observation\interfaces\crud;
 use mod_observation\traits\record_mapper;
+use ReflectionException;
 use stdClass;
 
 abstract class db_model_base implements crud
@@ -49,7 +50,14 @@ abstract class db_model_base implements crud
         }
     }
 
-    public function get($prop)
+    /**
+     * Get value for specific property/column in class instance
+     *
+     * @param string $prop property/column name to get value for
+     * @return mixed
+     * @throws coding_exception
+     */
+    public function get(string $prop)
     {
         if (property_exists($this, $this->$prop))
         {
@@ -61,6 +69,16 @@ abstract class db_model_base implements crud
         }
     }
 
+    /**
+     * Set a value for specific property/column in class instance
+     *
+     * @param string $prop property/column name to get value for
+     * @param mixed  $value
+     * @param bool   $save if true, changes will be saved immediately
+     * @return static
+     * @throws coding_exception
+     * @throws dml_exception
+     */
     public function set(string $prop, $value, bool $save = false): self
     {
         if (property_exists($this, $this->$prop))
@@ -92,11 +110,11 @@ abstract class db_model_base implements crud
     }
 
     /**
-     * Null if object not saved
+     * Null if object not saved to db
      *
      * @return int|null
      */
-    public function get_id()
+    public function get_id_or_null()
     {
         return $this->id;
     }
@@ -108,7 +126,7 @@ abstract class db_model_base implements crud
      *
      * @throws dml_exception
      */
-    public static function read_raw(int $id)
+    public static function read_record(int $id)
     {
         global $DB;
 
@@ -125,7 +143,7 @@ abstract class db_model_base implements crud
      */
     public static function read(int $id)
     {
-        if ($record = self::read_raw($id))
+        if ($record = self::read_record($id))
         {
             // overwrite with class instance
             $record = new static($record);
@@ -206,9 +224,71 @@ abstract class db_model_base implements crud
     }
 
     /**
+     * Fetches a single record by provided conditions and instantiates class instance
+     *
+     * @param array $conditions = [string => mixed]
+     * @param bool  $must_exist if true, exception wil be thrown if no record found
+     * @return static
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
+     */
+    protected static function read_by_condition(array $conditions, bool $must_exist = false): self
+    {
+        global $DB;
+
+        // validate criteria // todo validate column as well?
+        if (empty($condition))
+        {
+            throw new coding_exception(sprintf('No conditions provided for %s', __METHOD__));
+        }
+
+        $strictness = $must_exist ? MUST_EXIST : IGNORE_MISSING;
+        return new static($DB->get_record(static::TABLE, $conditions, null, $strictness));
+    }
+
+    /**
+     * Fetches all records that meet provided conditions and instantiates class instances for those records
+     *
+     * @param array $conditions = [string => mixed]
+     * @return static[]
+     * @throws ReflectionException
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    protected static function read_all_by_condition(array $conditions): array
+    {
+        global $DB;
+
+        // validate criteria
+        if (empty($condition))
+        {
+            throw new coding_exception(sprintf('No conditions provided for %s', __METHOD__));
+        }
+
+        $valid = array_filter(
+            (new \ReflectionClass(get_class(__CLASS__)))->getConstants(),
+            function ($const)
+            {
+                return stripos($const, 'COL_') !== false;
+            });
+        foreach ($conditions as $condition)
+        {
+            if (!in_array($condition, $valid))
+            {
+                throw new coding_exception(
+                    sprintf('Cannot filter by non-existent column "%s" in %s', $condition, __CLASS__));
+            }
+        }
+
+        return static::to_class_instances(
+            $DB->get_records(static::TABLE, $conditions));
+    }
+
+    /**
      * Convert array of database records to array of class instances of those records
      *
-     * @param stdClass[] $records db records (bool also accepted)
+     * @param stdClass[]|false $records db records (bool also accepted)
      * @return static[]
      */
     protected static function to_class_instances($records): array
@@ -234,3 +314,22 @@ abstract class db_model_base implements crud
         }
     }
 }
+
+// trait instance_trait
+// {
+//     // public function __construct($id_or_record, $userid = null)
+//     // {
+//     //     parent::__construct($id_or_record);
+//     // }
+//
+//     protected static function read_all_by_condition_and_map(array $criteria, $userid): array
+//     {
+//         $res = [];
+//         foreach (static::read_all_by_condition($criteria) as $rec)
+//         {
+//             $res[] = new static($rec, $userid);
+//         }
+//
+//         return $res;
+//     }
+// }

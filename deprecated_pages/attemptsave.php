@@ -25,7 +25,7 @@
  */
 
 use mod_observation\attempt;
-use mod_observation\observation;
+use mod_observation\observation_base;
 use mod_observation\topic_item;
 
 define('AJAX_SCRIPT', true);
@@ -40,12 +40,12 @@ $observationid       = required_param('bid', PARAM_INT);
 $topicitemid = required_param('id', PARAM_INT);
 $attempttext = required_param('attempttext', PARAM_TEXT);
 
-$observation    = new observation($observationid);
+$observation    = new observation_base($observationid);
 $course = $DB->get_record('course', array('id' => $observation->course), '*', MUST_EXIST);
 $cm     = get_coursemodule_from_instance('observation', $observation->id, $course->id, false, MUST_EXIST);
 
 require_login($course, true, $cm);
-if (!observation::can_evaluate($userid, context_module::instance($cm->id)))
+if (!observation_base::can_evaluate($userid, context_module::instance($cm->id)))
 {
     print_error('access denied');
 }

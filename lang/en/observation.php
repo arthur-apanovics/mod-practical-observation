@@ -43,7 +43,7 @@ $string['observation:evaluateself'] = 'Evaluate self';
 $string['observation:manage'] = 'Manage';
 $string['observation:view'] = 'View';
 
-$string['intro_defaults'] = 'Default instructions';
+$string['intro_defaults'] = 'Instructions';
 $string['intro_assign_observer'] = 'Observer requirements';
 $string['intro_assign_observer_help'] = 'Content to appear on "Assign observer" page for learner.<br>Specify requirements that an observer has to meet for this activity here.';
 $string['default_intro_observer'] = 'Default Observer instructions';

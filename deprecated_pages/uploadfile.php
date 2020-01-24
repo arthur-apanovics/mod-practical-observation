@@ -24,7 +24,7 @@
  * Upload a file to a observation topic item
  */
 
-use mod_observation\observation;
+use mod_observation\observation_base;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/totara/plan/lib.php');
@@ -58,7 +58,7 @@ if (!($observation->allowfileuploads || $observation->allowselffileuploads))
 }
 // Only users with evaluate perm or evaluateself that's also the observation user should be able to upload a file (if config allows)
 // Also allow observation owners to upload files, if configured
-$canevaluate   = observation::can_evaluate($userid, $modcontext);
+$canevaluate   = observation_base::can_evaluate($userid, $modcontext);
 $canselfupload = $observation->allowselffileuploads && $userid == $USER->id;
 if (!($canevaluate || $canselfupload))
 {

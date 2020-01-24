@@ -29,7 +29,7 @@ trait record_mapper
             else if (is_numeric($id_or_record))
             {
                 // id given, fetch from db
-                if ($record = self::read_raw($id_or_record))
+                if ($record = self::read_record($id_or_record))
                 {
                     $this->map_to_record($record);
                 }

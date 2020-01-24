@@ -24,25 +24,25 @@ namespace mod_observation;
 
 use coding_exception;
 
-class assessor_submission extends db_model_base
+class assessor_submission_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_assessor_submission';
 
-    public const COL_ASSESSOR                = 'assessor';
-    public const COL_LEARNER_TASK_SUBMISSION = 'learner_task_submission';
-    public const COL_STATUS                  = 'status';
+    public const COL_ASSESSORID           = 'assessorid';
+    public const COL_LEARNER_SUBMISSIONID = 'learner_submissionid';
+    public const COL_STATUS               = 'status';
 
-    public const STATUS_NOT_COMPLETE              = 'not_complete';
-    public const STATUS_COMPLETE                  = 'complete';
+    public const STATUS_NOT_COMPLETE = 'not_complete';
+    public const STATUS_COMPLETE     = 'complete';
 
     /**
      * @var int
      */
-    protected $assessor;
+    protected $assessorid;
     /**
      * @var int
      */
-    protected $learner_task_submission;
+    protected $learner_submissionid;
     /**
      * ENUM ('requested_new_observation', 'not_complete', 'complete')
      *
@@ -64,5 +64,13 @@ class assessor_submission extends db_model_base
         }
 
         return parent::set($prop, $value, $save);
+    }
+}
+
+class assessor_submission extends assessor_submission_base
+{
+    public function __construct($id_or_record)
+    {
+        parent::__construct($id_or_record);
     }
 }

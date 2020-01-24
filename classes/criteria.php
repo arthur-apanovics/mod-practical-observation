@@ -22,20 +22,18 @@
 
 namespace mod_observation;
 
-use mod_observation;
-
-class criteria extends db_model_base
+class criteria_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_criteria';
 
-    public const COL_TASK               = 'task';
+    public const COL_TASKID             = 'taskid';
     public const COL_DESCRIPTION        = 'description';
     public const COL_DESCRIPTION_FORMAT = 'description_format';
 
     /**
      * @var int
      */
-    protected $task;
+    protected $taskid;
     /**
      * @var string
      */
@@ -44,4 +42,43 @@ class criteria extends db_model_base
      * @var int
      */
     protected $description_format;
+}
+
+// abstract class instance_base extends db_model_base
+// {
+//     public function __construct($id_or_record, int $userid)
+//     {
+//         parent::__construct($id_or_record);
+//     }
+//
+//     protected function map_records(array $records, int $userid): array
+//     {
+//         return array_map(
+//             function ($record) use ($userid)
+//             {
+//                 return new static($record, $userid);
+//             },
+//             static::read_all_by_condition([criteria::COL_TASKID => $this->id])); // <<<< issue!
+//     }
+// }
+
+class criteria extends criteria_base
+{
+    /**
+     * @var observer_feedback[]
+     */
+    private $observer_feedback;
+
+    public function __construct($id_or_record, int $userid)
+    {
+        parent::__construct($id_or_record);
+
+        $this->observer_feedback = array_map(
+            function ($record) use ($userid)
+            {
+                return new observer_feedback($record, $userid);
+            },
+            observer_feedback::read_all_by_condition(
+                [observer_feedback::COL_CRITERIAID => $this->id, $this->observer_feedback]));
+    }
 }

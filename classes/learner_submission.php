@@ -23,13 +23,15 @@
 namespace mod_observation;
 
 use coding_exception;
+use dml_exception;
+use dml_missing_record_exception;
 
-class learner_submission extends db_model_base
+class learner_submission_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_learner_submission';
 
-    public const COL_USER          = 'user';
-    public const COL_TASK          = 'task';
+    public const COL_USERID        = 'userid';
+    public const COL_TASKID        = 'taskid';
     public const COL_STATUS        = 'status';
     public const COL_TIMESTARTED   = 'timestarted';
     public const COL_TIMECOMPLETED = 'timecompleted';
@@ -47,11 +49,11 @@ class learner_submission extends db_model_base
     /**
      * @var int
      */
-    protected $user;
+    protected $userid;
     /**
      * @var int
      */
-    protected $task; // fk user
+    protected $taskid;
     /**
      * ENUM ('not_started', 'learner_in_progress', 'observation_pending', 'observation_in_progress',
      * 'observation_incomplete', 'assessment_pending', 'assessment_in_progress', 'assessment_incomplete', 'complete')
@@ -90,6 +92,116 @@ class learner_submission extends db_model_base
                     sprintf("'$value' is not a valid value for '%s' in '%s'", self::COL_STATUS, __CLASS__));
             }
         }
+
         return parent::set($prop, $value, $save);
+    }
+
+    // /**
+    //  * @param int $id observation id
+    //  * @param int $userid
+    //  * @param int $taskid
+    //  * @return learner_submission_base[]
+    //  * @throws \dml_exception
+    //  */
+    // public static function get_submissions(int $id, int $userid = null, int $taskid = null): array
+    // {
+    //     // TODO check for multiple records if taskid provided and throw
+    //     return self::read_all_by_condition(
+    //         [self::COL_ID => $id, self::COL_USERID => $userid, self::COL_TASKID => $taskid]);
+    // }
+}
+
+class learner_submission extends learner_submission_base
+{
+    /**
+     * @var learner_attempt[]
+     */
+    private $learner_attempts;
+    /**
+     * @var observer_assignment[]
+     */
+    private $observer_assignments;
+    /**
+     * @var assessor_submission
+     */
+    private $assessor_submission;
+
+    public function __construct($id_or_record, int $userid)
+    {
+        parent::__construct($id_or_record);
+
+        $this->learner_attempts = array_map(
+            function ($record) use ($userid)
+            {
+                return new learner_attempt($record, $userid);
+            },
+            learner_attempt::read_all_by_condition([learner_attempt::COL_LEARNER_SUBMISSIONID => $this->id]));
+
+        $this->observer_assignments = array_map(
+            function ($record) use ($userid)
+            {
+                return new observer_assignment($record);
+            },
+            observer_assignment::read_all_by_condition([observer_assignment::COL_LEARNER_SUBMISSIONID => $this->id]));
+
+        $this->assessor_submission = assessor_submission::read_by_condition(
+            [assessor_submission::COL_LEARNER_SUBMISSIONID => $this->id],
+            $this->is_observation_complete() // must exist if observation complete
+        );
+    }
+
+    public function is_observation_complete(bool $validate = false)
+    {
+        $result = false;
+
+        if ($validate)
+        {
+            if ($observer_assignment = self::get_active_observer_assignment_or_null($this->id))
+            {
+                $observer_feedback = $observer_assignment->get_observer_submission()->get_observer_feedback();
+
+
+                foreach ($observer_feedback as $feedback)
+                {
+
+                }
+
+                throw //TODO HERE!
+            }
+        }
+        else
+        {
+            $complete_statuses = [
+                self::STATUS_ASSESSMENT_PENDING,
+                self::STATUS_ASSESSMENT_IN_PROGRESS,
+                self::STATUS_ASSESSMENT_INCOMPLETE,
+            ];
+
+            $result =  in_array($this->status, $complete_statuses);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Fetches currently active observer assignment or null if one does not exist
+     *
+     * @param int $learner_submissionid
+     * @return observer_assignment|null null if no record found
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
+     * @throws coding_exception
+     */
+    public static function get_active_observer_assignment_or_null(int $learner_submissionid)
+    {
+        $assignment = observer_assignment::read_by_condition(
+            [
+                observer_assignment::COL_LEARNER_SUBMISSIONID => $learner_submissionid,
+                observer_assignment::COL_ACTIVE               => true
+            ]);
+
+        return !empty($assignment->id)
+            ? $assignment
+            : null;
     }
 }

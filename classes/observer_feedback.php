@@ -24,14 +24,14 @@ namespace mod_observation;
 
 use coding_exception;
 
-class observer_feedback extends db_model_base
+class observer_feedback_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_observer_criteria_feedback';
 
-    public const COL_ATTEMPT             = 'attempt';
-    public const COL_CRITERIA            = 'criteria';
-    public const COL_OBSERVER_SUBMISSION = 'observer_submission';
-    public const COL_STATUS              = 'status';
+    public const COL_ATTEMPTID           = 'attemptid';
+    public const COL_CRITERIAID            = 'criteriaid';
+    public const COL_OBSERVER_SUBMISSIONID = 'observer_submissionid';
+    public const COL_STATUS                = 'status';
     public const COL_TEXT                = 'text';
     public const COL_TEXT_FORMAT         = 'text_format';
 
@@ -41,15 +41,15 @@ class observer_feedback extends db_model_base
     /**
      * @var int
      */
-    protected $attempt;
+    protected $attemptid;
     /**
      * @var int
      */
-    protected $criteria;
+    protected $criteriaid;
     /**
      * @var int
      */
-    protected $observer_submission;
+    protected $observer_submissionid;
     /**
      * ENUM ('not_complete', 'complete')
      *
@@ -79,5 +79,13 @@ class observer_feedback extends db_model_base
         }
 
         return parent::set($prop, $value, $save);
+    }
+}
+
+class observer_feedback extends observer_feedback_base
+{
+    public function __construct($id_or_record, int $userid)
+    {
+        parent::__construct($id_or_record);
     }
 }

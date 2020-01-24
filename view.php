@@ -26,8 +26,8 @@
  */
 
 use mod_observation\event\course_module_viewed;
+use mod_observation\observation_base;
 use mod_observation\observation;
-use mod_observation\observation_instance;
 use mod_observation\user_observation;
 
 // TODO: THIS WHOLE PAGE!!!
@@ -48,7 +48,7 @@ $event->add_record_snapshot('course', $PAGE->course);
 $event->add_record_snapshot($PAGE->cm->modname, $observation->get_record_from_object());
 $event->trigger();
 
-$observation = new observation_instance($cm);
+$observation = new observation($cm);
 
 // Print the page header.
 $PAGE->set_url('/mod/observation/view.php', array('id' => $cm->id));

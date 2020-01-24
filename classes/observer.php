@@ -22,9 +22,7 @@
 
 namespace mod_observation;
 
-use mod_observation;
-
-class observer extends db_model_base
+class observer_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_observer';
 
@@ -49,4 +47,12 @@ class observer extends db_model_base
      * @var string
      */
     protected $position_title;
+}
+
+class observer extends observer_base
+{
+    public function __construct($id_or_record)
+    {
+        parent::__construct($id_or_record);
+    }
 }

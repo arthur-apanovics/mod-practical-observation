@@ -47,14 +47,14 @@
  *
  */
 
-use mod_observation\observation;
+use mod_observation\observation_base;
 
 defined('MOODLE_INTERNAL') || die();
 
 // Modify capabilities as needed and remove this comment.
 $capabilities = array(
     /*'mod/observation:addinstance'*/
-    observation::CAP_ADDINSTANCE     => array(
+    observation_base::CAP_ADDINSTANCE     => array(
         'riskbitmask'          => RISK_XSS,
         'captype'              => 'write',
         'contextlevel'         => CONTEXT_COURSE,
@@ -66,7 +66,7 @@ $capabilities = array(
     ),
 
     /*'mod/observation:view'*/
-    observation::CAP_VIEW            => array(
+    observation_base::CAP_VIEW            => array(
         'captype'      => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes'   => array(
@@ -78,7 +78,7 @@ $capabilities = array(
     ),
 
     /*'mod/observation:submit'*/
-    observation::CAP_SUBMIT          => array(
+    observation_base::CAP_SUBMIT          => array(
         'captype'      => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes'   => array(
@@ -87,7 +87,7 @@ $capabilities = array(
     ),
 
     /*'mod/observation:viewsubmissions'*/
-    observation::CAP_VIEWSUBMISSIONS => array(
+    observation_base::CAP_VIEWSUBMISSIONS => array(
         'riskbitmask'  => RISK_SPAM,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -98,7 +98,7 @@ $capabilities = array(
     ),
 
     /*'mod/observation:assess'*/
-    observation::CAP_ASSESS          => array(
+    observation_base::CAP_ASSESS          => array(
         'riskbitmask'  => RISK_SPAM,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -109,7 +109,7 @@ $capabilities = array(
     ),
 
     /*'mod/observation:manage'*/
-    observation::CAP_MANAGE          => array(
+    observation_base::CAP_MANAGE          => array(
         'riskbitmask'  => RISK_XSS,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,

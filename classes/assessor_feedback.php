@@ -24,19 +24,19 @@ namespace mod_observation;
 
 use mod_observation;
 
-class assessor_feedback extends db_model_base
+class assessor_feedback_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_assessor_feedback';
 
-    public const COL_ASSESSOR_TASK_SUBMISSION = 'assessor_task_submission';
-    public const COL_TEXT                     = 'text';
-    public const COL_TEXT_FORMAT              = 'text_format';
-    public const COL_TIMESUBMITTED            = 'timesubmitted';
+    public const COL_ASSESSOR_SUBMISSIONID = 'assessor_submissionid';
+    public const COL_TEXT                  = 'text';
+    public const COL_TEXT_FORMAT           = 'text_format';
+    public const COL_TIMESUBMITTED         = 'timesubmitted';
 
     /**
      * @var int
      */
-    protected $assessor_task_submission;
+    protected $assessor_submissionid;
     /**
      * @var string
      */

@@ -26,7 +26,7 @@
 
 use mod_observation\email_assignment;
 use mod_observation\item_witness;
-use mod_observation\observation;
+use mod_observation\observation_base;
 use mod_observation\topic;
 use mod_observation\user_topic_item;
 
@@ -98,7 +98,7 @@ $topiccompletion = topic::update_topic_completion($userid, $observationid, $topi
 
 $transaction->allow_commit();
 
-$modifiedstr = observation::get_modifiedstr_user($topicitem->witness->timewitnessed);
+$modifiedstr = observation_base::get_modifiedstr_user($topicitem->witness->timewitnessed);
 
 $jsonparams = array(
     'item'        => $topicitem->witness,

@@ -22,18 +22,22 @@
 
 namespace mod_observation;
 
-class observer_submission extends db_model_base
+use coding_exception;
+use dml_exception;
+use ReflectionException;
+
+class observer_submission_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_observer_submission';
 
-    public const COL_OBSERVER_ASSIGNMENT = 'observer_assignment';
-    public const COL_TIMESTARTED         = 'timestarted';
-    public const COL_TIMESUBMITTED       = 'timesubmitted';
+    public const COL_OBSERVER_ASSIGNMENTID = 'observer_assignmentid';
+    public const COL_TIMESTARTED           = 'timestarted';
+    public const COL_TIMESUBMITTED         = 'timesubmitted';
 
     /**
      * @var int
      */
-    protected $observer_assignment;
+    protected $observer_assignmentid;
     /**
      * @var int
      */
@@ -42,4 +46,35 @@ class observer_submission extends db_model_base
      * @var int
      */
     protected $timesubmitted;
+}
+
+class observer_submission extends observer_submission_base
+{
+    /* NOTE: observer_feedback is attached to criteria class */
+
+    // /**
+    //  * @var observer_feedback[]
+    //  */
+    // private $observer_feedback;
+
+    public function __construct($id_or_record)
+    {
+        parent::__construct($id_or_record);
+
+        // $this->observer_feedback =
+        //     observer_feedback::read_all_by_condition([observer_feedback::COL_OBSERVER_SUBMISSIONID => $this->id]);
+    }
+
+    /**
+     * Fetches observer feedback from database
+     *
+     * @return observer_feedback[]
+     * @throws ReflectionException
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public function get_observer_feedback(): array
+    {
+        return observer_feedback::read_all_by_condition([observer_feedback::COL_OBSERVER_SUBMISSIONID => $this->id]);
+    }
 }

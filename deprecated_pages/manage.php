@@ -20,7 +20,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_observation\observation;
+use mod_observation\observation_base;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/lib.php');
@@ -29,7 +29,7 @@ require_once(dirname(__FILE__) . '/locallib.php');
 $id = optional_param('cmid', 0, PARAM_INT); // Course_module ID
 $b  = optional_param('b', 0, PARAM_INT);  // Observation instance ID
 
-list($observation, $course, $cm) = observation_check_page_id_params_and_init($id, $b); /* @var $observation observation */
+list($observation, $course, $cm) = observation_check_page_id_params_and_init($id, $b); /* @var $observation observation_base */
 
 require_login($course, true, $cm);
 require_capability('mod/observation:manage', context_module::instance($cm->id));

@@ -26,7 +26,7 @@
  */
 
 use mod_observation\completion;
-use mod_observation\observation;
+use mod_observation\observation_base;
 use mod_observation\user_observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -40,12 +40,12 @@ $b      = optional_param('bid', 0, PARAM_INT);  // ... observation instance ID -
 
 $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
 
-list($observation, $course, $cm) = observation_check_page_id_params_and_init($id, $b); /* @var $observation observation */
+list($observation, $course, $cm) = observation_check_page_id_params_and_init($id, $b); /* @var $observation observation_base */
 
 require_login($course, true, $cm);
 
 $modcontext  = context_module::instance($cm->id);
-$canevaluate = observation::can_evaluate($userid, $modcontext);
+$canevaluate = observation_base::can_evaluate($userid, $modcontext);
 $cansignoff  = has_capability('mod/observation:signoff', $modcontext);
 $canwitness  = has_capability('mod/observation:witnessitem', $modcontext);
 if (!($canevaluate || $cansignoff || $canwitness))

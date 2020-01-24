@@ -32,7 +32,7 @@
  * Moodle is performing actions across all modules.
  */
 
-use mod_observation\observation;
+use mod_observation\observation_base;
 use totara_job\job_assignment;
 
 defined('MOODLE_INTERNAL') || die();
@@ -85,9 +85,9 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
     global $USER;
 
     $time        = time();
-    $observation = new observation();
+    $observation = new observation_base();
 
-    $observation->set(observation::COL_TIMECREATED, $time);
+    $observation->set(observation_base::COL_TIMECREATED, $time);
     $observation->set($observation::COL_TIMEMODIFIED, $time);
     $observation->set($observation::COL_LASTMODIFIEDBY, $USER->id);
 
@@ -95,7 +95,7 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
 
     $observation->create();
 
-    return $observation->get_id();//todo test if create() updated object reference
+    return $observation->get_id_or_null();//todo test if create() updated object reference
 }
 
 /**
@@ -115,9 +115,9 @@ function observation_update_instance(stdClass $observation, mod_observation_mod_
 {
     global $USER;
 
-    $observation = new observation($observation);
-    $observation->set(observation::COL_TIMEMODIFIED, time());
-    $observation->set(observation::COL_LASTMODIFIEDBY, $USER->id);
+    $observation = new observation_base($observation);
+    $observation->set(observation_base::COL_TIMEMODIFIED, time());
+    $observation->set(observation_base::COL_LASTMODIFIEDBY, $USER->id);
     // $observation->id             = $observation->instance; // ?!
 
     // You may have to add extra stuff in here.
@@ -141,7 +141,7 @@ function observation_delete_instance($id)
 {
     try
     {
-        $observation = new observation($id);
+        $observation = new observation_base($id);
     }
     catch (dml_missing_record_exception $ex)
     {
@@ -206,11 +206,11 @@ function observation_user_complete($course, $user, $mod, $observation)
  */
 function observation_get_completion_requirements($cm)
 {
-    $observation = new observation($cm->instance);
+    $observation = new observation_base($cm->instance);
 
     $result = array();
 
-    if ($observation->get(observation::COL_COMPLETIONTOPICS))
+    if ($observation->get(observation_base::COL_COMPLETIONTOPICS))
     {
         $result[] = get_string('completiontopics', 'observation');
     }
@@ -230,11 +230,11 @@ function observation_get_completion_requirements($cm)
 function observation_get_completion_progress($cm, $userid)
 {
     // Get observation details.
-    $observation = new observation($cm->instance);
+    $observation = new observation_base($cm->instance);
 
     $result = array();
 
-    if ($observation->get(observation::COL_COMPLETIONTOPICS))
+    if ($observation->get(observation_base::COL_COMPLETIONTOPICS))
     {
         if ($observation->is_activity_complete())
         {
@@ -262,10 +262,10 @@ function observation_get_completion_progress($cm, $userid)
 function observation_get_completion_state($course, $cm, $userid, $type)
 {
     // Get observation.
-    $observation = new observation($cm->instance);
+    $observation = new observation_base($cm->instance);
 
     // This means that if only view is required we don't end up with a false state.
-    if (empty($observation->get(observation::COL_COMPLETIONTOPICS)))
+    if (empty($observation->get(observation_base::COL_COMPLETIONTOPICS)))
     {
         return $type;
     }
@@ -350,9 +350,9 @@ function observation_get_file_areas($course, $cm, $context)
 {
     $areas = [];
 
-    $areas[observation::FILE_AREA_TRAINEE]  = get_string(observation::FILE_AREA_TRAINEE, OBSERVATION);
-    $areas[observation::FILE_AREA_OBSERVER] = get_string(observation::FILE_AREA_OBSERVER, OBSERVATION);
-    $areas[observation::FILE_AREA_ASSESSOR] = get_string(observation::FILE_AREA_ASSESSOR, OBSERVATION);
+    $areas[observation_base::FILE_AREA_TRAINEE]  = get_string(observation_base::FILE_AREA_TRAINEE, OBSERVATION);
+    $areas[observation_base::FILE_AREA_OBSERVER] = get_string(observation_base::FILE_AREA_OBSERVER, OBSERVATION);
+    $areas[observation_base::FILE_AREA_ASSESSOR] = get_string(observation_base::FILE_AREA_ASSESSOR, OBSERVATION);
 
     return $areas;
 }
@@ -395,7 +395,7 @@ function observation_get_file_info(
         ? '.'
         : $file_name;
 
-    if ($file_area === observation::FILE_AREA_INTRO)
+    if ($file_area === observation_base::FILE_AREA_INTRO)
     {
         if (!has_capability('moodle/course:managefiles', $context))
         {
@@ -448,7 +448,7 @@ function observation_pluginfile(
     require_login($course, true, $cm);
 
     $user_id = $args[0];
-    if (!(has_capability(observation::CAP_MANAGE, $context) || $user_id == $USER->id))
+    if (!(has_capability(observation_base::CAP_MANAGE, $context) || $user_id == $USER->id))
     {
         // Only evaluators and/or owners have access to files
         return false;

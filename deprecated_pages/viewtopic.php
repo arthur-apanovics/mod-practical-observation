@@ -26,7 +26,7 @@
  */
 
 use mod_observation\event\course_module_viewed;
-use mod_observation\observation;
+use mod_observation\observation_base;
 use mod_observation\user_observation;
 use mod_observation\user_topic;
 
@@ -39,7 +39,7 @@ $id      = optional_param('id', 0, PARAM_INT); // Course_module ID, or
 $b       = optional_param('n', 0, PARAM_INT);  // observation instance ID.
 $topicid = optional_param('topic', 0, PARAM_INT); // Topic id
 
-list($observation, $course, $cm) = observation_check_page_id_params_and_init($id, $b); /* @var $observation observation */
+list($observation, $course, $cm) = observation_check_page_id_params_and_init($id, $b); /* @var $observation observation_base */
 
 require_login($course, true, $cm);
 
