@@ -68,7 +68,5 @@ class learner_attempt extends learner_attempt_base
     public function __construct($id_or_record, int $userid)
     {
         parent::__construct($id_or_record);
-
-
     }
 }

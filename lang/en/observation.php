@@ -44,12 +44,12 @@ $string['observation:manage'] = 'Manage';
 $string['observation:view'] = 'View';
 
 $string['intro_defaults'] = 'Instructions';
-$string['intro_assign_observer'] = 'Observer requirements';
+$string['intro_assign_observer'] = 'Observer requirements (learner)';
 $string['intro_assign_observer_help'] = 'Content to appear on "Assign observer" page for learner.<br>Specify requirements that an observer has to meet for this activity here.';
-$string['default_intro_observer'] = 'Default Observer instructions';
-$string['default_intro_observer_help'] = 'If set, this will be the default Observer instruction for all new Tasks.<br>Use this to include content that applies to all Tasks or if instructions are the same for all Tasks.<br>Note: the default instruction can still be fully edited for each topic.';
-$string['default_intro_assessor'] = 'Default Assessor instructions';
-$string['default_intro_assessor_help'] = 'If set, this will be the default Assessor instruction for all new Tasks.<br>Use this to include content that applies to all Tasks or if instructions are the same for all Tasks.<br>Note: the default instruction can still be fully edited for each topic.';
+$string['default_intro_observer'] = 'Default task instructions - Observer';
+$string['default_intro_observer_help'] = 'If set, this will be the default Observer instruction for all new Tasks.<br>Use this to include content that applies to all Tasks or if instructions are the same for all Tasks.<br>Note: the default instruction can still be fully edited for each task.';
+$string['default_intro_assessor'] = 'Default task instructions - Assessor';
+$string['default_intro_assessor_help'] = 'If set, this will be the default Assessor instruction for all new Tasks.<br>Use this to include content that applies to all Tasks or if instructions are the same for all Tasks.<br>Note: the default instruction can still be fully edited for each task.';
 $string['completion_tasks'] = 'All Tasks are observed and complete';
 
 // $string['observationfieldset'] = 'Custom example fieldset';

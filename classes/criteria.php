@@ -29,6 +29,7 @@ class criteria_base extends db_model_base
     public const COL_TASKID             = 'taskid';
     public const COL_DESCRIPTION        = 'description';
     public const COL_DESCRIPTION_FORMAT = 'description_format';
+    public const COL_ORDER              = 'order';
 
     /**
      * @var int
@@ -42,25 +43,13 @@ class criteria_base extends db_model_base
      * @var int
      */
     protected $description_format;
+    /**
+     * sequence number in task
+     *
+     * @var int
+     */
+    protected $order;
 }
-
-// abstract class instance_base extends db_model_base
-// {
-//     public function __construct($id_or_record, int $userid)
-//     {
-//         parent::__construct($id_or_record);
-//     }
-//
-//     protected function map_records(array $records, int $userid): array
-//     {
-//         return array_map(
-//             function ($record) use ($userid)
-//             {
-//                 return new static($record, $userid);
-//             },
-//             static::read_all_by_condition([criteria::COL_TASKID => $this->id])); // <<<< issue!
-//     }
-// }
 
 class criteria extends criteria_base
 {

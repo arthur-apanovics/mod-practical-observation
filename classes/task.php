@@ -33,6 +33,7 @@ class task_base extends db_model_base
     public const COL_INTRO_OBSERVER_FORMAT = 'intro_observer_format';
     public const COL_INTRO_ASSESSOR        = 'intro_assessor';
     public const COL_INTRO_ASSESSOR_FORMAT = 'intro_assessor_format';
+    public const COL_ORDER                 = 'order';
 
     /**
      * @var int
@@ -50,6 +51,12 @@ class task_base extends db_model_base
      * @var string
      */
     protected $intro_assessor;
+    /**
+     * sequence number in activity
+     *
+     * @var int
+     */
+    protected $order;
 }
 
 class task extends task_base

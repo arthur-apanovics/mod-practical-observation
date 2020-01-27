@@ -138,60 +138,10 @@ class observation extends observation_base
      * @var cm_info
      */
     private $cm;
-
-    // task related
     /**
-     * @var task_base[]
+     * @var task[]
      */
     private $tasks;
-    /**
-     * @var criteria_base[]
-     */
-    private $criterias;
-
-    // learner related
-    /**
-     * @var learner_submission_base[]
-     */
-    private $learner_submissions;
-    /**
-     * @var learner_attempt_base[]
-     */
-    private $learner_attempts;
-
-    // observer related
-    /**
-     * @var observer_base[]
-     */
-    private $observers;
-    /**
-     * @var observer_assignment_base[]
-     */
-    private $observer_assignments;
-    /**
-     * @var observer_submission_base[]
-     */
-    private $observer_submissions;
-    /**
-     * @var observer_feedback_base[]
-     */
-    private $observer_feedbacks;
-
-    // assessor related
-    /**
-     * @var assessor_submission_base[]
-     */
-    private $assessor_submissions;
-    /**
-     * @var assessor_feedback_base[]
-     */
-    private $assessor_feedbacks;
-
-    // GETTERS:
-
-    // TODO
-
-    // CLASS METHODS:
 
     /**
      * observation_instance constructor.
@@ -202,31 +152,19 @@ class observation extends observation_base
      * @throws dml_missing_record_exception
      * @throws coding_exception
      * @throws dml_exception
+     * @throws \ReflectionException
      */
     public function __construct(cm_info $course_module, int $userid = null, int $taskid = null)
     {
         $this->cm = $course_module;
         parent::__construct($this->cm->instance);
 
-        $instanceid = $this->cm->instance;
-
         $this->tasks = array_map(
             function ($record) use ($userid)
             {
                 return new task($record, $userid);
             },
-            task::read_all_by_condition([task::COL_OBSERVATIONID => $instanceid]));
-
-        // $this->learner_submissions = learner_submission::get_submissions($instanceid, $userid, $taskid);
-        // $this->learner_attempts = learner_attempt::get_attempts($instanceid, $userid, $taskid);
-        //
-        // $this->observers = observer::get_observers($instanceid, $userid, $taskid);
-        // $this->observer_assignments = observer_assignment::get_assignments($instanceid, $userid, $taskid);
-        // $this->observer_submissions = observer_submission::get_submissions($instanceid, $userid, $taskid);
-        // $this->observer_feedbacks = observer_feedback::get_feedback($instanceid, $userid, $taskid);
-        //
-        // $this->assessor_submissions = assessor_submission::get_submissions($instanceid, $userid, $taskid);
-        // $this->assessor_feedbacks = assessor_feedback::get_feedback($instanceid, $userid, $taskid);
+            task::read_all_by_condition([task::COL_OBSERVATIONID => $this->cm->instance]));
     }
 
     /**
