@@ -7,20 +7,28 @@
   </p>
 </div>
 
-<h5>Completion criteria</h5>
+<h5>Completion observations</h5>
 <div class="wrapper-task">
   <ol>
     {{> mod_observation/comp_completion_criteria}}
+    {{> mod_observation/comp_mark_criteria}}
     {{> mod_observation/comp_completion_criteria}}
-    {{> mod_observation/comp_completion_criteria}}  
+    {{> mod_observation/comp_feedback_attempt}}
+    {{> mod_observation/comp_completion_criteria}} 
+     {{> mod_observation/comp_feedback_attempt}} 
   </ol>
 </div>
 
-<h5>Attempts</h5>
+<h5>Information and evidence from the trainee</h5>
 <div class="wrapper-task">
+  <p class="flex-criteria">
+    <span class="observer-note">Observer assigned - joe@blogs.com</span>
+  </p>
   <h5 class="attempt">Attempt #1</h5>
+  {{> mod_observation/comp_show_evidence}}
+  <h5 class="attempt">Attempt #2</h5>
   <div class="editor">editor goes here</div>
 </div>
-<div class="button-wrapper">
+<div class="request-button-wrapper">
   <button class="button">Request observation</button>
 </div>

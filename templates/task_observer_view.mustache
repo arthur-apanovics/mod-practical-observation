@@ -1,42 +1,54 @@
 <div class="wrapper-title">
   <h3 class="title-main-task">Assign an observer for "Task Three"</h3>
   <p class="flex-title-task">
-    <span class="title-desc-task">Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
+    <span class="title-desc-task"><b>Message to display when learner is assigning an observer.&nbsp;</b>Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
     Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
     </span>
   </p>
 </div>
 <h5>Assign from history</h5>
-<table class="table">
-    <tr>
+<table class="table" id="observer-table">
+    <thead>
         <th>Name</th>
-        <th>Observed topics</th>
         <th></th>
-    </tr>
-    <tr>     
-        <td>bruce@wayne.com</td>
-        <td>1</td>
-        <td><a href="#">Assign</td>
-    </tr>
+    </thead>
+    <tbody>
+        <tr data-fullname="joe" data-phone="1234567" data-email="joe@blogs.com" data-postion="software dev">     
+            <td>joe@blogs.com {{#is_current}}<i>(current observer)</i>{{/is_current}}</td>
+            <td><a href="javascript:void(0);" class="assign">Assign</td>
+        </tr>
+        <tr data-fullname="bruce" data-phone="3456789" data-email="bruce@blogs.com" data-postion="dev">     
+            <td>bruce@wayne.com</td>
+            <td><a href="javascript:void(0);" class="assign">Assign</td>
+        </tr>
+    </tbody>
 </table>
-<h5>New observer</h5>
-<div class="wrapper">
-  <form class="myForm">
+<h5>Assign observer</h5>
+<div class="wrapper-title">
+  <form class="myForm" id="observer" name="observer">
         <div class="obs-contact">
             <label for="name">Full name</label>
-            <input type="text" id="name" placeholder="Joe">
+            <input type="text" id="name" value="">
         </div>
         <div class="obs-contact">
             <label for="phone">Phone</label>
-            <input type="tel" id="phone" placeholder="123456789">
+            <input type="tel" id="phone" value="">
         </div>
         <div class="obs-contact">
             <label for="email">Email</label>
-            <input type="email" id="email" placeholder="joe@blogs.com">
+            <input type="email" id="email">
         </div>
         <div class="obs-contact">
             <label for="position">Position title</label>
-            <input type="text" id="position" placeholder="Supervisor">
+            <input type="text" id="position">
+        </div>
+        <div class="obs-contact">
+            <label for="message">Message to observer</label>
+            <textarea id="message" name="message" placeholder="Optional message to appear in observer email." cols="142" style="height:100px; width:94%"></textarea>        
+        </div>
+        <div class="send-button-wrapper">
+            <button class="button">Send</button>
         </div>
     </form>
+    <form>
 </div>
