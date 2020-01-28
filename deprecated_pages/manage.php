@@ -20,50 +20,39 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/**
- * Prints a particular instance of observation for the current user.
- *
- */
-
-use mod_observation\event\course_module_viewed;
 use mod_observation\observation_base;
-use mod_observation\observation;
-use mod_observation\user_observation;
-
-// TODO: THIS WHOLE PAGE!!!
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once(dirname(__FILE__) . '/lib.php');
+require_once(dirname(__FILE__) . '/locallib.php');
 
-$id = optional_param('id', 0, PARAM_INT); // instance id
+$id = optional_param('cmid', 0, PARAM_INT); // Course_module ID
+$b  = optional_param('b', 0, PARAM_INT);  // Observation instance ID
 
-list($course, $cm) = get_course_and_cm_from_instance($id, OBSERVATION);
+list($observation, $course, $cm) = observation_check_page_id_params_and_init($id, $b); /* @var $observation observation_base */
 
 require_login($course, true, $cm);
-
-$event = course_module_viewed::create(array(
-    'objectid' => $PAGE->cm->instance,
-    'context'  => $PAGE->context,
-));
-$event->add_record_snapshot('course', $PAGE->course);
-$event->add_record_snapshot($PAGE->cm->modname, $observation->get_record_from_object());
-$event->trigger();
-
-$observation = new observation($cm);
+require_capability('mod/observation:manage', context_module::instance($cm->id));
 
 // Print the page header.
 $PAGE->set_url('/mod/observation/view.php', array('id' => $cm->id));
-$PAGE->set_title(format_string($observation->name));
-$PAGE->set_heading(format_string($course->fullname));
+$PAGE->set_title(format_string($course->fullname));
+$PAGE->set_heading(format_string($observation->name) . ' - ' . get_string('manage', 'observation'));
 
 // Output starts here.
 echo $OUTPUT->header();
 
-echo $OUTPUT->heading(format_string($observation->name));
+// Replace the following lines with you own code.
+echo $OUTPUT->heading($PAGE->heading);
 
+$addtopicurl = new moodle_url('/mod/observation/topic.php', array('bid' => $observation->id));
+echo html_writer::tag('div', $OUTPUT->single_button($addtopicurl, get_string('addtopic', 'observation')),
+    array('class' => 'mod-observation-topic-addbtn'));
+
+$topics   = $DB->get_records('observation_topic', array('observationid' => $observation->id));
 /* @var $renderer mod_observation_renderer */
-$renderer = $PAGE->get_renderer('observation');
-
-// TODO: Manage tasks button
+$renderer = $PAGE->get_renderer('mod_observation');
+echo $renderer->config_topics($observation);
 
 // Finish the page.
 echo $OUTPUT->footer();

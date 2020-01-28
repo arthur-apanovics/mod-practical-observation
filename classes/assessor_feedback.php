@@ -20,19 +20,33 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/**
- * Defines the version and other meta-info about the plugin
- *
- * Setting the $plugin->version to 0 prevents the plugin from being installed.
- * See https://docs.moodle.org/dev/version.php for more info.
- */
+namespace mod_observation;
 
-defined('MOODLE_INTERNAL') || die();
+use mod_observation;
 
-$plugin->component    = 'mod_observation';
-$plugin->version      = 2017101806;
-$plugin->release      = 'v0.1';
-$plugin->requires     = 2015111606.00;
-$plugin->maturity     = MATURITY_ALPHA;
-$plugin->cron         = 900;
-$plugin->dependencies = array();
+class assessor_feedback_base extends db_model_base
+{
+    public const TABLE = OBSERVATION . '_assessor_feedback';
+
+    public const COL_ASSESSOR_SUBMISSIONID = 'assessor_submissionid';
+    public const COL_TEXT                  = 'text';
+    public const COL_TEXT_FORMAT           = 'text_format';
+    public const COL_TIMESUBMITTED         = 'timesubmitted';
+
+    /**
+     * @var int
+     */
+    protected $assessor_submissionid;
+    /**
+     * @var string
+     */
+    protected $text;
+    /**
+     * @var int
+     */
+    protected $text_format;
+    /**
+     * @var int
+     */
+    protected $timesubmitted;
+}

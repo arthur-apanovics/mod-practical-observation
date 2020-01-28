@@ -21,8 +21,8 @@
  * @package totara_feedback360
  */
 
-use mod_observation\models\email_assignment;
-use mod_observation\models\external_request;
+use mod_observation\email_assignment;
+use mod_observation\external_request;
 use mod_observation\user_observation;
 
 require_once(__DIR__ . '/../../config.php');

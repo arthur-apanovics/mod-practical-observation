@@ -47,11 +47,14 @@
  *
  */
 
+use mod_observation\observation_base;
+
 defined('MOODLE_INTERNAL') || die();
 
 // Modify capabilities as needed and remove this comment.
 $capabilities = array(
-    'mod/observation:addinstance' => array(
+    /*'mod/observation:addinstance'*/
+    observation_base::CAP_ADDINSTANCE     => array(
         'riskbitmask'          => RISK_XSS,
         'captype'              => 'write',
         'contextlevel'         => CONTEXT_COURSE,
@@ -62,10 +65,11 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
 
-    'mod/observation:view' => array(
+    /*'mod/observation:view'*/
+    observation_base::CAP_VIEW            => array(
         'captype'      => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy'       => array(
+        'archetypes'   => array(
             'student'        => CAP_ALLOW,
             'teacher'        => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
@@ -73,45 +77,44 @@ $capabilities = array(
         )
     ),
 
-    'mod/observation:evaluate' => array(
-        'riskbitmask'  => RISK_SPAM,
-        'captype'      => 'write',
+    /*'mod/observation:submit'*/
+    observation_base::CAP_SUBMIT          => array(
+        'captype'      => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy'       => array(
-            'editingteacher' => CAP_ALLOW,
-            'manager'        => CAP_ALLOW
+        'archetypes'   => array(
+            'student' => CAP_ALLOW,
         )
     ),
 
-    'mod/observation:evaluateself' => array(
-        'captype'      => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'legacy'       => array()
-    ),
-
-    'mod/observation:signoff' => array(
+    /*'mod/observation:viewsubmissions'*/
+    observation_base::CAP_VIEWSUBMISSIONS => array(
         'riskbitmask'  => RISK_SPAM,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy'       => array(
+        'archetypes'   => array(
+            'teacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         )
     ),
 
-    'mod/observation:manage'      => array(
+    /*'mod/observation:assess'*/
+    observation_base::CAP_ASSESS          => array(
+        'riskbitmask'  => RISK_SPAM,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes'   => array(
+            'teacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+
+    /*'mod/observation:manage'*/
+    observation_base::CAP_MANAGE          => array(
         'riskbitmask'  => RISK_XSS,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy'       => array(
+        'archetypes'   => array(
             'editingteacher' => CAP_ALLOW,
-        )
-    ),
-    'mod/observation:witnessitem' => array(
-        'riskbitmask'  => RISK_SPAM,
-        'captype'      => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'legacy'       => array(
-            'manager' => CAP_ALLOW
         )
     ),
 );

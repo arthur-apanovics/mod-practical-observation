@@ -22,8 +22,6 @@
 
 global $CFG;
 
-use mod_observation\models\completion;
-
 require_once($CFG->dirroot . '/totara/reportbuilder/classes/rb_base_content.php');
 
 # Include the observation rb source, to ensure all default settings get created upon report creation
@@ -85,7 +83,7 @@ class rb_observation_evaluation_embedded extends rb_base_embedded
         $this->contentsettings = array(
             'observation_completion_type' => array(
                 'enable'         => 1,
-                'completiontype' => completion::COMP_TYPE_Observation
+                'completiontype' => completion::COMP_TYPE_Observation //TODO
             )
         );
 

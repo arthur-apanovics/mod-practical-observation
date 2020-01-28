@@ -20,7 +20,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_observation\models\external_request;
+use mod_observation\external_request;
 use mod_observation\user_external_request;
 
 if (!defined('MOODLE_INTERNAL'))

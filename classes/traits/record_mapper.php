@@ -10,22 +10,33 @@ trait record_mapper
 {
     /**
      * Attempts to map existing database record values to class by either fetching record
-     * from database by id or mapping to provided values or existing object
+     * from database by id or mapping to provided values or existing object.
+     * Intended to be used from a constructor as return is void.
+     *
      * @param $id_or_record
      * @throws coding_exception
+     * @throws \dml_missing_record_exception
      */
-    private function create_from_id_or_map_to_record($id_or_record)
+    private function create_from_id_or_map_to_record($id_or_record): void
     {
         if (!is_null($id_or_record) && !empty($id_or_record))
         {
             if (is_object($id_or_record))
             {
+                // db record given
                 $this->map_to_record($id_or_record);
             }
             else if (is_numeric($id_or_record))
             {
-                $this->map_to_record(
-                    $this->fetch_record_from_id($id_or_record));
+                // id given, fetch from db
+                if ($record = self::read_record($id_or_record))
+                {
+                    $this->map_to_record($record);
+                }
+                else
+                {
+                    throw new \dml_missing_record_exception(self::TABLE, 'SELECT', ['id' => $id_or_record]);
+                }
             }
             else
             {
@@ -33,11 +44,11 @@ trait record_mapper
                                            . json_encode($id_or_record) . '") when initializing ' . __CLASS__);
             }
         }
-        // else
-        // {
-        //     throw new coding_exception('No data provided when attempting to initialize "'
-        //                                . __CLASS__ . '" object');
-        // }
+        else
+        {
+            throw new coding_exception('No data provided when attempting to initialize "'
+                                       . __CLASS__ . '" object');
+        }
     }
 
     /**
