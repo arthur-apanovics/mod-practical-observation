@@ -47,14 +47,12 @@
  *
  */
 
-use mod_observation\observation_base;
-
 defined('MOODLE_INTERNAL') || die();
 
 // Modify capabilities as needed and remove this comment.
 $capabilities = array(
-    /*'mod/observation:addinstance'*/
-    observation_base::CAP_ADDINSTANCE     => array(
+    /*observation::CAP_ADDINSTANCE*/
+    'mod/observation:addinstance'     => array(
         'riskbitmask'          => RISK_XSS,
         'captype'              => 'write',
         'contextlevel'         => CONTEXT_COURSE,
@@ -65,8 +63,8 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
 
-    /*'mod/observation:view'*/
-    observation_base::CAP_VIEW            => array(
+    /*observation::CAP_VIEW*/
+    'mod/observation:view'            => array(
         'captype'      => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes'   => array(
@@ -77,8 +75,8 @@ $capabilities = array(
         )
     ),
 
-    /*'mod/observation:submit'*/
-    observation_base::CAP_SUBMIT          => array(
+    /*observation::CAP_SUBMIT*/
+    'mod/observation:submit'          => array(
         'captype'      => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes'   => array(
@@ -86,8 +84,8 @@ $capabilities = array(
         )
     ),
 
-    /*'mod/observation:viewsubmissions'*/
-    observation_base::CAP_VIEWSUBMISSIONS => array(
+    /*observation::CAP_VIEWSUBMISSIONS*/
+    'mod/observation:viewsubmissions' => array(
         'riskbitmask'  => RISK_SPAM,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -97,8 +95,8 @@ $capabilities = array(
         )
     ),
 
-    /*'mod/observation:assess'*/
-    observation_base::CAP_ASSESS          => array(
+    /*observation::CAP_ASSESS*/
+    'mod/observation:assess'          => array(
         'riskbitmask'  => RISK_SPAM,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -108,8 +106,8 @@ $capabilities = array(
         )
     ),
 
-    /*'mod/observation:manage'*/
-    observation_base::CAP_MANAGE          => array(
+    /*observation::CAP_MANAGE*/
+    'mod/observation:manage'          => array(
         'riskbitmask'  => RISK_XSS,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
