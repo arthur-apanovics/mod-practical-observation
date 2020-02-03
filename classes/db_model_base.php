@@ -42,7 +42,7 @@ abstract class db_model_base implements crud
     {
         if (is_null(static::TABLE))
         {
-            throw new coding_exception('TABLE not declared for ' . get_class($this));
+            throw new coding_exception('TABLE not declared for ' . static::class);
         }
         if (!is_null($id_or_record))
         {
@@ -59,13 +59,13 @@ abstract class db_model_base implements crud
      */
     public function get(string $prop)
     {
-        if (property_exists($this, $this->$prop))
+        if (property_exists($this, $prop))
         {
             return $this->$prop;
         }
         else
         {
-            throw new coding_exception("Property '$prop' does not exist in " . __CLASS__);
+            throw new coding_exception("Property '$prop' does not exist in " . static::class);
         }
     }
 
@@ -81,31 +81,33 @@ abstract class db_model_base implements crud
      */
     public function set(string $prop, $value, bool $save = false): self
     {
-        if (property_exists($this, $this->$prop))
+        if (property_exists($this, $prop))
         {
-            $arg_type    = gettype($value);
-            $target_type = gettype($this->$prop);
-            if ($arg_type == $target_type)
-            {
-                $this->$prop = $value;
+            // not in PHP:
+            // $arg_type    = gettype($value);
+            // $target_type = gettype($this->$prop);
+            // if ($arg_type == $target_type)
+            // {
+            // }
+            // else
+            // {
+            //     throw new coding_exception(
+            //         "Incorrect data type provided for property '$prop' - expected '$target_type', got '$arg_type' in"
+            //         . static::class);
+            // }
 
-                if ($save)
-                {
-                    $this->update();
-                }
+            $this->$prop = $value;
 
-                return $this;
-            }
-            else
+            if ($save)
             {
-                throw new coding_exception(
-                    "Incorrect data type provided for property '$prop' - expected '$target_type', got '$arg_type' in"
-                    . __CLASS__);
+                $this->update();
             }
+
+            return $this;
         }
         else
         {
-            throw new coding_exception("Cannot set non-existent property '$prop' in " . __CLASS__);
+            throw new coding_exception("Cannot set non-existent property '$prop' in " . static::class);
         }
     }
 
@@ -243,7 +245,9 @@ abstract class db_model_base implements crud
             throw new coding_exception(sprintf('No conditions provided for %s', __METHOD__));
         }
 
-        $strictness = $must_exist ? MUST_EXIST : IGNORE_MISSING;
+        $strictness = $must_exist
+            ? MUST_EXIST
+            : IGNORE_MISSING;
         return new static($DB->get_record(static::TABLE, $conditions, null, $strictness));
     }
 
@@ -261,23 +265,18 @@ abstract class db_model_base implements crud
         global $DB;
 
         // validate criteria
-        if (empty($condition))
+        if (empty($conditions))
         {
             throw new coding_exception(sprintf('No conditions provided for %s', __METHOD__));
         }
 
-        $valid = array_filter(
-            (new \ReflectionClass(get_class(__CLASS__)))->getConstants(),
-            function ($const)
-            {
-                return stripos($const, 'COL_') !== false;
-            });
-        foreach ($conditions as $condition)
+        $constants = (new \ReflectionClass(static::class))->getConstants();
+        foreach ($conditions as $column => $value)
         {
-            if (!in_array($condition, $valid))
+            if (!in_array($column, $constants))
             {
                 throw new coding_exception(
-                    sprintf('Cannot filter by non-existent column "%s" in %s', $condition, __CLASS__));
+                    sprintf('Cannot filter by non-existent column "%s" in %s', $column, static::class));
             }
         }
 
@@ -314,22 +313,3 @@ abstract class db_model_base implements crud
         }
     }
 }
-
-// trait instance_trait
-// {
-//     // public function __construct($id_or_record, $userid = null)
-//     // {
-//     //     parent::__construct($id_or_record);
-//     // }
-//
-//     protected static function read_all_by_condition_and_map(array $criteria, $userid): array
-//     {
-//         $res = [];
-//         foreach (static::read_all_by_condition($criteria) as $rec)
-//         {
-//             $res[] = new static($rec, $userid);
-//         }
-//
-//         return $res;
-//     }
-// }

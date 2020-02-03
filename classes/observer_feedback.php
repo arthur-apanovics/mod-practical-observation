@@ -23,6 +23,7 @@
 namespace mod_observation;
 
 use coding_exception;
+use mod_observation\interfaces\templateable;
 
 class observer_feedback_base extends db_model_base
 {
@@ -74,7 +75,7 @@ class observer_feedback_base extends db_model_base
             if (!in_array($value, $allowed))
             {
                 throw new coding_exception(
-                    sprintf("'$value' is not a valid value for '%s' in '%s'", self::COL_STATUS, __CLASS__));
+                    sprintf("'$value' is not a valid value for '%s' in '%s'", self::COL_STATUS, get_class($this)));
             }
         }
 
@@ -82,7 +83,7 @@ class observer_feedback_base extends db_model_base
     }
 }
 
-class observer_feedback extends observer_feedback_base
+class observer_feedback extends observer_feedback_base implements templateable
 {
     public function __construct($id_or_record, int $userid)
     {

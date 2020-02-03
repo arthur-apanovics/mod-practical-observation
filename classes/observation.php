@@ -22,10 +22,15 @@
 
 namespace mod_observation;
 
+// avoid classloading exceptions
+include_once('interface/crud.php');
+
 use cm_info;
 use coding_exception;
 use dml_exception;
 use dml_missing_record_exception;
+use mod_observation\interfaces\templateable;
+use totara_userdata\local\count;
 
 class observation_base extends db_model_base
 {
@@ -36,18 +41,22 @@ class observation_base extends db_model_base
     public const COL_COURSE                        = 'course';
     public const COL_NAME                          = 'name';
     public const COL_INTRO                         = 'intro';
-    public const COL_INTRO_FORMAT                  = 'intro_format';
+    public const COL_INTROFORMAT                   = 'introformat';
     public const COL_TIMEOPEN                      = 'timeopen';
     public const COL_TIMECLOSE                     = 'timeclose';
     public const COL_TIMECREATED                   = 'timecreated';
     public const COL_TIMEMODIFIED                  = 'timemodified';
     public const COL_LASTMODIFIEDBY                = 'lastmodifiedby';
     public const COL_DELETED                       = 'deleted';
-    public const COL_DEFAULT_INTRO_OBSERVER        = 'default_intro_observer';
-    public const COL_DEFAULT_INTRO_OBSERVER_FORMAT = 'default_intro_observer_format';
-    public const COL_DEFAULT_INTRO_ASSIGN          = 'default_intro_assign';
-    public const COL_DEFAULT_INTRO_ASSIGN_FORMAT   = 'default_intro_assign_format';
-    public const COL_COMPLETIONTOPICS              = 'completiontopics';
+    public const COL_DEF_I_TASK_OBSERVER           = 'def_i_task_observer';
+    public const COL_DEF_I_TASK_OBSERVER_FORMAT    = 'def_i_task_observer_format';
+    public const COL_DEF_I_TASK_ASSESSOR           = 'def_i_task_assessor';
+    public const COL_DEF_I_TASK_ASSESSOR_FORMAT    = 'def_i_task_assessor_format';
+    public const COL_DEF_I_ASS_OBS_LEARNER         = 'def_i_ass_obs_learner';
+    public const COL_DEF_I_ASS_OBS_LEARNER_FORMAT  = 'def_i_ass_obs_learner_format';
+    public const COL_DEF_I_ASS_OBS_OBSERVER        = 'def_i_ass_obs_observer';
+    public const COL_DEF_I_ASS_OBS_OBSERVER_FORMAT = 'def_i_ass_obs_observer_format';
+    public const COL_COMPLETION_TASKS              = 'completion_tasks';
 
     // ACTIVITY CONSTANTS:
 
@@ -80,7 +89,7 @@ class observation_base extends db_model_base
     /**
      * @var int
      */
-    protected $intro_format;
+    protected $introformat;
     /**
      * @var int
      */
@@ -106,25 +115,45 @@ class observation_base extends db_model_base
      */
     protected $deleted;
     /**
+     * default intro
      * @var string
      */
-    protected $default_intro_observer;
+    protected $def_i_task_observer;
     /**
      * @var int
      */
-    protected $default_intro_observer_format;
+    protected $def_i_task_observer_format;
     /**
+     * default intro
      * @var string
      */
-    protected $default_intro_assign;
+    protected $def_i_task_assessor;
     /**
      * @var int
      */
-    protected $default_intro_assign_format;
+    protected $def_i_task_assessor_format;
+    /**
+     * default intro
+     * @var string
+     */
+    protected $def_i_ass_obs_learner;
+    /**
+     * @var int
+     */
+    protected $def_i_ass_obs_learner_format;
+    /**
+     * default intro
+     * @var string
+     */
+    protected $def_i_ass_obs_observer;
+    /**
+     * @var int
+     */
+    protected $def_i_ass_obs_observer_format;
     /**
      * @var bool
      */
-    protected $completiontopics;
+    protected $completion_tasks;
 }
 
 /**
@@ -132,7 +161,7 @@ class observation_base extends db_model_base
  *
  * @package mod_observation
  */
-class observation extends observation_base
+class observation extends observation_base implements templateable
 {
     /**
      * @var cm_info
@@ -146,24 +175,25 @@ class observation extends observation_base
     /**
      * observation_instance constructor.
      *
-     * @param cm_info $course_module
-     * @param int     $userid
-     * @param int     $taskid
+     * @param object|cm_info $cm_or_cm_info
+     * @param int            $userid
+     * @param int            $taskid
      * @throws dml_missing_record_exception
      * @throws coding_exception
      * @throws dml_exception
      * @throws \ReflectionException
      */
-    public function __construct(cm_info $course_module, int $userid = null, int $taskid = null)
+    public function __construct($cm_or_cm_info, int $userid = null, int $taskid = null)
     {
-        $this->cm = $course_module;
+        if (!$cm_or_cm_info instanceof cm_info)
+        {
+            $cm_or_cm_info = cm_info::create($cm_or_cm_info);
+        }
+
+        $this->cm = $cm_or_cm_info;
         parent::__construct($this->cm->instance);
 
-        $this->tasks = array_map(
-            function ($record) use ($userid)
-            {
-                return new task($record, $userid);
-            },
+        $this->tasks = task::to_class_instances(
             task::read_all_by_condition([task::COL_OBSERVATIONID => $this->cm->instance]));
     }
 
@@ -183,11 +213,52 @@ class observation extends observation_base
 
     /**
      * Checks if all criteria for completing this observation are complete
+     * @param int $userid
      * @return bool complete or not
-     * @todo perform completion check
      */
-    public function is_activity_complete(): bool
+    public function is_activity_complete(int $userid): bool
     {
-        throw new coding_exception(__METHOD__ . ' not defined');
+        if (empty($this->tasks))
+        {
+            // no tasks = not complete
+            return false;
+        }
+
+        foreach ($this->tasks as $task)
+        {
+            if (!$task->is_complete($userid))
+            {
+                // return early as all tasks have to be complete
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function get_formatted_name()
+    {
+        return format_string($this->name);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function export_template_data(): array
+    {
+        $tasks = [];
+        foreach ($this->tasks as $task)
+        {
+            $tasks[] = $task->export_template_data();
+        }
+
+        return [
+            'id'     => $this->id,
+            'course' => $this->course,
+            'name'   => $this->name,
+            'intro'  => $this->intro,
+
+            'tasks' => $tasks,
+        ];
     }
 }

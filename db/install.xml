@@ -10,18 +10,22 @@
         <FIELD NAME="course" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="intro_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="introformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timeopen" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timeclose" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="lastmodifiedby" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="deleted" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="default_intro_observer" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="default_intro_observer_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="default_intro_assign" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="default_intro_assign_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="completiontopics" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If set, learner has to complete all topics for activity to count as complete"/>
+        <FIELD NAME="def_i_task_observer" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Default intro"/>
+        <FIELD NAME="def_i_task_observer_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Default intro format"/>
+        <FIELD NAME="def_i_task_assessor" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Default intro"/>
+        <FIELD NAME="def_i_task_assessor_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Default intro format"/>
+        <FIELD NAME="def_i_ass_obs_learner" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Default intro"/>
+        <FIELD NAME="def_i_ass_obs_learner_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Default intro format"/>
+        <FIELD NAME="def_i_ass_obs_observer" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Default intro"/>
+        <FIELD NAME="def_i_ass_obs_observer_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Default intro format"/>
+        <FIELD NAME="completion_tasks" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If set, learner has to complete all tasks for activity to count as complete"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -32,6 +36,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="observationid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="intro_learner" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="intro_learner_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="intro_observer" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
@@ -49,6 +54,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="taskid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="description_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="order" TYPE="int" LENGTH="9" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="sequence number in task"/>

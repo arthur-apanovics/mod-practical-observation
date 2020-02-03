@@ -11,7 +11,7 @@ $icons = array(
         array(
             'data' =>
                 array(
-                    'classes' => 'fa-cubes',
+                    'classes' => 'ft-blended',
                 ),
         ),
 );

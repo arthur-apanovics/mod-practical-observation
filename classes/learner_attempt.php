@@ -23,6 +23,7 @@
 namespace mod_observation;
 
 use mod_observation;
+use mod_observation\interfaces\templateable;
 
 class learner_attempt_base extends db_model_base
 {
@@ -63,7 +64,7 @@ class learner_attempt_base extends db_model_base
     protected $attempt_number;
 }
 
-class learner_attempt extends learner_attempt_base
+class learner_attempt extends learner_attempt_base implements templateable
 {
     public function __construct($id_or_record, int $userid)
     {

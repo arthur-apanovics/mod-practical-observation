@@ -23,6 +23,7 @@
 namespace mod_observation;
 
 use mod_observation;
+use mod_observation\interfaces\templateable;
 
 class observer_assignment_base extends db_model_base
 {
@@ -72,7 +73,7 @@ class observer_assignment_base extends db_model_base
     protected $active;
 }
 
-class observer_assignment extends observer_assignment_base
+class observer_assignment extends observer_assignment_base implements templateable
 {
     /**
      * @var observer

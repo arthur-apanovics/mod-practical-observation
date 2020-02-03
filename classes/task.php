@@ -22,11 +22,14 @@
 
 namespace mod_observation;
 
+use mod_observation\interfaces\templateable;
+
 class task_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_task';
 
     public const COL_OBSERVATIONID         = 'observationid';
+    public const COL_NAME                  = 'name';
     public const COL_INTRO_LEARNER         = 'intro_learner';
     public const COL_INTRO_LEARNER_FORMAT  = 'intro_learner_format';
     public const COL_INTRO_OBSERVER        = 'intro_observer';
@@ -39,6 +42,10 @@ class task_base extends db_model_base
      * @var int
      */
     protected $observationid;
+    /**
+     * @var string
+     */
+    protected $name;
     /**
      * @var string
      */
@@ -59,10 +66,10 @@ class task_base extends db_model_base
     protected $order;
 }
 
-class task extends task_base
+class task extends task_base implements templateable
 {
     /**
-     * @var criteria_base[]
+     * @var criteria[]
      */
     private $criteria;
     /**
@@ -74,19 +81,57 @@ class task extends task_base
     {
         parent::__construct($id_or_record);
 
-        $this->criteria = array_map(
-            function ($record) use ($userid)
-            {
-                return new criteria($record, $userid);
-            },
+        $this->criteria = criteria::to_class_instances(
             criteria::read_all_by_condition([criteria::COL_TASKID => $this->id]));
 
-        $this->learner_submissions = array_map(
-            function ($record) use ($userid)
-            {
-                return new learner_submission($record, $userid);
-            },
+        $this->learner_submissions = learner_submission::to_class_instances(
             learner_submission::read_all_by_condition(
                 [learner_submission::COL_TASKID => $this->id, learner_submission::COL_USERID => $userid]));
+    }
+
+    /**
+     * Checks if task has been observed for given userid
+     *
+     * @param int $userid
+     */
+    public function is_observed(int $userid)
+    {
+        // todo: implement method
+        throw new \coding_exception(__METHOD__ . ' not implemented');
+    }
+
+    /**
+     * Checks if task has been completed (observed & assessed) for given user id
+     *
+     * @param int $userid
+     */
+    public function is_complete(int $userid)
+    {
+        // todo: implement method
+        throw new \coding_exception(__METHOD__ . ' not implemented');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function export_template_data(): array
+    {
+        $criteria_data = [];
+        foreach ($this->criteria as $criteria)
+        {
+            $criteria_data[] = $criteria->export_template_data();
+        }
+
+        $learner_submissions_data = [];
+        foreach ($this->learner_submissions as $learner_submission)
+        {
+            $learner_submissions_data[] = $learner_submission->export_template_data();
+        }
+
+        return [
+            $this->get_record_from_object(),
+            'criteria'            => $criteria_data,
+            'learner_submissions' => $learner_submissions_data
+        ];
     }
 }

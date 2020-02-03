@@ -22,11 +22,14 @@
 
 namespace mod_observation;
 
+use mod_observation\interfaces\templateable;
+
 class criteria_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_criteria';
 
     public const COL_TASKID             = 'taskid';
+    public const COL_NAME               = 'name';
     public const COL_DESCRIPTION        = 'description';
     public const COL_DESCRIPTION_FORMAT = 'description_format';
     public const COL_ORDER              = 'order';
@@ -35,6 +38,10 @@ class criteria_base extends db_model_base
      * @var int
      */
     protected $taskid;
+    /**
+     * @var string
+     */
+    protected $name;
     /**
      * @var string
      */
@@ -51,7 +58,7 @@ class criteria_base extends db_model_base
     protected $order;
 }
 
-class criteria extends criteria_base
+class criteria extends criteria_base implements templateable
 {
     /**
      * @var observer_feedback[]
@@ -62,12 +69,29 @@ class criteria extends criteria_base
     {
         parent::__construct($id_or_record);
 
-        $this->observer_feedback = array_map(
-            function ($record) use ($userid)
-            {
-                return new observer_feedback($record, $userid);
-            },
+        $this->observer_feedback = observer_feedback::to_class_instances(
             observer_feedback::read_all_by_condition(
                 [observer_feedback::COL_CRITERIAID => $this->id, $this->observer_feedback]));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function export_template_data(): array
+    {
+        $observer_feedback_data = [];
+        foreach ($this->observer_feedback as $observer_feedback)
+        {
+            $observer_feedback_data[] = $observer_feedback->export_template_data();
+        }
+
+        return [
+            'id'          => $this->id,
+            'name'        => $this->name,
+            'description' => $this->description,
+            'order'       => $this->order,
+
+            'observer_feedback' => $observer_feedback_data
+        ];
     }
 }

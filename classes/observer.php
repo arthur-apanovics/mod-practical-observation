@@ -22,6 +22,8 @@
 
 namespace mod_observation;
 
+use mod_observation\interfaces\templateable;
+
 class observer_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_observer';
@@ -49,7 +51,7 @@ class observer_base extends db_model_base
     protected $position_title;
 }
 
-class observer extends observer_base
+class observer extends observer_base implements templateable
 {
     public function __construct($id_or_record)
     {

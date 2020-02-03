@@ -43,19 +43,23 @@ $string['observation:evaluateself'] = 'Evaluate self';
 $string['observation:manage'] = 'Manage';
 $string['observation:view'] = 'View';
 
+$string['name'] = 'Observation name';
+$string['name_help'] = 'The title of your Observation activity.';
 $string['intro_defaults'] = 'Instructions';
-$string['intro_assign_observer'] = 'Observer requirements (learner)';
-$string['intro_assign_observer_help'] = 'Content to appear on "Assign observer" page for learner.<br>Specify requirements that an observer has to meet for this activity here.';
-$string['default_intro_observer'] = 'Default task instructions - Observer';
-$string['default_intro_observer_help'] = 'If set, this will be the default Observer instruction for all new Tasks.<br>Use this to include content that applies to all Tasks or if instructions are the same for all Tasks.<br>Note: the default instruction can still be fully edited for each task.';
-$string['default_intro_assessor'] = 'Default task instructions - Assessor';
-$string['default_intro_assessor_help'] = 'If set, this will be the default Assessor instruction for all new Tasks.<br>Use this to include content that applies to all Tasks or if instructions are the same for all Tasks.<br>Note: the default instruction can still be fully edited for each task.';
+$string['def_i_task_observer'] = 'Default observer requirements - Learner (optional)';
+$string['def_i_task_observer_help'] = 'If set, this will be the default content that will appear on "Assign observer" page for a learner.<br>Note: the default instruction can still be fully edited for each task.';
+$string['def_i_task_assessor'] = 'Default observer requirements - Observer (optional)';
+$string['def_i_task_assessor_help'] = 'If set, this will be the default criteria that an observer has to confirm they meet before they\'re able to observe a task. <br>Note: the default instruction can still be fully edited for each task.';
+$string['def_i_ass_obs_learner'] = 'Default task instructions - Observer (optional)';
+$string['def_i_ass_obs_learner_help'] = 'If set, this will be the default Observer instruction for all new Tasks.<br>Use this to include content that applies to all Tasks or if instructions are the same for all Tasks.<br>Note: the default instruction can still be fully edited for each task.';
+$string['def_i_ass_obs_observer'] = 'Default task instructions - Assessor (optional)';
+$string['def_i_ass_obs_observer_help'] = 'If set, this will be the default Assessor instruction for all new Tasks.<br>Use this to include content that applies to all Tasks or if instructions are the same for all Tasks.<br>Note: the default instruction can still be fully edited for each task.';
 $string['completion_tasks'] = 'All Tasks are observed and complete';
+$string['timeopen'] = 'Date open';
+$string['timeclose'] = 'Date closed';
 
-// $string['observationfieldset'] = 'Custom example fieldset';
-$string['observationname'] = 'Observation name';
-$string['observationname_help'] = 'The title of your Observation activity.';
 $string['observation'] = 'Observation';
+// $string['observationfieldset'] = 'Custom example fieldset';
 // $string['competencies'] = 'Competencies';
 // $string['competencies_help'] = 'Here you can select which of the assigned course competencies should be marked as proficient upon completion of this task.
 //

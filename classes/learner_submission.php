@@ -25,6 +25,7 @@ namespace mod_observation;
 use coding_exception;
 use dml_exception;
 use dml_missing_record_exception;
+use mod_observation\interfaces\templateable;
 
 class learner_submission_base extends db_model_base
 {
@@ -89,7 +90,7 @@ class learner_submission_base extends db_model_base
             if (!in_array($value, $allowed))
             {
                 throw new coding_exception(
-                    sprintf("'$value' is not a valid value for '%s' in '%s'", self::COL_STATUS, __CLASS__));
+                    sprintf("'$value' is not a valid value for '%s' in '%s'", self::COL_STATUS, get_class($this)));
             }
         }
 
@@ -111,7 +112,7 @@ class learner_submission_base extends db_model_base
     // }
 }
 
-class learner_submission extends learner_submission_base
+class learner_submission extends learner_submission_base implements templateable
 {
     /**
      * @var learner_attempt[]
@@ -130,18 +131,10 @@ class learner_submission extends learner_submission_base
     {
         parent::__construct($id_or_record);
 
-        $this->learner_attempts = array_map(
-            function ($record) use ($userid)
-            {
-                return new learner_attempt($record, $userid);
-            },
+        $this->learner_attempts = learner_attempt::to_class_instances(
             learner_attempt::read_all_by_condition([learner_attempt::COL_LEARNER_SUBMISSIONID => $this->id]));
 
-        $this->observer_assignments = array_map(
-            function ($record) use ($userid)
-            {
-                return new observer_assignment($record);
-            },
+        $this->observer_assignments = observer_assignment::to_class_instances(
             observer_assignment::read_all_by_condition([observer_assignment::COL_LEARNER_SUBMISSIONID => $this->id]));
 
         $this->assessor_submission = assessor_submission::read_by_condition(
@@ -152,6 +145,9 @@ class learner_submission extends learner_submission_base
 
     public function is_observation_complete(bool $validate = false)
     {
+        // todo: implement method
+        throw new \coding_exception(__METHOD__ . ' not implemented');
+
         $result = false;
 
         if ($validate)
@@ -177,7 +173,7 @@ class learner_submission extends learner_submission_base
                 self::STATUS_ASSESSMENT_INCOMPLETE,
             ];
 
-            $result =  in_array($this->status, $complete_statuses);
+            $result = in_array($this->status, $complete_statuses);
         }
 
         return $result;
@@ -203,5 +199,33 @@ class learner_submission extends learner_submission_base
         return !empty($assignment->id)
             ? $assignment
             : null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function export_template_data(): array
+    {
+        $learner_attempts_data = [];
+        foreach ($this->learner_attempts as $learner_attempt)
+        {
+            $learner_attempts_data[] = $learner_attempt->export_template_data();
+        }
+
+        $observer_assignments_data = [];
+        foreach ($this->observer_assignments as $observer_assignment)
+        {
+            $observer_assignments_data[] = $observer_assignment->export_template_data();
+        }
+
+        return [
+            'id'            => $this->id,
+            'timestarted'   => $this->timestarted,
+            'timecompleted' => $this->timecompleted,
+
+            'learner_attempts'     => $learner_attempts_data,
+            'observer_assignments' => $observer_assignments_data,
+            'assessor_submission'  => $this->assessor_submission->export_template_data()
+        ];
     }
 }

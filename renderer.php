@@ -23,9 +23,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 use core\output\flex_icon;
-use mod_observation\observation_base;
+use mod_observation\observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+
 // require_once($CFG->dirroot . '/mod/observation/lib.php');
 
 class mod_observation_renderer extends plugin_renderer_base
@@ -150,5 +151,11 @@ class mod_observation_renderer extends plugin_renderer_base
     //
     //     return $this->output->flex_icon($icon_id, ['alt' => $date_str]);
     // }
+
+    public function activity_view(observation $observation)
+    {
+        return $this->render_from_template(
+            OBSERVATION_MODULE . '/activity_view', $observation->export_template_data());
+    }
 }
 

@@ -41,13 +41,13 @@ trait record_mapper
             else
             {
                 throw new coding_exception('Incorrect constructor argument passed ("'
-                                           . json_encode($id_or_record) . '") when initializing ' . __CLASS__);
+                                           . json_encode($id_or_record) . '") when initializing ' . get_class($this));
             }
         }
         else
         {
             throw new coding_exception('No data provided when attempting to initialize "'
-                                       . __CLASS__ . '" object');
+                                       . static::class . '" object');
         }
     }
 
@@ -71,7 +71,7 @@ trait record_mapper
         }
         else
         {
-            throw new coding_exception('Cannot map supplied record to ' . get_class($this) . ' - no data provided');
+            throw new coding_exception('Cannot map supplied record to ' . static::class . ' - no data provided');
         }
     }
 

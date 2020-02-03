@@ -24,6 +24,7 @@ namespace mod_observation;
 
 use coding_exception;
 use dml_exception;
+use mod_observation\interfaces\templateable;
 use ReflectionException;
 
 class observer_submission_base extends db_model_base
@@ -48,7 +49,7 @@ class observer_submission_base extends db_model_base
     protected $timesubmitted;
 }
 
-class observer_submission extends observer_submission_base
+class observer_submission extends observer_submission_base implements templateable
 {
     /* NOTE: observer_feedback is attached to criteria class */
 
