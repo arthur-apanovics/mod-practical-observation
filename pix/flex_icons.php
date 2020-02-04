@@ -1,6 +1,6 @@
 <?php
 /*
- * @author  Eugene Venter <eugene@catalyst.net.nz>
+ * @author  Arthur Apanovics <arthur.a@likeminded.co.nz>
  * @package mod_observation
  */
 
