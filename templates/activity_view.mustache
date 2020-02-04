@@ -1,11 +1,29 @@
 <div class="wrapper-obs-activity">
-  <h3 class="title-main">Observation activity type</h3>
-  <p class="title-desc">
-    Can have description showing on the outside like standard activities.
-  </p>
+    <h3 class="title-main">{{{name}}}</h3>
+    <div class="title-desc">{{{intro}}}</div>
 </div>
 
-{{> mod_observation/comp_task_title}}
-{{> mod_observation/comp_task_title}}
-{{> mod_observation/comp_task_title}}
-{{> mod_observation/comp_task_title}}
+{{#tasks}}
+    {{> mod_observation/comp_task_title}}
+{{/tasks}}
+{{^tasks}}
+{{! apropriate messsage based on role}}
+    <p>
+        {{#capabilities.can_manage}}
+            {{#str}}manage:no_tasks, observation{{/str}}
+        {{/capabilities.can_manage}}
+        {{^capabilities.can_manage}}
+            {{#str}}no_tasks, observation{{/str}}
+        {{/capabilities.can_manage}}
+    </p>
+{{/tasks}}
+
+{{#capabilities.can_manage}}
+{{! edit topics button }}
+    <div class="align-center">
+        <a href="{{{module_root}}}/edit.php?id={{id}}" class="btn btn-secondary">
+        {{#str}}manage:edit_tasks, observation{{/str}}
+        </a>
+    </div>
+{{/capabilities.can_manage}}
+

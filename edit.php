@@ -20,12 +20,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/**
- * Prints a particular instance of observation for the current user.
- *
- */
-
-use mod_observation\event\course_module_viewed;
 use mod_observation\observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -38,13 +32,6 @@ $context = context_module::instance($cmid);
 require_login($course, true, $cm);
 
 // TODO: Event
-// $event = course_module_viewed::create(array(
-//     'objectid' => $PAGE->cm->instance,
-//     'context'  => $PAGE->context,
-// ));
-// $event->add_record_snapshot('course', $PAGE->course);
-// $event->add_record_snapshot($PAGE->cm->modname, $observation->get_record_from_object());
-// $event->trigger();
 
 $observation = new observation($cm);
 $name        = $observation->get_formatted_name();

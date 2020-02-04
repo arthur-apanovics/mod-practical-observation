@@ -137,7 +137,7 @@ class task extends task_base implements templateable
             self::COL_ORDER          => $this->order,
 
             'criteria'            => $criteria_data,
-            'learner_submissions' => $learner_submissions_data
+            'learner_submissions' => $learner_submissions_data,
         ];
     }
 }

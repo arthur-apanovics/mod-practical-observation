@@ -31,6 +31,14 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 
 class mod_observation_renderer extends plugin_renderer_base
 {
+    public function __construct(moodle_page $page, $target)
+    {
+        // TODO: REMOVE CSS IMPORT WHEN PORTED TO .less
+        echo '<link rel="stylesheet" type="text/css" href="styles_temp.css">';
+
+        parent::__construct($page, $target);
+    }
+
     // /**
     //  * @param user_topic $topic
     //  * @return string icon html
@@ -152,10 +160,14 @@ class mod_observation_renderer extends plugin_renderer_base
     //     return $this->output->flex_icon($icon_id, ['alt' => $date_str]);
     // }
 
-    public function activity_view(observation $observation)
+    public function activity_view(observation $observation, context_module $context)
     {
-        return $this->render_from_template(
-            OBSERVATION_MODULE . '/activity_view', $observation->export_template_data());
+        $template_data = $observation->export_template_data();
+        $out           = '';
+
+        $out .= $this->render_from_template(OBSERVATION_MODULE . '/activity_view', $template_data);
+
+        return $out;
     }
 }
 

@@ -28,10 +28,12 @@ include_once('interface/templateable.php');
 
 use cm_info;
 use coding_exception;
+use context_module;
 use core_user;
 use dml_exception;
 use dml_missing_record_exception;
 use mod_observation\interfaces\templateable;
+use moodle_url;
 use totara_userdata\local\count;
 
 class observation_base extends db_model_base
@@ -62,12 +64,30 @@ class observation_base extends db_model_base
 
     // ACTIVITY CONSTANTS:
 
-    public const CAP_ADDINSTANCE     = 'mod/observation:addinstance';
-    public const CAP_VIEW            = 'mod/observation:view';
-    public const CAP_SUBMIT          = 'mod/observation:submit';
+    /**
+     * Can add new activity instances
+     */
+    public const CAP_ADDINSTANCE = 'mod/observation:addinstance';
+    /**
+     * Can view activity (read only)
+     */
+    public const CAP_VIEW = 'mod/observation:view';
+    /**
+     * Can make submissions (learner)
+     */
+    public const CAP_SUBMIT = 'mod/observation:submit';
+    /**
+     * Can view a list of all submissions
+     */
     public const CAP_VIEWSUBMISSIONS = 'mod/observation:viewsubmissions';
-    public const CAP_ASSESS          = 'mod/observation:assess';
-    public const CAP_MANAGE          = 'mod/observation:manage';
+    /**
+     * Can assess observed activities (trainer)
+     */
+    public const CAP_ASSESS = 'mod/observation:assess';
+    /**
+     * Can make changes to activity, e.g. settings, topics (editing trainer)
+     */
+    public const CAP_MANAGE = 'mod/observation:manage';
 
     public const FILE_AREA_INTRO    = 'observation_intro';
     public const FILE_AREA_TRAINEE  = 'learner_attachments';
@@ -254,6 +274,8 @@ class observation extends observation_base implements templateable
             $tasks[] = $task->export_template_data();
         }
 
+        $context = context_module::instance($this->cm->id);
+
         return [
             self::COL_ID             => $this->id,
             self::COL_COURSE         => $this->course,
@@ -261,7 +283,17 @@ class observation extends observation_base implements templateable
             self::COL_INTRO          => $this->intro,
             self::COL_LASTMODIFIEDBY => fullname(core_user::get_user($this->lastmodifiedby)),
 
-            'tasks' => $tasks,
+            'tasks'             => $tasks,
+
+            // other data
+            'module_root'       => (new moodle_url(sprintf('/%s', OBSERVATION_MODULE)))->out(false),
+            'capabilities' => [
+                'can_view'            => has_capability(self::CAP_VIEW, $context),
+                'can_submit'          => has_capability(self::CAP_SUBMIT, $context),
+                'can_viewsubmissions' => has_capability(self::CAP_VIEWSUBMISSIONS, $context),
+                'can_assess'          => has_capability(self::CAP_ASSESS, $context),
+                'can_manage'          => has_capability(self::CAP_MANAGE, $context),
+            ]
         ];
     }
 }

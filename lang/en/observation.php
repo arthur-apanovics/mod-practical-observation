@@ -77,6 +77,9 @@ $string['status:assessment_pending'] = 'Assessment pending';
 $string['status:assessment_in_progress'] = 'Assessment in progress';
 $string['status:assessment_incomplete'] = 'Assessment not complete';
 
+// MANAGE SPECIFIC
+$string['manage:no_tasks'] = 'This activity does not have any tasks, use button below to add new tasks.';
+$string['manage:edit_tasks'] = 'Edit tasks';
 
 // $string['confirmtaskdelete'] = 'Are you sure you want to delete this task?';
 // $string['confirmcriteriadelete'] = 'Are you sure you want to delete this criteria?';
@@ -84,12 +87,13 @@ $string['status:assessment_incomplete'] = 'Assessment not complete';
 // $string['deletetask'] = 'Delete task';
 // $string['taskdeleted'] = 'Task deleted';
 // $string['edittask'] = 'Edit task';
-// $string['edittasks'] = 'Edit tasks';
 // $string['error:observationnotfound'] = 'Observation not found';
 $string['assessstudents'] = 'Assess students';
 $string['criteriadeleted'] = 'Criteria deleted';
 // $string['manage'] = 'Manage';
-$string['notasks'] = 'No tasks';
+
+$string['no_tasks'] = 'There are currently no tasks in this activity.';
+
 
 // $string['printthisobservation'] = 'Print this Observation';
 $string['report'] = 'Report';
