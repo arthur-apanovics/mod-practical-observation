@@ -33,7 +33,11 @@ class observer_submission_base extends db_model_base
 
     public const COL_OBSERVER_ASSIGNMENTID = 'observer_assignmentid';
     public const COL_TIMESTARTED           = 'timestarted';
+    public const COL_STATUS                = 'status';
     public const COL_TIMESUBMITTED         = 'timesubmitted';
+
+    public const STATUS_NOT_COMPLETE = 'not_complete';
+    public const STATUS_COMPLETE     = 'complete';
 
     /**
      * @var int
@@ -44,9 +48,13 @@ class observer_submission_base extends db_model_base
      */
     protected $timestarted;
     /**
+     * @var string
+     */
+    protected $status;
+    /**
      * @var int
      */
-    protected $timesubmitted;
+    protected $timesubmitted; // todo not sure if needed here...
 }
 
 class observer_submission extends observer_submission_base implements templateable
@@ -77,5 +85,24 @@ class observer_submission extends observer_submission_base implements templateab
     public function get_observer_feedback(): array
     {
         return observer_feedback::read_all_by_condition([observer_feedback::COL_OBSERVER_SUBMISSIONID => $this->id]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function export_template_data(): array
+    {
+        $timesubmitted = null;
+        if (!is_null($this->timesubmitted))
+        {
+            $timesubmitted = userdate($this->timesubmitted);
+        }
+
+        return [
+            self::COL_ID            => $this->id,
+            self::COL_TIMESTARTED   => $this->timestarted,
+            self::COL_TIMESUBMITTED => $timesubmitted,
+            self::COL_STATUS        => lib::get_status_string($this->status),
+        ];
     }
 }

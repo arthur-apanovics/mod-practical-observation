@@ -22,7 +22,7 @@
 
 namespace mod_observation;
 
-use mod_observation;
+use mod_observation\interfaces\templateable;
 
 class assessor_feedback_base extends db_model_base
 {
@@ -49,4 +49,24 @@ class assessor_feedback_base extends db_model_base
      * @var int
      */
     protected $timesubmitted;
+}
+
+class assessor_feedback extends assessor_feedback_base implements templateable
+{
+    public function __construct($id_or_record)
+    {
+        parent::__construct($id_or_record);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function export_template_data(): array
+    {
+        return [
+            self::COL_ID            => $this->id,
+            self::COL_TEXT          => $this->text,
+            self::COL_TIMESUBMITTED => usertime($this->timesubmitted),
+        ];
+    }
 }

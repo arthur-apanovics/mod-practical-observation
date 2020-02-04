@@ -70,4 +70,18 @@ class learner_attempt extends learner_attempt_base implements templateable
     {
         parent::__construct($id_or_record);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function export_template_data(): array
+    {
+        return [
+            self::COL_ID             => $this->id,
+            self::COL_TIMESTARTED    => userdate($this->timestarted),
+            self::COL_TIMESUBMITTED  => userdate($this->timesubmitted),
+            self::COL_TEXT           => $this->text,
+            self::COL_ATTEMPT_NUMBER => $this->attempt_number,
+        ];
+    }
 }

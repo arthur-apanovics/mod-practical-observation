@@ -111,4 +111,21 @@ class observer_assignment extends observer_assignment_base implements templateab
     {
         return $this->observer_submission;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function export_template_data(): array
+    {
+        return [
+            self::COL_ID                   => $this->id,
+            self::COL_CHANGE_EXPLAIN       => $this->change_explain,
+            self::COL_OBSERVATION_ACCEPTED => $this->observation_accepted,
+            self::COL_TIMEASSIGNED         => usertime($this->timeassigned),
+            self::COL_ACTIVE               => $this->active,
+
+            'observer'            => $this->observer->export_template_data(),
+            'observer_submission' => $this->observer_submission->export_template_data(),
+        ];
+    }
 }

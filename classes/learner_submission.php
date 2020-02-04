@@ -219,9 +219,9 @@ class learner_submission extends learner_submission_base implements templateable
         }
 
         return [
-            'id'            => $this->id,
-            'timestarted'   => $this->timestarted,
-            'timecompleted' => $this->timecompleted,
+            self::COL_ID            => $this->id,
+            self::COL_TIMESTARTED   => userdate($this->timestarted),
+            self::COL_TIMECOMPLETED => userdate($this->timecompleted),
 
             'learner_attempts'     => $learner_attempts_data,
             'observer_assignments' => $observer_assignments_data,

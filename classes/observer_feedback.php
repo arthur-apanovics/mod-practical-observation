@@ -29,12 +29,12 @@ class observer_feedback_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_observer_criteria_feedback';
 
-    public const COL_ATTEMPTID           = 'attemptid';
+    public const COL_ATTEMPTID             = 'attemptid';
     public const COL_CRITERIAID            = 'criteriaid';
     public const COL_OBSERVER_SUBMISSIONID = 'observer_submissionid';
     public const COL_STATUS                = 'status';
-    public const COL_TEXT                = 'text';
-    public const COL_TEXT_FORMAT         = 'text_format';
+    public const COL_TEXT                  = 'text';
+    public const COL_TEXT_FORMAT           = 'text_format';
 
     public const STATUS_NOT_COMPLETE = 'not_complete';
     public const STATUS_COMPLETE     = 'complete';
@@ -88,5 +88,17 @@ class observer_feedback extends observer_feedback_base implements templateable
     public function __construct($id_or_record, int $userid)
     {
         parent::__construct($id_or_record);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function export_template_data(): array
+    {
+        return [
+            self::COL_ID     => $this->id,
+            self::COL_STATUS => lib::get_status_string($this->status),
+            self::COL_TEXT   => $this->text,
+        ];
     }
 }

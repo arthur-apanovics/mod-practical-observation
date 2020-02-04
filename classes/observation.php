@@ -24,9 +24,11 @@ namespace mod_observation;
 
 // avoid classloading exceptions
 include_once('interface/crud.php');
+include_once('interface/templateable.php');
 
 use cm_info;
 use coding_exception;
+use core_user;
 use dml_exception;
 use dml_missing_record_exception;
 use mod_observation\interfaces\templateable;
@@ -253,10 +255,11 @@ class observation extends observation_base implements templateable
         }
 
         return [
-            'id'     => $this->id,
-            'course' => $this->course,
-            'name'   => $this->name,
-            'intro'  => $this->intro,
+            self::COL_ID             => $this->id,
+            self::COL_COURSE         => $this->course,
+            self::COL_NAME           => $this->name,
+            self::COL_INTRO          => $this->intro,
+            self::COL_LASTMODIFIEDBY => fullname(core_user::get_user($this->lastmodifiedby)),
 
             'tasks' => $tasks,
         ];

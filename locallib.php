@@ -26,5 +26,27 @@
  * All the observation specific functions, needed to implement the module
  * logic, should go here. Never include this file from your lib.php!
  */
+namespace mod_observation;
 
 defined('MOODLE_INTERNAL') || die();
+
+// common methods here
+class lib
+{
+    /**
+     * Returns observation activity status string for ANY class
+     *
+     * @param string $status
+     * @return string
+     * @throws \coding_exception
+     */
+    public static function get_status_string(string $status): string
+    {
+        if (!$status)
+        {
+            throw new \coding_exception(sprintf('No status provided for %s', __METHOD__));
+        }
+
+        return get_string(sprintf('status:%s', $status), OBSERVATION);
+    }
+}

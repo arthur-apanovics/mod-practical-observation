@@ -85,10 +85,10 @@ function observation_supports($feature)
 function observation_add_instance(stdClass $observation, mod_observation_mod_form $mform = null)
 {
     global $USER;
-    
-    $data = (array)$observation;
-    $now        = time();
-    $base = new  observation_base();
+
+    $data = (array) $observation;
+    $now  = time();
+    $base = new observation_base();
 
     $base->set($base::COL_COURSE, $data[$base::COL_COURSE]);
     $base->set($base::COL_NAME, $data[$base::COL_NAME]);
@@ -132,14 +132,18 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
  * @return boolean Success/Fail
  * @throws dml_exception
  * @throws coding_exception
+ * @throws ReflectionException
  */
 function observation_update_instance(stdClass $observation, mod_observation_mod_form $mform = null)
 {
     global $USER;
 
-    $observation = new  observation_base($observation);
-    $observation->set( observation_base::COL_TIMEMODIFIED, time());
-    $observation->set( observation_base::COL_LASTMODIFIEDBY, $USER->id);
+    // todo: test and implement
+    throw new \coding_exception(__FUNCTION__ . ' not implemented');
+
+    $observation = new  observation($observation);
+    $observation->set(observation_base::COL_TIMEMODIFIED, time());
+    $observation->set(observation_base::COL_LASTMODIFIEDBY, $USER->id);
     // $observation->id             = $observation->instance; // ?!
 
     // You may have to add extra stuff in here.
@@ -234,7 +238,7 @@ function observation_get_completion_requirements($cm)
 
     $result = array();
 
-    if ($observation->get( observation_base::COL_COMPLETION_TASKS))
+    if ($observation->get(observation_base::COL_COMPLETION_TASKS))
     {
         $result[] = get_string('completion_tasks', 'observation');
     }
@@ -258,7 +262,7 @@ function observation_get_completion_progress($cm, $userid)
 
     $result = array();
 
-    if ($observation->get( observation_base::COL_COMPLETION_TASKS))
+    if ($observation->get(observation_base::COL_COMPLETION_TASKS))
     {
         if ($observation->is_activity_complete())
         {
@@ -290,7 +294,7 @@ function observation_get_completion_state($course, $cm, $userid, $type)
     $observation = new  observation($cm);
 
     // This means that if only view is required we don't end up with a false state.
-    if (empty($observation->get( observation_base::COL_COMPLETION_TASKS)))
+    if (empty($observation->get(observation_base::COL_COMPLETION_TASKS)))
     {
         return $type;
     }
@@ -375,9 +379,9 @@ function observation_get_file_areas($course, $cm, $context)
 {
     $areas = [];
 
-    $areas[observation_base::FILE_AREA_TRAINEE]  = get_string( observation_base::FILE_AREA_TRAINEE, OBSERVATION);
-    $areas[observation_base::FILE_AREA_OBSERVER] = get_string( observation_base::FILE_AREA_OBSERVER, OBSERVATION);
-    $areas[observation_base::FILE_AREA_ASSESSOR] = get_string( observation_base::FILE_AREA_ASSESSOR, OBSERVATION);
+    $areas[observation_base::FILE_AREA_TRAINEE]  = get_string(observation_base::FILE_AREA_TRAINEE, OBSERVATION);
+    $areas[observation_base::FILE_AREA_OBSERVER] = get_string(observation_base::FILE_AREA_OBSERVER, OBSERVATION);
+    $areas[observation_base::FILE_AREA_ASSESSOR] = get_string(observation_base::FILE_AREA_ASSESSOR, OBSERVATION);
 
     return $areas;
 }
@@ -420,7 +424,7 @@ function observation_get_file_info(
         ? '.'
         : $file_name;
 
-    if ($file_area ===  observation_base::FILE_AREA_INTRO)
+    if ($file_area === observation_base::FILE_AREA_INTRO)
     {
         if (!has_capability('moodle/course:managefiles', $context))
         {
@@ -473,7 +477,7 @@ function observation_pluginfile(
     require_login($course, true, $cm);
 
     $user_id = $args[0];
-    if (!(has_capability( observation_base::CAP_MANAGE, $context) || $user_id == $USER->id))
+    if (!(has_capability(observation_base::CAP_MANAGE, $context) || $user_id == $USER->id))
     {
         // Only evaluators and/or owners have access to files
         return false;

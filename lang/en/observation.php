@@ -65,9 +65,18 @@ $string['observation'] = 'Observation';
 //
 // Multiple competencies can be selected by holding down \<CTRL\> and and selecting the criterias.';
 
-$string['completionstatus'] = 'Completion status';
-$string['completionstatus_incomplete'] = 'Incomplete';
-$string['completionstatus_complete'] = 'Complete';
+// STATUS STRINGS
+$string['status:not_complete'] = 'Not complete';
+$string['status:complete'] = 'Complete';
+$string['status:not_started'] = 'Not started';
+$string['status:learner_in_progress'] = 'In progress';
+$string['status:observation_pending'] = 'Observation pending';
+$string['status:observation_in_progress'] = 'Observation in progress';
+$string['status:observation_incomplete'] = 'Observation not complete';
+$string['status:assessment_pending'] = 'Assessment pending';
+$string['status:assessment_in_progress'] = 'Assessment in progress';
+$string['status:assessment_incomplete'] = 'Assessment not complete';
+
 
 // $string['confirmtaskdelete'] = 'Are you sure you want to delete this task?';
 // $string['confirmcriteriadelete'] = 'Are you sure you want to delete this criteria?';

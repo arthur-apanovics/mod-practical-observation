@@ -129,7 +129,13 @@ class task extends task_base implements templateable
         }
 
         return [
-            $this->get_record_from_object(),
+            self::COL_ID             => $this->id,
+            self::COL_NAME           => $this->name,
+            self::COL_INTRO_LEARNER  => $this->intro_learner,
+            self::COL_INTRO_OBSERVER => $this->intro_observer,
+            self::COL_INTRO_ASSESSOR => $this->intro_assessor,
+            self::COL_ORDER          => $this->order,
+
             'criteria'            => $criteria_data,
             'learner_submissions' => $learner_submissions_data
         ];

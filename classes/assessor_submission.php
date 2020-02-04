@@ -74,4 +74,15 @@ class assessor_submission extends assessor_submission_base implements templateab
     {
         parent::__construct($id_or_record);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function export_template_data(): array
+    {
+        return [
+            self::COL_ID     => $this->id,
+            self::COL_STATUS => lib::get_status_string($this->status),
+        ];
+    }
 }
