@@ -148,13 +148,13 @@ ol li::before {
 }
 .criteria-desc
 {
-    flex-grow: 1;
-    font-size: 13px;
-    margin: 0px 5px;
-    padding: 5px 10px;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    border: 1px solid #d3d3d3;
+  flex-grow: 1;
+  font-size: 13px;
+  margin: 0px 5px;
+  padding: 5px 10px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  border: 1px solid #d3d3d3;
 }
 .attempt
 {
@@ -178,8 +178,8 @@ ol li::before {
   margin: auto;
 }
 .button
-{
-  background-color: #FFAA00;
+{  
+  /*background-color: #FFAA00;*/
   border: none;
   color: white;  
   border-radius: 5px;
@@ -257,7 +257,6 @@ ol li::before {
   margin-left: auto;
   color: #C0C0C0;
 }
-
 .evidence
 {
   margin: 0px 13px 45px 13px;
@@ -289,4 +288,44 @@ ol li::before {
   flex: 0 0 99%;
   text-align: right;
   margin-right: 8px;
+}
+.confirm-change-wrapper
+{
+  width: 55%;
+  border: 2px solid #d3d3d3;
+  margin: 0 auto;
+}
+.confirm-change-wrapper > h4, .confirm-change-wrapper > h5
+{
+  padding-left: 18px;
+  padding-top: 15px;
+  /*padding-bottom: 15px;*/
+}
+.flex
+{
+  display: flex;
+  flex-wrap: wrap;
+}
+.confirm-change-wrapper > p
+{
+  font-size: 13px;
+  padding-left: 18px;
+  line-height: 7px;
+}
+.msg
+{
+  border: 2px solid #d3d3d3;
+  margin: 0px 18px 40px;
+}
+.confirm-change-wrapper > div > p
+{
+  padding-left: 4px;
+  padding-top: 4px;
+  padding-bottom: 50px;
+}
+.button-wrapper
+{
+  text-align: right;
+  margin-right: 18px;
+  margin-bottom: 33px;
 }

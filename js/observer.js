@@ -1,8 +1,13 @@
-$(".assign").on('click',function(){
-console.log('test');
+$("#observer-table").on('click','.assign',function(){
+
+  var currentRow=$(this).closest("tr");
+  var fname = currentRow.data('fullname');
+  var phone = currentRow.data('phone');
+  var email = currentRow.data('email');
+  var position = currentRow.data('position');
   
-var fname = $('table#observer-table tbody').find('tr:eq(0)').data('fullname');
-  //var fname = $('table#observer-table tbody tr').attr('data-fullname');
-  
-  
+  $("#name").val(fname);
+  $("#phone").val(phone);
+  $("#email").val(email);
+  $("#position").val(position);
 });

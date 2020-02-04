@@ -30,6 +30,7 @@ echo $OUTPUT->heading(format_string('Template test'));
 //$templatename = 'observation/activity_view';
 $templatename = 'observation/task_observer_view';
 //$templatename = 'observation/task_view';
+//$templatename = 'observation/change_observer_view';
 
 // declare any data your template might need here
 $context_data = [];

@@ -13,11 +13,11 @@
         <th></th>
     </thead>
     <tbody>
-        <tr data-fullname="joe" data-phone="1234567" data-email="joe@blogs.com" data-postion="software dev">     
+        <tr data-id="one" data-fullname="joe" data-phone="1234567" data-email="joe@blogs.com" data-position="software dev">     
             <td>joe@blogs.com {{#is_current}}<i>(current observer)</i>{{/is_current}}</td>
             <td><a href="javascript:void(0);" class="assign">Assign</td>
         </tr>
-        <tr data-fullname="bruce" data-phone="3456789" data-email="bruce@blogs.com" data-postion="dev">     
+        <tr data-id="two" data-fullname="bruce" data-phone="3456789" data-email="bruce@blogs.com" data-position="dev">     
             <td>bruce@wayne.com</td>
             <td><a href="javascript:void(0);" class="assign">Assign</td>
         </tr>
@@ -36,18 +36,18 @@
         </div>
         <div class="obs-contact">
             <label for="email">Email</label>
-            <input type="email" id="email">
+            <input type="email" id="email" value="">
         </div>
         <div class="obs-contact">
             <label for="position">Position title</label>
-            <input type="text" id="position">
+            <input type="text" id="position" value="">
         </div>
         <div class="obs-contact">
             <label for="message">Message to observer</label>
             <textarea id="message" name="message" placeholder="Optional message to appear in observer email." cols="142" style="height:100px; width:94%"></textarea>        
         </div>
         <div class="send-button-wrapper">
-            <button class="button">Send</button>
+            <button class="btn btn-primary">Send</button>
         </div>
     </form>
     <form>
