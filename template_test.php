@@ -21,16 +21,19 @@ $PAGE->set_heading(format_string('Template test'));
 $renderer = $PAGE->get_renderer('observation');
 
 $PAGE->requires->css('/mod/observation/styles_temp.css');
+$PAGE->requires->js('/mod/observation/js/Sortable.js');
 $PAGE->requires->js('/mod/observation/js/observer.js');
+
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string('Template test'));
 
 // template name must include component name, e.g. 'component/template_name'
 //$templatename = 'observation/activity_view';
-$templatename = 'observation/task_observer_view';
+//$templatename = 'observation/task_observer_view';
 //$templatename = 'observation/task_view';
 //$templatename = 'observation/change_observer_view';
+$templatename = 'observation/comp_observation_activity_task_list';
 
 // declare any data your template might need here
 $context_data = [];
