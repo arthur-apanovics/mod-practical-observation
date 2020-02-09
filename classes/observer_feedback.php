@@ -27,7 +27,7 @@ use mod_observation\interfaces\templateable;
 
 class observer_feedback_base extends db_model_base
 {
-    public const TABLE = OBSERVATION . '_observer_criteria_feedback';
+    public const TABLE = OBSERVATION . '_observer_feedback';
 
     public const COL_ATTEMPTID             = 'attemptid';
     public const COL_CRITERIAID            = 'criteriaid';

@@ -51,13 +51,25 @@ class task_base extends db_model_base
      */
     protected $intro_learner;
     /**
+     * @var int
+     */
+    protected $intro_learner_format;
+    /**
      * @var string
      */
     protected $intro_observer;
     /**
+     * @var int
+     */
+    protected $intro_observer_format;
+    /**
      * @var string
      */
     protected $intro_assessor;
+    /**
+     * @var int
+     */
+    protected $intro_assessor_format;
     /**
      * sequence number in activity
      *
@@ -87,6 +99,11 @@ class task extends task_base implements templateable
         $this->learner_submissions = learner_submission::to_class_instances(
             learner_submission::read_all_by_condition(
                 [learner_submission::COL_TASKID => $this->id, learner_submission::COL_USERID => $userid]));
+    }
+
+    public function get_formatted_name()
+    {
+        return format_string($this->name);
     }
 
     /**
@@ -139,5 +156,10 @@ class task extends task_base implements templateable
             'criteria'            => $criteria_data,
             'learner_submissions' => $learner_submissions_data,
         ];
+    }
+
+    public function get_criteria()
+    {
+        return $this->criteria;
     }
 }

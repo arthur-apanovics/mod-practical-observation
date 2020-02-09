@@ -26,6 +26,7 @@
  * All the observation specific functions, needed to implement the module
  * logic, should go here. Never include this file from your lib.php!
  */
+
 namespace mod_observation;
 
 defined('MOODLE_INTERNAL') || die();
@@ -48,5 +49,44 @@ class lib
         }
 
         return get_string(sprintf('status:%s', $status), OBSERVATION);
+    }
+
+    /**
+     * Find object in associative array based on criteria
+     *
+     * @param array $input input assoc array
+     * @param mixed $key key to lookup by
+     * @param mixed $value value to match
+     *
+     * @return mixed matched entry in array
+     */
+    public static function find_in_assoc_array_or_null(array $input, $key, $value)
+    {
+        foreach ($input as $entry)
+        {
+            if ($entry instanceof db_model_base)
+            {
+                $compare_to = $entry->get($key);
+            }
+            else if (is_array($entry))
+            {
+                $compare_to = $entry[$key];
+            }
+            else if (is_object($entry))
+            {
+                $compare_to = $entry->$key;
+            }
+            else
+            {
+                throw new \coding_exception(sprintf('Unsupported object type "%s" in array', gettype($entry)));
+            }
+
+            if ($value === $compare_to)
+            {
+                return $entry;
+            }
+        }
+
+        return null;
     }
 }

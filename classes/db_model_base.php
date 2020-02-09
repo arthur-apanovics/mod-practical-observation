@@ -300,7 +300,7 @@ abstract class db_model_base implements crud
         return array_map(
             function ($rec)
             {
-                return new $this($rec);
+                return new static($rec);
             },
             $records);
     }

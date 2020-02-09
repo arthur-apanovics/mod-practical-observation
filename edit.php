@@ -24,10 +24,10 @@ use mod_observation\observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 
-$cmid = required_param('id', PARAM_INT);
+$instance_id = required_param('id', PARAM_INT);
 
-list($course, $cm) = get_course_and_cm_from_cmid($cmid);
-$context = context_module::instance($cmid);
+list($course, $cm) = get_course_and_cm_from_instance($instance_id, OBSERVATION);
+$context = context_module::instance($cm->id);
 
 require_login($course, true, $cm);
 
@@ -47,7 +47,7 @@ echo $OUTPUT->header();
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
 
-echo $renderer->activity_view($observation, $context);
+echo $renderer->manage_view($observation, $context);
 
 // Finish the page.
 echo $OUTPUT->footer();

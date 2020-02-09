@@ -152,6 +152,9 @@ class learner_submission extends learner_submission_base implements templateable
 
         if ($validate)
         {
+            // todo: implement method
+            throw new \coding_exception(__METHOD__ . ' - validation not implemented');
+
             if ($observer_assignment = self::get_active_observer_assignment_or_null($this->id))
             {
                 $observer_feedback = $observer_assignment->get_observer_submission()->get_observer_feedback();
@@ -161,8 +164,6 @@ class learner_submission extends learner_submission_base implements templateable
                 {
 
                 }
-
-                throw //TODO HERE!
             }
         }
         else

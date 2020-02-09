@@ -263,6 +263,41 @@ class observation extends observation_base implements templateable
         return format_string($this->name);
     }
 
+    public function get_tasks()
+    {
+        return $this->tasks;
+    }
+
+    public function create_task(task_base $task)
+    {
+        if (!$task->get_id_or_null())
+        {
+            $task->create();
+        }
+        // task already created in db, make sure it hasn't been added to observation already
+        else if ($this->tasks[$task->get_id_or_null()])
+        {
+            throw new coding_exception(
+                sprintf(
+                    'Task "%s" (id %d) already exists in observation %s (id %d)',
+                    $task->get(task::COL_NAME),
+                    $task->get_id_or_null(),
+                    $this->get_formatted_name(),
+                    $this->get_id_or_null()));
+        }
+        else if ($task->get(task::COL_OBSERVATIONID !== $this->get_id_or_null()))
+        {
+            throw new coding_exception(sprintf(
+                    'Task "%s" (id %d) does not belong to observation %s (id %d)',
+                    $task->get(task::COL_NAME),
+                    $task->get_id_or_null(),
+                    $this->get_formatted_name(),
+                    $this->get_id_or_null()));
+        }
+
+        $this->tasks[] = new task($task);
+    }
+
     /**
      * @inheritDoc
      */
@@ -283,10 +318,10 @@ class observation extends observation_base implements templateable
             self::COL_INTRO          => $this->intro,
             self::COL_LASTMODIFIEDBY => fullname(core_user::get_user($this->lastmodifiedby)),
 
-            'tasks'             => $tasks,
+            'tasks'        => $tasks,
 
             // other data
-            'module_root'       => (new moodle_url(sprintf('/%s', OBSERVATION_MODULE)))->out(false),
+            'module_root'  => (new moodle_url(sprintf('/mod/%s', OBSERVATION)))->out(false),
             'capabilities' => [
                 'can_view'            => has_capability(self::CAP_VIEW, $context),
                 'can_submit'          => has_capability(self::CAP_SUBMIT, $context),

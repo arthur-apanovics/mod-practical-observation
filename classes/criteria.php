@@ -65,13 +65,12 @@ class criteria extends criteria_base implements templateable
      */
     private $observer_feedback;
 
-    public function __construct($id_or_record, int $userid)
+    public function __construct($id_or_record, int $userid = null)
     {
         parent::__construct($id_or_record);
 
         $this->observer_feedback = observer_feedback::to_class_instances(
-            observer_feedback::read_all_by_condition(
-                [observer_feedback::COL_CRITERIAID => $this->id, $this->observer_feedback]));
+            observer_feedback::read_all_by_condition([observer_feedback::COL_CRITERIAID => $this->id]));
     }
 
     /**

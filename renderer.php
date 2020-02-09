@@ -160,7 +160,25 @@ class mod_observation_renderer extends plugin_renderer_base
     //     return $this->output->flex_icon($icon_id, ['alt' => $date_str]);
     // }
 
+    /**
+     * Render main activity view
+     *
+     * @param observation    $observation
+     * @param context_module $context
+     * @return string
+     * @throws moodle_exception
+     */
     public function activity_view(observation $observation, context_module $context)
+    {
+        $template_data = $observation->export_template_data();
+        $out           = '';
+
+        $out .= $this->render_from_template(OBSERVATION_MODULE . '/activity_view', $template_data);
+
+        return $out;
+    }
+
+    public function manage_view(observation $observation, context_module $context)
     {
         $template_data = $observation->export_template_data();
         $out           = '';
