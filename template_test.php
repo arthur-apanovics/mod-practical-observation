@@ -20,8 +20,8 @@ $PAGE->set_heading(format_string('Template test'));
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
 
+$PAGE->requires->js_call_amd(OBSERVATION_MODULE . '/developer_view', 'init', ['test', 'param', 123]);
 $PAGE->requires->css('/mod/observation/styles_temp.css');
-$PAGE->requires->js('/mod/observation/js/Sortable.js');
 $PAGE->requires->js('/mod/observation/js/observer.js');
 
 
