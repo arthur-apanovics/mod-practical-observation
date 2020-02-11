@@ -411,6 +411,10 @@ ol li::before
 {
     content: counter(my-awesome-counter);
 }
+.page-container
+{
+    width:100%;
+}
 .glyphicon 
 {
     position: relative;
@@ -439,7 +443,7 @@ ol li::before
 }
 .sub-list-actions
 {
-    margin-right: -24px;
+    margin-right: -9px;
 }
 .plus
 {    
