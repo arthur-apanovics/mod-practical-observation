@@ -1,7 +1,7 @@
 <h4>Editing observation: Observation activity type</h4>
 <div class="list-wrapper">
-  <div id="taskList">  
-    <ol>
+  <div id="taskList">
+    <ol id="mainTaskList">
         <li class="list-group-item">
           <div class="page-container">   
             <span class="glyphicon glyphicon-move my-handle" aria-hidden="true"></span>
@@ -31,6 +31,21 @@
               </div>          
             <div id="subTaskList">
             {{> mod_observation/comp_observation_activity_subtask_list}}
+              {{! <ol id="nestedSortables">
+                <li class="list-group-item">
+                    <div class="page-container">   
+                        <span class="glyphicon glyphicon-move my-handle" aria-hidden="true"></span>
+                        <div class="obs-subtask-list">
+                            <div>The trainee used a thing</div>
+                            <div class="actions sub-list-actions">
+                                <span class="edit">Edit</span>
+                                <span>Delete</span>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+              </ol> 
+              </li>}}
             </div>
           </div>
         </li>     

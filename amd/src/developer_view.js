@@ -6,58 +6,39 @@
 define(['jquery', 'core/ajax', 'core/notification', 'mod_observation/Sortable',],
     function ($, ajax, notification, Sortable) {
 
-    return {
+    return {    
         init: function () {
-            alert('init\'d!');
-        }
+                Sortable.create(mainTaskList, {
+                    handle: '.my-handle',
+                    animation: 150,
+                    onChange: function(evt) {
+                        var o = evt.oldIndex;
+                        console.log('old index', o);
+                        var t = evt.newIndex;
+                        console.log('new index', t);
+                    }  
+                });   
+                
+                for (var i = 0; i < nestedSortables.length; i++) {
+                    new Sortable(nestedSortables[i], {
+                        group: {
+                            name: 'nestedSortables',
+                            pull:  false
+                          },
+                        animation: 150,
+                        fallbackOnBody: true,
+                        swapThreshold: 0.65,
+                        handle: '.my-handle',
+                        onEnd: function(evt) {
+                             var prevIndex = evt.oldIndex;
+                             // send ajax request
+                             console.log('Send ajax request to save in db', prevIndex);
+                             var currentIndex = evt.newIndex;
+                             // send ajax request
+                             console.log('Send ajax request to save in db', currentIndex);
+                        },
+                    });
+                }                          
+            }
     };
-
 });
-
-// define(['jquery'], function($) {
-//
-//     /**
-//      * Give me blue.
-//      * @access private
-//      * @return {string}
-//      */
-//     var makeItBlue = function() {
-//         // We can use our jquery dependency here.
-//         return $('.blue').show();
-//     };
-//
-//     /**
-//      * @constructor
-//      * @alias module:block_overview/helloworld
-//      */
-//     var greeting = function() {
-//         alert('howdayyy');
-//
-//         /** @access private */
-//         var privateThoughts = 'I like the colour blue';
-//
-//         /** @access public */
-//         this.publicThoughts = 'I like the colour orange';
-//
-//     };
-//
-//     /**
-//      * A formal greeting.
-//      * @access public
-//      * @return {string}
-//      */
-//     greeting.prototype.formal = function() {
-//         return 'How do you do?';
-//     };
-//
-//     /**
-//      * An informal greeting.
-//      * @access public
-//      * @return {string}
-//      */
-//     greeting.prototype.informal = function() {
-//         return 'Wassup!';
-//     };
-//
-//     return greeting;
-// });

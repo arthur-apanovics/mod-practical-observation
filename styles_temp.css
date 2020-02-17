@@ -426,6 +426,7 @@ ol li::before
     line-height: 1;
     -webkit-font-smoothing: antialiased;
 }
+
 .my-handle {
     cursor: move;
     cursor: -webkit-grabbing;
