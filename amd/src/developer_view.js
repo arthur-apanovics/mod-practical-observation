@@ -12,13 +12,16 @@ define(['jquery', 'core/ajax', 'core/notification', 'mod_observation/Sortable',]
                     handle: '.my-handle',
                     animation: 150,
                     onChange: function(evt) {
-                        var o = evt.oldIndex;
-                        console.log('old index', o);
-                        var t = evt.newIndex;
-                        console.log('new index', t);
+                        var mainTaskOldIndex = evt.oldIndex;
+                        // send ajax request
+                        console.log('Send ajax request to save in db', mainTaskOldIndex);
+                        var mainTaskCurrentIndex = evt.newIndex;
+                        // send ajax request
+                        console.log('Send ajax request to save in db', mainTaskCurrentIndex);
                     }  
-                });   
-                
+                });
+
+                // Loop through each nested sortable element
                 for (var i = 0; i < nestedSortables.length; i++) {
                     new Sortable(nestedSortables[i], {
                         group: {
@@ -30,12 +33,12 @@ define(['jquery', 'core/ajax', 'core/notification', 'mod_observation/Sortable',]
                         swapThreshold: 0.65,
                         handle: '.my-handle',
                         onEnd: function(evt) {
-                             var prevIndex = evt.oldIndex;
+                             var criteriaPrevIndex = evt.oldIndex;
                              // send ajax request
-                             console.log('Send ajax request to save in db', prevIndex);
-                             var currentIndex = evt.newIndex;
+                             console.log('Send ajax request to save in db', criteriaPrevIndex);
+                             var criteriaCurrentIndex = evt.newIndex;
                              // send ajax request
-                             console.log('Send ajax request to save in db', currentIndex);
+                             console.log('Send ajax request to save in db', criteriaCurrentIndex);
                         },
                     });
                 }                          
