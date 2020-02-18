@@ -88,4 +88,54 @@ class mod_observation_external extends external_api
                 'example_2' => new external_value(PARAM_INT, 'example description', VALUE_DEFAULT, null),
             ]);
     }
+
+    public static function task_update_order($taskid, $neworder)
+    {
+        global $USER;
+
+        $extracted_params = self::validate_parameters(self::task_update_order_parameters(), [$taskid, $neworder]);
+
+        $task = new \mod_observation\task($taskid);
+        $task->update_order_and_save($neworder);
+
+        return self::clean_returnvalue(self::task_update_order_returns(), [$taskid, $neworder]);
+    }
+
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function task_update_order_parameters()
+    {
+        return new external_function_parameters(
+            [
+                'taskid'   => new external_value(PARAM_INT, 'task id'),
+                'neworder' => new external_value(PARAM_INT, 'new order for observation task')                    
+            ]);
+    }
+
+    /**
+     * Expose to ajax
+     * @return boolean
+     */
+    public static function task_update_order_is_allowed_from_ajax()
+    {
+        // have no idea if we actually need to specify this or not, maybe 'true' is returned by default if method not set?
+        return true;
+    }
+
+    /**
+     * Returns description of method return values
+     *
+     * @return external_single_structure
+     */
+    public static function task_update_order_returns()
+    {
+        return new external_single_structure(
+            [
+                'neworder' => new external_value(PARAM_INT, 'new order of task', VALUE_DEFAULT, null),
+                
+            ]);
+    }
+
 }

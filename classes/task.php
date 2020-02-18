@@ -162,4 +162,11 @@ class task extends task_base implements templateable
     {
         return $this->criteria;
     }
+
+    public function update_order_and_save(int $order)
+    {
+        die('test update');
+        $this->order = $order;
+        return $this->update();
+    }
 }
