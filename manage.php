@@ -23,13 +23,15 @@
 use mod_observation\observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once('lib.php');
 
-$instance_id = required_param('id', PARAM_INT);
+$cmid = required_param('id', PARAM_INT);
 
-list($course, $cm) = get_course_and_cm_from_instance($instance_id, OBSERVATION);
+list($course, $cm) = get_course_and_cm_from_cmid($cmid, OBSERVATION);
 $context = context_module::instance($cm->id);
 
-require_login($course, true, $cm);
+require_login($course, false, $cm);
+require_capability(observation::CAP_MANAGE, $context);
 
 // TODO: Event
 
@@ -37,9 +39,11 @@ $observation = new observation($cm);
 $name        = $observation->get_formatted_name();
 
 // Print the page header.
-$PAGE->set_url('/mod/observation/view.php', array('id' => $cm->id));
+$PAGE->set_url(OBSERVATION_MODULE_PATH . 'manage.php', array('id' => $cm->id));
 $PAGE->set_title($name);
 $PAGE->set_heading(format_string($course->fullname));
+
+$PAGE->requires->js_call_amd(OBSERVATION_MODULE . '/developer_view', 'init');
 
 // Output starts here.
 echo $OUTPUT->header();

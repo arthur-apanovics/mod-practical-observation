@@ -32,7 +32,7 @@ class criteria_base extends db_model_base
     public const COL_NAME               = 'name';
     public const COL_DESCRIPTION        = 'description';
     public const COL_DESCRIPTION_FORMAT = 'description_format';
-    public const COL_ORDER              = 'order';
+    public const COL_SEQUENCE           = 'sequence';
 
     /**
      * @var int
@@ -55,7 +55,7 @@ class criteria_base extends db_model_base
      *
      * @var int
      */
-    protected $order;
+    protected $sequence;
 }
 
 class criteria extends criteria_base implements templateable
@@ -88,7 +88,7 @@ class criteria extends criteria_base implements templateable
             self::COL_ID          => $this->id,
             self::COL_NAME        => $this->name,
             self::COL_DESCRIPTION => $this->description,
-            self::COL_ORDER       => $this->order,
+            self::COL_SEQUENCE    => $this->sequence,
 
             'observer_feedback' => $observer_feedback_data
         ];

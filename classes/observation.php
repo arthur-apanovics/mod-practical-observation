@@ -22,10 +22,6 @@
 
 namespace mod_observation;
 
-// avoid classloading exceptions
-include_once('interface/crud.php');
-include_once('interface/templateable.php');
-
 use cm_info;
 use coding_exception;
 use context_module;
@@ -52,15 +48,19 @@ class observation_base extends db_model_base
     public const COL_TIMEMODIFIED                  = 'timemodified';
     public const COL_LASTMODIFIEDBY                = 'lastmodifiedby';
     public const COL_DELETED                       = 'deleted';
-    public const COL_DEF_I_TASK_OBSERVER           = 'def_i_task_observer';
-    public const COL_DEF_I_TASK_OBSERVER_FORMAT    = 'def_i_task_observer_format';
-    public const COL_DEF_I_TASK_ASSESSOR           = 'def_i_task_assessor';
-    public const COL_DEF_I_TASK_ASSESSOR_FORMAT    = 'def_i_task_assessor_format';
-    public const COL_DEF_I_ASS_OBS_LEARNER         = 'def_i_ass_obs_learner';
-    public const COL_DEF_I_ASS_OBS_LEARNER_FORMAT  = 'def_i_ass_obs_learner_format';
-    public const COL_DEF_I_ASS_OBS_OBSERVER        = 'def_i_ass_obs_observer';
-    public const COL_DEF_I_ASS_OBS_OBSERVER_FORMAT = 'def_i_ass_obs_observer_format';
     public const COL_COMPLETION_TASKS              = 'completion_tasks';
+    // default intro's:
+    public const COL_DEF_I_TASK_LEARNER           = 'def_i_task_learner';
+    public const COL_DEF_I_TASK_OBSERVER           = 'def_i_task_observer';
+    public const COL_DEF_I_TASK_ASSESSOR           = 'def_i_task_assessor';
+    public const COL_DEF_I_ASS_OBS_LEARNER         = 'def_i_ass_obs_learner';
+    public const COL_DEF_I_ASS_OBS_OBSERVER        = 'def_i_ass_obs_observer';
+    // formats for default intro's:
+    public const COL_DEF_I_TASK_LEARNER_FORMAT    = 'def_i_task_learner_format';
+    public const COL_DEF_I_TASK_OBSERVER_FORMAT    = 'def_i_task_observer_format';
+    public const COL_DEF_I_TASK_ASSESSOR_FORMAT    = 'def_i_task_assessor_format';
+    public const COL_DEF_I_ASS_OBS_LEARNER_FORMAT  = 'def_i_ass_obs_learner_format';
+    public const COL_DEF_I_ASS_OBS_OBSERVER_FORMAT = 'def_i_ass_obs_observer_format';
 
     // ACTIVITY CONSTANTS:
 
@@ -140,6 +140,15 @@ class observation_base extends db_model_base
      * default intro
      * @var string
      */
+    protected $def_i_task_learner;
+    /**
+     * @var int
+     */
+    protected $def_i_task_learner_format;
+    /**
+     * default intro
+     * @var string
+     */
     protected $def_i_task_observer;
     /**
      * @var int
@@ -176,6 +185,11 @@ class observation_base extends db_model_base
      * @var bool
      */
     protected $completion_tasks;
+
+    public function get_formatted_name()
+    {
+        return format_string($this->name);
+    }
 }
 
 /**
@@ -216,7 +230,9 @@ class observation extends observation_base implements templateable
         parent::__construct($this->cm->instance);
 
         $this->tasks = task::to_class_instances(
-            task::read_all_by_condition([task::COL_OBSERVATIONID => $this->cm->instance]));
+            task::read_all_by_condition(
+                [task::COL_OBSERVATIONID => $this->cm->instance],
+                sprintf('`%s` ASC', task::COL_SEQUENCE)));
     }
 
     /**
@@ -258,11 +274,6 @@ class observation extends observation_base implements templateable
         return true;
     }
 
-    public function get_formatted_name()
-    {
-        return format_string($this->name);
-    }
-
     public function get_tasks()
     {
         return $this->tasks;
@@ -287,7 +298,8 @@ class observation extends observation_base implements templateable
         }
         else if ($task->get(task::COL_OBSERVATIONID !== $this->get_id_or_null()))
         {
-            throw new coding_exception(sprintf(
+            throw new coding_exception(
+                sprintf(
                     'Task "%s" (id %d) does not belong to observation %s (id %d)',
                     $task->get(task::COL_NAME),
                     $task->get_id_or_null(),
@@ -318,10 +330,13 @@ class observation extends observation_base implements templateable
             self::COL_INTRO          => $this->intro,
             self::COL_LASTMODIFIEDBY => fullname(core_user::get_user($this->lastmodifiedby)),
 
-            'tasks'        => $tasks,
+            'tasks'       => $tasks,
 
             // other data
-            'module_root'  => (new moodle_url(sprintf('/mod/%s', OBSERVATION)))->out(false),
+            'module_root' => (new moodle_url(sprintf('/mod/%s', OBSERVATION)))->out(false),
+            'courseid'    => $this->course,
+            'cmid'        => $this->cm->id,
+
             'capabilities' => [
                 'can_view'            => has_capability(self::CAP_VIEW, $context),
                 'can_submit'          => has_capability(self::CAP_SUBMIT, $context),

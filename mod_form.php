@@ -68,10 +68,11 @@ class mod_observation_mod_form extends moodleform_mod
         $mform->setExpanded('intro_defaults', true);
 
         $default_intros = [
-            mod_observation\observation::COL_DEF_I_ASS_OBS_LEARNER,
-            mod_observation\observation::COL_DEF_I_ASS_OBS_OBSERVER,
+            mod_observation\observation::COL_DEF_I_TASK_LEARNER,
             mod_observation\observation::COL_DEF_I_TASK_OBSERVER,
             mod_observation\observation::COL_DEF_I_TASK_ASSESSOR,
+            mod_observation\observation::COL_DEF_I_ASS_OBS_LEARNER,
+            mod_observation\observation::COL_DEF_I_ASS_OBS_OBSERVER,
         ];
         foreach ($default_intros as $element)
         {

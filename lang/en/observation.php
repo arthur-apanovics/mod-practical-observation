@@ -43,20 +43,41 @@ $string['observation:evaluateself'] = 'Evaluate self';
 $string['observation:manage'] = 'Manage';
 $string['observation:view'] = 'View';
 
+$def_task_template = 'Default task instructions - %s (optional)';
+$def_task_help_template = 'If set, this will be the default %s instruction for all new Tasks.<br>Use this to include content that applies to all Tasks or if instructions are the same for all Tasks.<br>Note: the default instruction can still be fully edited for each task.';
+
 $string['name'] = 'Observation name';
 $string['name_help'] = 'The title of your Observation activity.';
 $string['intro_defaults'] = 'Instructions';
-$string['def_i_task_observer'] = 'Default observer requirements - Learner (optional)';
-$string['def_i_task_observer_help'] = 'If set, this will be the default content that will appear on "Assign observer" page for a learner.<br>Note: the default instruction can still be fully edited for each task.';
-$string['def_i_task_assessor'] = 'Default observer requirements - Observer (optional)';
-$string['def_i_task_assessor_help'] = 'If set, this will be the default criteria that an observer has to confirm they meet before they\'re able to observe a task. <br>Note: the default instruction can still be fully edited for each task.';
-$string['def_i_ass_obs_learner'] = 'Default task instructions - Observer (optional)';
-$string['def_i_ass_obs_learner_help'] = 'If set, this will be the default Observer instruction for all new Tasks.<br>Use this to include content that applies to all Tasks or if instructions are the same for all Tasks.<br>Note: the default instruction can still be fully edited for each task.';
-$string['def_i_ass_obs_observer'] = 'Default task instructions - Assessor (optional)';
-$string['def_i_ass_obs_observer_help'] = 'If set, this will be the default Assessor instruction for all new Tasks.<br>Use this to include content that applies to all Tasks or if instructions are the same for all Tasks.<br>Note: the default instruction can still be fully edited for each task.';
+$string['def_i_task_learner'] = sprintf($def_task_template, 'Learner');
+$string['def_i_task_learner_help'] = sprintf($def_task_help_template, 'Learner');
+$string['def_i_task_observer'] = sprintf($def_task_template, 'Observer');
+$string['def_i_task_observer_help'] = sprintf($def_task_help_template, 'Observer');
+$string['def_i_task_assessor'] = sprintf($def_task_template, 'Assessor');
+$string['def_i_task_assessor_help'] = sprintf($def_task_help_template, 'Assessor');
+$string['def_i_ass_obs_learner'] = 'Default observer requirements - Learner (optional)';
+$string['def_i_ass_obs_learner_help'] = 'If set, this will be the default content that will appear on "Assign observer" page for a learner.<br>Note: the default instruction can still be fully edited for each task.';
+$string['def_i_ass_obs_observer'] = 'Default observer requirements - Observer (optional)';
+$string['def_i_ass_obs_observer_help'] = 'If set, this will be the default criteria that an observer has to confirm they meet before they\'re able to observe a task. <br>Note: the default instruction can still be fully edited for each task.';
 $string['completion_tasks'] = 'All Tasks are observed and complete';
 $string['timeopen'] = 'Date open';
 $string['timeclose'] = 'Date closed';
+
+// TASK FORM
+$task_template = 'Task instructions - <b>%s</b>';
+$task_help_template = '<b>%s</b> instructions for this Task';
+
+$string['task_name'] ='Task name';
+$string['intro_learner'] = sprintf($task_template, 'Learner');
+$string['intro_learner_help'] = sprintf($task_help_template, 'Learner');
+$string['intro_observer'] = sprintf($task_template, 'Observer');
+$string['intro_observer_help'] = sprintf($task_help_template, 'Observer');
+$string['intro_assessor'] = sprintf($task_template, 'Assessor');
+$string['intro_assessor_help'] = sprintf($task_help_template, 'Assessor');
+$string['int_assign_obs_learner'] ='Observer requirements - <b>Learner</b>';
+$string['int_assign_obs_learner_help'] = 'Content that will appear on "Assign observer" page for a learner.';
+$string['int_assign_obs_observer'] ='Observer requirements - <b>Observer</b>';
+$string['int_assign_obs_observer_help'] = 'Criteria that an observer has to confirm they meet before they\'re able to observe a task.';
 
 $string['observation'] = 'Observation';
 // $string['observationfieldset'] = 'Custom example fieldset';
@@ -86,7 +107,8 @@ $string['manage:edit_tasks'] = 'Edit tasks';
 // $string['deletecriteria'] = 'Delete criteria';
 // $string['deletetask'] = 'Delete task';
 // $string['taskdeleted'] = 'Task deleted';
-// $string['edittask'] = 'Edit task';
+$string['addtask'] = 'Add task';
+$string['edittask'] = 'Edit task';
 // $string['error:observationnotfound'] = 'Observation not found';
 $string['assessstudents'] = 'Assess students';
 $string['criteriadeleted'] = 'Criteria deleted';

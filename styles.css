@@ -1,145 +1,353 @@
-[id^=mod-observation-],
-[id^=page-mod-observation-] {
-  padding-bottom: 2em;
+/*[id ^= mod-observation-],
+[id ^= page-mod-observation-],*/
+body.path-mod-observation #page * {
+  box-sizing: border-box;
 }
-[id^=mod-observation-] .config-mod-observation-topic-item,
-[id^=page-mod-observation-] .config-mod-observation-topic-item,
-[id^=mod-observation-] .mod-observation-topic-item,
-[id^=page-mod-observation-] .mod-observation-topic-item {
-  padding: 0.3em;
+body.path-mod-observation #page .wrapper {
+  border: 2px solid #d3d3d3;
+  margin-bottom: 10px;
 }
-[id^=mod-observation-] .mod-observation-topic-items,
-[id^=page-mod-observation-] .mod-observation-topic-items {
-  font-size: 1.2em;
-  display: table;
+body.path-mod-observation #page .title-main {
+  padding-left: 10px;
 }
-[id^=mod-observation-] .observation-eval-actions,
-[id^=page-mod-observation-] .observation-eval-actions {
-  margin-top: 2em;
+body.path-mod-observation #page .flex-title {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  padding-bottom: 10px;
 }
-[id^=mod-observation-] .mod-observation-modifiedstr,
-[id^=page-mod-observation-] .mod-observation-modifiedstr,
-[id^=mod-observation-] .mod-observation-witnessedstr,
-[id^=page-mod-observation-] .mod-observation-witnessedstr,
-[id^=mod-observation-] .mod-observation-topic-modifiedstr,
-[id^=page-mod-observation-] .mod-observation-topic-modifiedstr {
-  font-size: 0.8em;
-  font-style: italic;
-  color: grey;
+body.path-mod-observation #page .flex-title > span {
+  white-space: nowrap;
 }
-[id^=mod-observation-] .mod-observation-topic-signoff,
-[id^=page-mod-observation-] .mod-observation-topic-signoff {
-  font-size: 1.2em;
-  padding-right: 1em;
+body.path-mod-observation #page .title-desc {
+  flex-grow: 1;
+  padding-left: 10px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+body.path-mod-observation #page .title-note {
+  font-size: 80%;
+  padding-right: 25px;
+}
+body.path-mod-observation #page .wrapper-title {
+  width: 75%;
+  border: 2px solid #d3d3d3;
+  margin-bottom: 30px;
+}
+body.path-mod-observation #page .title-main-task {
+  padding-left: 18px;
+}
+body.path-mod-observation #page .flex-title-task {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+}
+body.path-mod-observation #page .title-desc-task {
+  flex-grow: 1;
+  font-size: 13px;
+  padding: 5px 22px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+body.path-mod-observation #page .table {
+  width: 75%;
+  border: 2px solid #d3d3d3;
+}
+body.path-mod-observation #page th {
+  background-color: #d3d3d3;
+  color: black;
+}
+body.path-mod-observation #page .table > thead > tr > th,
+body.path-mod-observation #page .table > tbody > tr > th,
+body.path-mod-observation #page .table > tfoot > tr > th,
+body.path-mod-observation #page .table > thead > tr > td,
+body.path-mod-observation #page .table > tbody > tr > td {
+  text-align: left;
+  padding: 8px 50px 8px 50px;
+  border: none;
+}
+body.path-mod-observation #page .myForm {
+  display: flex;
+  padding: 1.8em;
+  /*align-items: flex-end;*/
+  flex-wrap: wrap;
+}
+body.path-mod-observation #page .obs-contact {
+  margin-right: 2em;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 10px;
+}
+body.path-mod-observation #page .obs-contact-message {
+  display: flex;
+  flex-direction: column;
+}
+body.path-mod-observation #page .obs-contact > input {
+  flex: 1;
+  width: 100%;
+}
+body.path-mod-observation #page .obs-contact > label {
+  font-weight: normal;
+}
+body.path-mod-observation #page form select,
+body.path-mod-observation #page form input[type="text"],
+body.path-mod-observation #page form input[type="email"],
+body.path-mod-observation #page form input[type="tel"],
+body.path-mod-observation #page form.atto_form input[type="url"],
+body.path-mod-observation #page select.singleselect {
+  padding: 6px 12px;
+  margin: 0 0 5px 0;
+  border-radius: 0;
+  width: 100%;
+  max-width: 300px;
+}
+body.path-mod-observation #page .wrapper-obs-activity {
+  border: 2px solid #d3d3d3;
+  margin-bottom: 40px;
+}
+body.path-mod-observation #page .wrapper-task {
+  width: 65%;
+  border: 2px solid #d3d3d3;
+  margin-bottom: 30px;
+}
+body.path-mod-observation #page h5 {
+  margin-bottom: 3px;
+}
+body.path-mod-observation #page .subtitle-criteria {
+  padding-left: 0;
+}
+body.path-mod-observation #page ol {
+  list-style: none;
+  counter-reset: my-awesome-counter;
+  margin: 20px 8px 27px 8px;
+}
+body.path-mod-observation #page ol li {
+  counter-increment: my-awesome-counter;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 2px 0 5px 5px;
+}
+body.path-mod-observation #page ol li::before {
+  content: counter(my-awesome-counter) ". ";
+  font-size: 13px;
+}
+body.path-mod-observation #page .criteria-desc {
+  flex-grow: 1;
+  font-size: 13px;
+  margin: 0 5px;
+  padding: 5px 10px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  border: 1px solid #d3d3d3;
+}
+body.path-mod-observation #page .attempt {
+  margin: 0 0 6px 13px;
+}
+body.path-mod-observation #page .editor {
+  margin: 0 13px 20px;
+  padding: 5px 10px;
+  border: 1px solid #d3d3d3;
+}
+body.path-mod-observation #page .request-button-wrapper {
+  width: 65%;
+  text-align: center;
+  margin: 45px 0 30px 0;
+}
+body.path-mod-observation #page .send-button-wrapper {
+  width: auto;
+  margin: auto;
+}
+body.path-mod-observation #page .button {
+  /*background-color: #FFAA00;*/
+  border: none;
+  color: white;
+  border-radius: 5px;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 14px;
+  width: auto;
+  padding: 6px 20px;
+}
+body.path-mod-observation #page .button:hover,
+body.path-mod-observation #page button:focus,
+body.path-mod-observation #page button:active {
+  background-color: #ffaa00;
+  color: white;
+  text-decoration: none;
+}
+body.path-mod-observation #page .flex-criteria {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+body.path-mod-observation #page .flex-criteria > span.criteria-note {
+  font-size: 10px;
+  margin-left: auto;
+  margin-right: 7px;
+  margin-bottom: 15px;
+  color: #c0c0c0;
+}
+body.path-mod-observation #page .wrapper-feedback {
+  display: flex;
+  align-content: space-between;
+  border: 1px solid #d3d3d3;
+  margin: 0 5px 6px 69px;
+}
+body.path-mod-observation #page .flex-feedback {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+body.path-mod-observation #page .feedback-desc {
+  font-size: 13px;
+  margin: 0 0;
+  padding: 5px 5px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  flex: 0 0 50%;
+}
+body.path-mod-observation #page .feedback-attempt-heading {
+  margin-left: 69px;
+  margin-top: 18px;
+}
+body.path-mod-observation #page .feedback-email {
+  margin-top: 5px;
+  margin-right: 8px;
+  flex: 0 0 14%;
+  align-items: flex-end;
+}
+body.path-mod-observation #page .timestamp {
+  flex: 0 0 99%;
   text-align: right;
+  margin-right: 8px;
 }
-[id^=mod-observation-] .mod-observation-topic-signoff img,
-[id^=page-mod-observation-] .mod-observation-topic-signoff img {
-  padding-left: 0.4em;
+body.path-mod-observation #page .observer-note {
+  margin-top: 55px;
+  margin-right: 37px;
+  font-size: 14px;
+  margin-left: auto;
+  color: #c0c0c0;
 }
-[id^=mod-observation-] textarea.observation-completion-comment,
-[id^=page-mod-observation-] textarea.observation-completion-comment,
-[id^=mod-observation-] textarea.observation-completion-submission,
-[id^=page-mod-observation-] textarea.observation-completion-submission {
-  margin-left: 0.4em;
-  width: 90%;
+body.path-mod-observation #page .evidence {
+  margin: 0 13px 45px 13px;
+  padding: 0;
 }
-[id^=mod-observation-] .mod-observation-topic table td.c0,
-[id^=page-mod-observation-] .mod-observation-topic table td.c0 {
-  width: 40%;
+body.path-mod-observation #page .task-evidence {
+  font-size: 13px;
+  margin: 5px 5px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  flex: 0 0 40%;
 }
-[id^=mod-observation-] .mod-observation-topic table td.c1,
-[id^=page-mod-observation-] .mod-observation-topic table td.c1 {
-  width: 60%;
+body.path-mod-observation #page .learner-email {
+  text-align: right;
+  margin-right: 8px;
+  margin-top: 5px;
+  flex: 0 0 14%;
+  align-items: flex-end;
 }
-[id^=mod-observation-] .observation-submit,
-[id^=page-mod-observation-] .observation-submit {
+body.path-mod-observation #page .attached-evidence {
+  flex: 0 0 50%;
+  margin-left: 5px;
+}
+body.path-mod-observation #page .observer-timestamp {
+  flex: 0 0 99%;
+  text-align: right;
+  margin-right: 8px;
+}
+body.path-mod-observation #page .align-center {
   text-align: center;
 }
-[id^=mod-observation-] .evalprint,
-[id^=page-mod-observation-] .evalprint,
-[id^=mod-observation-] .observation-save,
-[id^=page-mod-observation-] .observation-save {
-  float: right;
+body.path-mod-observation #page .confirm-change-wrapper {
+  width: 55%;
+  border: 2px solid #d3d3d3;
+  margin: 0 auto;
 }
-#page-mod-observation-evaluate .mod-observation-topic-signoff .flex-icon,
-#page-mod-observation-observe .mod-observation-topic-signoff .flex-icon,
-#page-mod-observation-evaluate .observation-item-witness .flex-icon,
-#page-mod-observation-observe .observation-item-witness .flex-icon {
+body.path-mod-observation #page .confirm-change-wrapper > h4,
+body.path-mod-observation #page .confirm-change-wrapper > h5 {
+  padding-left: 18px;
+  padding-top: 15px;
+  /*padding-bottom: 15px;*/
+}
+body.path-mod-observation #page .flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+body.path-mod-observation #page .confirm-change-wrapper > p {
+  font-size: 13px;
+  padding-left: 18px;
+  line-height: 7px;
+}
+body.path-mod-observation #page .msg {
+  border: 2px solid #d3d3d3;
+  margin: 0 18px 40px;
+}
+body.path-mod-observation #page .confirm-change-wrapper > div > p {
+  padding-left: 4px;
+  padding-top: 4px;
+  padding-bottom: 50px;
+}
+body.path-mod-observation #page .button-wrapper {
+  text-align: right;
+  margin-right: 18px;
+  margin-bottom: 33px;
+}
+body.path-mod-observation #page .list-wrapper {
+  width: 100%;
+  margin-top: 3em;
+}
+body.path-mod-observation #page #taskList > ol > li,
+body.path-mod-observation #page .subTaskList > ol > li {
+  display: flex;
+  border: none;
+}
+body.path-mod-observation #page #taskList > ol > li::before,
+body.path-mod-observation #page .subTaskList > ol > li::before {
+  content: counter(my-awesome-counter);
+}
+body.path-mod-observation #page .page-container {
+  width: 100%;
+}
+body.path-mod-observation #page .glyphicon {
+  position: relative;
+  float: left;
+  padding: 1px 7px;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+}
+body.path-mod-observation #page .my-handle {
+  cursor: move;
+  cursor: -webkit-grabbing;
+}
+body.path-mod-observation #page .obs-task-list {
+  display: flex;
+  border-bottom: 1px solid teal;
+  padding: 1px 7px 1px 7px;
+}
+body.path-mod-observation #page .actions {
+  margin-left: auto;
   cursor: pointer;
 }
-.config-mod-observation-topic-heading,
-.mod-observation-topic-heading {
-  font-size: 1.4em;
-  font-weight: bold;
-  margin-top: 0.5em;
-  margin-bottom: 0.2em;
+body.path-mod-observation #page .sub-list-actions {
+  margin-right: -9px;
 }
-.mod-observation-topic-heading {
-  padding-left: 0.8em;
+body.path-mod-observation #page .plus {
+  padding-right: 5px;
 }
-.mod-observation-topic-addbtn {
-  float: right;
+body.path-mod-observation #page .edit {
+  padding-right: 5px;
 }
-#config-mod-observation-topics {
-  padding-bottom: 2em;
+body.path-mod-observation #page .obs-subtask-list {
+  display: flex;
+  /*padding: 1px 7px 1px 7px;  */
 }
-.config-mod-observation-topic-items {
-  margin-left: 1em;
-  font-size: 1.2em;
+body.path-mod-observation #page .btn-wrapper {
+  text-align: center;
+  margin-top: 2em;
 }
-img.observation-topic-completion-status {
-  vertical-align: baseline;
-}
-#observation-eval-icon-templates,
-.user-observation-comments-warning,
-.observation-completion-comment-print,
-.observation-completion-submission-print {
-  display: none;
-}
-.mod-observation-evalstudents-btn,
-.mod-observation-evalself-btn,
-.mod-observation-manage-btn {
-  float: right;
-}
-.mod-observation-topicitem-files {
-  font-size: 0.8em;
-}
-/**
- * printing styles
- */
-@media print {
-  @page {
-    margin: 25mm !important;
-  }
-  #block-region-side-pre,
-  #block-region-side-post,
-  #page-header,
-  #page-footer,
-  .evalprint,
-  .logininfo,
-  .navbar,
-  textarea.observation-completion-comment,
-  textarea.observation-completion-submission,
-  .user-observation-comments-warning,
-  #totaramenu {
-    display: none !important;
-  }
-  #region-main {
-    width: 100% !important;
-    padding: 0;
-  }
-  #mod-observation-user-observation .observation-completion-comment-print,
-  #mod-observation-user-observation .observation-completion-submission-print {
-    display: block;
-  }
-  #mod-observation-user-observation .mod-observation-topic-heading {
-    padding-left: 0;
-  }
-  #mod-observation-user-observation .mod-observation-topic-items {
-    display: table;
-  }
-  #mod-observation-user-observation .mod-observation-topic {
-    page-break-inside: avoid;
-  }
+body.path-mod-observation #page .btn-wrapper > button {
+  margin-right: 1em;
 }

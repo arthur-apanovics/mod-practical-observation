@@ -33,9 +33,6 @@ class mod_observation_renderer extends plugin_renderer_base
 {
     public function __construct(moodle_page $page, $target)
     {
-        // TODO: REMOVE CSS IMPORT WHEN PORTED TO .less
-        echo '<link rel="stylesheet" type="text/css" href="styles_temp.css">';
-
         parent::__construct($page, $target);
     }
 
@@ -183,7 +180,7 @@ class mod_observation_renderer extends plugin_renderer_base
         $template_data = $observation->export_template_data();
         $out           = '';
 
-        $out .= $this->render_from_template(OBSERVATION_MODULE . '/activity_view', $template_data);
+        $out .= $this->render_from_template(OBSERVATION_MODULE . '/manage_tasks_view', $template_data);
 
         return $out;
     }

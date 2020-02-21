@@ -41,7 +41,7 @@ defined('MOODLE_INTERNAL') || die();
 
 define('OBSERVATION', 'observation');
 define('OBSERVATION_MODULE', 'mod_observation');
-define('OBSERVATION_MODULE_PATH', '/mod/converse/');
+define('OBSERVATION_MODULE_PATH', '/mod/observation/');
 
 /* Moodle core API */
 
@@ -432,7 +432,7 @@ function observation_get_file_info(
             return null;
         }
 
-        if (!($stored_file = $fs->get_file($context->id, 'mod_converse', $file_area, 0, $file_path, $file_name)))
+        if (!($stored_file = $fs->get_file($context->id, OBSERVATION_MODULE, $file_area, 0, $file_path, $file_name)))
         {
             return null;
         }

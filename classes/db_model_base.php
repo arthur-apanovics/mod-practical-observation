@@ -11,6 +11,12 @@ use mod_observation\traits\record_mapper;
 use ReflectionException;
 use stdClass;
 
+// avoid classloading exceptions
+global $CFG;
+require_once($CFG->dirroot . '/mod/observation/lib.php');
+require_once($CFG->dirroot . '/mod/observation/classes/interface/crud.php');
+require_once($CFG->dirroot . '/mod/observation/classes/interface/templateable.php');
+
 abstract class db_model_base implements crud
 {
     use record_mapper;
@@ -165,7 +171,7 @@ abstract class db_model_base implements crud
     {
         global $DB;
 
-        $this->id = $DB->insert_record(static::TABLE, self::get_record_from_object());
+        $this->id = $DB->insert_record(static::TABLE, self::to_record());
 
         return $this->refresh();
     }
@@ -204,7 +210,7 @@ abstract class db_model_base implements crud
         global $DB;
 
         $this->validate();
-        $DB->update_record(static::TABLE, $this->get_record_from_object());
+        $DB->update_record(static::TABLE, $this->to_record());
 
         return $this->refresh();
     }
@@ -240,7 +246,7 @@ abstract class db_model_base implements crud
         global $DB;
 
         // validate criteria // todo validate column as well?
-        if (empty($condition))
+        if (empty($conditions))
         {
             throw new coding_exception(sprintf('No conditions provided for %s', __METHOD__));
         }
@@ -254,13 +260,14 @@ abstract class db_model_base implements crud
     /**
      * Fetches all records that meet provided conditions and instantiates class instances for those records
      *
-     * @param array $conditions = [string => mixed]
+     * @param array  $conditions = [string => mixed]
+     * @param string $sort an order to sort the results in (optional, a valid SQL ORDER BY parameter).
      * @return static[]
      * @throws ReflectionException
      * @throws coding_exception
      * @throws dml_exception
      */
-    protected static function read_all_by_condition(array $conditions): array
+    protected static function read_all_by_condition(array $conditions, string $sort = null): array
     {
         global $DB;
 
@@ -281,7 +288,7 @@ abstract class db_model_base implements crud
         }
 
         return static::to_class_instances(
-            $DB->get_records(static::TABLE, $conditions));
+            $DB->get_records(static::TABLE, $conditions, $sort));
     }
 
     /**

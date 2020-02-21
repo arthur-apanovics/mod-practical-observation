@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+use mod_observation\task;
+
 defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
@@ -52,15 +54,13 @@ class mod_observation_external extends external_api
                 'example_array' => new external_single_structure(
                     [
                         'id'    => new external_value(
-                            PARAM_INT,
-                            'description here (I think only used for exception messages)',
-                            VALUE_REQUIRED), // << note the required option
+                            PARAM_INT, 'description here (I think only used for exception messages)', VALUE_REQUIRED),
+                        // << note the required option
                         'other' => new external_value(
                             PARAM_RAW,
                             'description here (I think only used for exception messages or /OPTIONS HTTP requests)'),
                         'stuff' => new external_value(
-                            PARAM_INT,
-                            'description here (I think only used for exception messages)')
+                            PARAM_INT, 'description here (I think only used for exception messages)')
                     ])
             ]);
     }
@@ -84,33 +84,35 @@ class mod_observation_external extends external_api
     {
         return new external_single_structure(
             [
-                'example_1'     => new external_value(PARAM_INT, 'example description', VALUE_DEFAULT, null),
+                'example_1' => new external_value(PARAM_INT, 'example description', VALUE_DEFAULT, null),
                 'example_2' => new external_value(PARAM_INT, 'example description', VALUE_DEFAULT, null),
             ]);
     }
 
-    public static function task_update_order($taskid, $neworder)
+    public static function task_update_sequence($taskid, $neworder)
     {
         global $USER;
 
-        $extracted_params = self::validate_parameters(self::task_update_order_parameters(), [$taskid, $neworder]);
+        // $extracted_params = self::validate_parameters(self::task_update_sequence_parameters(), [$taskid, $neworder]);
 
         $task = new \mod_observation\task($taskid);
-        $task->update_order_and_save($neworder);
+        $task->update_sequence_and_save($neworder);
 
-        return self::clean_returnvalue(self::task_update_order_returns(), [$taskid, $neworder]);
+        return self::clean_returnvalue(self::task_update_sequence_returns(), [$task->get(task::COL_SEQUENCE)]);
     }
 
     /**
      * Returns description of method parameters
      * @return external_function_parameters
      */
-    public static function task_update_order_parameters()
+    public static function task_update_sequence_parameters()
     {
         return new external_function_parameters(
             [
-                'taskid'   => new external_value(PARAM_INT, 'task id'),
-                'neworder' => new external_value(PARAM_INT, 'new order for observation task')                    
+                'taskid'   => new external_value(
+                    PARAM_INT, 'task id', true, null, NULL_NOT_ALLOWED),
+                'neworder' => new external_value(
+                    PARAM_INT, 'new order for observation task', true, null, NULL_NOT_ALLOWED),
             ]);
     }
 
@@ -118,7 +120,7 @@ class mod_observation_external extends external_api
      * Expose to ajax
      * @return boolean
      */
-    public static function task_update_order_is_allowed_from_ajax()
+    public static function task_update_sequence_is_allowed_from_ajax()
     {
         // have no idea if we actually need to specify this or not, maybe 'true' is returned by default if method not set?
         return true;
@@ -129,12 +131,11 @@ class mod_observation_external extends external_api
      *
      * @return external_single_structure
      */
-    public static function task_update_order_returns()
+    public static function task_update_sequence_returns()
     {
         return new external_single_structure(
             [
                 'neworder' => new external_value(PARAM_INT, 'new order of task', VALUE_DEFAULT, null),
-                
             ]);
     }
 

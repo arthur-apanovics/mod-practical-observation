@@ -22,7 +22,7 @@ defined('MOODLE_INTERNAL') || die;
 $services = [
     'observation service' => [
         'functions' => [
-            'mod_observation_task_update_order',
+            'mod_observation_task_update_sequence',
         ],
         'enabled'   => true
     ]
@@ -30,9 +30,9 @@ $services = [
 
 // the web service functions to install.
 $functions = [
-    'mod_observation_task_update_order'         => [
+    'mod_observation_task_update_sequence' => [
         'classname'    => 'mod_observation_external',
-        'methodname'   => 'task_update_order',
+        'methodname'   => 'task_update_sequence',
         'description'  => 'saves observation task data',
         'type'         => 'write',
         'capabilities' => \mod_observation\observation::CAP_MANAGE

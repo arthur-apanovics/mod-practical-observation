@@ -2,11 +2,13 @@
 {
     box-sizing: border-box;
 }
+
 .wrapper
 {
     border: 2px solid #d3d3d3;
     margin-bottom: 10px;
 }
+
 .title-main
 {
     padding-left: 10px;
@@ -395,27 +397,32 @@ ol li::before
 {
     text-align: right;
     margin-right: 18px;
-    margin-bottom: 33px;    
+    margin-bottom: 33px;
 }
+
 .list-wrapper
 {
     width: 100%;
     margin-top: 3em;
 }
-#taskList > ol > li, #subTaskList > ol> li
+
+#taskList > ol > li, .subTaskList > ol > li
 {
     display: flex;
     border: none;
 }
-#taskList > ol> li::before, #subTaskList > ol> li::before
+
+#taskList > ol > li::before, .subTaskList > ol > li::before
 {
     content: counter(my-awesome-counter);
 }
+
 .page-container
 {
-    width:100%;
+    width: 100%;
 }
-.glyphicon 
+
+.glyphicon
 {
     position: relative;
     float: left;
@@ -427,42 +434,52 @@ ol li::before
     -webkit-font-smoothing: antialiased;
 }
 
-.my-handle {
+.my-handle
+{
     cursor: move;
     cursor: -webkit-grabbing;
 }
+
 .obs-task-list
 {
     display: flex;
     border-bottom: 1px solid teal;
-    padding: 1px 7px 1px 7px;    
+    padding: 1px 7px 1px 7px;
 }
+
 .actions
 {
     margin-left: auto;
     cursor: pointer;
 }
+
 .sub-list-actions
 {
     margin-right: -9px;
 }
+
 .plus
-{    
+{
     padding-right: 5px;
 }
-.edit{
+
+.edit
+{
     padding-right: 5px;
 }
+
 .obs-subtask-list
 {
     display: flex;
-    /*padding: 1px 7px 1px 7px;  */  
+    /*padding: 1px 7px 1px 7px;  */
 }
+
 .btn-wrapper
 {
     text-align: center;
     margin-top: 2em;
 }
+
 .btn-wrapper > button
 {
     margin-right: 1em;

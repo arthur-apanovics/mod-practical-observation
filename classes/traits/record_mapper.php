@@ -80,7 +80,7 @@ trait record_mapper
      *
      * @return stdClass record
      */
-    public function get_record_from_object()
+    public function to_record()
     {
         $rec = [];
         foreach ($this as $key => $val)

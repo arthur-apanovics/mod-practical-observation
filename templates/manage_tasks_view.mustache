@@ -1,0 +1,15 @@
+<h3>Editing observation: {{name}}</h3>
+
+<div class="list-wrapper">
+    <div id="taskList">
+        <ol id="mainTaskList">
+            {{#tasks}}
+                {{> mod_observation/comp_task_manage}}
+            {{/tasks}}
+        </ol>
+    </div>
+</div>
+<div class="btn-wrapper">
+    <a href="{{{module_root}}}/manage_task.php?id={{cmid}}" class="btn btn-primary" id="addButton">Add Task</a>
+    <a href="{{{module_root}}}/view.php?id={{cmid}}" class="btn btn-secondary">Back to activity</a>
+</div>

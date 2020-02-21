@@ -49,7 +49,7 @@ require_login($course, true, $cm);
 //     'context'  => $PAGE->context,
 // ));
 // $event->add_record_snapshot('course', $PAGE->course);
-// $event->add_record_snapshot($PAGE->cm->modname, $observation->get_record_from_object());
+// $event->add_record_snapshot($PAGE->cm->modname, $observation->to_record());
 // $event->trigger();
 
 $topic = user_topic::get_user_topic($topicid, $USER->id);

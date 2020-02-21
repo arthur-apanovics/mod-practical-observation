@@ -1,0 +1,23 @@
+<li class="task list-group-item" taskid="{{id}}" order="{{order}}">
+    <div class="page-container">
+        <span class="glyphicon glyphicon-move my-handle" aria-hidden="true"></span>
+        <div class="obs-task-list">
+            <h4 class="title-main" style="margin-top: 0;">{{name}}</h4>
+            <div class="actions">
+                <span class="plus">+</span>
+                <span class="edit">Edit</span>
+                <span>Delete</span>
+            </div>
+        </div>
+        <div class="subTaskList">
+            <ol class="nestedCriteria">
+                {{#criteria}}
+                    {{> mod_observation/comp_criteria_manage}}
+                {{/criteria}}
+            </ol>
+            {{^criteria}}
+                add btn here
+            {{/criteria}}
+        </div>
+    </div>
+</li>

@@ -29,6 +29,7 @@ use mod_observation\event\course_module_viewed;
 use mod_observation\observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once('lib.php');
 
 $cmid = required_param('id', PARAM_INT);
 
@@ -43,7 +44,7 @@ require_login($course, true, $cm);
 //     'context'  => $PAGE->context,
 // ));
 // $event->add_record_snapshot('course', $PAGE->course);
-// $event->add_record_snapshot($PAGE->cm->modname, $observation->get_record_from_object());
+// $event->add_record_snapshot($PAGE->cm->modname, $observation->to_record());
 // $event->trigger();
 
 $observation = new observation($cm);
