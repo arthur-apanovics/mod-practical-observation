@@ -14,6 +14,7 @@ use stdClass;
 // avoid classloading exceptions
 global $CFG;
 require_once($CFG->dirroot . '/mod/observation/lib.php');
+require_once($CFG->dirroot . '/mod/observation/locallib.php');
 require_once($CFG->dirroot . '/mod/observation/classes/interface/crud.php');
 require_once($CFG->dirroot . '/mod/observation/classes/interface/templateable.php');
 
@@ -254,7 +255,7 @@ abstract class db_model_base implements crud
         $strictness = $must_exist
             ? MUST_EXIST
             : IGNORE_MISSING;
-        return new static($DB->get_record(static::TABLE, $conditions, null, $strictness));
+        return new static($DB->get_record(static::TABLE, $conditions, '*', $strictness));
     }
 
     /**

@@ -22,23 +22,29 @@
 
 namespace mod_observation;
 
-use mod_observation\interfaces\templateable;
-
-class assessor_submission extends assessor_submission_base implements templateable
+class assessor_feedback_base extends db_model_base
 {
-    public function __construct($id_or_record)
-    {
-        parent::__construct($id_or_record);
-    }
+    public const TABLE = OBSERVATION . '_assessor_feedback';
+
+    public const COL_ASSESSOR_SUBMISSIONID = 'assessor_submissionid';
+    public const COL_TEXT                  = 'text';
+    public const COL_TEXT_FORMAT           = 'text_format';
+    public const COL_TIMESUBMITTED         = 'timesubmitted';
 
     /**
-     * @inheritDoc
+     * @var int
      */
-    public function export_template_data(): array
-    {
-        return [
-            self::COL_ID     => $this->id,
-            self::COL_STATUS => lib::get_status_string($this->status),
-        ];
-    }
+    protected $assessor_submissionid;
+    /**
+     * @var string
+     */
+    protected $text;
+    /**
+     * @var int
+     */
+    protected $text_format;
+    /**
+     * @var int
+     */
+    protected $timesubmitted;
 }

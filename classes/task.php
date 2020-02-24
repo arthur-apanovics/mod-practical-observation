@@ -24,89 +24,6 @@ namespace mod_observation;
 
 use mod_observation\interfaces\templateable;
 
-class task_base extends db_model_base
-{
-    public const TABLE = OBSERVATION . '_task';
-
-    public const COL_OBSERVATIONID                  = 'observationid';
-    public const COL_NAME                           = 'name';
-    public const COL_INTRO_LEARNER                  = 'intro_learner';
-    public const COL_INTRO_LEARNER_FORMAT           = 'intro_learner_format';
-    public const COL_INTRO_OBSERVER                 = 'intro_observer';
-    public const COL_INTRO_OBSERVER_FORMAT          = 'intro_observer_format';
-    public const COL_INTRO_ASSESSOR                 = 'intro_assessor';
-    public const COL_INTRO_ASSESSOR_FORMAT          = 'intro_assessor_format';
-    /** @var string column - intro, assign observation - learner */
-    public const COL_INT_ASSIGN_OBS_LEARNER         = 'int_assign_obs_learner';
-    /** @var string column - intro, assign observation - learner_format */
-    public const COL_INT_ASSIGN_OBS_LEARNER_FORMAT  = 'int_assign_obs_learner_format';
-    /** @var string column - intro, assign observation - observer */
-    public const COL_INT_ASSIGN_OBS_OBSERVER        = 'int_assign_obs_observer';
-    /** @var string column - intro, assign observation - observer_format */
-    public const COL_INT_ASSIGN_OBS_OBSERVER_FORMAT = 'int_assign_obs_observer_format';
-    public const COL_SEQUENCE                       = 'sequence';
-
-    /**
-     * @var int
-     */
-    protected $observationid;
-    /**
-     * @var string
-     */
-    protected $name;
-    /**
-     * @var string
-     */
-    protected $intro_learner;
-    /**
-     * @var int
-     */
-    protected $intro_learner_format;
-    /**
-     * @var string
-     */
-    protected $intro_observer;
-    /**
-     * @var int
-     */
-    protected $intro_observer_format;
-    /**
-     * @var string
-     */
-    protected $intro_assessor;
-    /**
-     * @var int
-     */
-    protected $intro_assessor_format;
-    /**
-     * @var string
-     */
-    protected $int_assign_obs_learner;
-    /**
-     * @var int
-     */
-    protected $int_assign_obs_learner_format;
-    /**
-     * @var string
-     */
-    protected $int_assign_obs_observer;
-    /**
-     * @var int
-     */
-    protected $int_assign_obs_observer_format;
-    /**
-     * sequence number in activity
-     *
-     * @var int
-     */
-    protected $sequence;
-
-    public function get_formatted_name()
-    {
-        return format_string($this->name);
-    }
-}
-
 class task extends task_base implements templateable
 {
     /**
@@ -185,27 +102,5 @@ class task extends task_base implements templateable
     public function get_criteria()
     {
         return $this->criteria;
-    }
-
-    public function update_sequence_and_save(int $new_order)
-    {
-        // only update if new order differs
-        if ($this->sequence != $new_order)
-        {
-            $old_order = $this->sequence;
-            $related_task = task::read_by_condition(
-                [self::COL_OBSERVATIONID => $this->observationid, self::COL_SEQUENCE => $new_order],
-                true);
-
-            // move related task
-            $related_task->sequence = $old_order;
-            // move task in question
-            $this->sequence = $new_order;
-
-            $related_task->update();
-            $this->update();
-        }
-
-        return $this;
     }
 }

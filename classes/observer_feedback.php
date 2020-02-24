@@ -22,66 +22,7 @@
 
 namespace mod_observation;
 
-use coding_exception;
 use mod_observation\interfaces\templateable;
-
-class observer_feedback_base extends db_model_base
-{
-    public const TABLE = OBSERVATION . '_observer_feedback';
-
-    public const COL_ATTEMPTID             = 'attemptid';
-    public const COL_CRITERIAID            = 'criteriaid';
-    public const COL_OBSERVER_SUBMISSIONID = 'observer_submissionid';
-    public const COL_STATUS                = 'status';
-    public const COL_TEXT                  = 'text';
-    public const COL_TEXT_FORMAT           = 'text_format';
-
-    public const STATUS_NOT_COMPLETE = 'not_complete';
-    public const STATUS_COMPLETE     = 'complete';
-
-    /**
-     * @var int
-     */
-    protected $attemptid;
-    /**
-     * @var int
-     */
-    protected $criteriaid;
-    /**
-     * @var int
-     */
-    protected $observer_submissionid;
-    /**
-     * ENUM ('not_complete', 'complete')
-     *
-     * @var string
-     */
-    protected $status;
-    /**
-     * @var string
-     */
-    protected $text;
-    /**
-     * @var int
-     */
-    protected $text_format;
-
-    public function set(string $prop, $value, bool $save = false): db_model_base
-    {
-        if ($prop == self::COL_STATUS)
-        {
-            // validate status is correctly set
-            $allowed = [self::STATUS_COMPLETE, self::STATUS_NOT_COMPLETE];
-            if (!in_array($value, $allowed))
-            {
-                throw new coding_exception(
-                    sprintf("'$value' is not a valid value for '%s' in '%s'", self::COL_STATUS, get_class($this)));
-            }
-        }
-
-        return parent::set($prop, $value, $save);
-    }
-}
 
 class observer_feedback extends observer_feedback_base implements templateable
 {

@@ -22,56 +22,7 @@
 
 namespace mod_observation;
 
-use mod_observation;
 use mod_observation\interfaces\templateable;
-
-class observer_assignment_base extends db_model_base
-{
-    public const TABLE = OBSERVATION . '_observer_assignment';
-
-    public const COL_LEARNER_SUBMISSIONID = 'learner_submissionid';
-    public const COL_OBSERVERID           = 'observerid';
-    public const COL_CHANGE_EXPLAIN       = 'change_explain';
-    public const COL_OBSERVATION_ACCEPTED = 'observation_accepted';
-    public const COL_TIMEASSIGNED         = 'timeassigned';
-    public const COL_TOKEN                = 'token';
-    public const COL_ACTIVE               = 'active';
-
-    /**
-     * @var int
-     */
-    protected $learner_submissionid;
-    /**
-     * @var int
-     */
-    protected $observerid;
-    /**
-     * optional. used when observer change is requested
-     *
-     * @var string
-     */
-    protected $change_explain;
-    /**
-     * null if no decision made yet, false if observer declined observation, true if accepted and observer requirements confirmed
-     *
-     * @var bool
-     */
-    protected $observation_accepted;
-    /**
-     * @var int
-     */
-    protected $timeassigned;
-    /**
-     * @var string
-     */
-    protected $token;
-    /**
-     * indicates if this is the current assignment for related learner_submission
-     *
-     * @var bool
-     */
-    protected $active;
-}
 
 class observer_assignment extends observer_assignment_base implements templateable
 {

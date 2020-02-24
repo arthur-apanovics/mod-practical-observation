@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 use mod_observation\task;
+use mod_observation\task_base;
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -89,16 +90,24 @@ class mod_observation_external extends external_api
             ]);
     }
 
-    public static function task_update_sequence($taskid, $neworder)
+    public static function task_update_sequence($taskid, $newsequence)
     {
-        global $USER;
+        $clean_params = self::validate_parameters(
+            self::task_update_sequence_parameters(),
+            [
+                'taskid'      => $taskid,
+                'newsequence' => $newsequence
+            ]);
 
-        // $extracted_params = self::validate_parameters(self::task_update_sequence_parameters(), [$taskid, $neworder]);
+        $task = new task($taskid);
+        $task->update_sequence_and_save($newsequence);
 
-        $task = new \mod_observation\task($taskid);
-        $task->update_sequence_and_save($neworder);
-
-        return self::clean_returnvalue(self::task_update_sequence_returns(), [$task->get(task::COL_SEQUENCE)]);
+        return self::clean_returnvalue(
+            self::task_update_sequence_returns(),
+            [
+                'taskid'      => $task->get_id_or_null(),
+                'newsequence' => $task->get(task::COL_SEQUENCE)
+            ]);
     }
 
     /**
@@ -109,9 +118,9 @@ class mod_observation_external extends external_api
     {
         return new external_function_parameters(
             [
-                'taskid'   => new external_value(
+                'taskid'      => new external_value(
                     PARAM_INT, 'task id', true, null, NULL_NOT_ALLOWED),
-                'neworder' => new external_value(
+                'newsequence' => new external_value(
                     PARAM_INT, 'new order for observation task', true, null, NULL_NOT_ALLOWED),
             ]);
     }
@@ -135,7 +144,13 @@ class mod_observation_external extends external_api
     {
         return new external_single_structure(
             [
-                'neworder' => new external_value(PARAM_INT, 'new order of task', VALUE_DEFAULT, null),
+                'taskid'      => new external_value(PARAM_INT, 'task id', true, null, NULL_NOT_ALLOWED),
+                'newsequence' => new external_value(
+                    PARAM_INT,
+                    'new order of task',
+                    VALUE_DEFAULT,
+                    null,
+                    NULL_NOT_ALLOWED),
             ]);
     }
 

@@ -25,57 +25,6 @@ namespace mod_observation;
 use core_user;
 use mod_observation\interfaces\templateable;
 
-class observer_base extends db_model_base
-{
-    public const TABLE = OBSERVATION . '_observer';
-
-    public const COL_FULLNAME       = 'fullname';
-    public const COL_PHONE          = 'phone';
-    public const COL_EMAIL          = 'email';
-    public const COL_POSITION_TITLE = 'position_title';
-    public const COL_ADDED_BY       = 'added_by';
-    public const COL_TIMEADDED      = 'timeadded';
-    public const COL_MODIFIED_BY    = 'modified_by';
-    public const COL_TIMEMODIFIED   = 'timemodified';
-
-    /**
-     * @var string
-     */
-    protected $fullname;
-    /**
-     * @var string
-     */
-    protected $phone;
-    /**
-     * @var string
-     */
-    protected $email;
-    /**
-     * @var string
-     */
-    protected $position_title;
-    /**
-     * User id of learner that added this observer into system
-     *
-     * @var int
-     */
-    protected $added_by;
-    /**
-     * @var int
-     */
-    protected $timeadded;
-    /**
-     * Id of user that last modified observer record
-     *
-     * @var int
-     */
-    protected $modified_by;
-    /**
-     * @var int
-     */
-    protected $timemodified;
-}
-
 class observer extends observer_base implements templateable
 {
     public function __construct($id_or_record)

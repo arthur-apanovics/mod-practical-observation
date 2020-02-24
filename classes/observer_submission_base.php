@@ -22,23 +22,32 @@
 
 namespace mod_observation;
 
-use mod_observation\interfaces\templateable;
-
-class assessor_submission extends assessor_submission_base implements templateable
+class observer_submission_base extends db_model_base
 {
-    public function __construct($id_or_record)
-    {
-        parent::__construct($id_or_record);
-    }
+    public const TABLE = OBSERVATION . '_observer_submission';
+
+    public const COL_OBSERVER_ASSIGNMENTID = 'observer_assignmentid';
+    public const COL_TIMESTARTED           = 'timestarted';
+    public const COL_STATUS                = 'status';
+    public const COL_TIMESUBMITTED         = 'timesubmitted';
+
+    public const STATUS_NOT_COMPLETE = 'not_complete';
+    public const STATUS_COMPLETE     = 'complete';
 
     /**
-     * @inheritDoc
+     * @var int
      */
-    public function export_template_data(): array
-    {
-        return [
-            self::COL_ID     => $this->id,
-            self::COL_STATUS => lib::get_status_string($this->status),
-        ];
-    }
+    protected $observer_assignmentid;
+    /**
+     * @var int
+     */
+    protected $timestarted;
+    /**
+     * @var string
+     */
+    protected $status;
+    /**
+     * @var int
+     */
+    protected $timesubmitted; // todo not sure if needed here...
 }

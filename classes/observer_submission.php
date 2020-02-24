@@ -27,36 +27,6 @@ use dml_exception;
 use mod_observation\interfaces\templateable;
 use ReflectionException;
 
-class observer_submission_base extends db_model_base
-{
-    public const TABLE = OBSERVATION . '_observer_submission';
-
-    public const COL_OBSERVER_ASSIGNMENTID = 'observer_assignmentid';
-    public const COL_TIMESTARTED           = 'timestarted';
-    public const COL_STATUS                = 'status';
-    public const COL_TIMESUBMITTED         = 'timesubmitted';
-
-    public const STATUS_NOT_COMPLETE = 'not_complete';
-    public const STATUS_COMPLETE     = 'complete';
-
-    /**
-     * @var int
-     */
-    protected $observer_assignmentid;
-    /**
-     * @var int
-     */
-    protected $timestarted;
-    /**
-     * @var string
-     */
-    protected $status;
-    /**
-     * @var int
-     */
-    protected $timesubmitted; // todo not sure if needed here...
-}
-
 class observer_submission extends observer_submission_base implements templateable
 {
     /* NOTE: observer_feedback is attached to criteria class */

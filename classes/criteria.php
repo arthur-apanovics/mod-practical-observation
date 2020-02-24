@@ -24,40 +24,6 @@ namespace mod_observation;
 
 use mod_observation\interfaces\templateable;
 
-class criteria_base extends db_model_base
-{
-    public const TABLE = OBSERVATION . '_criteria';
-
-    public const COL_TASKID             = 'taskid';
-    public const COL_NAME               = 'name';
-    public const COL_DESCRIPTION        = 'description';
-    public const COL_DESCRIPTION_FORMAT = 'description_format';
-    public const COL_SEQUENCE           = 'sequence';
-
-    /**
-     * @var int
-     */
-    protected $taskid;
-    /**
-     * @var string
-     */
-    protected $name;
-    /**
-     * @var string
-     */
-    protected $description;
-    /**
-     * @var int
-     */
-    protected $description_format;
-    /**
-     * sequence number in task
-     *
-     * @var int
-     */
-    protected $sequence;
-}
-
 class criteria extends criteria_base implements templateable
 {
     /**

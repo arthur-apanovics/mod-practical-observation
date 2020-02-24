@@ -22,23 +22,41 @@
 
 namespace mod_observation;
 
-use mod_observation\interfaces\templateable;
-
-class assessor_submission extends assessor_submission_base implements templateable
+class learner_attempt_base extends db_model_base
 {
-    public function __construct($id_or_record)
-    {
-        parent::__construct($id_or_record);
-    }
+    public const TABLE = OBSERVATION . '_learner_attempt';
+
+    public const COL_LEARNER_SUBMISSIONID = 'learner_submissionid';
+    public const COL_TIMESTARTED          = 'timestarted';
+    public const COL_TIMESUBMITTED        = 'timesubmitted';
+    public const COL_TEXT                 = 'text';
+    public const COL_TEXT_FORMAT          = 'text_format';
+    public const COL_ATTEMPT_NUMBER       = 'attempt_number';
 
     /**
-     * @inheritDoc
+     * @var int
      */
-    public function export_template_data(): array
-    {
-        return [
-            self::COL_ID     => $this->id,
-            self::COL_STATUS => lib::get_status_string($this->status),
-        ];
-    }
+    protected $learner_submissionid;
+    /**
+     * @var int
+     */
+    protected $timestarted;
+    /**
+     * @var int
+     */
+    protected $timesubmitted;
+    /**
+     * @var string
+     */
+    protected $text;
+    /**
+     * @var int
+     */
+    protected $text_format;
+    /**
+     * attempt number in order of sequence.
+     *
+     * @var int
+     */
+    protected $attempt_number;
 }

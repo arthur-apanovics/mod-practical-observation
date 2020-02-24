@@ -22,23 +22,36 @@
 
 namespace mod_observation;
 
-use mod_observation\interfaces\templateable;
-
-class assessor_submission extends assessor_submission_base implements templateable
+class criteria_base extends db_model_base
 {
-    public function __construct($id_or_record)
-    {
-        parent::__construct($id_or_record);
-    }
+    public const TABLE = OBSERVATION . '_criteria';
+
+    public const COL_TASKID             = 'taskid';
+    public const COL_NAME               = 'name';
+    public const COL_DESCRIPTION        = 'description';
+    public const COL_DESCRIPTION_FORMAT = 'description_format';
+    public const COL_SEQUENCE           = 'sequence';
 
     /**
-     * @inheritDoc
+     * @var int
      */
-    public function export_template_data(): array
-    {
-        return [
-            self::COL_ID     => $this->id,
-            self::COL_STATUS => lib::get_status_string($this->status),
-        ];
-    }
+    protected $taskid;
+    /**
+     * @var string
+     */
+    protected $name;
+    /**
+     * @var string
+     */
+    protected $description;
+    /**
+     * @var int
+     */
+    protected $description_format;
+    /**
+     * sequence number in task
+     *
+     * @var int
+     */
+    protected $sequence;
 }
