@@ -4,20 +4,26 @@
         <div class="obs-task-list">
             <h4 class="title-main" style="margin-top: 0;">{{name}}</h4>
             <div class="actions">
-                <span class="plus">+</span>
-                <span class="edit">Edit</span>
-                <span>Delete</span>
+                <a href="{{{module_root}}}/manage_criteria.php?id={{cmid}}&taskid={{id}}" class="plus">
+                Add Criteria
+                </a>
+                <a href="{{{module_root}}}/manage_task.php?id={{cmid}}&taskid={{id}}" class="edit">
+                Edit
+                </a>
+                <a href="{{{module_root}}}/manage_task.php?id={{cmid}}&taskid={{id}}&delete=1">
+                Delete
+                </a>
             </div>
-        </div>
-        <div class="subTaskList">
-            <ol class="nestedCriteria">
-                {{#criteria}}
-                    {{> mod_observation/comp_criteria_manage}}
+            <div class="subTaskList">
+                <ol class="nestedCriteria">
+                    {{#criteria}}
+                        {{> mod_observation/comp_criteria_manage}}
+                    {{/criteria}}
+                </ol>
+                {{^criteria}}
+                    {{#str}}no_criteria, observation{{/str}}
                 {{/criteria}}
-            </ol>
-            {{^criteria}}
-                add btn here
-            {{/criteria}}
+            </div>
         </div>
     </div>
 </li>

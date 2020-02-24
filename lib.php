@@ -87,7 +87,7 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
     global $USER;
 
     $data = (array) $observation;
-    $now  = time();
+    $now = time();
     $base = new observation_base();
 
     $base->set($base::COL_COURSE, $data[$base::COL_COURSE]);
@@ -102,22 +102,28 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
     $base->set($base::COL_TIMEMODIFIED, $now);
     $base->set($base::COL_LASTMODIFIEDBY, $USER->id);
 
-    $base->set($base::COL_DEF_I_TASK_OBSERVER, $data[$base::COL_DEF_I_TASK_OBSERVER]['text']);
-    $base->set($base::COL_DEF_I_TASK_OBSERVER_FORMAT, $data[$base::COL_DEF_I_TASK_OBSERVER]['format']);
-    $base->set($base::COL_DEF_I_TASK_ASSESSOR, $data[$base::COL_DEF_I_TASK_ASSESSOR]['text']);
-    $base->set($base::COL_DEF_I_TASK_ASSESSOR_FORMAT, $data[$base::COL_DEF_I_TASK_ASSESSOR]['format']);
-    $base->set($base::COL_DEF_I_ASS_OBS_LEARNER, $data[$base::COL_DEF_I_ASS_OBS_LEARNER]['text']);
-    $base->set($base::COL_DEF_I_ASS_OBS_LEARNER_FORMAT, $data[$base::COL_DEF_I_ASS_OBS_LEARNER]['format']);
-    $base->set($base::COL_DEF_I_ASS_OBS_OBSERVER, $data[$base::COL_DEF_I_ASS_OBS_OBSERVER]['text']);
-    $base->set($base::COL_DEF_I_ASS_OBS_OBSERVER_FORMAT, $data[$base::COL_DEF_I_ASS_OBS_OBSERVER]['format']);
+    $intros = [
+            $base::COL_DEF_I_TASK_LEARNER,
+            $base::COL_DEF_I_TASK_OBSERVER,
+            $base::COL_DEF_I_TASK_ASSESSOR,
+            $base::COL_DEF_I_ASS_OBS_LEARNER,
+            $base::COL_DEF_I_ASS_OBS_OBSERVER,
+    ];
+
+    // set the values
+    foreach ($intros as $intro)
+    {
+        $format = "{$intro}_FORMAT";
+        $base->set($intro, $data[$intro]['text']);
+        $base->set($format, $data[$intro]['format']);
+    }
 
     $base->set($base::COL_COMPLETION_TASKS, $data[$base::COL_COMPLETION_TASKS]);
-
     $base->set($base::COL_DELETED, 0);
 
     $base->create();
 
-    return $base->get_id_or_null();//todo test if create() updated object reference
+    return $base->get_id_or_null();
 }
 
 /**
@@ -203,7 +209,7 @@ function observation_delete_instance($id)
  */
 function observation_user_outline($course, $user, $mod, $observation) // TODO: User outline?
 {
-    $return       = new stdClass();
+    $return = new stdClass();
     $return->time = 0;
     $return->info = '';
     return $return;
@@ -379,7 +385,7 @@ function observation_get_file_areas($course, $cm, $context)
 {
     $areas = [];
 
-    $areas[observation_base::FILE_AREA_TRAINEE]  = get_string(observation_base::FILE_AREA_TRAINEE, OBSERVATION);
+    $areas[observation_base::FILE_AREA_TRAINEE] = get_string(observation_base::FILE_AREA_TRAINEE, OBSERVATION);
     $areas[observation_base::FILE_AREA_OBSERVER] = get_string(observation_base::FILE_AREA_OBSERVER, OBSERVATION);
     $areas[observation_base::FILE_AREA_ASSESSOR] = get_string(observation_base::FILE_AREA_ASSESSOR, OBSERVATION);
 
@@ -415,8 +421,8 @@ function observation_get_file_info(
         return null;
     }
 
-    $url_base  = $CFG->wwwroot . '/pluginfile.php';
-    $fs        = get_file_storage();
+    $url_base = $CFG->wwwroot . '/pluginfile.php';
+    $fs = get_file_storage();
     $file_path = is_null($file_path)
         ? '/'
         : $file_path;
@@ -483,9 +489,9 @@ function observation_pluginfile(
         return false;
     }
 
-    $fs            = get_file_storage();
+    $fs = get_file_storage();
     $relative_path = implode('/', $args);
-    $full_path     = "/$context->id/" . OBSERVATION_MODULE . "/$filearea/$relative_path";
+    $full_path = "/$context->id/" . OBSERVATION_MODULE . "/$filearea/$relative_path";
     if ((!$file = $fs->get_file_by_hash(sha1($full_path))) || $file->is_directory())
     {
         send_file_not_found();

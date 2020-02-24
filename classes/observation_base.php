@@ -28,25 +28,25 @@ class observation_base extends db_model_base
 
     public const TABLE = 'observation';
 
-    public const COL_COURSE                        = 'course';
-    public const COL_NAME                          = 'name';
-    public const COL_INTRO                         = 'intro';
-    public const COL_INTROFORMAT                   = 'introformat';
-    public const COL_TIMEOPEN                      = 'timeopen';
-    public const COL_TIMECLOSE                     = 'timeclose';
-    public const COL_TIMECREATED                   = 'timecreated';
-    public const COL_TIMEMODIFIED                  = 'timemodified';
-    public const COL_LASTMODIFIEDBY                = 'lastmodifiedby';
-    public const COL_DELETED                       = 'deleted';
-    public const COL_COMPLETION_TASKS              = 'completion_tasks';
+    public const COL_COURSE           = 'course';
+    public const COL_NAME             = 'name';
+    public const COL_INTRO            = 'intro';
+    public const COL_INTROFORMAT      = 'introformat';
+    public const COL_TIMEOPEN         = 'timeopen';
+    public const COL_TIMECLOSE        = 'timeclose';
+    public const COL_TIMECREATED      = 'timecreated';
+    public const COL_TIMEMODIFIED     = 'timemodified';
+    public const COL_LASTMODIFIEDBY   = 'lastmodifiedby';
+    public const COL_DELETED          = 'deleted';
+    public const COL_COMPLETION_TASKS = 'completion_tasks';
     // default intro's:
-    public const COL_DEF_I_TASK_LEARNER           = 'def_i_task_learner';
-    public const COL_DEF_I_TASK_OBSERVER           = 'def_i_task_observer';
-    public const COL_DEF_I_TASK_ASSESSOR           = 'def_i_task_assessor';
-    public const COL_DEF_I_ASS_OBS_LEARNER         = 'def_i_ass_obs_learner';
-    public const COL_DEF_I_ASS_OBS_OBSERVER        = 'def_i_ass_obs_observer';
+    public const COL_DEF_I_TASK_LEARNER     = 'def_i_task_learner';
+    public const COL_DEF_I_TASK_OBSERVER    = 'def_i_task_observer';
+    public const COL_DEF_I_TASK_ASSESSOR    = 'def_i_task_assessor';
+    public const COL_DEF_I_ASS_OBS_LEARNER  = 'def_i_ass_obs_learner';
+    public const COL_DEF_I_ASS_OBS_OBSERVER = 'def_i_ass_obs_observer';
     // formats for default intro's:
-    public const COL_DEF_I_TASK_LEARNER_FORMAT    = 'def_i_task_learner_format';
+    public const COL_DEF_I_TASK_LEARNER_FORMAT     = 'def_i_task_learner_format';
     public const COL_DEF_I_TASK_OBSERVER_FORMAT    = 'def_i_task_observer_format';
     public const COL_DEF_I_TASK_ASSESSOR_FORMAT    = 'def_i_task_assessor_format';
     public const COL_DEF_I_ASS_OBS_LEARNER_FORMAT  = 'def_i_ass_obs_learner_format';
@@ -179,5 +179,42 @@ class observation_base extends db_model_base
     public function get_formatted_name()
     {
         return format_string($this->name);
+    }
+
+    /**
+     * @return array ['column_name' =>
+ *                     [
+     *                  'text' => 'default_value',
+     *                  'format' => 'default_value'
+*                      ]]
+     */
+    public function get_form_defaults_for_new_task()
+    {
+        return [
+            task::COL_INTRO_LEARNER => [
+                'text'   => $this->def_i_task_learner,
+                'format' => $this->def_i_task_learner_format
+            ],
+
+            task::COL_INTRO_OBSERVER => [
+                'text'   => $this->def_i_task_observer,
+                'format' => $this->def_i_task_observer_format
+            ],
+
+            task::COL_INTRO_ASSESSOR => [
+                'text'   => $this->def_i_task_assessor,
+                'format' => $this->def_i_task_assessor_format
+            ],
+
+            task::COL_INT_ASSIGN_OBS_LEARNER => [
+                'text'   => $this->def_i_ass_obs_learner,
+                'format' => $this->def_i_ass_obs_learner_format
+            ],
+
+            task::COL_INT_ASSIGN_OBS_OBSERVER => [
+                'text'   => $this->def_i_ass_obs_observer,
+                'format' => $this->def_i_ass_obs_observer_format
+            ],
+        ];
     }
 }

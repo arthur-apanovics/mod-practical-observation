@@ -89,4 +89,29 @@ class lib
 
         return null;
     }
+
+    /**
+     * Sort provided array by it's sequence number
+     *
+     * @param task[]|criteria[] $task_or_criteria_array
+     * @return mixed
+     */
+    public static function sort_by_sequence(array $task_or_criteria_array)
+    {
+        usort($task_or_criteria_array, [self::class, 'compare_sequence']);
+
+        return $task_or_criteria_array;
+    }
+
+    /**
+     * Used for sorting by sequence
+     *
+     * @param array $a
+     * @param array $b
+     * @return bool
+     */
+    public static function compare_sequence(array $a, array $b)
+    {
+        return $a['sequence'] > $b['sequence'];
+    }
 }

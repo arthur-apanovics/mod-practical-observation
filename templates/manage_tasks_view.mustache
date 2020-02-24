@@ -10,6 +10,10 @@
     </div>
 </div>
 <div class="btn-wrapper">
-    <a href="{{{module_root}}}/manage_task.php?id={{cmid}}" class="btn btn-primary" id="addButton">Add Task</a>
-    <a href="{{{module_root}}}/view.php?id={{cmid}}" class="btn btn-secondary">Back to activity</a>
+    <a href="{{{module_root}}}/manage_task.php?id={{cmid}}" class="btn btn-primary" id="addButton">
+    {{#str}}add_task, observation{{/str}}
+    </a>
+    <a href="{{{module_root}}}/view.php?id={{cmid}}" class="btn btn-secondary">
+    {{#str}}back_to_activity, observation{{/str}}
+    </a>
 </div>

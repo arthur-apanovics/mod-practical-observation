@@ -26,20 +26,20 @@ class task_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_task';
 
-    public const COL_OBSERVATIONID                  = 'observationid';
-    public const COL_NAME                           = 'name';
-    public const COL_INTRO_LEARNER                  = 'intro_learner';
-    public const COL_INTRO_LEARNER_FORMAT           = 'intro_learner_format';
-    public const COL_INTRO_OBSERVER                 = 'intro_observer';
-    public const COL_INTRO_OBSERVER_FORMAT          = 'intro_observer_format';
-    public const COL_INTRO_ASSESSOR                 = 'intro_assessor';
-    public const COL_INTRO_ASSESSOR_FORMAT          = 'intro_assessor_format';
+    public const COL_OBSERVATIONID         = 'observationid';
+    public const COL_NAME                  = 'name';
+    public const COL_INTRO_LEARNER         = 'intro_learner';
+    public const COL_INTRO_LEARNER_FORMAT  = 'intro_learner_format';
+    public const COL_INTRO_OBSERVER        = 'intro_observer';
+    public const COL_INTRO_OBSERVER_FORMAT = 'intro_observer_format';
+    public const COL_INTRO_ASSESSOR        = 'intro_assessor';
+    public const COL_INTRO_ASSESSOR_FORMAT = 'intro_assessor_format';
     /** @var string column - intro, assign observation - learner */
-    public const COL_INT_ASSIGN_OBS_LEARNER         = 'int_assign_obs_learner';
+    public const COL_INT_ASSIGN_OBS_LEARNER = 'int_assign_obs_learner';
     /** @var string column - intro, assign observation - learner_format */
-    public const COL_INT_ASSIGN_OBS_LEARNER_FORMAT  = 'int_assign_obs_learner_format';
+    public const COL_INT_ASSIGN_OBS_LEARNER_FORMAT = 'int_assign_obs_learner_format';
     /** @var string column - intro, assign observation - observer */
-    public const COL_INT_ASSIGN_OBS_OBSERVER        = 'int_assign_obs_observer';
+    public const COL_INT_ASSIGN_OBS_OBSERVER = 'int_assign_obs_observer';
     /** @var string column - intro, assign observation - observer_format */
     public const COL_INT_ASSIGN_OBS_OBSERVER_FORMAT = 'int_assign_obs_observer_format';
     public const COL_SEQUENCE                       = 'sequence';
@@ -121,25 +121,88 @@ class task_base extends db_model_base
         return $this->get_last_sequence_number_in_activity() + 1;
     }
 
-    public function update_sequence_and_save(int $new_order)
+    public function update_sequence_and_save(int $new_sequence)
     {
         // only update if new order differs
-        if ($this->sequence != $new_order)
+        if ($this->sequence != $new_sequence)
         {
             $old_order = $this->sequence;
             $related_task = task::read_by_condition(
-                [self::COL_OBSERVATIONID => $this->observationid, self::COL_SEQUENCE => $new_order],
+                [self::COL_OBSERVATIONID => $this->observationid, self::COL_SEQUENCE => $new_sequence],
                 true);
 
             // move related task
             $related_task->sequence = $old_order;
             // move task in question
-            $this->sequence = $new_order;
+            $this->sequence = $new_sequence;
 
             $related_task->update();
             $this->update();
         }
 
         return $this;
+    }
+
+    public function delete()
+    {
+        $sql = 'SELECT * 
+                FROM {:task_table}
+                WHERE observationid = :observationid
+                AND sequence > :deleted_sequence';
+        $to_update = task_base::read_all_by_sql(
+            $sql,
+            [
+                'task_table'       => self::TABLE,
+                'observationid'    => $this->observationid,
+                'deleted_sequence' => $this->sequence,
+            ]);
+
+        $result = parent::delete();
+
+        // update sequence number for related records
+        foreach ($to_update as $task_base)
+        {
+            $updated_sequence = $task_base->get($task_base::COL_SEQUENCE) - 1;
+            $task_base->set(task::COL_SEQUENCE, $updated_sequence);
+
+            $task_base->update();
+        }
+
+        return $result;
+    }
+
+    public function get_moodle_form_data()
+    {
+        return [
+            self::COL_OBSERVATIONID => $this->observationid,
+            self::COL_NAME          => $this->name,
+            self::COL_SEQUENCE      => $this->sequence,
+
+            // editors
+            self::COL_INTRO_LEARNER => [
+                'text'   => $this->intro_learner,
+                'format' => $this->intro_learner_format
+            ],
+
+            self::COL_INTRO_OBSERVER => [
+                'text'   => $this->intro_observer,
+                'format' => $this->intro_observer_format
+            ],
+
+            self::COL_INTRO_ASSESSOR => [
+                'text'   => $this->intro_assessor,
+                'format' => $this->intro_assessor_format
+            ],
+
+            self::COL_INT_ASSIGN_OBS_LEARNER => [
+                'text'   => $this->int_assign_obs_learner,
+                'format' => $this->int_assign_obs_learner_format
+            ],
+
+            self::COL_INT_ASSIGN_OBS_OBSERVER => [
+                'text'   => $this->int_assign_obs_observer,
+                'format' => $this->int_assign_obs_observer_format
+            ],
+        ];
     }
 }

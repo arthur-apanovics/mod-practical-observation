@@ -36,10 +36,9 @@ class observation_task_form extends moodleform
 {
     function definition()
     {
-        global $CFG;
-
         $mform =& $this->_form;
-        $cmid = $this->_customdata['id'];
+        $cmid = $this->_customdata['cmid'];
+        $taskid = $this->_customdata['taskid'];
         $cm = get_coursemodule_from_id(OBSERVATION, $cmid);
         $context = context_module::instance($cm->id);
 
@@ -68,14 +67,18 @@ class observation_task_form extends moodleform
                     'subdirs'  => false
                 ]);
             $mform->addHelpButton($element, $element, OBSERVATION);
+            $mform->addRule($element, get_string('required'), 'required', null);
             $mform->setType($element, PARAM_RAW);// no XSS prevention here, users must be trusted
         }
 
-        $mform->addElement('hidden', 'cmid');
-        $mform->setType('cmid', PARAM_INT);
-        $mform->setDefault('cmid', $cmid);
+        // CMID
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
+        $mform->setDefault('id', $cmid);
+        // TASK ID
+        $mform->addElement('hidden', 'taskid');
+        $mform->setType('taskid', PARAM_INT);
+        $mform->setDefault('taskid', $taskid);
 
         $this->add_action_buttons(true);
     }

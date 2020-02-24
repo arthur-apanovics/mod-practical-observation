@@ -99,7 +99,7 @@ class mod_observation_external extends external_api
                 'newsequence' => $newsequence
             ]);
 
-        $task = new task($taskid);
+        $task = new task_base($taskid);
         $task->update_sequence_and_save($newsequence);
 
         return self::clean_returnvalue(

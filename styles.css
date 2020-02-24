@@ -329,7 +329,6 @@ body.path-mod-observation #page .obs-task-list {
 }
 body.path-mod-observation #page .actions {
   margin-left: auto;
-  cursor: pointer;
 }
 body.path-mod-observation #page .sub-list-actions {
   margin-right: -9px;

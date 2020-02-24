@@ -158,6 +158,25 @@ class mod_observation_renderer extends plugin_renderer_base
     // }
 
     /**
+     * Sets 'confirm' as a boolean in GET request to check result
+     *
+     * @param string     $confirmation_text
+     * @param array|null $additional_params
+     * @throws coding_exception
+     */
+    public function echo_confirmation_page_and_die(string $confirmation_text, array $additional_params = null)
+    {
+        $confirm_url = $this->page->url;
+        $confirm_url->params(['confirm' => 1, 'sesskey' => sesskey()] + $additional_params);
+
+        echo $this->output->header();
+        echo $this->output->confirm($confirmation_text, $confirm_url, $this->page->url);
+        echo $this->output->footer();
+
+        die();
+    }
+
+    /**
      * Render main activity view
      *
      * @param observation    $observation
@@ -168,7 +187,7 @@ class mod_observation_renderer extends plugin_renderer_base
     public function activity_view(observation $observation, context_module $context)
     {
         $template_data = $observation->export_template_data();
-        $out           = '';
+        $out = '';
 
         $out .= $this->render_from_template(OBSERVATION_MODULE . '/activity_view', $template_data);
 
@@ -178,7 +197,7 @@ class mod_observation_renderer extends plugin_renderer_base
     public function manage_view(observation $observation, context_module $context)
     {
         $template_data = $observation->export_template_data();
-        $out           = '';
+        $out = '';
 
         $out .= $this->render_from_template(OBSERVATION_MODULE . '/manage_tasks_view', $template_data);
 

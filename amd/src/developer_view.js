@@ -8,11 +8,20 @@ define(['jquery', 'core/ajax', 'core/notification', 'mod_observation/Sortable'],
 
         return {
             init: function () {
-                var updateSequenceAjax = function (event) {
-                    var oldIndex = event.oldIndex;
-                    var newIndex = event.newIndex;
+                var sortList = function (listElement) {
+                    $(listElement).find("li").sort(sort_li).appendTo(listElement);
 
-                    if (oldIndex === newIndex) {
+                    function sort_li(a, b) {
+                        return ($(b).data('sequence')) < ($(a).data('sequence')) ? 1 : -1;
+                    }
+                };
+
+                var updateSequenceAjax = function (event) {
+                    // sequence is NOT zero indexed
+                    var oldSequence = event.oldIndex + 1;
+                    var newSequence = event.newIndex + 1;
+
+                    if (oldSequence === newSequence) {
                         // nothing changed
                         return;
                     }
@@ -20,9 +29,12 @@ define(['jquery', 'core/ajax', 'core/notification', 'mod_observation/Sortable'],
                     var methodName = null;
                     var args = null;
                     switch (event.target.id) {
-                        default:
-                            debugger;
+                        case 'mainTaskList':
+                            methodName = 'mod_observation_task_update_sequence';
+                            args = {taskid: event.item.getAttribute('taskid'), newsequence: newSequence};
                             break;
+                        default:
+                            throw new Error('Unsupported element');
                     }
 
 
@@ -30,7 +42,11 @@ define(['jquery', 'core/ajax', 'core/notification', 'mod_observation/Sortable'],
                         methodname: methodName,
                         args: args,
                         done: console.info,
-                        fail: console.error
+                        fail: function (ex) {
+                            // undo re-order
+                            sortList(event.target);
+                            notification.exception(ex);
+                        }
                     }], true, true);
                 };
 

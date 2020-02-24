@@ -36,6 +36,10 @@ $string['pluginname'] = 'Observation';
 $string['observation'] = 'Observation';
 $string['accessdenied'] = 'Access denied';
 
+// GENERAL
+$string['back_to_activity'] =  'Back to activity';
+$string['observation'] = 'Observation';
+
 // SETTINGS FORM
 $string['observation:addinstance'] = 'Add instance';
 $string['observation:evaluate'] = 'Evaluate';
@@ -79,13 +83,6 @@ $string['int_assign_obs_learner_help'] = 'Content that will appear on "Assign ob
 $string['int_assign_obs_observer'] ='Observer requirements - <b>Observer</b>';
 $string['int_assign_obs_observer_help'] = 'Criteria that an observer has to confirm they meet before they\'re able to observe a task.';
 
-$string['observation'] = 'Observation';
-// $string['observationfieldset'] = 'Custom example fieldset';
-// $string['competencies'] = 'Competencies';
-// $string['competencies_help'] = 'Here you can select which of the assigned course competencies should be marked as proficient upon completion of this task.
-//
-// Multiple competencies can be selected by holding down \<CTRL\> and and selecting the criterias.';
-
 // STATUS STRINGS
 $string['status:not_complete'] = 'Not complete';
 $string['status:complete'] = 'Complete';
@@ -102,23 +99,22 @@ $string['status:assessment_incomplete'] = 'Assessment not complete';
 $string['manage:no_tasks'] = 'This activity does not have any tasks, use button below to add new tasks.';
 $string['manage:edit_tasks'] = 'Edit tasks';
 
-// $string['confirmtaskdelete'] = 'Are you sure you want to delete this task?';
-// $string['confirmcriteriadelete'] = 'Are you sure you want to delete this criteria?';
-// $string['deletecriteria'] = 'Delete criteria';
-// $string['deletetask'] = 'Delete task';
-// $string['taskdeleted'] = 'Task deleted';
-$string['addtask'] = 'Add task';
-$string['edittask'] = 'Edit task';
-// $string['error:observationnotfound'] = 'Observation not found';
+$string['add_task'] = 'Add task';
+$string['edit_task'] = 'Edit task';
+$string['confirm_delete_task'] = 'Are you sure you want to delete task "{$a}"?<br>Warning: this operation is not reversable!';
+$string['deleted_task'] = 'Task "{$a}" deleted';
+
 $string['assessstudents'] = 'Assess students';
 $string['criteriadeleted'] = 'Criteria deleted';
-// $string['manage'] = 'Manage';
 
 $string['no_tasks'] = 'There are currently no tasks in this activity.';
 
+$string['report'] = 'Report';
 
 // $string['printthisobservation'] = 'Print this Observation';
-$string['report'] = 'Report';
+// $string['confirmcriteriadelete'] = 'Are you sure you want to delete this criteria?';
+// $string['error:observationnotfound'] = 'Observation not found';
+// $string['manage'] = 'Manage';
 
 // $string['submissiondate'] = 'Observation submitted on {$a}';
 // $string['nosubmissiondate'] = 'Observation has not been submitted yet';
@@ -127,3 +123,9 @@ $string['report'] = 'Report';
 // $string['requests_disabled:title'] = 'You cannot assign new emails at the moment';
 // $string['requestobservation'] = 'Request observation';
 // $string['userxfeedback'] = '{$a}\'s Feedback';
+
+// $string['observationfieldset'] = 'Custom example fieldset';
+// $string['competencies'] = 'Competencies';
+// $string['competencies_help'] = 'Here you can select which of the assigned course competencies should be marked as proficient upon completion of this task.
+//
+// Multiple competencies can be selected by holding down \<CTRL\> and and selecting the criterias.';
