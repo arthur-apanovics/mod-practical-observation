@@ -104,6 +104,25 @@ class task_base extends db_model_base
         return format_string($this->name);
     }
 
+    /**
+     * Mainly used when updating task from moodle form
+     *
+     * @return int
+     * @throws \dml_exception
+     * @throws \coding_exception
+     */
+    public function get_current_sequence_number(): int
+    {
+        global $DB;
+
+        if (is_null($this->id) || $this->id < 1)
+        {
+            throw new \coding_exception(sprintf('Cannot get sequence number of un-initialized class %s', self::class));
+        }
+
+        return $DB->get_field(self::TABLE, self::COL_SEQUENCE, [self::COL_ID => $this->id], MUST_EXIST);
+    }
+
     public function get_last_sequence_number_in_activity()
     {
         global $DB;
@@ -146,7 +165,7 @@ class task_base extends db_model_base
     public function delete()
     {
         $sql = 'SELECT * 
-                FROM {:task_table}
+                FROM {' . self::TABLE . '}
                 WHERE observationid = :observationid
                 AND sequence > :deleted_sequence';
         $to_update = task_base::read_all_by_sql(

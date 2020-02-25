@@ -63,6 +63,7 @@
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="description_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="feedback_required" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If set, observer has to provide written feedback along with marking"/>
         <FIELD NAME="sequence" TYPE="int" LENGTH="9" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="sequence number in task"/>
       </FIELDS>
       <KEYS>

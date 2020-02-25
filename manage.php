@@ -43,6 +43,8 @@ $PAGE->set_url(OBSERVATION_MODULE_PATH . 'manage.php', array('id' => $cm->id));
 $PAGE->set_title($name);
 $PAGE->set_heading(format_string($course->fullname));
 
+$PAGE->add_body_class('observation-manage');
+
 $PAGE->requires->js_call_amd(OBSERVATION_MODULE . '/developer_view', 'init');
 
 // Output starts here.

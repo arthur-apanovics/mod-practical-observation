@@ -1,29 +1,39 @@
 <li class="task list-group-item" taskid="{{id}}" order="{{order}}">
     <div class="page-container">
-        <span class="glyphicon glyphicon-move my-handle" aria-hidden="true"></span>
-        <div class="obs-task-list">
-            <h4 class="title-main" style="margin-top: 0;">{{name}}</h4>
-            <div class="actions">
-                <a href="{{{module_root}}}/manage_criteria.php?id={{cmid}}&taskid={{id}}" class="plus">
-                Add Criteria
-                </a>
-                <a href="{{{module_root}}}/manage_task.php?id={{cmid}}&taskid={{id}}" class="edit">
-                Edit
-                </a>
-                <a href="{{{module_root}}}/manage_task.php?id={{cmid}}&taskid={{id}}&delete=1">
-                Delete
-                </a>
-            </div>
-            <div class="subTaskList">
-                <ol class="nestedCriteria">
-                    {{#criteria}}
-                        {{> mod_observation/comp_criteria_manage}}
-                    {{/criteria}}
-                </ol>
-                {{^criteria}}
-                    {{#str}}no_criteria, observation{{/str}}
-                {{/criteria}}
+
+        <div class="task-wrapper">
+            <span class="glyphicon glyphicon-move my-handle" aria-hidden="true"></span>
+            <div class="obs-task-list">
+                <h4 class="title-main" style="margin-top: 0;">{{name}}</h4>
+                <div class="actions">
+                    <a href="{{{module_root}}}/manage_criteria.php?id={{cmid}}&taskid={{id}}" class="plus">
+                    <span class="glyphicon glyphicon-plus"
+                          title="{{#str}}add_criteria, observation{{/str}}"></span>
+                    </a>
+                    <a href="{{{module_root}}}/manage_task.php?id={{cmid}}&taskid={{id}}" class="edit">
+                    <span class="glyphicon glyphicon-pencil"
+                          title="{{#str}}edit_task, observation{{/str}}"></span>
+                    </a>
+                    <a href="{{{module_root}}}/manage_task.php?id={{cmid}}&taskid={{id}}&delete=1">
+                    <span class="glyphicon glyphicon-trash"
+                          title="{{#str}}delete_task, observation{{/str}}"></span>
+                    </a>
+                </div>
             </div>
         </div>
+
+        <div class="criteria-list">
+            <ol class="nestedCriteria">
+                {{#criteria}}
+                    {{> mod_observation/comp_criteria_manage}}
+                {{/criteria}}
+            </ol>
+            {{^criteria}}
+                <span style="margin-left: 1em; font-weight: normal;">
+                    {{#str}}no_criteria, observation{{/str}}
+                </span>
+            {{/criteria}}
+        </div>
+
     </div>
 </li>

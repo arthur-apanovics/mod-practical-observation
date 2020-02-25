@@ -51,10 +51,12 @@ class criteria extends criteria_base implements templateable
         }
 
         return [
-            self::COL_ID          => $this->id,
-            self::COL_NAME        => $this->name,
-            self::COL_DESCRIPTION => $this->description,
-            self::COL_SEQUENCE    => $this->sequence,
+            self::COL_ID                => $this->id,
+            self::COL_TASKID            => $this->taskid,
+            self::COL_NAME              => $this->name,
+            self::COL_DESCRIPTION       => $this->description,
+            self::COL_FEEDBACK_REQUIRED => $this->feedback_required,
+            self::COL_SEQUENCE          => $this->sequence,
 
             'observer_feedback' => $observer_feedback_data
         ];

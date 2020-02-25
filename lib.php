@@ -113,7 +113,7 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
     // set the values
     foreach ($intros as $intro)
     {
-        $format = "{$intro}_FORMAT";
+        $format = "{$intro}_format";
         $base->set($intro, $data[$intro]['text']);
         $base->set($format, $data[$intro]['format']);
     }

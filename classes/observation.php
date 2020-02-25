@@ -161,7 +161,7 @@ class observation extends observation_base implements templateable
             $tasks[] = $task->export_template_data();
         }
         // sort tasks based on sequence (tasks should be sorted in constructor but need to be sure)
-        $tasks = lib::sort_by_sequence($tasks);
+        $tasks = lib::sort_by_field($tasks, task::COL_SEQUENCE);
 
         $context = context_module::instance($this->cm->id);
 

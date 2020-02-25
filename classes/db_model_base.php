@@ -58,6 +58,18 @@ abstract class db_model_base implements crud
     }
 
     /**
+     * Used to populate Moodle QuickForm fields with existing data.
+     * Classes with editor elements HAVE TO override this method and return editor data
+     * as ['field_name' => ['text' => 'field_text_value', 'format' => 'field_format_value']]
+     *
+     * @return stdClass|array
+     */
+    public function get_moodle_form_data()
+    {
+        return $this->to_record();
+    }
+
+    /**
      * Get value for specific property/column in class instance
      *
      * @param string $prop property/column name to get value for
@@ -290,6 +302,22 @@ abstract class db_model_base implements crud
 
         return static::to_class_instances(
             $DB->get_records(static::TABLE, $conditions, $sort));
+    }
+
+    /**
+     * Fetches all records by running provided SQL query string
+     *
+     * @param string     $sql
+     * @param array|null $params
+     * @return static[]
+     * @throws dml_exception
+     */
+    protected static function read_all_by_sql(string $sql, array $params = null): array
+    {
+        global $DB;
+
+        return static::to_class_instances(
+            $DB->get_records_sql($sql, $params));
     }
 
     /**

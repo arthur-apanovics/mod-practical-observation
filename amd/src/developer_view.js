@@ -8,6 +8,10 @@ define(['jquery', 'core/ajax', 'core/notification', 'mod_observation/Sortable'],
 
         return {
             init: function () {
+                // sortable elements
+                var taskListId = 'mainTaskList';
+                var nestedCriteriaClass = 'nestedCriteria';
+
                 var sortList = function (listElement) {
                     $(listElement).find("li").sort(sort_li).appendTo(listElement);
 
@@ -28,15 +32,24 @@ define(['jquery', 'core/ajax', 'core/notification', 'mod_observation/Sortable'],
 
                     var methodName = null;
                     var args = null;
-                    switch (event.target.id) {
-                        case 'mainTaskList':
-                            methodName = 'mod_observation_task_update_sequence';
-                            args = {taskid: event.item.getAttribute('taskid'), newsequence: newSequence};
-                            break;
-                        default:
-                            throw new Error('Unsupported element');
-                    }
 
+                    if (event.target.className.trim() === nestedCriteriaClass) {
+                        methodName = 'mod_observation_criteria_update_sequence';
+                        args = {criteriaid: event.item.getAttribute('criteriaid'), newsequence: newSequence};
+                    } else if (event.target.id.trim() === taskListId) {
+                        methodName = 'mod_observation_task_update_sequence';
+                        args = {taskid: event.item.getAttribute('taskid'), newsequence: newSequence};
+                    } else {
+                        try {
+                            // attempt to re-sort unsupported element
+                            sortList(event.target);
+                        } catch (e) {
+                            // ignore
+                        }
+
+                        console.error('Unsupported element passed for sorting', event.target);
+                        notification.exception(new Error('Sorry, something went wrong. Please report this problem to your superior.'));
+                    }
 
                     ajax.call([{
                         methodname: methodName,
@@ -49,9 +62,6 @@ define(['jquery', 'core/ajax', 'core/notification', 'mod_observation/Sortable'],
                         }
                     }], true, true);
                 };
-
-                var taskListId = 'mainTaskList';
-                var nestedCriteriaClass = 'nestedCriteria';
 
                 Sortable.create(document.getElementById(taskListId), {
                     handle: '.my-handle',

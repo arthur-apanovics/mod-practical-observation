@@ -83,6 +83,14 @@ $string['int_assign_obs_learner_help'] = 'Content that will appear on "Assign ob
 $string['int_assign_obs_observer'] ='Observer requirements - <b>Observer</b>';
 $string['int_assign_obs_observer_help'] = 'Criteria that an observer has to confirm they meet before they\'re able to observe a task.';
 
+// CRITERIA FORM
+$string['criteria_name'] ='Criteria name';
+$string['description'] ='Description';
+$string['description_help'] ='Description of this criteria that will appear on the Task view for the Learner, Observer and Assessor';
+$string['feedback_required'] ='Feedback required';
+$string['feedback_required_help'] ='If checked, observers will have to provide textual feedback for this criteria';
+
+
 // STATUS STRINGS
 $string['status:not_complete'] = 'Not complete';
 $string['status:complete'] = 'Complete';
@@ -97,12 +105,23 @@ $string['status:assessment_incomplete'] = 'Assessment not complete';
 
 // MANAGE SPECIFIC
 $string['manage:no_tasks'] = 'This activity does not have any tasks, use button below to add new tasks.';
+$string['manage:empty'] = 'No tasks yet';
 $string['manage:edit_tasks'] = 'Edit tasks';
 
+// TASK SPECIFIC
 $string['add_task'] = 'Add task';
 $string['edit_task'] = 'Edit task';
+$string['delete_task'] = 'Delete task';
 $string['confirm_delete_task'] = 'Are you sure you want to delete task "{$a}"?<br>Warning: this operation is not reversable!';
 $string['deleted_task'] = 'Task "{$a}" deleted';
+$string['no_criteria'] = 'Task has no criteria';
+
+// CRITERIA SPECIFIC
+$string['add_criteria'] = 'Add criteria';
+$string['edit_criteria'] = 'Edit criteria';
+$string['delete_criteria'] = 'Delete criteria';
+$string['confirm_delete_criteria'] = 'Are you sure you want to delete criteria "{$a}"?<br>Warning: this operation is not reversable!';
+$string['deleted_criteria'] = 'Criteria "{$a}" deleted';
 
 $string['assessstudents'] = 'Assess students';
 $string['criteriadeleted'] = 'Criteria deleted';

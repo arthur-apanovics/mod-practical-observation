@@ -93,25 +93,29 @@ class lib
     /**
      * Sort provided array by it's sequence number
      *
-     * @param task[]|criteria[] $task_or_criteria_array
+     * @param array  $array_to_sort
+     * @param string $field_to_sort_by
      * @return mixed
      */
-    public static function sort_by_sequence(array $task_or_criteria_array)
+    public static function sort_by_field(array $array_to_sort, string $field_to_sort_by)
     {
-        usort($task_or_criteria_array, [self::class, 'compare_sequence']);
+        usort(
+            $array_to_sort,
+            function ($a, $b) use ($field_to_sort_by)
+            {
+                return $a[$field_to_sort_by] > $b[$field_to_sort_by];
+            });
 
-        return $task_or_criteria_array;
+        return $array_to_sort;
     }
 
-    /**
-     * Used for sorting by sequence
-     *
-     * @param array $a
-     * @param array $b
-     * @return bool
-     */
-    public static function compare_sequence(array $a, array $b)
+    public static function get_editor_file_options($context)
     {
-        return $a['sequence'] > $b['sequence'];
+        return [
+            'maxfiles' => EDITOR_UNLIMITED_FILES,
+            'noclean'  => true,
+            'context'  => $context,
+            'subdirs'  => false
+        ];
     }
 }

@@ -104,7 +104,13 @@ function get_random_lorem_paragraph()
 $observation = new observation($cm);
 $existing_tasks = $observation->get_tasks();
 
-$task_names = ['Task One', 'Task Two', 'Task Three', 'Task Four'];
+$num_of_tasks = rand(3,7);
+$task_names = [];
+for ($i = 1; $i < $num_of_tasks; $i++)
+{
+    $task_names[] = get_random_todo();
+}
+
 foreach ($task_names as $index => $task_name)
 {
     // check if task with same name already exists
@@ -117,9 +123,13 @@ foreach ($task_names as $index => $task_name)
         $task->set(task::COL_INTRO_LEARNER, get_random_lorem_paragraph());
         $task->set(task::COL_INTRO_OBSERVER, get_random_lorem_paragraph());
         $task->set(task::COL_INTRO_ASSESSOR, get_random_lorem_paragraph());
+        $task->set(task::COL_INT_ASSIGN_OBS_LEARNER, get_random_lorem_paragraph());
+        $task->set(task::COL_INT_ASSIGN_OBS_OBSERVER, get_random_lorem_paragraph());
         $task->set(task::COL_INTRO_LEARNER_FORMAT, 1);
         $task->set(task::COL_INTRO_OBSERVER_FORMAT, 1);
         $task->set(task::COL_INTRO_ASSESSOR_FORMAT, 1);
+        $task->set(task::COL_INT_ASSIGN_OBS_LEARNER_FORMAT, 1);
+        $task->set(task::COL_INT_ASSIGN_OBS_OBSERVER_FORMAT, 1);
 
         $task->create();
     }
@@ -133,15 +143,16 @@ foreach ($task_names as $index => $task_name)
     $task = new task($task);
     if (empty($task->get_criteria()))
     {
-        $num_of_criterias = rand(0, 5);
-        for ($i = 0; $i < $num_of_criterias; $i++)
+        $num_of_criterias = rand(1, 8);
+        for ($i = 1; $i < $num_of_criterias; $i++)
         {
             $criteria = new criteria_base();
             $criteria->set(criteria::COL_TASKID, $task->get_id_or_null());
             $criteria->set(criteria::COL_NAME, get_random_todo());
             $criteria->set(criteria::COL_DESCRIPTION, get_random_lorem_paragraph());
             $criteria->set(criteria::COL_DESCRIPTION_FORMAT, '');
-            $criteria->set(criteria::COL_SEQUENCE, $i);
+            $criteria->set(criteria::COL_FEEDBACK_REQUIRED, rand(0,1));
+            $criteria->set(criteria::COL_SEQUENCE, $criteria->get_next_sequence_number_in_task());
 
             $criteria->create();
         }

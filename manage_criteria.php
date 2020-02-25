@@ -20,6 +20,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_observation\criteria;
+use mod_observation\criteria_base;
 use mod_observation\observation;
 use mod_observation\observation_base;
 use mod_observation\task;
@@ -30,7 +32,8 @@ require_once('lib.php');
 require_once('forms.php');
 
 $cmid = required_param('id', PARAM_INT);
-$taskid = optional_param('taskid', 0, PARAM_INT);
+$taskid = required_param('taskid', PARAM_INT); // not really required, only when adding new criteria...
+$criteriaid = optional_param('criteriaid', 0, PARAM_INT);
 $delete = optional_param('delete', 0, PARAM_BOOL);
 
 list($course, $cm) = get_course_and_cm_from_cmid($cmid, OBSERVATION);
@@ -46,11 +49,13 @@ require_capability(observation::CAP_MANAGE, $context);
 // TODO: Event
 
 // Print the page header.
-$PAGE->set_url(OBSERVATION_MODULE_PATH . 'manage_task.php', array('id' => $cm->id, 'taskid' => $taskid));
+$PAGE->set_url(
+    OBSERVATION_MODULE_PATH . 'manage_criteria.php',
+    array('id' => $cm->id, 'taskid' => $taskid, 'criteriaid' => $criteriaid));
 
 if ($delete)
 {
-    $task = new task_base($taskid);
+    $criteria = new criteria_base($criteriaid);
 
     $confirm = optional_param('confirm', 0, PARAM_BOOL);
     if (!$confirm)
@@ -58,20 +63,20 @@ if ($delete)
         /* @var $renderer mod_observation_renderer */
         $renderer = ($PAGE->get_renderer(OBSERVATION));
         $renderer->echo_confirmation_page_and_die(
-            get_string('confirm_delete_task', 'observation', $task->get_formatted_name()),
+            get_string('confirm_delete_criteria', 'observation', $criteria->get_formatted_name()),
             ['delete' => 1]);
     }
     else
     {
-        $task->delete();
+        $criteria->delete();
         totara_set_notification(
-            get_string('deleted_task', \OBSERVATION, $task->get_formatted_name()),
-            $manage_url, // <<< REDIRECTION
+            get_string('deleted_criteria', \OBSERVATION, $criteria->get_formatted_name()),
+            $manage_url,
             ['class' => 'notifysuccess']);
     }
 }
 
-$form = new observation_task_form(null, ['cmid' => $cm->id, 'taskid' => $taskid]);
+$form = new observation_criteria_form(null, ['cmid' => $cm->id, 'taskid' => $taskid, 'criteriaid' => $criteriaid]);
 if ($form->is_cancelled())
 {
     redirect($manage_url);
@@ -79,63 +84,46 @@ if ($form->is_cancelled())
 if ($data = $form->get_data())
 {
     // data is being posted
-    $task = new task_base();
-    $task->set(task::COL_OBSERVATIONID, $observation->get_id_or_null());
-    $task->set(task::COL_NAME, $data->{task::COL_NAME});
+    $criteria = new criteria_base();
+    $criteria->set(criteria::COL_TASKID, $taskid);
+    $criteria->set(criteria::COL_NAME, $data->{criteria::COL_NAME});
+    $criteria->set(criteria::COL_DESCRIPTION, $data->{criteria::COL_DESCRIPTION}['text']);
+    $criteria->set(criteria::COL_DESCRIPTION_FORMAT, $data->{criteria::COL_DESCRIPTION}['format']);
+    $criteria->set(criteria::COL_FEEDBACK_REQUIRED, $data->{criteria::COL_FEEDBACK_REQUIRED});
 
-    $intros = [
-            task::COL_INTRO_LEARNER,
-            task::COL_INTRO_OBSERVER,
-            task::COL_INTRO_ASSESSOR,
-            task::COL_INT_ASSIGN_OBS_LEARNER,
-            task::COL_INT_ASSIGN_OBS_OBSERVER,
-    ];
-
-    // set the values
-    foreach ($intros as $intro)
-    {
-        $format = "{$intro}_format";
-        $task->set($intro, $data->{$intro}['text']);
-        $task->set($format, $data->{$intro}['format']);
-    }
-
-    if (empty($data->taskid))
+    if (empty($data->criteriaid))
     {
         // create
-        $task->set($task::COL_SEQUENCE, $task->get_next_sequence_number_in_activity());
+        $criteria->set($criteria::COL_SEQUENCE, $criteria->get_next_sequence_number_in_task());
 
-        $task->create();
+        $criteria->create();
     }
     else
     {
         // update
-        $task->set(task::COL_ID, $data->taskid);
-        $task->set($task::COL_SEQUENCE, $task->get_current_sequence_number());
+        $criteria->set(criteria::COL_ID, $data->criteriaid);
+        $criteria->set($criteria::COL_SEQUENCE, $criteria->get_current_sequence_number());
 
-        $task->update();
+        $criteria->update();
     }
 
     redirect($manage_url);
 }
 
-if (!empty($taskid))
+if (!empty($criteriaid))
 {
-    $task = new task_base($taskid);
-    $form->set_data($task->get_moodle_form_data());
-}
-else
-{
-    $form->set_data($observation->get_form_defaults_for_new_task());
+    $criteria = new criteria_base($criteriaid);
+    $form->set_data($criteria->get_moodle_form_data());
 }
 
 $observation_title = $observation->get_formatted_name();
-$actionstr = empty($taskid)
-    ? get_string('add_task', \OBSERVATION)
-    : get_string('edit_task', \OBSERVATION);
+$actionstr = empty($criteriaid)
+    ? get_string('add_criteria', \OBSERVATION)
+    : get_string('edit_criteria', \OBSERVATION);
 $PAGE->set_title($observation_title);
 $PAGE->set_heading(sprintf('%s - %s', $observation_title, $actionstr));
 
-$PAGE->add_body_class('observation-manage-task');
+$PAGE->add_body_class('observation-manage-criteria');
 
 // Output starts here.
 echo $OUTPUT->header();

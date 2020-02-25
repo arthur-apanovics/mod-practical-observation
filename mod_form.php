@@ -27,6 +27,8 @@
  * visit: http://docs.moodle.org/en/Development:lib/formslib.php
  */
 
+use mod_observation\lib;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
@@ -81,12 +83,7 @@ class mod_observation_mod_form extends moodleform_mod
                 $element,
                 get_string($element, OBSERVATION),
                 ['rows' => 10],
-                [
-                    'maxfiles' => EDITOR_UNLIMITED_FILES,
-                    'noclean'  => true,
-                    'context'  => $this->context,
-                    'subdirs'  => false
-                ]);
+                lib::get_editor_file_options($this->context));
             $mform->addHelpButton($element, $element, OBSERVATION);
             $mform->setType($element, PARAM_RAW);// no XSS prevention here, users must be trusted
         }

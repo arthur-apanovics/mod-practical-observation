@@ -2,13 +2,17 @@
 
 <div class="list-wrapper">
     <div id="taskList">
-        <ol id="mainTaskList">
+        <ol id="mainTaskList" observationid={{id}}>
             {{#tasks}}
                 {{> mod_observation/comp_task_manage}}
+            {{/tasks}}
+            {{^tasks}}
+                {{#str}}manage:empty, observation{{/str}}
             {{/tasks}}
         </ol>
     </div>
 </div>
+
 <div class="btn-wrapper">
     <a href="{{{module_root}}}/manage_task.php?id={{cmid}}" class="btn btn-primary" id="addButton">
     {{#str}}add_task, observation{{/str}}

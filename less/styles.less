@@ -205,7 +205,9 @@ body.path-mod-observation {
       padding: 6px 20px;
     }
 
-    .button:hover, button:focus, button:active {
+    .button:hover,
+    button:focus,
+    button:active {
       background-color: #ffaa00;
       color: white;
       text-decoration: none;
@@ -355,17 +357,19 @@ body.path-mod-observation {
       margin-top: 3em;
     }
 
-    #taskList > ol > li, .subTaskList > ol > li {
+    #taskList > ol > li,
+    .criteria-list > ol > li {
       display: flex;
       border: none;
     }
 
-    #taskList > ol > li::before, .subTaskList > ol > li::before {
+    #taskList > ol > li::before,
+    .criteria-list > ol > li::before {
       content: counter(my-awesome-counter);
     }
 
     .page-container {
-      width: 100%;
+      flex-basis: 100%;
     }
 
     .glyphicon {
@@ -418,6 +422,16 @@ body.path-mod-observation {
 
     .btn-wrapper > button {
       margin-right: 1em;
+    }
+  }
+}
+
+body.observation-manage {
+  ol {
+    &#mainTaskList {
+      > li {
+        margin-bottom: 2em;
+      }
     }
   }
 }

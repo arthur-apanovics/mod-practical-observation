@@ -297,16 +297,16 @@ body.path-mod-observation #page .list-wrapper {
   margin-top: 3em;
 }
 body.path-mod-observation #page #taskList > ol > li,
-body.path-mod-observation #page .subTaskList > ol > li {
+body.path-mod-observation #page .criteria-list > ol > li {
   display: flex;
   border: none;
 }
 body.path-mod-observation #page #taskList > ol > li::before,
-body.path-mod-observation #page .subTaskList > ol > li::before {
+body.path-mod-observation #page .criteria-list > ol > li::before {
   content: counter(my-awesome-counter);
 }
 body.path-mod-observation #page .page-container {
-  width: 100%;
+  flex-basis: 100%;
 }
 body.path-mod-observation #page .glyphicon {
   position: relative;
@@ -349,4 +349,7 @@ body.path-mod-observation #page .btn-wrapper {
 }
 body.path-mod-observation #page .btn-wrapper > button {
   margin-right: 1em;
+}
+body.observation-manage ol#mainTaskList > li {
+  margin-bottom: 2em;
 }

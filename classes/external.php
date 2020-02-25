@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+use mod_observation\criteria;
+use mod_observation\criteria_base;
 use mod_observation\task;
 use mod_observation\task_base;
 
@@ -32,64 +34,6 @@ require_once $CFG->dirroot . '/mod/observation/locallib.php';
  */
 class mod_observation_external extends external_api
 {
-    public static function save_example($observationid, $attempt)
-    {
-        global $USER;
-
-        $extracted_params = self::validate_parameters(self::save_example_parameters(), [/*parameters here*/]);
-
-        // LOGIC GOES HERE
-
-        return self::clean_returnvalue(self::save_example_returns(), [/*parameters here*/]);
-    }
-
-    /**
-     * Returns description of method parameters
-     * @return external_function_parameters
-     */
-    public static function save_example_parameters()
-    {
-        return new external_function_parameters(
-            [
-                'id'            => new external_value(PARAM_INT, 'id parameter description here'),
-                'example_array' => new external_single_structure(
-                    [
-                        'id'    => new external_value(
-                            PARAM_INT, 'description here (I think only used for exception messages)', VALUE_REQUIRED),
-                        // << note the required option
-                        'other' => new external_value(
-                            PARAM_RAW,
-                            'description here (I think only used for exception messages or /OPTIONS HTTP requests)'),
-                        'stuff' => new external_value(
-                            PARAM_INT, 'description here (I think only used for exception messages)')
-                    ])
-            ]);
-    }
-
-    /**
-     * Expose to ajax
-     * @return boolean
-     */
-    public static function save_example_is_allowed_from_ajax()
-    {
-        // have no idea if we actually need to specify this or not, maybe 'true' is returned by default if method not set?
-        return true;
-    }
-
-    /**
-     * Returns description of method return values
-     *
-     * @return external_single_structure
-     */
-    public static function save_example_returns()
-    {
-        return new external_single_structure(
-            [
-                'example_1' => new external_value(PARAM_INT, 'example description', VALUE_DEFAULT, null),
-                'example_2' => new external_value(PARAM_INT, 'example description', VALUE_DEFAULT, null),
-            ]);
-    }
-
     public static function task_update_sequence($taskid, $newsequence)
     {
         $clean_params = self::validate_parameters(
@@ -126,16 +70,6 @@ class mod_observation_external extends external_api
     }
 
     /**
-     * Expose to ajax
-     * @return boolean
-     */
-    public static function task_update_sequence_is_allowed_from_ajax()
-    {
-        // have no idea if we actually need to specify this or not, maybe 'true' is returned by default if method not set?
-        return true;
-    }
-
-    /**
      * Returns description of method return values
      *
      * @return external_single_structure
@@ -146,12 +80,57 @@ class mod_observation_external extends external_api
             [
                 'taskid'      => new external_value(PARAM_INT, 'task id', true, null, NULL_NOT_ALLOWED),
                 'newsequence' => new external_value(
-                    PARAM_INT,
-                    'new order of task',
-                    VALUE_DEFAULT,
-                    null,
-                    NULL_NOT_ALLOWED),
+                    PARAM_INT, 'new order of task', VALUE_DEFAULT, null, NULL_NOT_ALLOWED),
             ]);
     }
 
+    public static function criteria_update_sequence($criteriaid, $newsequence)
+    {
+        $clean_params = self::validate_parameters(
+            self::criteria_update_sequence_parameters(),
+            [
+                'criteriaid'  => $criteriaid,
+                'newsequence' => $newsequence
+            ]);
+
+        $criteria = new criteria_base($criteriaid);
+        $criteria->update_sequence_and_save($newsequence);
+
+        return self::clean_returnvalue(
+            self::criteria_update_sequence_returns(),
+            [
+                'criteriaid'  => $criteria->get_id_or_null(),
+                'newsequence' => $criteria->get(criteria::COL_SEQUENCE)
+            ]);
+    }
+
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function criteria_update_sequence_parameters()
+    {
+        return new external_function_parameters(
+            [
+                'criteriaid'  => new external_value(
+                    PARAM_INT, 'criteria id', true, null, NULL_NOT_ALLOWED),
+                'newsequence' => new external_value(
+                    PARAM_INT, 'new order for task criteria', true, null, NULL_NOT_ALLOWED),
+            ]);
+    }
+
+    /**
+     * Returns description of method return values
+     *
+     * @return external_single_structure
+     */
+    public static function criteria_update_sequence_returns()
+    {
+        return new external_single_structure(
+            [
+                'criteriaid'  => new external_value(PARAM_INT, 'criteria id', true, null, NULL_NOT_ALLOWED),
+                'newsequence' => new external_value(
+                    PARAM_INT, 'new order of criteria', VALUE_DEFAULT, null, NULL_NOT_ALLOWED),
+            ]);
+    }
 }

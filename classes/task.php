@@ -39,8 +39,7 @@ class task extends task_base implements templateable
     {
         parent::__construct($id_or_record);
 
-        $this->criteria = criteria::to_class_instances(
-            criteria::read_all_by_condition([criteria::COL_TASKID => $this->id]));
+        $this->criteria = criteria::read_all_by_condition([criteria::COL_TASKID => $this->id], criteria::COL_SEQUENCE);
 
         $this->learner_submissions = learner_submission::to_class_instances(
             learner_submission::read_all_by_condition(
@@ -79,6 +78,8 @@ class task extends task_base implements templateable
         {
             $criteria_data[] = $criteria->export_template_data();
         }
+        // sort by sequence again, just in case
+        $criteria_data = lib::sort_by_field($criteria_data, criteria::COL_SEQUENCE);
 
         $learner_submissions_data = [];
         foreach ($this->learner_submissions as $learner_submission)

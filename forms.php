@@ -20,7 +20,10 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_observation\criteria;
 use mod_observation\external_request;
+use mod_observation\lib;
+use mod_observation\task;
 use mod_observation\user_external_request;
 
 if (!defined('MOODLE_INTERNAL'))
@@ -42,14 +45,15 @@ class observation_task_form extends moodleform
         $cm = get_coursemodule_from_id(OBSERVATION, $cmid);
         $context = context_module::instance($cm->id);
 
-        $mform->addElement('text', 'name', get_string('task_name', OBSERVATION));
-        $mform->setType('name', PARAM_TEXT);
-        $mform->addRule('name', null, 'required', null, 'client');
+        $element = task::COL_NAME;
+        $mform->addElement('text', $element, get_string('task_name', OBSERVATION));
+        $mform->setType($element, PARAM_TEXT);
+        $mform->addRule($element, null, 'required', null, 'client');
 
         $task_intros = [
-            mod_observation\task::COL_INTRO_ASSESSOR,
             mod_observation\task::COL_INTRO_LEARNER,
             mod_observation\task::COL_INTRO_OBSERVER,
+            mod_observation\task::COL_INTRO_ASSESSOR,
             mod_observation\task::COL_INT_ASSIGN_OBS_LEARNER,
             mod_observation\task::COL_INT_ASSIGN_OBS_OBSERVER,
         ];
@@ -60,12 +64,7 @@ class observation_task_form extends moodleform
                 $element,
                 get_string($element, OBSERVATION),
                 ['rows' => 10],
-                [
-                    'maxfiles' => EDITOR_UNLIMITED_FILES,
-                    'noclean'  => true,
-                    'context'  => $context,
-                    'subdirs'  => false
-                ]);
+                lib::get_editor_file_options($context));
             $mform->addHelpButton($element, $element, OBSERVATION);
             $mform->addRule($element, get_string('required'), 'required', null);
             $mform->setType($element, PARAM_RAW);// no XSS prevention here, users must be trusted
@@ -79,6 +78,58 @@ class observation_task_form extends moodleform
         $mform->addElement('hidden', 'taskid');
         $mform->setType('taskid', PARAM_INT);
         $mform->setDefault('taskid', $taskid);
+
+        $this->add_action_buttons(true);
+    }
+}
+
+class observation_criteria_form extends moodleform
+{
+    function definition()
+    {
+        $mform =& $this->_form;
+        $cmid = $this->_customdata['cmid'];
+        $taskid = $this->_customdata['taskid'];
+        $criteriaid = $this->_customdata['criteriaid'];
+        $cm = get_coursemodule_from_id(OBSERVATION, $cmid);
+        $context = context_module::instance($cm->id);
+
+        // name
+        $element = criteria::COL_NAME;
+        $mform->addElement('text', $element, get_string('criteria_name', OBSERVATION));
+        $mform->setType($element, PARAM_TEXT);
+        $mform->addRule($element, null, 'required', null, 'client');
+
+        // description
+        $element = criteria::COL_DESCRIPTION;
+        $mform->addElement(
+            'editor',
+            $element,
+            get_string($element, OBSERVATION),
+            ['rows' => 10],
+            lib::get_editor_file_options($context));
+        $mform->addHelpButton($element, $element, OBSERVATION);
+        $mform->addRule($element, get_string('required'), 'required', null);
+        $mform->setType($element, PARAM_RAW);// no XSS prevention here, users must be trusted
+
+        // feedback required
+        $element = criteria::COL_FEEDBACK_REQUIRED;
+        $mform->addElement('advcheckbox', $element, get_string($element, 'observation'));
+        $mform->addHelpButton($element, $element, OBSERVATION);
+        $mform->setDefault($element, false);
+
+        // CMID
+        $mform->addElement('hidden', 'id');
+        $mform->setType('id', PARAM_INT);
+        $mform->setDefault('id', $cmid);
+        // TASK ID
+        $mform->addElement('hidden', 'taskid');
+        $mform->setType('taskid', PARAM_INT);
+        $mform->setDefault('taskid', $taskid);
+        // CRITERIA ID
+        $mform->addElement('hidden', 'criteriaid');
+        $mform->setType('criteriaid', PARAM_INT);
+        $mform->setDefault('criteriaid', $criteriaid);
 
         $this->add_action_buttons(true);
     }
