@@ -105,6 +105,7 @@ $string['status:assessment_incomplete'] = 'Assessment not complete';
 
 // MANAGE SPECIFIC
 $string['manage:no_tasks'] = 'This activity does not have any tasks, use button below to add new tasks.';
+$string['manage:missing_criteria'] = 'One or more tasks in this activity are missing completion criteria. Please correct this by using the "Edit tasks" section.';
 $string['manage:empty'] = 'No tasks yet';
 $string['manage:edit_tasks'] = 'Edit tasks';
 
@@ -115,6 +116,10 @@ $string['delete_task'] = 'Delete task';
 $string['confirm_delete_task'] = 'Are you sure you want to delete task "{$a}"?<br>Warning: this operation is not reversable!';
 $string['deleted_task'] = 'Task "{$a}" deleted';
 $string['no_criteria'] = 'Task has no criteria';
+
+$string['preview'] = 'Preview';
+$string['review'] = 'Review';
+$string['start'] = 'Start';
 
 // CRITERIA SPECIFIC
 $string['add_criteria'] = 'Add criteria';

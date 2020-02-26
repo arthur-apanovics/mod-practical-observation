@@ -91,19 +91,31 @@ class lib
     }
 
     /**
-     * Sort provided array by it's sequence number
+     * Sort provided array by it's sequence number in ascending order
      *
      * @param array  $array_to_sort
      * @param string $field_to_sort_by
-     * @return mixed
+     * @return array sorted array with array keys preserved
      */
-    public static function sort_by_field(array $array_to_sort, string $field_to_sort_by)
+    public static function sort_by_field(array $array_to_sort, string $field_to_sort_by): array
     {
-        usort(
+        uasort(
             $array_to_sort,
             function ($a, $b) use ($field_to_sort_by)
             {
-                return $a[$field_to_sort_by] > $b[$field_to_sort_by];
+                if ($a[$field_to_sort_by] === $b[$field_to_sort_by])
+                {
+                    debugging(
+                        sprintf(
+                            'Identical values detected when sorting by "%s" <pre>%s</pre> ID\'s [%b, %b]',
+                            $field_to_sort_by,
+                            print_r(array_keys($a), true),
+                            $a['id'],
+                            $b['id']),
+                        DEBUG_DEVELOPER);
+                }
+
+                return ($a[$field_to_sort_by] <=> $b[$field_to_sort_by]);
             });
 
         return $array_to_sort;

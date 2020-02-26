@@ -60,8 +60,8 @@ body.path-mod-observation #page th {
 body.path-mod-observation #page .table > thead > tr > th,
 body.path-mod-observation #page .table > tbody > tr > th,
 body.path-mod-observation #page .table > tfoot > tr > th,
-body.path-mod-observation #page .table > thead > tr > td,
-body.path-mod-observation #page .table > tbody > tr > td {
+body.path-mod-observation #page .table > thead > tr > th,
+body.path-mod-observation #page .table > tbody > tr > th {
   text-align: left;
   padding: 8px 50px 8px 50px;
   border: none;
@@ -93,8 +93,8 @@ body.path-mod-observation #page form select,
 body.path-mod-observation #page form input[type="text"],
 body.path-mod-observation #page form input[type="email"],
 body.path-mod-observation #page form input[type="tel"],
-body.path-mod-observation #page form.atto_form input[type="url"],
-body.path-mod-observation #page select.singleselect {
+body.path-mod-observation #page form select.singleselect,
+body.path-mod-observation #page form.atto_form input[type="url"] {
   padding: 6px 12px;
   margin: 0 0 5px 0;
   border-radius: 0;
@@ -115,21 +115,6 @@ body.path-mod-observation #page h5 {
 }
 body.path-mod-observation #page .subtitle-criteria {
   padding-left: 0;
-}
-body.path-mod-observation #page ol {
-  list-style: none;
-  counter-reset: my-awesome-counter;
-  margin: 20px 8px 27px 8px;
-}
-body.path-mod-observation #page ol li {
-  counter-increment: my-awesome-counter;
-  font-size: 13px;
-  font-weight: bold;
-  padding: 2px 0 5px 5px;
-}
-body.path-mod-observation #page ol li::before {
-  content: counter(my-awesome-counter) ". ";
-  font-size: 13px;
 }
 body.path-mod-observation #page .criteria-desc {
   flex-grow: 1;
@@ -308,20 +293,6 @@ body.path-mod-observation #page .criteria-list > ol > li::before {
 body.path-mod-observation #page .page-container {
   flex-basis: 100%;
 }
-body.path-mod-observation #page .glyphicon {
-  position: relative;
-  float: left;
-  padding: 1px 7px;
-  font-family: 'Glyphicons Halflings';
-  font-style: normal;
-  font-weight: 400;
-  line-height: 1;
-  -webkit-font-smoothing: antialiased;
-}
-body.path-mod-observation #page .my-handle {
-  cursor: move;
-  cursor: -webkit-grabbing;
-}
 body.path-mod-observation #page .obs-task-list {
   display: flex;
   border-bottom: 1px solid teal;
@@ -352,4 +323,36 @@ body.path-mod-observation #page .btn-wrapper > button {
 }
 body.observation-manage ol#mainTaskList > li {
   margin-bottom: 2em;
+}
+body.observation-manage ol li.list-group-item .my-handle {
+  cursor: move;
+  cursor: -webkit-grabbing;
+}
+body.observation-manage ol li .glyphicon {
+  position: relative;
+  float: left;
+  padding: 1px 7px;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+}
+body.observation-manage #page ol,
+body.observation-task #page ol {
+  list-style: none;
+  counter-reset: my-awesome-counter;
+  margin: 20px 8px 27px 8px;
+}
+body.observation-manage #page ol li,
+body.observation-task #page ol li {
+  counter-increment: my-awesome-counter;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 2px 0 5px 5px;
+}
+body.observation-manage #page ol li::before,
+body.observation-task #page ol li::before {
+  content: counter(my-awesome-counter) ". ";
+  font-size: 13px;
 }

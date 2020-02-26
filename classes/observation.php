@@ -151,6 +151,25 @@ class observation extends observation_base implements templateable
     }
 
     /**
+     * Checks if all tasks in this observation instance contain at least one criteria
+     *
+     * @return bool
+     */
+    public function all_tasks_have_criteria()
+    {
+        foreach ($this->tasks as $task)
+        {
+            if (!$task->has_criteria())
+            {
+                return false;
+            }
+        }
+
+        // if we got here, then all tasks have at least one criteria
+        return true;
+    }
+
+    /**
      * @inheritDoc
      */
     public function export_template_data(): array
@@ -158,6 +177,7 @@ class observation extends observation_base implements templateable
         $tasks = [];
         foreach ($this->tasks as $task)
         {
+            // has to be a simple array otherwise mustache won't loop over
             $tasks[] = $task->export_template_data();
         }
         // sort tasks based on sequence (tasks should be sorted in constructor but need to be sure)

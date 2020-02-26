@@ -132,7 +132,10 @@ class task_base extends db_model_base
             throw new \coding_exception('Instance ID missing or un-initialized class instance');
         }
 
-        return $DB->count_records(self::TABLE, [self::COL_OBSERVATIONID => $this->observationid]);
+        $sql = 'SELECT max(sequence)
+                FROM {' . self::TABLE . '} c
+                WHERE observationid = :observationid';
+        return $DB->get_field_sql($sql, ['observationid' => $this->observationid]);
     }
 
     public function get_next_sequence_number_in_activity()

@@ -41,9 +41,13 @@ class task extends task_base implements templateable
 
         $this->criteria = criteria::read_all_by_condition([criteria::COL_TASKID => $this->id], criteria::COL_SEQUENCE);
 
-        $this->learner_submissions = learner_submission::to_class_instances(
-            learner_submission::read_all_by_condition(
-                [learner_submission::COL_TASKID => $this->id, learner_submission::COL_USERID => $userid]));
+        $this->learner_submissions = learner_submission::read_all_by_condition(
+            [learner_submission::COL_TASKID => $this->id, learner_submission::COL_USERID => $userid]);
+    }
+
+    public function has_submission()
+    {
+        return (bool) count($this->learner_submissions);
     }
 
     /**
@@ -76,6 +80,7 @@ class task extends task_base implements templateable
         $criteria_data = [];
         foreach ($this->criteria as $criteria)
         {
+            // has to be a simple array otherwise mustache won't loop over
             $criteria_data[] = $criteria->export_template_data();
         }
         // sort by sequence again, just in case
@@ -89,6 +94,7 @@ class task extends task_base implements templateable
 
         return [
             self::COL_ID             => $this->id,
+            self::COL_OBSERVATIONID  => $this->observationid,
             self::COL_NAME           => $this->name,
             self::COL_INTRO_LEARNER  => $this->intro_learner,
             self::COL_INTRO_OBSERVER => $this->intro_observer,
@@ -97,11 +103,22 @@ class task extends task_base implements templateable
 
             'criteria'            => $criteria_data,
             'learner_submissions' => $learner_submissions_data,
+
+            // other data
+            'has_submission'      => $this->has_submission(),
         ];
     }
 
+    /**
+     * @return criteria[]|null Can be null if no criteria in task!
+     */
     public function get_criteria()
     {
         return $this->criteria;
+    }
+
+    public function has_criteria()
+    {
+        return (bool) count($this->criteria);
     }
 }

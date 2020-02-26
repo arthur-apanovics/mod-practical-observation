@@ -1,13 +1,17 @@
 <li class="list-group-item" criteriaid={{id}}>
 
     <div class="page-container">
+
         <span class="glyphicon glyphicon-move my-handle" aria-hidden="true"></span>
         <div class="obs-subtask-list">
-            <div>{{{name}}}</div>
+
+            <span class="title">{{{name}}}</span>
+
             {{#feedback_required}}
                 <span class="glyphicon glyphicon-paperclip"
                       title="{{#str}}feedback_required, observation{{/str}}"></span>
             {{/feedback_required}}
+
             <div class="actions sub-list-actions">
 
                 <a href="{{{module_root}}}/manage_criteria.php?id={{cmid}}&taskid={{taskid}}&criteriaid={{id}}"
@@ -23,7 +27,9 @@
                 </a>
 
             </div>
+
         </div>
+
     </div>
 
 </li>

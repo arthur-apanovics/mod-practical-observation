@@ -77,7 +77,7 @@ $capabilities = array(
 
     /*observation::CAP_SUBMIT*/
     'mod/observation:submit'          => array(
-        'captype'      => 'read',
+        'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes'   => array(
             'student' => CAP_ALLOW,
@@ -87,7 +87,7 @@ $capabilities = array(
     /*observation::CAP_VIEWSUBMISSIONS*/
     'mod/observation:viewsubmissions' => array(
         'riskbitmask'  => RISK_SPAM,
-        'captype'      => 'write',
+        'captype'      => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes'   => array(
             'teacher' => CAP_ALLOW,

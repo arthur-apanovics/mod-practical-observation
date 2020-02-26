@@ -1,8 +1,3 @@
-<div class="wrapper-obs-activity">
-    <h3 class="title-main">{{{name}}}</h3>
-    <div class="title-desc">{{{intro}}}</div>
-</div>
-
 {{#tasks}}
     {{> mod_observation/comp_task_title}}
 {{/tasks}}
@@ -17,13 +12,3 @@
         {{/capabilities.can_manage}}
     </p>
 {{/tasks}}
-
-{{#capabilities.can_manage}}
-{{! edit topics button }}
-    <div class="align-center">
-        <a href="{{{module_root}}}/manage.php?id={{cmid}}" class="btn btn-secondary">
-        {{#str}}manage:edit_tasks, observation{{/str}}
-        </a>
-    </div>
-{{/capabilities.can_manage}}
-

@@ -119,7 +119,7 @@ foreach ($task_names as $index => $task_name)
         $task = new task_base();
         $task->set(task::COL_NAME, $task_name);
         $task->set(task::COL_OBSERVATIONID, $observation->get_id_or_null());
-        $task->set(task::COL_SEQUENCE, $index);
+        $task->set(task::COL_SEQUENCE, $task->get_next_sequence_number_in_activity());
         $task->set(task::COL_INTRO_LEARNER, get_random_lorem_paragraph());
         $task->set(task::COL_INTRO_OBSERVER, get_random_lorem_paragraph());
         $task->set(task::COL_INTRO_ASSESSOR, get_random_lorem_paragraph());

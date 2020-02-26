@@ -22,8 +22,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use core\notification;
 use core\output\flex_icon;
+use mod_observation\lib;
 use mod_observation\observation;
+use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 
@@ -179,27 +182,80 @@ class mod_observation_renderer extends plugin_renderer_base
     /**
      * Render main activity view
      *
-     * @param observation    $observation
-     * @param context_module $context
+     * @param observation $observation
      * @return string
      * @throws moodle_exception
      */
-    public function activity_view(observation $observation, context_module $context)
+    public function activity_view(observation $observation)
     {
         $template_data = $observation->export_template_data();
+        $caps = $template_data['capabilities'];
         $out = '';
 
-        $out .= $this->render_from_template(OBSERVATION_MODULE . '/activity_view', $template_data);
+        $out .= $this->render_from_template(OBSERVATION_MODULE . '/part_activity_header', $template_data);
+
+        // assessor view
+        if ($caps['can_assess'] || $caps['can_viewsubmissions'])
+        {
+            // TODO: ASSESSOR TABLE
+            $out .= $this->render_from_template(OBSERVATION_MODULE . '/assessor_table', $template_data);
+        }
+        // learner view or preview
+        else if ($caps['can_submit'] || $caps['can_view'])
+        {
+            // submission/preview logic in template
+            $out .= $this->render_from_template(OBSERVATION_MODULE . '/activity_view', $template_data);
+        }
+
+        // validation for 'managers'
+        if ($caps['can_manage'])
+        {
+            // check all tasks have criteria
+            if (!$observation->all_tasks_have_criteria())
+            {
+                notification::warning(get_string('manage:missing_criteria', 'observation'));
+            }
+            
+            $out .= $this->render_from_template(OBSERVATION_MODULE . '/part_edit_tasks_button', $template_data);
+        }
 
         return $out;
     }
 
-    public function manage_view(observation $observation, context_module $context)
+    public function manage_view(observation $observation)
     {
         $template_data = $observation->export_template_data();
         $out = '';
 
         $out .= $this->render_from_template(OBSERVATION_MODULE . '/manage_tasks_view', $template_data);
+
+        return $out;
+    }
+
+    public function task_learner_view(observation $observation, task $task)
+    {
+        $template_data = $observation->export_template_data();
+        $task_template_data = lib::find_in_assoc_array_or_null(
+            $template_data['tasks'], task::COL_ID, $task->get_id_or_null());
+        $caps = $template_data['capabilities'];
+        $out = '';
+
+        if ($caps['can_submit'])
+        {
+            // learner submission
+            $out .= $this->render_from_template(OBSERVATION_MODULE . '/task_view_learner', $task_template_data);
+        }
+        else if ($caps['can_view'])
+        {
+            // preview
+            $out .= $this->render_from_template(OBSERVATION_MODULE . '/task_view_preview', $task_template_data);
+        }
+        else
+        {
+            print_error('Sorry, you don\'t have permission to view this page');
+            return $out;
+        }
+
 
         return $out;
     }

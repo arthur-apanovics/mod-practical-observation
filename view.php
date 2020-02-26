@@ -55,13 +55,15 @@ $PAGE->set_url('/mod/observation/view.php', array('id' => $cm->id));
 $PAGE->set_title($name);
 $PAGE->set_heading(format_string($course->fullname));
 
+$PAGE->add_body_class('observation-view');
+
 // Output starts here.
 echo $OUTPUT->header();
 
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
 
-echo $renderer->activity_view($observation, $context);
+echo $renderer->activity_view($observation);
 
 // Finish the page.
 echo $OUTPUT->footer();

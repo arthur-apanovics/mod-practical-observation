@@ -74,14 +74,30 @@ body.path-mod-observation {
       color: black;
     }
 
-    .table > thead > tr > th,
-    .table > tbody > tr > th,
-    .table > tfoot > tr > th,
-    .table > thead > tr > td,
-    .table > tbody > tr > td {
-      text-align: left;
-      padding: 8px 50px 8px 50px;
-      border: none;
+    //.table > thead > tr > th,
+    //.table > tbody > tr > th,
+    //.table > tfoot > tr > th,
+    //.table > thead > tr > td,
+    //.table > tbody > tr > td {
+    //  text-align: left;
+    //  padding: 8px 50px 8px 50px;
+    //  border: none;
+    //}
+
+    .table { // looks like it's unused
+      > thead,
+      > tbody,
+      > tfoot,
+      > thead,
+      > tbody {
+        > tr {
+          > th {
+            text-align: left;
+            padding: 8px 50px 8px 50px;
+            border: none;
+          }
+        }
+      }
     }
 
     .myForm {
@@ -112,17 +128,32 @@ body.path-mod-observation {
       font-weight: normal;
     }
 
-    form select,
-    form input[type="text"],
-    form input[type="email"],
-    form input[type="tel"],
-    form.atto_form input[type="url"],
-    select.singleselect {
-      padding: 6px 12px;
-      margin: 0 0 5px 0;
-      border-radius: 0;
-      width: 100%;
-      max-width: 300px;
+    //form select,
+    //form input[type="text"],
+    //form input[type="email"],
+    //form input[type="tel"],
+    //form.atto_form input[type="url"],
+    //select.singleselect {
+    //  padding: 6px 12px;
+    //  margin: 0 0 5px 0;
+    //  border-radius: 0;
+    //  width: 100%;
+    //  max-width: 300px;
+    //}
+
+    form {
+      select,
+      input[type="text"],
+      input[type="email"],
+      input[type="tel"],
+      select.singleselect,
+      &.atto_form input[type="url"] {
+        padding: 6px 12px;
+        margin: 0 0 5px 0;
+        border-radius: 0;
+        width: 100%;
+        max-width: 300px;
+      }
     }
 
     .wrapper-obs-activity {
@@ -142,24 +173,6 @@ body.path-mod-observation {
 
     .subtitle-criteria {
       padding-left: 0;
-    }
-
-    ol {
-      list-style: none;
-      counter-reset: my-awesome-counter;
-      margin: 20px 8px 27px 8px;
-    }
-
-    ol li {
-      counter-increment: my-awesome-counter;
-      font-size: 13px;
-      font-weight: bold;
-      padding: 2px 0 5px 5px;
-    }
-
-    ol li::before {
-      content: counter(my-awesome-counter) ". ";
-      font-size: 13px;
     }
 
     .criteria-desc {
@@ -372,22 +385,6 @@ body.path-mod-observation {
       flex-basis: 100%;
     }
 
-    .glyphicon {
-      position: relative;
-      float: left;
-      padding: 1px 7px;
-      font-family: 'Glyphicons Halflings';
-      font-style: normal;
-      font-weight: 400;
-      line-height: 1;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .my-handle {
-      cursor: move;
-      cursor: -webkit-grabbing;
-    }
-
     .obs-task-list {
       display: flex;
       border-bottom: 1px solid teal;
@@ -426,12 +423,59 @@ body.path-mod-observation {
   }
 }
 
+// "manage" page
 body.observation-manage {
   ol {
     &#mainTaskList {
       > li {
         margin-bottom: 2em;
       }
+    }
+
+    li {
+      &.list-group-item {
+        .my-handle {
+          cursor: move;
+          cursor: -webkit-grabbing;
+        }
+      }
+
+      .glyphicon {
+        position: relative;
+        float: left;
+        padding: 1px 7px;
+        font-family: 'Glyphicons Halflings';
+        font-style: normal;
+        font-weight: 400;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+      }
+    }
+
+  }
+}
+
+// common list styling
+body.observation-manage,
+body.observation-task {
+  #page { // without this our styles will 'leak' to outer scope
+    ol {
+
+      li {
+        counter-increment: my-awesome-counter;
+        font-size: 13px;
+        font-weight: bold;
+        padding: 2px 0 5px 5px;
+
+        &::before {
+          content: counter(my-awesome-counter) ". ";
+          font-size: 13px;
+        }
+      }
+
+      list-style: none;
+      counter-reset: my-awesome-counter;
+      margin: 20px 8px 27px 8px;
     }
   }
 }

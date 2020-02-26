@@ -1,0 +1,32 @@
+<div class="wrapper-task">
+    <h3 class="title-main-task">{{name}}</h3>
+    {{!<p class="flex-title-task">}}
+        <div class="title-desc-task">
+            {{{intro_learner}}}
+        </div>
+    {{!</p>}}
+</div>
+
+<h5>Completion observations</h5>
+<div class="wrapper-task">
+    <ol>
+        {{#criteria}}
+            {{> mod_observation/comp_completion_criteria}}
+            {{> mod_observation/comp_mark_criteria}}
+        {{/criteria}}
+    </ol>
+</div>
+
+<h5>Information and evidence from the trainee</h5>
+<div class="wrapper-task">
+    <p class="flex-criteria">
+        <span class="observer-note">Observer assigned - joe@blogs.com</span>
+    </p>
+    <h5 class="attempt">Attempt #1</h5>
+    {{> mod_observation/comp_show_evidence}}
+    <h5 class="attempt">Attempt #2</h5>
+    <div class="editor">editor goes here</div>
+</div>
+<div class="request-button-wrapper">
+    <button class="btn btn-primary">Request observation</button>
+</div>

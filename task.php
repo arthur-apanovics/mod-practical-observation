@@ -20,32 +20,37 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+/**
+ * Prints a particular instance of observation for the current user.
+ *
+ */
+
+use mod_observation\event\course_module_viewed;
 use mod_observation\observation;
+use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('lib.php');
 
 $cmid = required_param('id', PARAM_INT);
+$taskid = required_param('taskid', PARAM_INT);
 
-list($course, $cm) = get_course_and_cm_from_cmid($cmid, OBSERVATION);
-$context = context_module::instance($cm->id);
+list($course, $cm) = get_course_and_cm_from_cmid($cmid);
+$context = context_module::instance($cmid);
 
-require_login($course, false, $cm);
-require_capability(observation::CAP_MANAGE, $context);
+require_login($course, true, $cm);
 
 // TODO: Event
 
 $observation = new observation($cm);
-$name        = $observation->get_formatted_name();
+$task = new task($taskid, $USER->id);
 
 // Print the page header.
-$PAGE->set_url(OBSERVATION_MODULE_PATH . 'manage.php', array('id' => $cm->id));
-$PAGE->set_title($name);
+$PAGE->set_url('/mod/observation/view.php', array('id' => $cm->id));
+$PAGE->set_title($observation->get_formatted_name());
 $PAGE->set_heading(format_string($course->fullname));
 
-$PAGE->add_body_class('observation-manage');
-
-$PAGE->requires->js_call_amd(OBSERVATION_MODULE . '/developer_view', 'init');
+$PAGE->add_body_class('observation-task');
 
 // Output starts here.
 echo $OUTPUT->header();
@@ -53,7 +58,7 @@ echo $OUTPUT->header();
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
 
-echo $renderer->manage_view($observation);
+echo $renderer->task_learner_view($observation, $task);
 
 // Finish the page.
 echo $OUTPUT->footer();
