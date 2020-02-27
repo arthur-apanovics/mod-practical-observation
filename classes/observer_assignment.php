@@ -41,7 +41,7 @@ class observer_assignment extends observer_assignment_base implements templateab
 
         $this->observer = new observer($this->observerid);
 
-        $this->observer_submission = observer_submission::read_by_condition(
+        $this->observer_submission = observer_submission::read_by_condition_or_null(
             [observer_submission::COL_OBSERVER_ASSIGNMENTID => $this->id],
             $this->observation_accepted // must exist if observation has been accepted
         );
@@ -58,7 +58,7 @@ class observer_assignment extends observer_assignment_base implements templateab
     /**
      * @return observer_submission
      */
-    public function get_observer_submission(): observer_submission
+    public function get_observer_submission_or_null(): observer_submission
     {
         return $this->observer_submission;
     }

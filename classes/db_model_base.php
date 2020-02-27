@@ -78,14 +78,17 @@ abstract class db_model_base implements crud
      */
     public function get(string $prop)
     {
-        if (property_exists($this, $prop))
+        if (empty($prop))
         {
-            return $this->$prop;
+            throw new coding_exception(
+                sprintf('Empty argument "prop" passed when accessing %s from %s', static::class, __METHOD__));
         }
-        else
+        if (!property_exists($this, $prop))
         {
             throw new coding_exception("Property '$prop' does not exist in " . static::class);
         }
+
+        return $this->$prop;
     }
 
     /**
@@ -249,12 +252,12 @@ abstract class db_model_base implements crud
      *
      * @param array $conditions = [string => mixed]
      * @param bool  $must_exist if true, exception wil be thrown if no record found
-     * @return static
+     * @return static | null class instance if record exists or null if no record found (when must_exist = false)
      * @throws coding_exception
      * @throws dml_exception
      * @throws dml_missing_record_exception
      */
-    protected static function read_by_condition(array $conditions, bool $must_exist = false): self
+    protected static function read_by_condition_or_null(array $conditions, bool $must_exist = false)
     {
         global $DB;
 
@@ -264,10 +267,11 @@ abstract class db_model_base implements crud
             throw new coding_exception(sprintf('No conditions provided for %s', __METHOD__));
         }
 
-        $strictness = $must_exist
-            ? MUST_EXIST
-            : IGNORE_MISSING;
-        return new static($DB->get_record(static::TABLE, $conditions, '*', $strictness));
+        // $DB->get_record will throw for us if record does not exist when MUST_EXIST passed
+        $strictness = $must_exist ? MUST_EXIST : IGNORE_MISSING;
+        $record = $DB->get_record(static::TABLE, $conditions, '*', $strictness);
+
+        return !empty($record) ? new static() : null;
     }
 
     /**

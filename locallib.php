@@ -52,38 +52,44 @@ class lib
     }
 
     /**
-     * Find object in associative array based on criteria
+     * Find first object in associative array based on single key-value pair
      *
      * @param array $input input assoc array
      * @param mixed $key key to lookup by
      * @param mixed $value value to match
      *
-     * @return mixed matched entry in array
+     * @return mixed FIRST matched entry in array
+     * @throws \coding_exception
      */
-    public static function find_in_assoc_array_or_null(array $input, $key, $value)
+    public static function find_in_assoc_array_key_value_or_null($input, $key, $value)
     {
-        foreach ($input as $entry)
+        if (is_array($input))
         {
-            if ($entry instanceof db_model_base)
+            foreach ($input as $entry)
             {
-                $compare_to = $entry->get($key);
-            }
-            else if (is_array($entry))
-            {
-                $compare_to = $entry[$key];
-            }
-            else if (is_object($entry))
-            {
-                $compare_to = $entry->$key;
-            }
-            else
-            {
-                throw new \coding_exception(sprintf('Unsupported object type "%s" in array', gettype($entry)));
-            }
+                // get value to compare
+                if ($entry instanceof db_model_base)
+                {
+                    $compare_to = $entry->get($key);
+                }
+                else if (is_array($entry))
+                {
+                    $compare_to = $entry[$key];
+                }
+                else if (is_object($entry))
+                {
+                    $compare_to = $entry->{$key};
+                }
+                else
+                {
+                    throw new \coding_exception(sprintf('Unsupported object type "%s" in array', gettype($entry)));
+                }
 
-            if ($value === $compare_to)
-            {
-                return $entry;
+                // perform the actual comparison
+                if ($value == $compare_to) // has to be == and not ===
+                {
+                    return $entry;
+                }
             }
         }
 
@@ -91,17 +97,76 @@ class lib
     }
 
     /**
-     * Sort provided array by it's sequence number in ascending order
+     * Find first matching object in associative array based on multiple criteria
+     *
+     * @param array $input input assoc array
+     * @param array $criteria ['key' => 'value']
+     * @return mixed FIRST matched entry in array
+     * @throws \coding_exception
+     */
+    public static function find_in_assoc_array_criteria_or_null($input, array $criteria)
+    {
+        // sometimes $input can be null, we want to keep this flexibility by not adding a type constraint
+        if (!is_array($input) && !empty($criteria))
+        {
+            $values = array_values($criteria);
+            foreach ($input as $entry)
+            {
+                $compare_to = [];
+
+                // get values to compare
+                foreach (array_keys($criteria) as $key)
+                {
+                    if ($entry instanceof db_model_base)
+                    {
+                        $compare_to[] = $entry->get($key);
+                    }
+                    else if (is_array($entry))
+                    {
+                        $compare_to[] = $entry[$key];
+                    }
+                    else if (is_object($entry))
+                    {
+                        $compare_to[] = $entry->{$key};
+                    }
+                    else
+                    {
+                        throw new \coding_exception(sprintf('Unsupported object type "%s" in array', gettype($entry)));
+                    }
+                }
+
+                // perform the actual comparison
+                if ($values == $compare_to) // has to be == and not ===
+                {
+                    return $entry;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Sort provided array by it's sequence number in specified order
      *
      * @param array  $array_to_sort
      * @param string $field_to_sort_by
+     * @param string $asc_or_desc "asc"|"desc" sort in ascending (asc) or descending (desc) order
      * @return array sorted array with array keys preserved
+     * @throws \coding_exception
      */
-    public static function sort_by_field(array $array_to_sort, string $field_to_sort_by): array
+    public static function sort_by_field(
+        array $array_to_sort, string $field_to_sort_by, string $asc_or_desc = 'asc'): array
     {
+        $asc_or_desc = strtolower($asc_or_desc);
+        if (!in_array($asc_or_desc, ['asc', 'desc']))
+        {
+            throw new \coding_exception("Cannot sort in '$asc_or_desc' order. Valid options are 'asc' or 'desc'");
+        }
+
         uasort(
             $array_to_sort,
-            function ($a, $b) use ($field_to_sort_by)
+            function ($a, $b) use ($field_to_sort_by, $asc_or_desc)
             {
                 if ($a[$field_to_sort_by] === $b[$field_to_sort_by])
                 {
@@ -115,7 +180,9 @@ class lib
                         DEBUG_DEVELOPER);
                 }
 
-                return ($a[$field_to_sort_by] <=> $b[$field_to_sort_by]);
+                return $asc_or_desc == 'asc'
+                    ? ($a[$field_to_sort_by] <=> $b[$field_to_sort_by])
+                    : ($b[$field_to_sort_by] <=> $a[$field_to_sort_by]);
             });
 
         return $array_to_sort;

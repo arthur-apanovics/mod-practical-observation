@@ -76,6 +76,17 @@ class observer_feedback_base extends db_model_base
                 throw new coding_exception(
                     sprintf("'$value' is not a valid value for '%s' in '%s'", self::COL_STATUS, get_class($this)));
             }
+            if ($this->status === $value)
+            {
+                debugging(
+                    sprintf(
+                        '%s %s is already "%s". This should not normally happen',
+                        self::class,
+                        self::COL_STATUS,
+                        $value),
+                    DEBUG_DEVELOPER,
+                    debug_backtrace());
+            }
         }
 
         return parent::set($prop, $value, $save);

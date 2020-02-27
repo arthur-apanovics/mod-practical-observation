@@ -1,9 +1,11 @@
+<h5>Completion observations</h5>
+
 <div class="wrapper-task">
     <h3 class="title-main-task">{{name}}</h3>
     {{!<p class="flex-title-task">}}
-        <div class="title-desc-task">
-            {{{intro_learner}}}
-        </div>
+    <div class="title-desc-task">
+        {{{intro_learner}}}
+    </div>
     {{!</p>}}
 </div>
 
@@ -26,8 +28,11 @@
     <h5 class="attempt">Attempt #1</h5>
     {{> mod_observation/comp_show_evidence}}
     <h5 class="attempt">Attempt #2</h5>
-    <div class="editor">editor goes here</div>
+    <div class="editor">
+        {{{extra.editor_html}}}
+    </div>
 </div>
+
 <div class="request-button-wrapper">
     <button class="btn btn-primary">Request observation</button>
 </div>

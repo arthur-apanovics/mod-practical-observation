@@ -22,39 +22,31 @@
 
 namespace mod_observation;
 
-use coding_exception;
-use dml_exception;
 use mod_observation\interfaces\templateable;
-use ReflectionException;
 
 class observer_submission extends observer_submission_base implements templateable
 {
-    /* NOTE: observer_feedback is attached to criteria class */
-
-    // /**
-    //  * @var observer_feedback[]
-    //  */
-    // private $observer_feedback;
+    /**
+     * @var observer_feedback[]
+     */
+    private $observer_feedback;
 
     public function __construct($id_or_record)
     {
         parent::__construct($id_or_record);
 
-        // $this->observer_feedback =
-        //     observer_feedback::read_all_by_condition([observer_feedback::COL_OBSERVER_SUBMISSIONID => $this->id]);
+        $this->observer_feedback = observer_feedback::read_all_by_condition(
+            [observer_feedback::COL_OBSERVER_SUBMISSIONID => $this->id]);
     }
 
     /**
      * Fetches observer feedback from database
      *
-     * @return observer_feedback[]
-     * @throws ReflectionException
-     * @throws coding_exception
-     * @throws dml_exception
+     * @return observer_feedback[] empty array if no feedback
      */
     public function get_observer_feedback(): array
     {
-        return observer_feedback::read_all_by_condition([observer_feedback::COL_OBSERVER_SUBMISSIONID => $this->id]);
+        return $this->observer_feedback;
     }
 
     /**

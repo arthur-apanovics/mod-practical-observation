@@ -84,6 +84,16 @@ class criteria_base extends db_model_base
         return $DB->get_field(self::TABLE, self::COL_SEQUENCE, [self::COL_ID => $this->id], MUST_EXIST);
     }
 
+    public function get_next_sequence_number_in_task(): int
+    {
+        return $this->get_last_sequence_number_in_task() + 1;
+    }
+
+    /**
+     * @return int 0 if no criteria found
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     public function get_last_sequence_number_in_task()
     {
         global $DB;
@@ -95,14 +105,12 @@ class criteria_base extends db_model_base
 
         $sql = 'SELECT max(c.sequence)
                 FROM {' . self::TABLE . '} c
-                JOIN {' . task::TABLE . '} t ON t.id = c.taskid
-                WHERE c.taskid = :taskid';
-        return $DB->get_field_sql($sql, ['taskid' => $this->taskid,]);
-    }
+                JOIN {' . task::TABLE . '} t ON t.id = c.' . self::COL_TASKID . '
+                WHERE c.' . self::COL_TASKID . ' = :taskid';
 
-    public function get_next_sequence_number_in_task()
-    {
-        return $this->get_last_sequence_number_in_task() + 1;
+        $num = $DB->get_field_sql($sql, ['taskid' => $this->taskid,]);
+
+        return $num !== false ? $num : 0;
     }
 
     public function update_sequence_and_save(int $new_sequence)
@@ -111,7 +119,7 @@ class criteria_base extends db_model_base
         if ($this->sequence != $new_sequence)
         {
             $old_sequence = $this->sequence;
-            $related_criteria = criteria::read_by_condition(
+            $related_criteria = criteria::read_by_condition_or_null(
                 [self::COL_TASKID => $this->taskid, self::COL_SEQUENCE => $new_sequence],
                 true);
 
@@ -131,8 +139,8 @@ class criteria_base extends db_model_base
     {
         $sql = 'SELECT * 
                 FROM {' . self::TABLE . '}
-                WHERE taskid = :taskid
-                AND sequence > :deleted_sequence';
+                WHERE ' . self::COL_TASKID . ' = :taskid
+                AND ' . self::COL_SEQUENCE . ' > :deleted_sequence';
         $to_update = criteria_base::read_all_by_sql(
             $sql,
             [

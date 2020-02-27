@@ -26,7 +26,7 @@ use mod_observation\interfaces\templateable;
 
 class learner_attempt extends learner_attempt_base implements templateable
 {
-    public function __construct($id_or_record, int $userid)
+    public function __construct($id_or_record)
     {
         parent::__construct($id_or_record);
     }

@@ -59,4 +59,45 @@ class learner_attempt_base extends db_model_base
      * @var int
      */
     protected $attempt_number;
+
+    public function get_next_attemptnumber_in_submission(): int
+    {
+        return $this->get_last_attemptnumber_in_submission() + 1;
+    }
+
+    /**
+     * @return int 0 if no attempts found
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function get_last_attemptnumber_in_submission(): int
+    {
+        global $DB;
+
+        if (empty($this->learner_submissionid))
+        {
+            throw new \coding_exception('submission id missing or un-initialized class instance');
+        }
+
+        $sql = 'SELECT max(' . self::COL_ATTEMPT_NUMBER . ')
+                FROM {' . self::TABLE . '} a
+                WHERE ' . self::COL_LEARNER_SUBMISSIONID . ' = :learner_submissionid';
+        $num = $DB->get_field_sql($sql, ['learner_submissionid' => $this->learner_submissionid]);
+
+        return $num !== false ? $num : 0;
+    }
+
+    public function get_moodle_form_data()
+    {
+        return [
+            self::COL_LEARNER_SUBMISSIONID => $this->learner_submissionid,
+            self::COL_TIMESTARTED          => $this->timestarted,
+            self::COL_TIMESUBMITTED        => $this->timesubmitted,
+            self::COL_TEXT                 => [
+                'text'   => $this->text,
+                'format' => $this->text_format
+            ],
+            self::COL_ATTEMPT_NUMBER       => $this->attempt_number,
+        ];
+    }
 }

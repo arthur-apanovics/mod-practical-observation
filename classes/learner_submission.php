@@ -23,8 +23,6 @@
 namespace mod_observation;
 
 use coding_exception;
-use dml_exception;
-use dml_missing_record_exception;
 use mod_observation\interfaces\templateable;
 
 class learner_submission extends learner_submission_base implements templateable
@@ -42,7 +40,7 @@ class learner_submission extends learner_submission_base implements templateable
      */
     private $assessor_submission;
 
-    public function __construct($id_or_record, int $userid)
+    public function __construct($id_or_record)
     {
         parent::__construct($id_or_record);
 
@@ -52,69 +50,165 @@ class learner_submission extends learner_submission_base implements templateable
         $this->observer_assignments = observer_assignment::to_class_instances(
             observer_assignment::read_all_by_condition([observer_assignment::COL_LEARNER_SUBMISSIONID => $this->id]));
 
-        $this->assessor_submission = assessor_submission::read_by_condition(
+        $this->assessor_submission = assessor_submission::read_by_condition_or_null(
             [assessor_submission::COL_LEARNER_SUBMISSIONID => $this->id],
             $this->is_observation_complete() // must exist if observation complete
         );
     }
 
-    public function is_observation_complete(bool $validate = false)
+    public function is_observation_complete()
     {
-        // todo: implement method
-        throw new \coding_exception(__METHOD__ . ' not implemented');
+        $this->validate_status();
 
-        $result = false;
+        // if status is either one of these, then observation is complete
+        $complete_statuses = [
+            self::STATUS_ASSESSMENT_PENDING,
+            self::STATUS_ASSESSMENT_IN_PROGRESS,
+            self::STATUS_ASSESSMENT_INCOMPLETE,
+        ];
 
-        if ($validate)
+        return in_array($this->status, $complete_statuses);
+    }
+
+    private function validate_status(): void
+    {
+        if (empty($this->status))
         {
-            // todo: implement method
-            throw new \coding_exception(__METHOD__ . ' - validation not implemented');
+            throw new coding_exception(
+                sprintf('Accessing observation status on an uninitialized %s class', self::class));
+        }
+    }
 
-            if ($observer_assignment = self::get_active_observer_assignment_or_null($this->id))
-            {
-                $observer_feedback = $observer_assignment->get_observer_submission()->get_observer_feedback();
+    public function is_assessment_complete()
+    {
+        $this->validate_status();
 
+        return $this->status === self::STATUS_COMPLETE;
+    }
 
-                foreach ($observer_feedback as $feedback)
+    public function learner_can_attempt()
+    {
+        switch ($this->status)
+        {
+            // this status gets set when no attempts have been made
+            // or an observer or assessor has requested new attempt
+            case self::STATUS_LEARNER_PENDING:
+                if (!$this->has_attempts())
                 {
+                    // no attempts ever - ok
+                    $this->create_new_attempt(true);
 
+                    return true;
                 }
-            }
+                else
+                {
+                    // find latest attempt and check stuff
+                    $attempt = $this->get_latest_attempt_or_null();
+
+                    if ($attempt->get(learner_attempt::COL_TIMESUBMITTED) == 0)
+                    {
+                        // attempt exists and is not yet submitted - NOT OK!
+
+                        // learner_pending status is set AFTER an attempt has been marked
+                        // by an observer or assessor. This indicates a problem in our logic
+
+                        // update to correct status
+                        $this->set(self::COL_STATUS, self::STATUS_LEARNER_IN_PROGRESS, true);
+                        // let a dev know if he/she is watching
+                        debugging(
+                            sprintf(
+                                'learner submission status is set to "pending", however, an attempt already exists for submission id %n!',
+                                $this->id));
+
+                        return true;
+                    }
+                    else
+                    {
+                        // latest attempt has been submitted and status indicates that
+                        // another attempt has to be made by learner
+                        $this->create_new_attempt(true);
+
+                        return true;
+                    }
+                }
+                break;
+
+            case self::STATUS_LEARNER_IN_PROGRESS:
+                return true;
+                break;
+
+            default:
+                return false;
         }
-        else
+    }
+
+    public function has_attempts()
+    {
+        return (bool) count($this->learner_attempts);
+    }
+
+    /**
+     * @param bool $update_submission_state if true, will set submission state to {@link learner_submission::STATUS_LEARNER_IN_PROGRESS}
+     * @return learner_attempt_base
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     * @throws coding_exception
+     */
+    public function create_new_attempt(bool $update_submission_state = true)
+    {
+        $attempt = new learner_attempt_base();
+
+        // set defaults
+        $attempt->set(learner_attempt::COL_LEARNER_SUBMISSIONID, $this->id);
+        $attempt->set(learner_attempt::COL_TIMESTARTED, time());
+        $attempt->set(learner_attempt::COL_TIMESUBMITTED, 0);
+        $attempt->set(learner_attempt::COL_TEXT, '');
+        $attempt->set(learner_attempt::COL_TEXT_FORMAT, 0);
+        $attempt->set(learner_attempt::COL_ATTEMPT_NUMBER, $attempt->get_next_attemptnumber_in_submission());
+
+        $this->learner_attempts[] = $attempt->create();
+
+        if ($update_submission_state)
         {
-            $complete_statuses = [
-                self::STATUS_ASSESSMENT_PENDING,
-                self::STATUS_ASSESSMENT_IN_PROGRESS,
-                self::STATUS_ASSESSMENT_INCOMPLETE,
-            ];
-
-            $result = in_array($this->status, $complete_statuses);
+            $this->set(self::COL_STATUS, self::STATUS_LEARNER_IN_PROGRESS, true);
         }
 
-        return $result;
+        return $attempt;
+    }
+
+    /**
+     * @return learner_attempt|null null if no current attempt
+     * @throws coding_exception
+     */
+    public function get_latest_attempt_or_null()
+    {
+        if (is_null($this->learner_attempts))
+        {
+            return null;
+        }
+
+        $attempts_sorted = lib::sort_by_field(
+            $this->learner_attempts,
+            learner_attempt::COL_ATTEMPT_NUMBER,
+            'desc');
+
+        return $attempts_sorted[0];
     }
 
     /**
      * Fetches currently active observer assignment or null if one does not exist
      *
-     * @param int $learner_submissionid
      * @return observer_assignment|null null if no record found
-     * @throws dml_exception
-     * @throws dml_missing_record_exception
      * @throws coding_exception
      */
-    public static function get_active_observer_assignment_or_null(int $learner_submissionid)
+    public function get_active_observer_assignment_or_null()
     {
-        $assignment = observer_assignment::read_by_condition(
+        return lib::find_in_assoc_array_criteria_or_null(
+            $this->observer_assignments,
             [
-                observer_assignment::COL_LEARNER_SUBMISSIONID => $learner_submissionid,
+                observer_assignment::COL_LEARNER_SUBMISSIONID => $this->id,
                 observer_assignment::COL_ACTIVE               => true
             ]);
-
-        return !empty($assignment->id)
-            ? $assignment
-            : null;
     }
 
     /**
@@ -134,6 +228,12 @@ class learner_submission extends learner_submission_base implements templateable
             $observer_assignments_data[] = $observer_assignment->export_template_data();
         }
 
+        $assessor_submission_data = null;
+        if (!is_null($this->assessor_submission))
+        {
+            $assessor_submission_data = $this->assessor_submission->export_template_data();
+        }
+
         return [
             self::COL_ID            => $this->id,
             self::COL_TIMESTARTED   => userdate($this->timestarted),
@@ -141,7 +241,7 @@ class learner_submission extends learner_submission_base implements templateable
 
             'learner_attempts'     => $learner_attempts_data,
             'observer_assignments' => $observer_assignments_data,
-            'assessor_submission'  => $this->assessor_submission->export_template_data()
+            'assessor_submission'  => $assessor_submission_data
         ];
     }
 }

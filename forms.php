@@ -134,3 +134,31 @@ class observation_criteria_form extends moodleform
         $this->add_action_buttons(true);
     }
 }
+
+class observation_learner_editor_form extends moodleform
+{
+    function definition()
+    {
+        $mform =& $this->_form;
+        $cmid = $this->_customdata['cmid'];
+        $cm = get_coursemodule_from_id(OBSERVATION, $cmid);
+        $context = context_module::instance($cm->id);
+
+        // description
+        $element = 'learner_attempt';
+        $mform->addElement(
+            'editor',
+            $element,
+            get_string($element, OBSERVATION),
+            ['rows' => 10],
+            lib::get_editor_file_options($context));
+        $mform->addHelpButton($element, $element, OBSERVATION);
+        $mform->addRule($element, get_string('required'), 'required', null);
+        $mform->setType($element, PARAM_RAW);// no XSS prevention here, users must be trusted
+
+        // CMID
+        $mform->addElement('hidden', 'id');
+        $mform->setType('id', PARAM_INT);
+        $mform->setDefault('id', $cmid);
+    }
+}

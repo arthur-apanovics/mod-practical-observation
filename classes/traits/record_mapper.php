@@ -4,10 +4,27 @@
 namespace mod_observation\traits;
 
 use coding_exception;
+use mod_observation\db_model_base;
 use stdClass;
 
 trait record_mapper
 {
+    /**
+     * Create and return a moodle database record from current object
+     *
+     * @return stdClass record
+     */
+    public function to_record()
+    {
+        $rec = [];
+        foreach ($this as $key => $val)
+        {
+            $rec[$key] = $val;
+        }
+
+        return (object) $rec;
+    }
+
     /**
      * Attempts to map existing database record values to class by either fetching record
      * from database by id or mapping to provided values or existing object.
@@ -23,7 +40,7 @@ trait record_mapper
         {
             if (is_object($id_or_record))
             {
-                // db record given
+                // db record or class instance given
                 $this->map_to_record($id_or_record);
             }
             else if (is_numeric($id_or_record))
@@ -40,14 +57,15 @@ trait record_mapper
             }
             else
             {
-                throw new coding_exception('Incorrect constructor argument passed ("'
-                                           . json_encode($id_or_record) . '") when initializing ' . get_class($this));
+                throw new coding_exception(
+                    'Incorrect constructor argument passed ("' . json_encode($id_or_record) . '") when initializing '
+                    . get_class($this));
             }
         }
         else
         {
-            throw new coding_exception('No data provided when attempting to initialize "'
-                                       . static::class . '" object');
+            throw new coding_exception(
+                'No data provided when attempting to initialize "' . static::class . '" object');
         }
     }
 
@@ -73,19 +91,5 @@ trait record_mapper
         {
             throw new coding_exception('Cannot map supplied record to ' . static::class . ' - no data provided');
         }
-    }
-
-    /**
-     * Create and return a moodle database record from current object
-     *
-     * @return stdClass record
-     */
-    public function to_record()
-    {
-        $rec = [];
-        foreach ($this as $key => $val)
-            $rec[$key] = $val;
-
-        return (object)$rec;
     }
 }

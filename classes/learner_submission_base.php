@@ -23,25 +23,32 @@
 namespace mod_observation;
 
 use coding_exception;
+use core\command\exception;
 
 class learner_submission_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_learner_submission';
 
-    public const COL_USERID        = 'userid';
     public const COL_TASKID        = 'taskid';
+    public const COL_USERID        = 'userid';
     public const COL_STATUS        = 'status';
     public const COL_TIMESTARTED   = 'timestarted';
     public const COL_TIMECOMPLETED = 'timecompleted';
 
-    public const STATUS_NOT_STARTED             = 'not_started';
-    public const STATUS_LEARNER_IN_PROGRESS     = 'learner_in_progress';
+    // learner statuses
+    public const STATUS_LEARNER_PENDING     = 'learner_pending';
+    public const STATUS_LEARNER_IN_PROGRESS = 'learner_in_progress';
+
+    // observer statuses
     public const STATUS_OBSERVATION_PENDING     = 'observation_pending';
     public const STATUS_OBSERVATION_IN_PROGRESS = 'observation_in_progress';
     public const STATUS_OBSERVATION_INCOMPLETE  = 'observation_incomplete';
+
+    // assessor statuses
     public const STATUS_ASSESSMENT_PENDING      = 'assessment_pending';
     public const STATUS_ASSESSMENT_IN_PROGRESS  = 'assessment_in_progress';
     public const STATUS_ASSESSMENT_INCOMPLETE   = 'assessment_incomplete';
+
     public const STATUS_COMPLETE                = 'complete';
 
     /**
@@ -74,7 +81,7 @@ class learner_submission_base extends db_model_base
         {
             // validate status is correctly set
             $allowed = [
-                self::STATUS_NOT_STARTED,
+                self::STATUS_LEARNER_PENDING,
                 self::STATUS_LEARNER_IN_PROGRESS,
                 self::STATUS_OBSERVATION_PENDING,
                 self::STATUS_OBSERVATION_IN_PROGRESS,
@@ -89,22 +96,19 @@ class learner_submission_base extends db_model_base
                 throw new coding_exception(
                     sprintf("'$value' is not a valid value for '%s' in '%s'", self::COL_STATUS, get_class($this)));
             }
+            if ($this->status === $value)
+            {
+                debugging(
+                    sprintf(
+                        '%s %s is already "%s". This should not normally happen',
+                        self::class,
+                        self::COL_STATUS,
+                        $value),
+                    DEBUG_DEVELOPER,
+                    debug_backtrace());
+            }
         }
 
         return parent::set($prop, $value, $save);
     }
-
-    // /**
-    //  * @param int $id observation id
-    //  * @param int $userid
-    //  * @param int $taskid
-    //  * @return learner_submission_base[]
-    //  * @throws \dml_exception
-    //  */
-    // public static function get_submissions(int $id, int $userid = null, int $taskid = null): array
-    // {
-    //     // TODO check for multiple records if taskid provided and throw
-    //     return self::read_all_by_condition(
-    //         [self::COL_ID => $id, self::COL_USERID => $userid, self::COL_TASKID => $taskid]);
-    // }
 }

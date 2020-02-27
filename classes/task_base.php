@@ -123,6 +123,16 @@ class task_base extends db_model_base
         return $DB->get_field(self::TABLE, self::COL_SEQUENCE, [self::COL_ID => $this->id], MUST_EXIST);
     }
 
+    public function get_next_sequence_number_in_activity(): int
+    {
+        return $this->get_last_sequence_number_in_activity() + 1;
+    }
+
+    /**
+     * @return int 0 if no tasks found
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     public function get_last_sequence_number_in_activity()
     {
         global $DB;
@@ -134,13 +144,10 @@ class task_base extends db_model_base
 
         $sql = 'SELECT max(sequence)
                 FROM {' . self::TABLE . '} c
-                WHERE observationid = :observationid';
-        return $DB->get_field_sql($sql, ['observationid' => $this->observationid]);
-    }
+                WHERE ' . self::COL_OBSERVATIONID . ' = :observationid';
+        $num = $DB->get_field_sql($sql, ['observationid' => $this->observationid]);
 
-    public function get_next_sequence_number_in_activity()
-    {
-        return $this->get_last_sequence_number_in_activity() + 1;
+        return $num !== false ? $num : 0;
     }
 
     public function update_sequence_and_save(int $new_sequence)
@@ -149,7 +156,7 @@ class task_base extends db_model_base
         if ($this->sequence != $new_sequence)
         {
             $old_order = $this->sequence;
-            $related_task = task::read_by_condition(
+            $related_task = task::read_by_condition_or_null(
                 [self::COL_OBSERVATIONID => $this->observationid, self::COL_SEQUENCE => $new_sequence],
                 true);
 
@@ -169,8 +176,8 @@ class task_base extends db_model_base
     {
         $sql = 'SELECT * 
                 FROM {' . self::TABLE . '}
-                WHERE observationid = :observationid
-                AND sequence > :deleted_sequence';
+                WHERE ' . self::COL_OBSERVATIONID . ' = :observationid
+                AND ' . self::COL_SEQUENCE . ' > :deleted_sequence';
         $to_update = task_base::read_all_by_sql(
             $sql,
             [
