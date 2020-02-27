@@ -12,22 +12,31 @@ body.path-mod-observation #page .title-main {
 }
 body.path-mod-observation #page .flex-title {
   display: flex;
+  /* Standard syntax */
+  display: -webkit-flex;
+  /* Safari */
   align-items: flex-end;
   flex-wrap: nowrap;
-  padding-bottom: 10px;
+  /*padding-bottom: 10px; */
 }
 body.path-mod-observation #page .flex-title > span {
   white-space: nowrap;
 }
 body.path-mod-observation #page .title-desc {
   flex-grow: 1;
-  padding-left: 10px;
+  padding: 0 10px 0 10px;
   overflow-wrap: break-word;
   word-wrap: break-word;
 }
+body.path-mod-observation #page .obs-main-title {
+  flex: 3;
+  padding-left: 10px;
+}
 body.path-mod-observation #page .title-note {
-  font-size: 80%;
-  padding-right: 25px;
+  flex: 1;
+  font-size: 15px;
+  margin-top: 20px;
+  margin-bottom: 10px;
 }
 body.path-mod-observation #page .wrapper-title {
   width: 75%;
@@ -106,7 +115,6 @@ body.path-mod-observation #page .wrapper-obs-activity {
   margin-bottom: 40px;
 }
 body.path-mod-observation #page .wrapper-task {
-  width: 65%;
   border: 2px solid #d3d3d3;
   margin-bottom: 30px;
 }
@@ -118,9 +126,9 @@ body.path-mod-observation #page .subtitle-criteria {
 }
 body.path-mod-observation #page .criteria-desc {
   flex-grow: 1;
-  font-size: 13px;
-  margin: 0 5px;
-  padding: 5px 10px;
+  font-weight: normal;
+  margin: 5px 5px 5px 0;
+  padding: 5px 5px;
   overflow-wrap: break-word;
   word-wrap: break-word;
   border: 1px solid #d3d3d3;

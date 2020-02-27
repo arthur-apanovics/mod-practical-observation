@@ -1,33 +1,29 @@
 <div class="wrapper">
+    <div class="flex-title">
+        <div class="obs-main-title">
+            <h3>{{name}}</h3>
+        </div>
+        <div class="title-note">    
+            {{^has_submission}}
 
-    <h3 class="title-main">{{name}}</h3>
+                {{! check if submission or preview}}
+                {{#capabilities.can_submit}}
+                    <a href="{{{module_root}}}/task.php?id={{cmid}}&taskid={{id}}">
+                        {{#str}}start, observation{{/str}}
+                    </a>
+                {{/capabilities.can_submit}}
+                {{^capabilities.can_submit}}
+                    {{! can't submit, check if can preview }}
+                    {{#capabilities.can_view}}
+                        {{#str}}preview, observation{{/str}}
+                    {{/capabilities.can_view}}
+                {{/capabilities.can_submit}}
+            {{/has_submission}}
 
-    <p class="flex-title">
-        <div class="title-desc">{{{intro_learner}}}</div>
-        <a href="#">
-            <span class="title-note">
-                {{^has_submission}}
-
-                    {{! check if submission or preview}}
-                    {{#capabilities.can_submit}}
-                        <a href="{{{module_root}}}/task.php?id={{cmid}}&taskid={{id}}">
-                            {{#str}}start, observation{{/str}}
-                        </a>
-                    {{/capabilities.can_submit}}
-                    {{^capabilities.can_submit}}
-                        {{! can't submit, check if can preview }}
-                        {{#capabilities.can_view}}
-                            {{#str}}preview, observation{{/str}}
-                        {{/capabilities.can_view}}
-                    {{/capabilities.can_submit}}
-
-                {{/has_submission}}
-
-                {{#has_submission}}
-                    {{#str}}review, observation{{/str}}
-                {{/has_submission}}
-            </span>
-        </a>
-    </p>
-
+            {{#has_submission}}
+                {{#str}}review, observation{{/str}}
+            {{/has_submission}}
+        </div>
+    </div>
+        <div class="title-desc"><p>{{{intro_learner}}}</p></div>
 </div>

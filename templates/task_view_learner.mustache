@@ -7,12 +7,13 @@
     {{!</p>}}
 </div>
 
-<h5>Completion observations</h5>
 <div class="wrapper-task">
     <ol>
         {{#criteria}}
             {{> mod_observation/comp_completion_criteria}}
-            {{> mod_observation/comp_mark_criteria}}
+            <p class="flex-criteria">
+                <span class="criteria-note">{{!> mod_observation/comp_mark_criteria}}</span>
+            </p>
         {{/criteria}}
     </ol>
 </div>
