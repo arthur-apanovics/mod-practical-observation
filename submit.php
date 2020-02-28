@@ -25,44 +25,40 @@
  *
  */
 
-use mod_observation\event\course_module_viewed;
 use mod_observation\observation;
 use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('lib.php');
 
-$cmid = required_param('id', PARAM_INT);
-$taskid = required_param('taskid', PARAM_INT);
+// $cmid = required_param('id', PARAM_INT);
+// $taskid = required_param('taskid', PARAM_INT);
+$learner_submissionid = optional_param('lsid', null, PARAM_INT);
+$observer_submissionid = optional_param('osid', null, PARAM_INT);
+$assessor_submissionid = optional_param('asid', null, PARAM_INT);
 
-list($course, $cm) = get_course_and_cm_from_cmid($cmid);
-$context = context_module::instance($cmid);
+// list($course, $cm) = get_course_and_cm_from_cmid($cmid);
+// $context = context_module::instance($cmid);
 
-require_login($course, true, $cm);
+require_login();
 
-// TODO: Event
+// TODO: Events
 
-$observation = new observation($cm);
+if ($learner_submissionid)
+{
+    required_param('learner_attempt_id', PARAM_INT);
+}
+else if ($observer_submissionid)
+{
+    required_param('observer_feedback_id', PARAM_INT);
+}
+else if ($assessor_submissionid)
+{
+    required_param('assessor_feedback_id', PARAM_INT);
+}
+else
+{
+    throw new coding_exception('No submission id provided, cannot proceed with submission!');
+}
 
-// Print the page header.
-$PAGE->set_url('/mod/observation/task.php', array('id' => $cm->id));
-$PAGE->set_title($observation->get_formatted_name());
-$PAGE->set_heading(format_string($course->fullname));
-
-$PAGE->add_body_class('observation-task');
-
-// Output starts here.
-echo $OUTPUT->header();
-
-/* @var $renderer mod_observation_renderer */
-$renderer = $PAGE->get_renderer('observation');
-
-// check if learner
-echo $renderer->task_learner_view($observation, $taskid);
-
-// todo check if observer
-
-// todo check if assessor
-
-// Finish the page.
-echo $OUTPUT->footer();
+// $PAGE->set_url('/mod/observation/submit.php', array('id' => $cm->id));

@@ -117,6 +117,8 @@ $string['confirm_delete_task'] = 'Are you sure you want to delete task "{$a}"?<b
 $string['deleted_task'] = 'Task "{$a}" deleted';
 $string['no_criteria'] = 'Task has no criteria';
 
+$string['request_observation'] = 'Request observation';
+
 $string['preview'] = 'Preview';
 $string['review'] = 'Review';
 $string['start'] = 'Start';

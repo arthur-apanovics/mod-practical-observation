@@ -69,10 +69,14 @@ class observation extends observation_base implements templateable
         $this->cm = $cm_or_cm_info;
         parent::__construct($this->cm->instance);
 
-        $this->tasks = task::to_class_instances(
-            task::read_all_by_condition(
-                [task::COL_OBSERVATIONID => $this->cm->instance],
-                sprintf('`%s` ASC', task::COL_SEQUENCE)));
+        $this->tasks = task::read_all_by_condition(
+            [task::COL_OBSERVATIONID => $this->cm->instance],
+            sprintf('`%s` ASC', task::COL_SEQUENCE));
+    }
+
+    public function get_cm(): cm_info
+    {
+        return $this->cm;
     }
 
     /**
@@ -170,6 +174,26 @@ class observation extends observation_base implements templateable
     }
 
     /**
+     * Check every {@link observation_base} capability for specified user
+     *
+     * @param int|null $userid if null, global $USER will be used
+     * @return array ['capability' => bool]
+     * @throws coding_exception
+     */
+    public function export_capabilities(int $userid = null)
+    {
+        $context = context_module::instance($this->cm->id);
+
+        return [
+            'can_view'            => has_capability(self::CAP_VIEW, $context, $userid),
+            'can_submit'          => has_capability(self::CAP_SUBMIT, $context, $userid),
+            'can_viewsubmissions' => has_capability(self::CAP_VIEWSUBMISSIONS, $context, $userid),
+            'can_assess'          => has_capability(self::CAP_ASSESS, $context, $userid),
+            'can_manage'          => has_capability(self::CAP_MANAGE, $context, $userid),
+        ];
+    }
+
+    /**
      * @inheritDoc
      */
     public function export_template_data(): array
@@ -182,8 +206,6 @@ class observation extends observation_base implements templateable
         }
         // sort tasks based on sequence (tasks should be sorted in constructor but need to be sure)
         $tasks = lib::sort_by_field($tasks, task::COL_SEQUENCE);
-
-        $context = context_module::instance($this->cm->id);
 
         return [
             self::COL_ID             => $this->id,
@@ -199,13 +221,7 @@ class observation extends observation_base implements templateable
             'courseid'    => $this->course,
             'cmid'        => $this->cm->id,
 
-            'capabilities' => [
-                'can_view'            => has_capability(self::CAP_VIEW, $context),
-                'can_submit'          => has_capability(self::CAP_SUBMIT, $context),
-                'can_viewsubmissions' => has_capability(self::CAP_VIEWSUBMISSIONS, $context),
-                'can_assess'          => has_capability(self::CAP_ASSESS, $context),
-                'can_manage'          => has_capability(self::CAP_MANAGE, $context),
-            ]
+            'capabilities' => $this->export_capabilities_current_user()
         ];
     }
 }

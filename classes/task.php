@@ -49,11 +49,6 @@ class task extends task_base implements templateable
         $this->learner_submissions = learner_submission::read_all_by_condition($params);
     }
 
-    public function has_submission()
-    {
-        return (bool) count($this->learner_submissions);
-    }
-
     /**
      * Checks if task has been observed for given userid
      *
@@ -74,6 +69,49 @@ class task extends task_base implements templateable
     {
         // todo: implement method
         return false;
+    }
+
+    /**
+     * @return criteria[]|null Can be null if no criteria in task!
+     */
+    public function get_criteria()
+    {
+        return $this->criteria;
+    }
+
+    public function has_criteria()
+    {
+        return (bool) count($this->criteria);
+    }
+
+    /**
+     * @param int $userid
+     * @return learner_submission
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     */
+    public function get_current_learner_submission_or_create(int $userid)
+    {
+        $submission = lib::find_in_assoc_array_key_value_or_null(
+            $this->learner_submissions, learner_submission::COL_USERID, $userid);
+
+        if (empty($submission))
+        {
+            $submission = new learner_submission_base();
+            $submission->set(learner_submission::COL_TASKID, $this->id);
+            $submission->set(learner_submission::COL_USERID, $userid);
+            $submission->set(learner_submission::COL_STATUS, learner_submission::STATUS_LEARNER_PENDING);
+            $submission->set(learner_submission::COL_TIMESTARTED, time());
+            $submission->set(learner_submission::COL_TIMECOMPLETED, 0);
+
+            // create record and initialize submission class instance
+            $submission = new learner_submission($submission->create());
+
+            $this->learner_submissions[] = $submission;
+        }
+
+        return $submission;
     }
 
     /**
@@ -113,48 +151,8 @@ class task extends task_base implements templateable
         ];
     }
 
-    /**
-     * @return criteria[]|null Can be null if no criteria in task!
-     */
-    public function get_criteria()
+    public function has_submission()
     {
-        return $this->criteria;
-    }
-
-    public function has_criteria()
-    {
-        return (bool) count($this->criteria);
-    }
-
-    /**
-     * @param int $userid
-     * @return learner_submission
-     * @throws \coding_exception
-     * @throws \dml_exception
-     * @throws \dml_missing_record_exception
-     */
-    public function get_current_learner_submission_or_create(int $userid)
-    {
-        $submission = lib::find_in_assoc_array_key_value_or_null(
-            $this->learner_submissions,
-            learner_submission::COL_USERID,
-            $userid);
-
-        if (empty($submission))
-        {
-            $submission = new learner_submission_base();
-            $submission->set(learner_submission::COL_TASKID, $this->id);
-            $submission->set(learner_submission::COL_USERID, $userid);
-            $submission->set(learner_submission::COL_STATUS, learner_submission::STATUS_LEARNER_PENDING);
-            $submission->set(learner_submission::COL_TIMESTARTED, time());
-            $submission->set(learner_submission::COL_TIMECOMPLETED, 0);
-
-            // create record and initialize submission class instance
-            $submission = new learner_submission($submission->create());
-
-            $this->learner_submissions[] = $submission;
-        }
-
-        return $submission;
+        return (bool) count($this->learner_submissions);
     }
 }

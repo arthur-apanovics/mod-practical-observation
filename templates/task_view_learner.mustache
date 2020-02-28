@@ -20,19 +20,35 @@
     </ol>
 </div>
 
-<h5>Information and evidence from the trainee</h5>
-<div class="wrapper-task">
-    <p class="flex-criteria">
-        <span class="observer-note">Observer assigned - joe@blogs.com</span>
-    </p>
-    <h5 class="attempt">Attempt #1</h5>
-    {{> mod_observation/comp_show_evidence}}
-    <h5 class="attempt">Attempt #2</h5>
-    <div class="editor">
-        {{{extra.editor_html}}}
-    </div>
-</div>
+{{#extra.is_submission}}
+    <form action="submit.php" id="attempt-form" method="post" enctype="multipart/form-data" accept-charset="utf-8" autocomplete="off">
+{{/extra.is_submission}}
 
-<div class="request-button-wrapper">
-    <button class="btn btn-primary">Request observation</button>
-</div>
+    <h5>Information and evidence from the trainee</h5>
+    <div class="wrapper-task">
+        <h5 class="attempt">Attempt #1</h5>
+        {{> mod_observation/comp_show_evidence}}
+        <h5 class="attempt">Attempt #2</h5>
+
+        {{#extra.is_submission}}
+            <div class="editor">
+                {{{extra.editor_html}}}
+                {{{extra.filemanager_html}}}
+            </div>
+        {{/extra.is_submission}}
+
+    </div>
+{{#extra.is_submission}}
+
+        <input type="hidden" name="lsid" value={{extra.lsid}}>
+        <input type="hidden" name="attempt_id" value={{extra.attempt_id}}>
+
+        <div class="request-button-wrapper">
+            <button type="submit" class="btn btn-primary">
+                {{#str}}request_observation, observation{{/str}}
+            </button>
+        </div>
+    
+    </form>
+{{/extra.is_submission}}
+

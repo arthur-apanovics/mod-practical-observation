@@ -23,13 +23,13 @@
 defined('MOODLE_INTERNAL') || die();
 
 use core\notification;
+use mod_observation\learner_attempt;
 use mod_observation\lib;
 use mod_observation\observation;
 use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-
-// require_once($CFG->dirroot . '/mod/observation/lib.php');
+require_once('forms.php');
 
 class mod_observation_renderer extends plugin_renderer_base
 {
@@ -197,13 +197,13 @@ class mod_observation_renderer extends plugin_renderer_base
         if ($caps['can_assess'] || $caps['can_viewsubmissions'])
         {
             // TODO: ASSESSOR TABLE
-            $out .= $this->render_from_template('/assessor_table', $template_data);
+            $out .= $this->render_from_template('assessor_table', $template_data);
         }
         // learner view or preview
         else if ($caps['can_submit'] || $caps['can_view'])
         {
             // submission/preview logic in template
-            $out .= $this->render_from_template('/activity_view', $template_data);
+            $out .= $this->render_from_template('activity_view', $template_data);
         }
 
         // validation for 'managers'
@@ -215,7 +215,7 @@ class mod_observation_renderer extends plugin_renderer_base
                 notification::warning(get_string('manage:missing_criteria', 'observation'));
             }
 
-            $out .= $this->render_from_template('/part_edit_tasks_button', $template_data);
+            $out .= $this->render_from_template('part_edit_tasks_button', $template_data);
         }
 
         return $out;
@@ -230,11 +230,10 @@ class mod_observation_renderer extends plugin_renderer_base
     private function activity_header(array $template_data): string
     {
         return $this->render_from_template(
-            '/part_activity_header',
-            [
-                observation::COL_NAME  => $template_data[observation::COL_NAME],
-                observation::COL_INTRO => $template_data[observation::COL_INTRO],
-            ]);
+            'part_activity_header', [
+            observation::COL_NAME  => $template_data[observation::COL_NAME],
+            observation::COL_INTRO => $template_data[observation::COL_INTRO],
+        ]);
     }
 
     public function render_from_template($templatename, $context)
@@ -252,21 +251,19 @@ class mod_observation_renderer extends plugin_renderer_base
         $template_data = $observation->export_template_data();
         $out = '';
 
-        $out .= $this->render_from_template('/manage_tasks_view', $template_data);
+        $out .= $this->render_from_template('manage_tasks_view', $template_data);
 
         return $out;
     }
 
-    public function task_learner_view(observation $observation, task $task)
+    public function task_learner_view(observation $observation, int $taskid)
     {
         global $USER;
 
-        $template_data = $observation->export_template_data();
-        $task_template_data = lib::find_in_assoc_array_key_value_or_null(
-            $template_data['tasks'],
-            task::COL_ID,
-            $task->get_id_or_null());
-        $caps = $template_data['capabilities'];
+        $task = new task($taskid, $USER->id);
+
+        $task_template_data = $task->export_template_data();
+        $caps = $observation->export_capabilities();
         $out = '';
 
         if ($caps['can_submit'])
@@ -276,12 +273,25 @@ class mod_observation_renderer extends plugin_renderer_base
 
             if ($submission->learner_can_attempt())
             {
-                $attemp = $submission->get_latest_attempt_or_null();
+                $attempt = $submission->get_latest_attempt_or_null();
+                $context = context_module::instance($observation->get_cm()->id);
 
-                // get editor // TODO !!!!!!!!!!
-                $editor_form = new observation_learner_editor_form();
-                $editor_form->set_data($attemp->get_moodle_form_data());
-                $task_template_data['extra']['editor_html'] = $editor_form->render();
+                // text editor
+                $task_template_data['extra']['editor_html'] = $this->text_editor(
+                    $attempt->get(learner_attempt::COL_TEXT),
+                    $attempt->get(learner_attempt::COL_TEXT_FORMAT),
+                    $context);
+
+                // file manager
+                $task_template_data['extra']['filemanager_html'] =
+                    $this->files_input($attempt->get_id_or_null(), observation::FILE_AREA_TRAINEE, $context);
+
+                // id's
+                $task_template_data['extra']['lsid'] = $submission->get_id_or_null();
+                $task_template_data['extra']['attempt_id'] = $attempt->get_id_or_null();
+
+                // tell template that there will be a new attempt
+                $task_template_data['extra']['is_submission'] = true;
             }
 
             // TODO: STATUS FAKE BLOCK
@@ -291,7 +301,7 @@ class mod_observation_renderer extends plugin_renderer_base
         else if ($caps['can_view'])
         {
             // preview
-            $out .= $this->render_from_template('/task_view_preview', $task_template_data);
+            $out .= $this->render_from_template('task_view_preview', $task_template_data);
         }
         else
         {
@@ -300,6 +310,131 @@ class mod_observation_renderer extends plugin_renderer_base
         }
 
         return $out;
+    }
+
+    public function text_editor(string $text, int $format, context $context): string
+    {
+        global $CFG;
+        require_once($CFG->dirroot . '/repository/lib.php');
+
+        $input_name = 'learner_attempt';
+        $id = $input_name . '_id';
+        $output = '';
+
+        // get available formats
+        $response_format = $format;
+        $editor = editors_get_preferred_editor($response_format);
+        $formats = $editor->get_supported_formats();
+
+        $str_formats = format_text_menu();
+        foreach ($formats as $fid)
+        {
+            $formats[$fid] = $str_formats[$fid];
+        }
+
+        // set existing text
+        $editor->set_text($text);
+
+        $editor->use_editor(
+            $id, ['context' => $context, 'autosave' => true], ['return_types' => FILE_INTERNAL | FILE_EXTERNAL]);
+
+        // editor wrapper
+        $output .= html_writer::start_tag('div', ['class' => 'attempt-response']);
+        // editor textarea
+        $output .= html_writer::tag(
+            'div', html_writer::tag(
+            'textarea', s($text), [
+            'id'   => $id,
+            'name' => $input_name,
+            'rows' => 10,
+            'cols' => 50
+        ]));
+
+        // format wrapper
+        $output .= html_writer::start_tag('div');
+        if (count($formats) == 1)
+        {
+            // format id
+            reset($formats);
+            $output .= html_writer::empty_tag(
+                'input', array(
+                'type'  => 'hidden',
+                'name'  => $input_name . '_format',
+                'value' => key($formats)
+            ));
+        }
+        else
+        {
+            // format selector for plain text editors
+            $output .= html_writer::label(
+                get_string('format'), 'menu' . $input_name . 'format', false);
+            $output .= ' ';
+            $output .= html_writer::select($formats, $input_name . 'format', $response_format, '');
+        }
+
+        // /editor wrapper
+        $output .= html_writer::end_tag('div');
+        // /format wrapper
+        $output .= html_writer::end_tag('div');
+
+        return $output;
+    }
+
+    /**
+     * @param int     $itemid for learner - attempt id, for observer & assessor - feedback id
+     * @param context $context
+     * @param int     $max_files
+     * @return string
+     * @throws coding_exception
+     */
+    private function files_input(int $itemid, string $file_area, context $context, int $max_files = 10): string
+    {
+        global $CFG;
+        require_once($CFG->dirroot . '/lib/form/filemanager.php');
+
+        $picker_options = new stdClass();
+        $picker_options->mainfile = null;
+        $picker_options->maxfiles = $max_files;
+        $picker_options->context = $context;
+        $picker_options->return_types = FILE_INTERNAL;
+
+        $picker_options->itemid = $this->prepare_response_files_draft_itemid($file_area, $context->id, $itemid);
+
+        // render
+        $files_renderer = $this->page->get_renderer('core', 'files');
+        $fm = new form_filemanager($picker_options);
+        $out = '';
+
+        $out .= $files_renderer->render($fm);
+        $out .= html_writer::empty_tag(
+            'input', array(
+            'type'  => 'hidden',
+            'name'  => 'attachments_itemid',
+            'value' => $picker_options->itemid
+        ));
+
+        return $out;
+    }
+
+    /**
+     * @param string $file_area
+     * @param int    $contextid
+     * @param int    $itemid
+     * @return int the draft itemid.
+     */
+    public function prepare_response_files_draft_itemid(string $file_area, int $contextid, int $itemid = null)
+    {
+        $draftid = 0; // Will be filled in by file_prepare_draft_area.
+
+        // check if files exist
+        file_prepare_draft_area(
+            $draftid, $contextid, \OBSERVATION, $file_area, $itemid);
+
+        // // No files yet.
+        // file_prepare_draft_area(
+        //     $draftid, $contextid, \OBSERVATION, $file_area, null);
+
+        return $draftid;
     }
 
     /**

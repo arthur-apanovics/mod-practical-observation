@@ -140,25 +140,33 @@ class observation_learner_editor_form extends moodleform
     function definition()
     {
         $mform =& $this->_form;
-        $cmid = $this->_customdata['cmid'];
-        $cm = get_coursemodule_from_id(OBSERVATION, $cmid);
-        $context = context_module::instance($cm->id);
+        // $cmid = $this->_customdata['cmid'];
+        // $cm = get_coursemodule_from_id(OBSERVATION, $cmid);
+        // $context = context_module::instance($cm->id);
 
         // description
         $element = 'learner_attempt';
         $mform->addElement(
             'editor',
             $element,
-            get_string($element, OBSERVATION),
-            ['rows' => 10],
-            lib::get_editor_file_options($context));
-        $mform->addHelpButton($element, $element, OBSERVATION);
-        $mform->addRule($element, get_string('required'), 'required', null);
+            null /*get_string($element, OBSERVATION)*/,
+            ['rows' => 10]);
+        // $mform->addHelpButton($element, $element, OBSERVATION);
+        // $mform->addRule($element, get_string('required'), 'required', null);
         $mform->setType($element, PARAM_RAW);// no XSS prevention here, users must be trusted
 
+        // file upload
+        $element = 'upload_learner';
+        // // Restore file is not in the array options on purpose, because formslib can't handle it!
+        // $contextid = $this->_customdata['contextid'];
+        // $mform->addElement('hidden', 'contextid', $contextid);
+        // $mform->setType('contextid', PARAM_INT);
+        $mform->addElement('filepicker', $element, null /*get_string($element, OBSERVATION)*/);
+        // $mform->addHelpButton('restorefile', $element, OBSERVATION);
+
         // CMID
-        $mform->addElement('hidden', 'id');
-        $mform->setType('id', PARAM_INT);
-        $mform->setDefault('id', $cmid);
+        // $mform->addElement('hidden', 'id');
+        // $mform->setType('id', PARAM_INT);
+        // $mform->setDefault('id', $cmid);
     }
 }

@@ -44,11 +44,11 @@ class learner_submission extends learner_submission_base implements templateable
     {
         parent::__construct($id_or_record);
 
-        $this->learner_attempts = learner_attempt::to_class_instances(
-            learner_attempt::read_all_by_condition([learner_attempt::COL_LEARNER_SUBMISSIONID => $this->id]));
+        $this->learner_attempts = learner_attempt::read_all_by_condition(
+            [learner_attempt::COL_LEARNER_SUBMISSIONID => $this->id]);
 
-        $this->observer_assignments = observer_assignment::to_class_instances(
-            observer_assignment::read_all_by_condition([observer_assignment::COL_LEARNER_SUBMISSIONID => $this->id]));
+        $this->observer_assignments = observer_assignment::read_all_by_condition(
+            [observer_assignment::COL_LEARNER_SUBMISSIONID => $this->id]);
 
         $this->assessor_submission = assessor_submission::read_by_condition_or_null(
             [assessor_submission::COL_LEARNER_SUBMISSIONID => $this->id],
@@ -142,6 +142,11 @@ class learner_submission extends learner_submission_base implements templateable
         }
     }
 
+    /**
+     * Checks if learner has made any attempts for this submission
+     *
+     * @return bool
+     */
     public function has_attempts()
     {
         return (bool) count($this->learner_attempts);
@@ -163,7 +168,7 @@ class learner_submission extends learner_submission_base implements templateable
         $attempt->set(learner_attempt::COL_TIMESTARTED, time());
         $attempt->set(learner_attempt::COL_TIMESUBMITTED, 0);
         $attempt->set(learner_attempt::COL_TEXT, '');
-        $attempt->set(learner_attempt::COL_TEXT_FORMAT, 0);
+        $attempt->set(learner_attempt::COL_TEXT_FORMAT, editors_get_preferred_format());
         $attempt->set(learner_attempt::COL_ATTEMPT_NUMBER, $attempt->get_next_attemptnumber_in_submission());
 
         $this->learner_attempts[] = $attempt->create();
@@ -182,7 +187,7 @@ class learner_submission extends learner_submission_base implements templateable
      */
     public function get_latest_attempt_or_null()
     {
-        if (is_null($this->learner_attempts))
+        if (empty($this->learner_attempts))
         {
             return null;
         }
@@ -192,7 +197,7 @@ class learner_submission extends learner_submission_base implements templateable
             learner_attempt::COL_ATTEMPT_NUMBER,
             'desc');
 
-        return $attempts_sorted[0];
+        return array_values($attempts_sorted)[0];
     }
 
     /**

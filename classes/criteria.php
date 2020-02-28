@@ -35,8 +35,8 @@ class criteria extends criteria_base implements templateable
     {
         parent::__construct($id_or_record);
 
-        $this->observer_feedback = observer_feedback::to_class_instances(
-            observer_feedback::read_all_by_condition([observer_feedback::COL_CRITERIAID => $this->id]));
+        $this->observer_feedback = observer_feedback::read_all_by_condition(
+            [observer_feedback::COL_CRITERIAID => $this->id]);
     }
 
     /**

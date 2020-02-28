@@ -110,7 +110,7 @@ class criteria_base extends db_model_base
 
         $num = $DB->get_field_sql($sql, ['taskid' => $this->taskid,]);
 
-        return $num !== false ? $num : 0;
+        return $num != false ? $num : 0;
     }
 
     public function update_sequence_and_save(int $new_sequence)

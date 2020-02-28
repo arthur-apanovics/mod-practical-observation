@@ -84,7 +84,7 @@ class learner_attempt_base extends db_model_base
                 WHERE ' . self::COL_LEARNER_SUBMISSIONID . ' = :learner_submissionid';
         $num = $DB->get_field_sql($sql, ['learner_submissionid' => $this->learner_submissionid]);
 
-        return $num !== false ? $num : 0;
+        return $num != false ? $num : 0;
     }
 
     public function get_moodle_form_data()

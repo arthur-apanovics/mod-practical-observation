@@ -29,6 +29,8 @@
 
 namespace mod_observation;
 
+use context;
+
 defined('MOODLE_INTERNAL') || die();
 
 // common methods here
@@ -149,7 +151,7 @@ class lib
     /**
      * Sort provided array by it's sequence number in specified order
      *
-     * @param array  $array_to_sort
+     * @param array $array_to_sort
      * @param string $field_to_sort_by
      * @param string $asc_or_desc "asc"|"desc" sort in ascending (asc) or descending (desc) order
      * @return array sorted array with array keys preserved
@@ -165,25 +167,19 @@ class lib
         }
 
         uasort(
-            $array_to_sort,
-            function ($a, $b) use ($field_to_sort_by, $asc_or_desc)
+            $array_to_sort, function ($a, $b) use ($field_to_sort_by, $asc_or_desc)
+        {
+            if ($a[$field_to_sort_by] === $b[$field_to_sort_by])
             {
-                if ($a[$field_to_sort_by] === $b[$field_to_sort_by])
-                {
-                    debugging(
-                        sprintf(
-                            'Identical values detected when sorting by "%s" <pre>%s</pre> ID\'s [%b, %b]',
-                            $field_to_sort_by,
-                            print_r(array_keys($a), true),
-                            $a['id'],
-                            $b['id']),
-                        DEBUG_DEVELOPER);
-                }
+                debugging(
+                    sprintf(
+                        'Identical values detected when sorting by "%s" <pre>%s</pre> ID\'s [%b, %b]',
+                        $field_to_sort_by, print_r(array_keys($a), true), $a['id'], $b['id']), DEBUG_DEVELOPER);
+            }
 
-                return $asc_or_desc == 'asc'
-                    ? ($a[$field_to_sort_by] <=> $b[$field_to_sort_by])
-                    : ($b[$field_to_sort_by] <=> $a[$field_to_sort_by]);
-            });
+            return $asc_or_desc == 'asc' ? ($a[$field_to_sort_by] <=> $b[$field_to_sort_by])
+                : ($b[$field_to_sort_by] <=> $a[$field_to_sort_by]);
+        });
 
         return $array_to_sort;
     }
@@ -196,5 +192,11 @@ class lib
             'context'  => $context,
             'subdirs'  => false
         ];
+    }
+
+    public static function save_files(int $draftitemid, int $itemid, string $file_area, context $context)
+    {
+        file_save_draft_area_files(
+            $draftitemid, $context->id, OBSERVATION, $file_area, $itemid);
     }
 }

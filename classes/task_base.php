@@ -147,7 +147,7 @@ class task_base extends db_model_base
                 WHERE ' . self::COL_OBSERVATIONID . ' = :observationid';
         $num = $DB->get_field_sql($sql, ['observationid' => $this->observationid]);
 
-        return $num !== false ? $num : 0;
+        return $num != false ? $num : 0;
     }
 
     public function update_sequence_and_save(int $new_sequence)
