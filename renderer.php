@@ -287,11 +287,13 @@ class mod_observation_renderer extends plugin_renderer_base
                     $this->files_input($attempt->get_id_or_null(), observation::FILE_AREA_TRAINEE, $context);
 
                 // id's
-                $task_template_data['extra']['lsid'] = $submission->get_id_or_null();
+                $task_template_data['extra']['learner_submission_id'] = $submission->get_id_or_null();
                 $task_template_data['extra']['attempt_id'] = $attempt->get_id_or_null();
 
                 // tell template that there will be a new attempt
                 $task_template_data['extra']['is_submission'] = true;
+                // save time later by including cmid while whe have it easily available
+                $task_template_data['extra']['cmid'] = $observation->get_cm()->id;
             }
 
             // TODO: STATUS FAKE BLOCK
@@ -317,7 +319,7 @@ class mod_observation_renderer extends plugin_renderer_base
         global $CFG;
         require_once($CFG->dirroot . '/repository/lib.php');
 
-        $input_name = 'learner_attempt';
+        $input_name = lib::get_input_field_name_from_class(learner_attempt::class);
         $id = $input_name . '_id';
         $output = '';
 
@@ -426,13 +428,9 @@ class mod_observation_renderer extends plugin_renderer_base
     {
         $draftid = 0; // Will be filled in by file_prepare_draft_area.
 
-        // check if files exist
+        // if files exist for this itemid they will be automatically copied over
         file_prepare_draft_area(
             $draftid, $contextid, \OBSERVATION, $file_area, $itemid);
-
-        // // No files yet.
-        // file_prepare_draft_area(
-        //     $draftid, $contextid, \OBSERVATION, $file_area, null);
 
         return $draftid;
     }

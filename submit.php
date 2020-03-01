@@ -25,20 +25,23 @@
  *
  */
 
+use mod_observation\learner_attempt;
+use mod_observation\learner_attempt_base;
+use mod_observation\learner_submission_base;
+use mod_observation\lib;
 use mod_observation\observation;
-use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('lib.php');
+require_once($CFG->libdir.'/filelib.php');
 
-// $cmid = required_param('id', PARAM_INT);
-// $taskid = required_param('taskid', PARAM_INT);
-$learner_submissionid = optional_param('lsid', null, PARAM_INT);
-$observer_submissionid = optional_param('osid', null, PARAM_INT);
-$assessor_submissionid = optional_param('asid', null, PARAM_INT);
+$cmid = required_param('cmid', PARAM_INT);
+$learner_submissionid = optional_param('learner_submission_id', null, PARAM_INT);
+$observer_submissionid = optional_param('observer_submission_id', null, PARAM_INT);
+$assessor_submissionid = optional_param('assessor_submission_id', null, PARAM_INT);
 
 // list($course, $cm) = get_course_and_cm_from_cmid($cmid);
-// $context = context_module::instance($cmid);
+$context = context_module::instance($cmid);
 
 require_login();
 
@@ -46,7 +49,36 @@ require_login();
 
 if ($learner_submissionid)
 {
-    required_param('learner_attempt_id', PARAM_INT);
+    $attempt_id = required_param('attempt_id', PARAM_INT);
+
+    // check id's are correct
+    $learner_submission = new learner_submission_base($learner_submissionid);
+    $attempt = new learner_attempt_base($attempt_id);
+
+    // get text
+    $text_field = lib::get_input_field_name_from_class(learner_attempt::class);
+    $attempt_text = required_param($text_field, PARAM_RAW);
+    $attempt_text_format = required_param("{$text_field}_format", PARAM_INT);
+    // get files
+    $draft_itemid = required_param('attachments_itemid', PARAM_INT);
+
+    // update attempt
+    $attempt->set(learner_attempt::COL_TEXT, $attempt_text);
+    $attempt->set(learner_attempt::COL_TEXT_FORMAT, $attempt_text_format);
+    $attempt->update();
+
+    // save files
+    file_save_draft_area_files(
+        $draft_itemid,
+        $context->id,
+        \OBSERVATION,
+        observation::FILE_AREA_TRAINEE,
+        $attempt->get_id_or_null());
+
+    redirect(
+        new moodle_url(
+            OBSERVATION_MODULE_PATH . 'request.php',
+            ['cmid' => $cmid, 'learner_submission_id' => $learner_submission->get_id_or_null()]));
 }
 else if ($observer_submissionid)
 {

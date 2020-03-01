@@ -39,7 +39,7 @@ class observer_feedback extends observer_feedback_base implements templateable
         return [
             self::COL_ID     => $this->id,
             self::COL_STATUS => lib::get_status_string($this->status),
-            self::COL_TEXT   => $this->text,
+            self::COL_TEXT   => format_text($this->text, FORMAT_HTML),
         ];
     }
 }

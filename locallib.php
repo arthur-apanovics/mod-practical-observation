@@ -151,7 +151,7 @@ class lib
     /**
      * Sort provided array by it's sequence number in specified order
      *
-     * @param array $array_to_sort
+     * @param array  $array_to_sort
      * @param string $field_to_sort_by
      * @param string $asc_or_desc "asc"|"desc" sort in ascending (asc) or descending (desc) order
      * @return array sorted array with array keys preserved
@@ -198,5 +198,46 @@ class lib
     {
         file_save_draft_area_files(
             $draftitemid, $context->id, OBSERVATION, $file_area, $itemid);
+    }
+
+    /**
+     * @param string $class object::class string
+     * @return string
+     * @throws \coding_exception
+     */
+    public static function get_input_field_name_from_class(string $class): string
+    {
+        // even though all fields are named the same at the moment, their names might change
+        // in the future via a refactoring therefore we still check for each class here
+        switch ($class)
+        {
+            case learner_attempt::class:
+                $text_field = learner_attempt::COL_TEXT;
+                break;
+            case observer_feedback::class:
+                $text_field = observer_feedback::COL_TEXT;
+                break;
+            case assessor_feedback::class:
+                $text_field = assessor_feedback::COL_TEXT;
+                break;
+            default:
+                throw new \coding_exception('Unsupported classname');
+        }
+
+        return sprintf('%s_%s', lib::remove_namespace_from_classname($class), $text_field);
+    }
+
+    /**
+     * Remove namespace from object::class string
+     *
+     * https://coderwall.com/p/cpxxxw/php-get-class-name-without-namespace
+     * @param string $class
+     * @return false|string
+     */
+    public static function remove_namespace_from_classname(string $class)
+    {
+        return (substr(
+            $class,
+            strrpos($class, '\\') + 1));
     }
 }

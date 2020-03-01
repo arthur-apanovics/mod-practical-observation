@@ -4,7 +4,6 @@
 namespace mod_observation\traits;
 
 use coding_exception;
-use mod_observation\db_model_base;
 use stdClass;
 
 trait record_mapper
@@ -65,7 +64,7 @@ trait record_mapper
         else
         {
             throw new coding_exception(
-                'No data provided when attempting to initialize "' . static::class . '" object');
+                sprintf('No data or invalid id provided when attempting to initialize "%s"', static::class));
         }
     }
 

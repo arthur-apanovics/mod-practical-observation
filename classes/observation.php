@@ -221,7 +221,7 @@ class observation extends observation_base implements templateable
             'courseid'    => $this->course,
             'cmid'        => $this->cm->id,
 
-            'capabilities' => $this->export_capabilities_current_user()
+            'capabilities' => $this->export_capabilities()
         ];
     }
 }
