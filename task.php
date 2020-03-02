@@ -20,11 +20,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/**
- * Prints a particular instance of observation for the current user.
- *
- */
-
 use mod_observation\event\course_module_viewed;
 use mod_observation\observation;
 use mod_observation\task;

@@ -12,9 +12,11 @@
 <div class="wrapper-task">
     <ol>
         {{#criteria}}
-            {{> mod_observation/comp_completion_criteria}}
+            {{> mod_observation/comp-completion_criteria}}
             <p class="flex-criteria">
-                <span class="criteria-note">{{!> mod_observation/comp_mark_criteria}}</span>
+                <span class="criteria-note">
+                    {{!> mod_observation/comp-mark_criteria}}
+                </span>
             </p>
         {{/criteria}}
     </ol>
@@ -27,7 +29,7 @@
     <h5>Information and evidence from the trainee</h5>
     <div class="wrapper-task">
         <h5 class="attempt">Attempt #1</h5>
-        {{> mod_observation/comp_show_evidence}}
+        {{> mod_observation/comp-show_evidence}}
         <h5 class="attempt">Attempt #2</h5>
 
         {{#extra.is_submission}}

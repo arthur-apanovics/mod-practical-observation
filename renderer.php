@@ -24,6 +24,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use core\notification;
 use mod_observation\learner_attempt;
+use mod_observation\learner_submission;
 use mod_observation\lib;
 use mod_observation\observation;
 use mod_observation\task;
@@ -197,13 +198,13 @@ class mod_observation_renderer extends plugin_renderer_base
         if ($caps['can_assess'] || $caps['can_viewsubmissions'])
         {
             // TODO: ASSESSOR TABLE
-            $out .= $this->render_from_template('assessor_table', $template_data);
+            $out .= $this->render_from_template('part-assessor_table', $template_data);
         }
         // learner view or preview
         else if ($caps['can_submit'] || $caps['can_view'])
         {
             // submission/preview logic in template
-            $out .= $this->render_from_template('activity_view', $template_data);
+            $out .= $this->render_from_template('view-activity', $template_data);
         }
 
         // validation for 'managers'
@@ -215,7 +216,7 @@ class mod_observation_renderer extends plugin_renderer_base
                 notification::warning(get_string('manage:missing_criteria', 'observation'));
             }
 
-            $out .= $this->render_from_template('part_edit_tasks_button', $template_data);
+            $out .= $this->render_from_template('part-edit_tasks_button', $template_data);
         }
 
         return $out;
@@ -230,7 +231,7 @@ class mod_observation_renderer extends plugin_renderer_base
     private function activity_header(array $template_data): string
     {
         return $this->render_from_template(
-            'part_activity_header', [
+            'part-activity_header', [
             observation::COL_NAME  => $template_data[observation::COL_NAME],
             observation::COL_INTRO => $template_data[observation::COL_INTRO],
         ]);
@@ -251,7 +252,7 @@ class mod_observation_renderer extends plugin_renderer_base
         $template_data = $observation->export_template_data();
         $out = '';
 
-        $out .= $this->render_from_template('manage_tasks_view', $template_data);
+        $out .= $this->render_from_template('view-manage_tasks', $template_data);
 
         return $out;
     }
@@ -298,7 +299,7 @@ class mod_observation_renderer extends plugin_renderer_base
 
             // TODO: STATUS FAKE BLOCK
 
-            $out .= $this->render_from_template('task_view_learner', $task_template_data);
+            $out .= $this->render_from_template('view-task_learner', $task_template_data);
         }
         else if ($caps['can_view'])
         {
