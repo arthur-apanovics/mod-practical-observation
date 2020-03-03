@@ -49,7 +49,6 @@ body.path-mod-observation {
     }
 
     .wrapper-title {
-      width: 75%;
       border: 2px solid #d3d3d3;
       margin-bottom: 30px;
     }
@@ -73,7 +72,6 @@ body.path-mod-observation {
     }
 
     .table {
-      width: 75%;
       border: 2px solid #d3d3d3;
     }
 
@@ -81,16 +79,6 @@ body.path-mod-observation {
       background-color: #d3d3d3;
       color: black;
     }
-
-    //.table > thead > tr > th,
-    //.table > tbody > tr > th,
-    //.table > tfoot > tr > th,
-    //.table > thead > tr > td,
-    //.table > tbody > tr > td {
-    //  text-align: left;
-    //  padding: 8px 50px 8px 50px;
-    //  border: none;
-    //}
 
     .table { // looks like it's unused
       > thead,
@@ -108,46 +96,34 @@ body.path-mod-observation {
       }
     }
 
-    .myForm {
-      display: flex;
-      padding: 1.8em;
-      /*align-items: flex-end;*/
-      flex-wrap: wrap;
-    }
+    // now this is an mform
+    //#assign-observer-form {
+    //  display: flex;
+    //  padding: 1.8em;
+    //  /*align-items: flex-end;*/
+    //  flex-wrap: wrap;
+    //}
 
-    .obs-contact {
+    .form-group {
       margin-right: 2em;
       display: flex;
       flex-direction: column;
       padding-bottom: 10px;
     }
 
-    .obs-contact-message {
+    .form-group-message {
       display: flex;
       flex-direction: column;
     }
 
-    .obs-contact > input {
+    .form-group > input {
       flex: 1;
       width: 100%;
     }
 
-    .obs-contact > label {
+    .form-group > label {
       font-weight: normal;
     }
-
-    //form select,
-    //form input[type="text"],
-    //form input[type="email"],
-    //form input[type="tel"],
-    //form.atto_form input[type="url"],
-    //select.singleselect {
-    //  padding: 6px 12px;
-    //  margin: 0 0 5px 0;
-    //  border-radius: 0;
-    //  width: 100%;
-    //  max-width: 300px;
-    //}
 
     form {
       select,

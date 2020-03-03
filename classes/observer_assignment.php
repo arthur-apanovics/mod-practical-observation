@@ -22,6 +22,9 @@
 
 namespace mod_observation;
 
+use coding_exception;
+use dml_exception;
+use dml_missing_record_exception;
 use mod_observation\interfaces\templateable;
 
 class observer_assignment extends observer_assignment_base implements templateable
@@ -43,7 +46,7 @@ class observer_assignment extends observer_assignment_base implements templateab
 
         $this->observer_submission = observer_submission::read_by_condition_or_null(
             [observer_submission::COL_OBSERVER_ASSIGNMENTID => $this->id],
-            $this->observation_accepted // must exist if observation has been accepted
+            (bool) $this->observation_accepted // must exist if observation has been accepted
         );
     }
 
@@ -56,11 +59,42 @@ class observer_assignment extends observer_assignment_base implements templateab
     }
 
     /**
-     * @return observer_submission
+     * Create assignment and sets it as the active one
+     *
+     * @param int    $learner_submissionid
+     * @param int    $observer_id
+     * @param string $explanation if learner is switching observers, he/she must explain why
+     * @return observer_assignment
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
      */
-    public function get_observer_submission_or_null(): observer_submission
+    public static function create_assignment(
+        int $learner_submissionid, int $observer_id, string $explanation = null): observer_assignment
     {
-        return $this->observer_submission;
+        $assignment = new observer_assignment_base();
+        $assignment->set(observer_assignment::COL_LEARNER_SUBMISSIONID, $learner_submissionid);
+        $assignment->set(observer_assignment::COL_OBSERVERID, $observer_id);
+        $assignment->set(observer_assignment::COL_CHANGE_EXPLAIN, $explanation);
+        $assignment->set(observer_assignment::COL_OBSERVATION_ACCEPTED, null);
+        $assignment->set(observer_assignment::COL_TIMEASSIGNED, time());
+        $assignment->set(observer_assignment::COL_TOKEN, self::create_requestertoken());
+        $assignment->set(observer_assignment::COL_ACTIVE, true);
+
+        return new self($assignment->create());
+    }
+
+    /**
+     * Creates a random, unique 40 character sha1 hash to be used as the 'requestertoken'.
+     * Taken from {@link \feedback360_responder}
+     *
+     * @return string the requester token (a 40 character sha1 hash).
+     */
+    private static function create_requestertoken()
+    {
+        $stringtohash = 'requester' . time() . random_string() . get_site_identifier();
+
+        return sha1($stringtohash);
     }
 
     /**
@@ -68,6 +102,10 @@ class observer_assignment extends observer_assignment_base implements templateab
      */
     public function export_template_data(): array
     {
+        $observer_submission = !is_null($this->observer_submission)
+            ? $this->observer_submission->export_template_data()
+            : null;
+
         return [
             self::COL_ID                   => $this->id,
             self::COL_CHANGE_EXPLAIN       => $this->change_explain,
@@ -76,7 +114,7 @@ class observer_assignment extends observer_assignment_base implements templateab
             self::COL_ACTIVE               => $this->active,
 
             'observer'            => $this->observer->export_template_data(),
-            'observer_submission' => $this->observer_submission->export_template_data(),
+            'observer_submission' => $observer_submission
         ];
     }
 }

@@ -30,6 +30,7 @@
 namespace mod_observation;
 
 use context;
+use mod_observation\interfaces\templateable;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -109,7 +110,7 @@ class lib
     public static function find_in_assoc_array_criteria_or_null($input, array $criteria)
     {
         // sometimes $input can be null, we want to keep this flexibility by not adding a type constraint
-        if (!is_array($input) && !empty($criteria))
+        if (is_array($input) && !empty($criteria))
         {
             $values = array_values($criteria);
             foreach ($input as $entry)
@@ -239,5 +240,32 @@ class lib
         return (substr(
             $class,
             strrpos($class, '\\') + 1));
+    }
+
+    /**
+     * Simple convenience method that iterates over each object in array and exports template data
+     *
+     * @param templateable[] $objects
+     * @return array
+     */
+    public static function export_template_data_for_array(array $objects): array
+    {
+        $result = [];
+        foreach ($objects as $object)
+        {
+            if ($object instanceof templateable)
+            {
+                $result[] = $object->export_template_data();
+            }
+            else
+            {
+                debugging(
+                    sprintf('Unsupported object passed to %s', __METHOD__),
+                    DEBUG_DEVELOPER,
+                    debug_backtrace());
+            }
+        }
+
+        return $result;
     }
 }

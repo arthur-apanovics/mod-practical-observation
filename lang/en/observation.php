@@ -137,6 +137,25 @@ $string['no_tasks'] = 'There are currently no tasks in this activity.';
 
 $string['report'] = 'Report';
 
+// ASSIGN OBSERVER
+$string['assign_observer:page_title'] = 'Assign observer - {$a}';
+$string['assign_observer:table_title'] = 'Assign from history';
+$string['assign_observer:header'] = 'Assign observer';
+$string['assign_observer:phone_validation_message'] = 'Please enter a valid NZ phone number';
+$string['assign_observer:email_validation_message'] = 'Please enter a valid email address';
+$string['assign_observer:confirm_change'] = 'Current observer for this task is <strong>{$a->current}</strong>.<br>Are you sure you want to assign <strong>{$a->new}</strong> as the observer for task "{$a->task}"?';
+$string['assign_observer:input_prompt'] = 'Briefly explain this change';
+
+// OBSERVER
+$string['fullname'] = 'Full name';
+$string['phone'] = 'Phone';
+$string['email'] = 'Email';
+$string['position_title'] = 'Position title';
+$string['message'] = 'Message';
+$string['message_placeholder'] = 'Optional message to appear in observer email';
+
+$string['send'] = 'Send';
+
 // $string['printthisobservation'] = 'Print this Observation';
 // $string['confirmcriteriadelete'] = 'Are you sure you want to delete this criteria?';
 // $string['error:observationnotfound'] = 'Observation not found';

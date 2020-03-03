@@ -73,7 +73,7 @@ if ($learner_submissionid)
     redirect(
         new moodle_url(
             OBSERVATION_MODULE_PATH . 'request.php',
-            ['cmid' => $cmid, 'learner_submission_id' => $learner_submission->get_id_or_null()]));
+            ['id' => $cmid, 'learner_submission_id' => $learner_submission->get_id_or_null()]));
 }
 else if ($observer_submissionid)
 {

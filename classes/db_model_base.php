@@ -271,7 +271,7 @@ abstract class db_model_base implements crud
         $strictness = $must_exist ? MUST_EXIST : IGNORE_MISSING;
         $record = $DB->get_record(static::TABLE, $conditions, '*', $strictness);
 
-        return !empty($record) ? new static() : null;
+        return !empty($record) ? new static($record) : null;
     }
 
     /**

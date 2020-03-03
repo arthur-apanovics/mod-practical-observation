@@ -23,6 +23,7 @@
 use mod_observation\criteria;
 use mod_observation\external_request;
 use mod_observation\lib;
+use mod_observation\observer;
 use mod_observation\task;
 use mod_observation\user_external_request;
 
@@ -135,38 +136,79 @@ class observation_criteria_form extends moodleform
     }
 }
 
-class observation_learner_editor_form extends moodleform
+
+class observation_assign_observer_form extends moodleform
 {
     function definition()
     {
         $mform =& $this->_form;
-        // $cmid = $this->_customdata['cmid'];
-        // $cm = get_coursemodule_from_id(OBSERVATION, $cmid);
-        // $context = context_module::instance($cm->id);
+        $mform->updateAttributes(['id' => 'assign-observer-form']);
 
-        // description
-        $element = 'learner_attempt';
-        $mform->addElement(
-            'editor',
+        $cmid = $this->_customdata['id'];
+        $learner_submission_id = $this->_customdata['learner_submission_id'];
+
+        $element = 'assign_observer:header';
+        $mform->addElement('header', $element, get_string('assign_observer:header', OBSERVATION));
+        $mform->setExpanded($element);
+
+        // name
+        $element = observer::COL_FULLNAME;
+        $mform->addElement('text', $element, get_string($element, OBSERVATION));
+        $mform->setType($element, PARAM_TEXT);
+        $mform->addRule($element, null, 'required', null, 'client');
+
+        // phone
+        $element = observer::COL_PHONE;
+        $mform->addElement('text', $element, get_string($element, OBSERVATION));
+        $mform->setType($element, PARAM_TEXT);
+        $mform->addRule($element, null, 'required', null, 'client');
+        $mform->addRule(
             $element,
-            null /*get_string($element, OBSERVATION)*/,
-            ['rows' => 10]);
-        // $mform->addHelpButton($element, $element, OBSERVATION);
-        // $mform->addRule($element, get_string('required'), 'required', null);
-        $mform->setType($element, PARAM_RAW);// no XSS prevention here, users must be trusted
+            get_string('assign_observer:phone_validation_message', 'observation'),
+            'regex',
+            '/(0|(\+64(\s|-)?)){1}(21|22|27){1}(\s|-)?\d{3}(\s|-)?\d{4}/',
+            'client');
 
-        // file upload
-        $element = 'upload_learner';
-        // // Restore file is not in the array options on purpose, because formslib can't handle it!
-        // $contextid = $this->_customdata['contextid'];
-        // $mform->addElement('hidden', 'contextid', $contextid);
-        // $mform->setType('contextid', PARAM_INT);
-        $mform->addElement('filepicker', $element, null /*get_string($element, OBSERVATION)*/);
-        // $mform->addHelpButton('restorefile', $element, OBSERVATION);
+        // email
+        $element = observer::COL_EMAIL;
+        $mform->addElement('text', $element, get_string($element, OBSERVATION));
+        $mform->setType($element, PARAM_EMAIL);
+        $mform->addRule($element, null, 'required', null, 'client');
+        $mform->addRule(
+            $element,
+            get_string('assign_observer:email_validation_message', 'observation'),
+            'regex',
+            '/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i',
+            'client');
+
+        // position
+        $element = observer::COL_POSITION_TITLE;
+        $mform->addElement('text', $element, get_string($element, OBSERVATION));
+        $mform->setType($element, PARAM_TEXT);
+        $mform->addRule($element, null, 'required', null, 'client');
+
+        // message
+        $element = 'message';
+        $mform->addElement(
+            'textarea', $element, get_string($element, OBSERVATION),
+            [
+                'rows'        => 4,
+                'cols'        => 60,
+                'placeholder' => get_string('message_placeholder', 'observation')
+            ]);
+        $mform->setType($element, PARAM_TEXT);
 
         // CMID
-        // $mform->addElement('hidden', 'id');
-        // $mform->setType('id', PARAM_INT);
-        // $mform->setDefault('id', $cmid);
+        $element = 'id';
+        $mform->addElement('hidden', $element);
+        $mform->setType($element, PARAM_INT);
+        $mform->setDefault($element, $cmid);
+        // submission id
+        $element = 'learner_submission_id';
+        $mform->addElement('hidden', $element);
+        $mform->setType($element, PARAM_INT);
+        $mform->setDefault($element, $learner_submission_id);
+
+        $this->add_action_buttons(false, get_string('send', 'observation'));
     }
 }

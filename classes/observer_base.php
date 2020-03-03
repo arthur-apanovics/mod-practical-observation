@@ -22,6 +22,8 @@
 
 namespace mod_observation;
 
+use dml_exception;
+
 class observer_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_observer';
@@ -71,4 +73,54 @@ class observer_base extends db_model_base
      * @var int
      */
     protected $timemodified;
+
+    public function get_formatted_name()
+    {
+        return format_string($this->fullname);
+    }
+
+    public static function update_or_create(observer_base $submitted_observer)
+    {
+        global $USER;
+
+        // try match by email
+        if ($id = self::try_get_id_for_observer($submitted_observer))
+        {
+            // update existing record
+            $existing = new self($id);
+            $existing->fullname = $submitted_observer->fullname;
+            $existing->phone = $submitted_observer->phone;
+            // skipping email
+            $existing->position_title = $submitted_observer->position_title;
+            $existing->timemodified = time();
+            $existing->modified_by = $USER->id;
+
+            return $existing->update();
+        }
+        else
+        {
+            // create new record
+            $submitted_observer->added_by = $submitted_observer->modified_by = $USER->id;
+            $submitted_observer->timeadded = $submitted_observer->timemodified = time();
+
+            return $submitted_observer->create();
+        }
+    }
+
+    /**
+     * Checks if an observer exists based on provided data.
+     * Used when checking existing observer assignments during observation requesting.
+     *
+     * @param observer_base $observer
+     * @return false|int false if not matching record found, id if found
+     * @throws dml_exception
+     */
+    public static function try_get_id_for_observer(observer_base $observer)
+    {
+        global $DB;
+
+        //TODO perform more and smarter checks
+
+        return $DB->get_field(self::TABLE, self::COL_ID, [self::COL_EMAIL => $observer->email]);
+    }
 }

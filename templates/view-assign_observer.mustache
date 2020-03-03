@@ -1,53 +1,100 @@
 <div class="wrapper-title">
-  <h3 class="title-main-task">Assign an observer for "Task Three"</h3>
-  <p class="flex-title-task">
-    <span class="title-desc-task"><b>Message to display when learner is assigning an observer.&nbsp;</b>Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
-    Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
-    </span>
-  </p>
+    <h3 class="title-main-task">{{#str}}assign_observer:page_title, observation, {{{name}}}{{/str}}</h3>
+    <p class="flex-title-task">
+        <span class="title-desc-task">
+            {{{int_assign_obs_learner}}}
+        </span>
+    </p>
 </div>
-<h5>Assign from history</h5>
-<table class="table" id="observer-table">
+
+<h5>{{#str}}assign_observer:table_title, observation{{/str}}</h5>
+<table id="observer-history-table" class="table">
     <thead>
+    <tr>
         <th>Name</th>
         <th></th>
+    </tr>
     </thead>
+
     <tbody>
-        <tr data-id="one" data-fullname="joe" data-phone="1234567" data-email="joe@blogs.com" data-position="software dev">     
-            <td>joe@blogs.com {{#is_current}}<i>(current observer)</i>{{/is_current}}</td>
-            <td><a href="javascript:void(0);" class="assign">Assign</td>
+    {{#extra.course_observer_assignments}}
+        <tr class="observer-row"
+            data-id="{{id}}"
+            data-fullname="{{observer.fullname}}"
+            data-phone="{{observer.phone}}"
+            data-email="{{observer.email}}"
+            data-position_title="{{observer.position_title}}"
+            data-active="{{#active}}1{{/active}}{{^active}}0{{/active}}">
+            <td>{{observer.fullname}} ({{observer.email}}) {{#active}}<i>(current observer)</i>{{/active}}</td>
+            <td>
+                <a href="#" class="assign">Assign</a>
+            </td>
         </tr>
-        <tr data-id="two" data-fullname="bruce" data-phone="3456789" data-email="bruce@blogs.com" data-position="dev">     
-            <td>bruce@wayne.com</td>
-            <td><a href="javascript:void(0);" class="assign">Assign</td>
+    {{/extra.course_observer_assignments}}
+    {{^extra.course_observer_assignments}}
+        <tr>
+            <td>Observers that you have previously assigned in this module will appear here</td>
+            <td></td>
         </tr>
+    {{/extra.course_observer_assignments}}
+<!--    <tr data-id="one"
+        data-fullname="joe"
+        data-phone="0245639874"
+        data-email="joe@blogs.com"
+        data-position_title="software dev"
+        data-active="{{active}}">
+        <td>joe@blogs.com {{#is_current}}<i>(current observer)</i>{{/is_current}}</td>
+        <td>
+            <a href="#" class="assign">Assign</a>
+        </td>
+    </tr>
+    <tr data-id="two" data-fullname="bruce" data-phone="3456789" data-email="bruce@blogs.com" data-position_title="dev">
+        <td>bruce@wayne.com</td>
+        <td>
+            <a href="#" class="assign">Assign</a>
+        </td>
+    </tr>-->
     </tbody>
 </table>
-<h5>Assign observer</h5>
-<div class="wrapper-title">
-  <form class="myForm" id="observer" name="observer">
-        <div class="obs-contact">
+
+<!--<h5>Assign observer</h5>-->
+<!--<div class="wrapper-title">
+    <form method="post" id="assign-observer-form" name="observer">
+
+        <div class="form-group">
             <label for="name">Full name</label>
-            <input type="text" id="name" value="">
+            <input type="text" id="name" name="name" required>
         </div>
-        <div class="obs-contact">
+
+        <div class="form-group">
             <label for="phone">Phone</label>
-            <input type="tel" id="phone" value="">
+            <input type="tel" id="phone" name="phone" required>
         </div>
-        <div class="obs-contact">
+
+        <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" id="email" value="">
+            <input type="email" id="email" name="email" required>
         </div>
-        <div class="obs-contact">
+
+        <div class="form-group">
             <label for="position">Position title</label>
-            <input type="text" id="position" value="">
+            <input type="text" id="position" name="position" required>
         </div>
-        <div class="obs-contact">
-            <label for="message">Message to observer</label>
-            <textarea id="message" name="message" placeholder="Optional message to appear in observer email." cols="142" style="height:100px; width:94%"></textarea>        
+
+        <div class="form-group">
+            <label for="message">Message to observer (optional)</label>
+            <textarea id="message"
+                      name="message"
+                      placeholder="Optional message to appear in observer email."
+                      cols="142"
+                      style="height:100px; width:94%"></textarea>
         </div>
+
+        <input type="hidden" name="assign_observer_submit" value="1">
+
         <div class="send-button-wrapper">
-            <button class="btn btn-primary">Send</button>
+            <button type="submit" class="btn btn-primary">Send</button>
         </div>
+
     </form>
-</div>
+</div>-->

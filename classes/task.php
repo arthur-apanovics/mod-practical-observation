@@ -135,13 +135,17 @@ class task extends task_base implements templateable
         }
 
         return [
-            self::COL_ID             => $this->id,
-            self::COL_OBSERVATIONID  => $this->observationid,
-            self::COL_NAME           => $this->name,
-            self::COL_INTRO_LEARNER  => $this->intro_learner,
-            self::COL_INTRO_OBSERVER => $this->intro_observer,
-            self::COL_INTRO_ASSESSOR => $this->intro_assessor,
-            self::COL_SEQUENCE       => $this->sequence,
+            // general
+            self::COL_ID                      => $this->id,
+            self::COL_OBSERVATIONID           => $this->observationid,
+            self::COL_NAME                    => $this->name,
+            self::COL_SEQUENCE                => $this->sequence,
+            // intros
+            self::COL_INTRO_LEARNER           => $this->intro_learner,
+            self::COL_INTRO_OBSERVER          => $this->intro_observer,
+            self::COL_INTRO_ASSESSOR          => $this->intro_assessor,
+            self::COL_INT_ASSIGN_OBS_LEARNER  => $this->int_assign_obs_learner,
+            self::COL_INT_ASSIGN_OBS_OBSERVER => $this->int_assign_obs_observer,
 
             'criteria'            => $criteria_data,
             'learner_submissions' => $learner_submissions_data,

@@ -201,6 +201,60 @@ class learner_submission extends learner_submission_base implements templateable
     }
 
     /**
+     * Assigns submitted observer to this learner submission.
+     *
+     * @param observer_base $submitted_observer
+     * @param string        $message message to include in email for observer
+     * @param string|null   $explanation if learner is switching observers, he/she must explain why
+     * @return observer_assignment
+     * @throws \dml_exception
+     * @throws coding_exception
+     * @throws \moodle_exception
+     */
+    public function assign_observer(
+        observer_base $submitted_observer, string $message, string $explanation = null): observer_assignment
+    {
+        if ($current_assignment = $this->get_active_observer_assignment_or_null())
+        {
+            // we have an existing assignment
+
+            //TODO: CHECK IF observation_accepted = 0,
+            // MEANING OBSERVER HAS DECLINED THIS REQUEST PREVIOUSLY
+
+            // assignment for this submission exists, check if same observer submitted
+            $current_observer = $current_assignment->get_observer();
+            if ($current_observer->get_id_or_null() != $submitted_observer->get_id_or_null())
+            {
+                if (is_null($explanation))
+                {
+                    throw new coding_exception('Explanation cannot be NULL when switching observers');
+                }
+
+                // new observer, set current assignment as 'not active'
+                $current_assignment->set(observer_assignment::COL_ACTIVE, false, true);
+
+                // create assignment for new observer
+                $assignment = observer_assignment::create_assignment(
+                    $this->id, $submitted_observer->get_id_or_null(), $explanation);
+            }
+        }
+        else
+        {
+            // no assignment yet, create
+            $assignment = observer_assignment::create_assignment($this->id, $submitted_observer->get_id_or_null());
+        }
+
+        // TODO: EVENT
+
+        // TODO: SEND EMAIL AND NOTIFICATION
+        $review_url = new \moodle_url(null, []);
+        // send email
+        // send notification
+
+        return $assignment;
+    }
+
+    /**
      * Fetches currently active observer assignment or null if one does not exist
      *
      * @return observer_assignment|null null if no record found
@@ -214,6 +268,71 @@ class learner_submission extends learner_submission_base implements templateable
                 observer_assignment::COL_LEARNER_SUBMISSIONID => $this->id,
                 observer_assignment::COL_ACTIVE               => true
             ]);
+    }
+
+    /**
+     * Used for 'assign observer from history table' to display all observers assigned by user in activity
+     *
+     * @return observer_assignment[]
+     * @throws \dml_exception
+     */
+    public function get_course_level_observer_assignments(): array
+    {
+        global $DB;
+
+        // get course this submission is in
+        //  SELECT o.course
+        //  FROM mdl_observation o
+        //  JOIN mdl_observation_task t on t.observationid = o.id
+        //  JOIN mdl_observation_learner_submission ls ON ls.taskid = t.id
+        //  WHERE ls.id = 6
+
+        $sql = 'SELECT o.' . observation::COL_COURSE . '
+                FROM {' . observation::TABLE . '} o
+                    JOIN {' . task::TABLE . '} t on t.' . task::COL_OBSERVATIONID . ' = o.id
+                    JOIN {' . learner_submission::TABLE . '} ls ON ls.' . learner_submission::COL_TASKID . ' = t.id
+                WHERE ls.id = ?';
+        $courseid = $DB->get_field_sql($sql, [$this->id], MUST_EXIST);
+
+        // get all assignments in course for user:
+        //   SELECT oa.*
+        //   FROM mdl_observation_observer_assignment oa
+        //            INNER JOIN (SELECT x.token
+        //                             , x.active
+        //                        FROM mdl_observation_observer_assignment x
+        //                        WHERE x.active = (SELECT max(active)
+        //                                          FROM mdl_observation_observer_assignment
+        //                                          WHERE x.observerid = observerid)
+        //                        GROUP BY x.observerid) g
+        //                       ON g.token = oa.token AND g.active = oa.active
+        //            JOIN mdl_observation_learner_submission ls
+        //                 ON ls.id = oa.learner_submissionid
+        //            JOIN mdl_observation_task t ON t.id = ls.taskid
+        //            JOIN mdl_observation o ON o.id = t.observationid
+        //   WHERE ls.userid = 130
+        //       AND o.course = 381
+
+        // TODO: This might be easier to do in PHP
+        $sql = 'SELECT oa.*
+                FROM {' . observer_assignment::TABLE . '} oa
+                     INNER JOIN (SELECT x.' . observer_assignment::COL_TOKEN . '
+                          , x.' . observer_assignment::COL_ACTIVE . '
+                     FROM mdl_observation_observer_assignment x
+                     WHERE x.' . observer_assignment::COL_ACTIVE . ' = (SELECT max(' . observer_assignment::COL_ACTIVE . ')
+                                       FROM {' . observer_assignment::TABLE . '}
+                                       WHERE x.' . observer_assignment::COL_OBSERVERID . ' = '
+            . observer_assignment::COL_OBSERVERID . ')
+                     GROUP BY x.' . observer_assignment::COL_OBSERVERID . ') g
+                    ON g.' . observer_assignment::COL_TOKEN . ' = oa.' . observer_assignment::COL_TOKEN
+            . ' AND g.' . observer_assignment::COL_ACTIVE . ' = oa.' . observer_assignment::COL_ACTIVE . '
+                    JOIN {' . learner_submission::TABLE . '} ls 
+                        ON ls.id = oa.' . observer_assignment::COL_LEARNER_SUBMISSIONID . '
+                    JOIN {' . task::TABLE . '} t ON t.id = ls.' . learner_submission::COL_TASKID . '
+                    JOIN {' . observation::TABLE . '} o ON o.id = t.' . task::COL_OBSERVATIONID . '
+                WHERE ls.' . learner_submission::COL_USERID . ' = ?
+                AND o.' . observation::COL_COURSE . ' = ?';
+
+        return observer_assignment::read_all_by_sql($sql, [$this->userid, $courseid]);
     }
 
     /**

@@ -22,6 +22,8 @@
 
 namespace mod_observation;
 
+use cm_info;
+
 class observation_base extends db_model_base
 {
     // DATABASE CONSTANTS:
@@ -181,12 +183,22 @@ class observation_base extends db_model_base
         return format_string($this->name);
     }
 
+    public function get_cm(): cm_info
+    {
+        if (is_null($this->id))
+        {
+            throw new \coding_exception('Cannot get course module for uninitialized observation activity class');
+        }
+
+        return cm_info::create(get_coursemodule_from_instance(OBSERVATION, $this->id));
+    }
+
     /**
      * @return array ['column_name' =>
- *                     [
+     *                 [
      *                  'text' => 'default_value',
      *                  'format' => 'default_value'
-*                      ]]
+     *                  ]]
      */
     public function get_form_defaults_for_new_task()
     {

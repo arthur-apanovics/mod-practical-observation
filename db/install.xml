@@ -125,7 +125,7 @@
         <FIELD NAME="learner_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="observerid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="change_explain" TYPE="text" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="optional. used when observer change is requested"/>
-        <FIELD NAME="observation_accepted" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="null if no decision made yet, false if observer declined observation, true if accepted and observer requirements confirmed"/>
+        <FIELD NAME="observation_accepted" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="null if no decision made yet, false if observer declined observation, true if accepted and observer requirements confirmed"/>
         <FIELD NAME="timeassigned" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="token" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="active" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="indicates if this is the current assignment for related learner_submission"/>
