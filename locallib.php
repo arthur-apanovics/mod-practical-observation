@@ -247,7 +247,7 @@ class lib
      * @param templateable[] $objects
      * @return array
      */
-    public static function export_template_data_for_array(array $objects): array
+    public static function export_template_data_from_array(array $objects): array
     {
         $result = [];
         foreach ($objects as $object)

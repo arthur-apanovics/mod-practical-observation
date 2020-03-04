@@ -22,6 +22,7 @@
 
 use mod_observation\event\course_module_viewed;
 use mod_observation\observation;
+use mod_observation\observation_base;
 use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -37,11 +38,11 @@ require_login($course, true, $cm);
 
 // TODO: Event
 
-$observation = new observation($cm);
+$observation_base = new observation_base($cm->instance);
 
 // Print the page header.
 $PAGE->set_url('/mod/observation/task.php', array('id' => $cm->id));
-$PAGE->set_title($observation->get_formatted_name());
+$PAGE->set_title($observation_base->get_formatted_name());
 $PAGE->set_heading(format_string($course->fullname));
 
 $PAGE->add_body_class('observation-task');
@@ -53,7 +54,7 @@ echo $OUTPUT->header();
 $renderer = $PAGE->get_renderer('observation');
 
 // check if learner
-echo $renderer->task_learner_view($observation, $taskid);
+echo $renderer->task_learner_view($observation_base, $taskid);
 
 // todo check if observer
 

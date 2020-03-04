@@ -334,19 +334,20 @@ class mod_observation_renderer extends plugin_renderer_base
         return $out;
     }
 
-    public function task_learner_view(observation $observation, int $taskid)
+    public function task_learner_view(observation_base $observation_base, int $taskid)
     {
         global $USER;
 
+        $cm = $observation_base->get_cm();
         // only include data relevant to this user
         $task = new task($taskid, $USER->id);
 
         $template_data = $task->export_template_data();
         $task_template_data = [ // lightweight data to render task header
-            task::COL_NAME => $template_data['name'],
-            task::COL_INTRO_LEARNER => $template_data['intro_learner']
+                                task::COL_NAME          => $template_data['name'],
+                                task::COL_INTRO_LEARNER => $template_data['intro_learner']
         ];
-        $caps = $observation->export_capabilities();
+        $caps = $observation_base->export_capabilities();
         $out = '';
 
         if ($caps['can_submit'])
@@ -357,7 +358,7 @@ class mod_observation_renderer extends plugin_renderer_base
             if ($submission->learner_can_attempt())
             {
                 $attempt = $submission->get_latest_attempt_or_null();
-                $context = context_module::instance($observation->get_cm()->id);
+                $context = context_module::instance($cm->id);
 
                 // render task header
                 $out .= $this->render_from_template(
@@ -365,6 +366,8 @@ class mod_observation_renderer extends plugin_renderer_base
 
                 // since we're not looping over submitted attempts we need to manually provide attempt number
                 $template_data['extra']['attempt_number'] = $attempt->get(learner_attempt::COL_ATTEMPT_NUMBER);
+
+                // TODO: DISABLE 'request observation' WHEN NO INPUT
                 // text editor
                 $template_data['extra']['editor_html'] = $this->text_editor(
                     $attempt->get(learner_attempt::COL_TEXT),
@@ -382,7 +385,7 @@ class mod_observation_renderer extends plugin_renderer_base
                 // tell template that there will be a new attempt
                 $template_data['extra']['is_submission'] = true;
                 // save time later by including cmid while whe have it easily available
-                $template_data['extra']['cmid'] = $observation->get_cm()->id;
+                $template_data['extra']['cmid'] = $cm->id;
             }
             else if ($submission->is_observation_pending_or_in_progress())
             {
@@ -392,8 +395,25 @@ class mod_observation_renderer extends plugin_renderer_base
 
                 // render observer details
                 $observer = $submission->get_active_observer_assignment_or_null()->get_observer();
-                $out .= $this->render_from_template(
-                    'part-observer_details', $observer->export_template_data());
+                $observer_template_data = $observer->export_template_data();
+                // enables 'change observer' link
+                $observer_template_data['extra']['is_learner'] = true;
+
+                // allow to change observer if previous observer hasn't accepted yet
+                if (!$submission->is_observation_in_progress())
+                {
+                    // it is easier to generate this link here rather than the template
+                    $attempt = $submission->get_latest_attempt_or_null();
+                    $observer_template_data['extra']['change_observer_url'] = new moodle_url(
+                        OBSERVATION_MODULE_PATH . 'request.php',
+                        [
+                            'id'                    => $cm->id,
+                            'learner_submission_id' => $submission->get_id_or_null(),
+                            'attempt_id'            => $attempt->get_id_or_null(),
+                        ]);
+                }
+
+                $out .= $this->render_from_template('part-observer_details', $observer_template_data);
 
                 notification::info(
                     get_string(
@@ -451,10 +471,11 @@ class mod_observation_renderer extends plugin_renderer_base
         $output .= html_writer::tag(
             'div', html_writer::tag(
             'textarea', s($text), [
-            'id'   => $id,
-            'name' => $input_name,
-            'rows' => 10,
-            'cols' => 50
+            'id'    => $id,
+            'name'  => $input_name,
+            'rows'  => 10,
+            // 'cols' => 50
+            'style' => 'width: 100%;'
         ]));
 
         // format wrapper
@@ -551,7 +572,7 @@ class mod_observation_renderer extends plugin_renderer_base
         $template_data['extra'][task::COL_INT_ASSIGN_OBS_LEARNER] = format_text(
             $task->get(task::COL_INT_ASSIGN_OBS_LEARNER), FORMAT_HTML);
 
-        $template_data['extra']['course_observer_assignments'] = lib::export_template_data_for_array(
+        $template_data['extra']['course_observer_assignments'] = lib::export_template_data_from_array(
             $learner_submission->get_course_level_observer_assignments());
 
         $this->page->requires->js_call_amd(OBSERVATION_MODULE . '/assign_observer_view', 'init');

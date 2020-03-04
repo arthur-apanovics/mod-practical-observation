@@ -128,6 +128,17 @@ if ($data = $form->get_data())
             );
             // dies here
         }
+        else if ($submitted_observer_id == $current->get_id_or_null())
+        {
+            // assignment exists and it's for the same observer, nothing to do here
+            redirect(
+                $activity_url,
+                get_string(
+                    'notification:observer_assigned_no_change', 'observation',
+                    ['task' => $task->get_formatted_name(), 'email' => $submitted->get(observer::COL_EMAIL)]),
+                null,
+                notification::NOTIFY_WARNING);
+        }
     }
 
     //  no observer assignment OR submitted observer is the same as currently assigned observer

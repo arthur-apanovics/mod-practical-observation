@@ -147,7 +147,8 @@ $string['assign_observer:confirm_change'] = 'Current observer for this task is <
 $string['assign_observer:input_prompt'] = 'Briefly explain this change';
 
 $string['assign_observer:assigned_observer'] = 'Assigned observer';
-$string['assign_observer:change_observer'] = 'Change observer';
+$string['assign_observer:change_observer'] = 'change observer';
+$string['assign_observer:last_assigned'] = 'Last assigned';
 
 // OBSERVER
 $string['fullname'] = 'Full name';
@@ -161,5 +162,6 @@ $string['send'] = 'Send';
 
 // NOTIFICATIONS
 $string['notification:observation_pending'] = 'Observation request sent to {$a}, please be patient while your observer reviews your submission';
+$string['notification:observer_assigned_no_change'] = '<strong>{$a->email}</strong> is already the assigned observer for task <i>{$a->task}</i>';
 $string['notification:observer_assigned_same'] = 'Observation request for <i>{$a->task}</i> sent to <strong>{$a->email}</strong>';
 $string['notification:observer_assigned_new'] = 'Observer successfully changed and observation request sent to <strong>{$a->email}</strong> for <i>{$a->task}</i>';

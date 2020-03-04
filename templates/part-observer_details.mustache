@@ -1,7 +1,21 @@
 <div id="observer-details">
     <div class="header">
         <h5>{{#str}}assign_observer:assigned_observer, observation{{/str}}</h5>
-        <span id="change-observer">{{#str}}assign_observer:change_observer, observation{{/str}}</span>
+
+        {{#extra.is_learner}}
+            {{#extra.change_observer_url}}
+                (
+                <a id="change-observer" href="{{{extra.change_observer_url}}}">
+                    {{#str}}assign_observer:change_observer, observation{{/str}}
+                </a>
+                )
+            {{/extra.change_observer_url}}
+        {{/extra.is_learner}}
+
+        {{#extra.is_assessor}}
+            <span class="last-assigned">{{#str}}assign_observer:last_assigned, observation{{/str}}</span>
+        {{/extra.is_assessor}}
+
     </div>
 
     <table>

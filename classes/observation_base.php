@@ -23,6 +23,8 @@
 namespace mod_observation;
 
 use cm_info;
+use coding_exception;
+use context_module;
 
 class observation_base extends db_model_base
 {
@@ -183,14 +185,35 @@ class observation_base extends db_model_base
         return format_string($this->name);
     }
 
+    /**
+     * Check every {@link observation_base} capability for specified user
+     *
+     * @param int|null $userid if null, global $USER will be used
+     * @return array ['capability' => bool]
+     * @throws coding_exception
+     */
+    public function export_capabilities(int $userid = null)
+    {
+        $context = context_module::instance($this->get_cm()->id);
+
+        return [
+            'can_view'            => has_capability(self::CAP_VIEW, $context, $userid),
+            'can_submit'          => has_capability(self::CAP_SUBMIT, $context, $userid),
+            'can_viewsubmissions' => has_capability(self::CAP_VIEWSUBMISSIONS, $context, $userid),
+            'can_assess'          => has_capability(self::CAP_ASSESS, $context, $userid),
+            'can_manage'          => has_capability(self::CAP_MANAGE, $context, $userid),
+        ];
+    }
+
     public function get_cm(): cm_info
     {
         if (is_null($this->id))
         {
-            throw new \coding_exception('Cannot get course module for uninitialized observation activity class');
+            throw new coding_exception('Cannot get course module for uninitialized observation activity class');
         }
 
-        return cm_info::create(get_coursemodule_from_instance(OBSERVATION, $this->id));
+        return cm_info::create(
+            get_coursemodule_from_instance(OBSERVATION, $this->id, $this->course, false, MUST_EXIST));
     }
 
     /**

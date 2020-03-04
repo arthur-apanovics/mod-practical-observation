@@ -251,18 +251,28 @@ class learner_submission extends learner_submission_base implements templateable
                 $assignment = observer_assignment::create_assignment(
                     $this->id, $submitted_observer->get_id_or_null(), $explanation);
             }
+            else
+            {
+                // same observer, nothing changed
+                return $current_assignment;
+            }
         }
         else
         {
             // no assignment yet, create
             $assignment = observer_assignment::create_assignment($this->id, $submitted_observer->get_id_or_null());
+            // update learner submission status
+            $this->update_status(self::STATUS_OBSERVATION_PENDING);
         }
 
-        // update learner submission status
-        $this->update_status(self::STATUS_OBSERVATION_PENDING);
-        // "submit" attempt
+        // attempt will be already submitted if learner
+        // is changing observers after already submitting
         $attempt = $this->get_latest_attempt_or_null();
-        $attempt->submit();
+        if (!$attempt->is_submitted())
+        {
+            // "submit" attempt
+            $attempt->submit();
+        }
 
         // TODO: EVENT
 
@@ -298,6 +308,68 @@ class learner_submission extends learner_submission_base implements templateable
      */
     public function get_course_level_observer_assignments(): array
     {
+        // get all assignments in course for user:
+        // SELECT oa.id
+        // , oa.learner_submissionid
+        // , oa.observerid
+        // , oa.change_explain
+        // , oa.observation_accepted
+        // , oa.timeassigned
+        // , oa.token
+        // , if(oa.learner_submissionid != ?, 0, oa.active) active
+        // FROM mdl_observation_observer_assignment oa
+        //          INNER JOIN (SELECT x.token
+        //                           , x.active
+        //                      FROM mdl_observation_observer_assignment x
+        //                      WHERE x.active = (SELECT max(active)
+        //                                        FROM mdl_observation_observer_assignment
+        //                                        WHERE x.observerid = observerid)
+        //                      GROUP BY x.observerid) g
+        //                     ON g.token = oa.token AND g.active = oa.active
+        //          JOIN mdl_observation_learner_submission ls
+        //               ON ls.id = oa.learner_submissionid
+        //          JOIN mdl_observation_task t ON t.id = ls.taskid
+        //          JOIN mdl_observation o ON o.id = t.observationid
+        // WHERE ls.userid = ?
+        //   AND o.course = ?
+
+        $sql =
+            'SELECT oa.id
+            , oa.' . observer_assignment::COL_LEARNER_SUBMISSIONID . '
+            , oa.' . observer_assignment::COL_OBSERVERID . '
+            , oa.' . observer_assignment::COL_CHANGE_EXPLAIN . '
+            , oa.' . observer_assignment::COL_OBSERVATION_ACCEPTED . '
+            , oa.' . observer_assignment::COL_TIMEASSIGNED . '
+            , oa.' . observer_assignment::COL_TOKEN . '
+            , if(oa.' . observer_assignment::COL_LEARNER_SUBMISSIONID . ' != ?, 0, oa.'
+            . observer_assignment::COL_ACTIVE . ') active
+            FROM {' . observer_assignment::TABLE . '} oa
+                 INNER JOIN (SELECT x.' . observer_assignment::COL_TOKEN . '
+                      , x.' . observer_assignment::COL_ACTIVE . '
+                 FROM mdl_observation_observer_assignment x
+                 WHERE x.' . observer_assignment::COL_ACTIVE . ' = (SELECT max(' . observer_assignment::COL_ACTIVE . ')
+                                   FROM {' . observer_assignment::TABLE . '}
+                                   WHERE x.' . observer_assignment::COL_OBSERVERID . ' = '
+            . observer_assignment::COL_OBSERVERID . ')
+                     GROUP BY x.' . observer_assignment::COL_OBSERVERID . ') g
+                    ON g.' . observer_assignment::COL_TOKEN . ' = oa.' . observer_assignment::COL_TOKEN
+            . ' AND g.' . observer_assignment::COL_ACTIVE . ' = oa.' . observer_assignment::COL_ACTIVE . '
+                    JOIN {' . learner_submission::TABLE . '} ls
+                        ON ls.id = oa.' . observer_assignment::COL_LEARNER_SUBMISSIONID . '
+                    JOIN {' . task::TABLE . '} t ON t.id = ls.' . learner_submission::COL_TASKID . '
+                    JOIN {' . observation::TABLE . '} o ON o.id = t.' . task::COL_OBSERVATIONID . '
+                WHERE ls.' . learner_submission::COL_USERID . ' = ?
+                AND o.' . observation::COL_COURSE . ' = ?';
+
+        return observer_assignment::read_all_by_sql($sql, [$this->id, $this->userid, $this->get_course_id()]);
+    }
+
+    /**
+     * @return int
+     * @throws \dml_exception
+     */
+    private function get_course_id(): int
+    {
         global $DB;
 
         // get course this submission is in
@@ -312,47 +384,8 @@ class learner_submission extends learner_submission_base implements templateable
                     JOIN {' . task::TABLE . '} t on t.' . task::COL_OBSERVATIONID . ' = o.id
                     JOIN {' . learner_submission::TABLE . '} ls ON ls.' . learner_submission::COL_TASKID . ' = t.id
                 WHERE ls.id = ?';
-        $courseid = $DB->get_field_sql($sql, [$this->id], MUST_EXIST);
 
-        // get all assignments in course for user:
-        //   SELECT oa.*
-        //   FROM mdl_observation_observer_assignment oa
-        //            INNER JOIN (SELECT x.token
-        //                             , x.active
-        //                        FROM mdl_observation_observer_assignment x
-        //                        WHERE x.active = (SELECT max(active)
-        //                                          FROM mdl_observation_observer_assignment
-        //                                          WHERE x.observerid = observerid)
-        //                        GROUP BY x.observerid) g
-        //                       ON g.token = oa.token AND g.active = oa.active
-        //            JOIN mdl_observation_learner_submission ls
-        //                 ON ls.id = oa.learner_submissionid
-        //            JOIN mdl_observation_task t ON t.id = ls.taskid
-        //            JOIN mdl_observation o ON o.id = t.observationid
-        //   WHERE ls.userid = 130
-        //       AND o.course = 381
-
-        // TODO: This might be easier to do in PHP
-        $sql = 'SELECT oa.*
-                FROM {' . observer_assignment::TABLE . '} oa
-                     INNER JOIN (SELECT x.' . observer_assignment::COL_TOKEN . '
-                          , x.' . observer_assignment::COL_ACTIVE . '
-                     FROM mdl_observation_observer_assignment x
-                     WHERE x.' . observer_assignment::COL_ACTIVE . ' = (SELECT max(' . observer_assignment::COL_ACTIVE . ')
-                                       FROM {' . observer_assignment::TABLE . '}
-                                       WHERE x.' . observer_assignment::COL_OBSERVERID . ' = '
-            . observer_assignment::COL_OBSERVERID . ')
-                     GROUP BY x.' . observer_assignment::COL_OBSERVERID . ') g
-                    ON g.' . observer_assignment::COL_TOKEN . ' = oa.' . observer_assignment::COL_TOKEN
-            . ' AND g.' . observer_assignment::COL_ACTIVE . ' = oa.' . observer_assignment::COL_ACTIVE . '
-                    JOIN {' . learner_submission::TABLE . '} ls 
-                        ON ls.id = oa.' . observer_assignment::COL_LEARNER_SUBMISSIONID . '
-                    JOIN {' . task::TABLE . '} t ON t.id = ls.' . learner_submission::COL_TASKID . '
-                    JOIN {' . observation::TABLE . '} o ON o.id = t.' . task::COL_OBSERVATIONID . '
-                WHERE ls.' . learner_submission::COL_USERID . ' = ?
-                AND o.' . observation::COL_COURSE . ' = ?';
-
-        return observer_assignment::read_all_by_sql($sql, [$this->userid, $courseid]);
+        return $DB->get_field_sql($sql, [$this->id], MUST_EXIST);
     }
 
     public function is_observation_pending_or_in_progress()
@@ -360,6 +393,11 @@ class learner_submission extends learner_submission_base implements templateable
         $yes = [self::STATUS_OBSERVATION_PENDING, self::STATUS_OBSERVATION_IN_PROGRESS];
 
         return in_array($this->status, $yes);
+    }
+
+    public function is_observation_in_progress()
+    {
+        return $this->status == self::STATUS_LEARNER_IN_PROGRESS;
     }
 
     /**
