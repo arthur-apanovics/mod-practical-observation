@@ -138,7 +138,7 @@ abstract class db_model_base implements crud
      *
      * @return int|null
      */
-    public function get_id_or_null()
+    public function get_id_or_null(): ?int
     {
         return $this->id;
     }
@@ -257,7 +257,7 @@ abstract class db_model_base implements crud
      * @throws dml_exception
      * @throws dml_missing_record_exception
      */
-    protected static function read_by_condition_or_null(array $conditions, bool $must_exist = false)
+    protected static function read_by_condition_or_null(array $conditions, bool $must_exist = false): ?self
     {
         global $DB;
 

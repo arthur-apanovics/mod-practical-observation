@@ -28,6 +28,7 @@ use mod_observation\learner_submission;
 use mod_observation\lib;
 use mod_observation\observation;
 use mod_observation\observation_base;
+use mod_observation\observer;
 use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -202,7 +203,13 @@ class mod_observation_renderer extends plugin_renderer_base
             $output .= html_writer::div(
                 html_writer::tag(
                     'textarea', '',
-                    ['id' => 'user_input', 'name' => 'user_input', 'rows' => 5, 'style' => 'width: 100%;', 'required' => true]));
+                    [
+                        'id'       => 'user_input',
+                        'name'     => 'user_input',
+                        'rows'     => 5,
+                        'style'    => 'width: 100%;',
+                        'required' => true
+                    ]));
             $output .= $this->output->box_end();
 
             $output .= $this->output->box_start('modal-footer', 'modal-footer');
@@ -331,9 +338,14 @@ class mod_observation_renderer extends plugin_renderer_base
     {
         global $USER;
 
+        // only include data relevant to this user
         $task = new task($taskid, $USER->id);
 
-        $task_template_data = $task->export_template_data();
+        $template_data = $task->export_template_data();
+        $task_template_data = [ // lightweight data to render task header
+            task::COL_NAME => $template_data['name'],
+            task::COL_INTRO_LEARNER => $template_data['intro_learner']
+        ];
         $caps = $observation->export_capabilities();
         $out = '';
 
@@ -347,34 +359,56 @@ class mod_observation_renderer extends plugin_renderer_base
                 $attempt = $submission->get_latest_attempt_or_null();
                 $context = context_module::instance($observation->get_cm()->id);
 
+                // render task header
+                $out .= $this->render_from_template(
+                    'part-task_header', $task_template_data);
+
+                // since we're not looping over submitted attempts we need to manually provide attempt number
+                $template_data['extra']['attempt_number'] = $attempt->get(learner_attempt::COL_ATTEMPT_NUMBER);
                 // text editor
-                $task_template_data['extra']['editor_html'] = $this->text_editor(
+                $template_data['extra']['editor_html'] = $this->text_editor(
                     $attempt->get(learner_attempt::COL_TEXT),
                     $attempt->get(learner_attempt::COL_TEXT_FORMAT),
                     $context);
 
                 // file manager
-                $task_template_data['extra']['filemanager_html'] =
+                $template_data['extra']['filemanager_html'] =
                     $this->files_input($attempt->get_id_or_null(), observation::FILE_AREA_TRAINEE, $context);
 
                 // id's
-                $task_template_data['extra']['learner_submission_id'] = $submission->get_id_or_null();
-                $task_template_data['extra']['attempt_id'] = $attempt->get_id_or_null();
+                $template_data['extra']['learner_submission_id'] = $submission->get_id_or_null();
+                $template_data['extra']['attempt_id'] = $attempt->get_id_or_null();
 
                 // tell template that there will be a new attempt
-                $task_template_data['extra']['is_submission'] = true;
+                $template_data['extra']['is_submission'] = true;
                 // save time later by including cmid while whe have it easily available
-                $task_template_data['extra']['cmid'] = $observation->get_cm()->id;
+                $template_data['extra']['cmid'] = $observation->get_cm()->id;
+            }
+            else if ($submission->is_observation_pending_or_in_progress())
+            {
+                // render task header
+                $out .= $this->render_from_template(
+                    'part-task_header', $task_template_data);
+
+                // render observer details
+                $observer = $submission->get_active_observer_assignment_or_null()->get_observer();
+                $out .= $this->render_from_template(
+                    'part-observer_details', $observer->export_template_data());
+
+                notification::info(
+                    get_string(
+                        'notification:observation_pending', 'observation',
+                        $observer->get(observer::COL_EMAIL)));
             }
 
             // TODO: STATUS FAKE BLOCK
 
-            $out .= $this->render_from_template('view-task_learner', $task_template_data);
+            $out .= $this->render_from_template('view-task_learner', $template_data);
         }
         else if ($caps['can_view'])
         {
             // preview
-            $out .= $this->render_from_template('task_view_preview', $task_template_data);
+            $out .= $this->render_from_template('task_view_preview', $template_data);
         }
         else
         {
@@ -513,8 +547,8 @@ class mod_observation_renderer extends plugin_renderer_base
         $out = '';
 
         // save resources by not exporting all task data
-        $template_data[task::COL_NAME] = $task->get_formatted_name();
-        $template_data[task::COL_INT_ASSIGN_OBS_LEARNER] = format_text(
+        $template_data['extra'][task::COL_NAME] = $task->get_formatted_name();
+        $template_data['extra'][task::COL_INT_ASSIGN_OBS_LEARNER] = format_text(
             $task->get(task::COL_INT_ASSIGN_OBS_LEARNER), FORMAT_HTML);
 
         $template_data['extra']['course_observer_assignments'] = lib::export_template_data_for_array(

@@ -35,7 +35,7 @@
 require_once('classes/observation.php');
 
 use mod_observation\observation;
-use \mod_observation\observation_base;
+use mod_observation\observation_base;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -103,11 +103,11 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
     $base->set($base::COL_LASTMODIFIEDBY, $USER->id);
 
     $intros = [
-            $base::COL_DEF_I_TASK_LEARNER,
-            $base::COL_DEF_I_TASK_OBSERVER,
-            $base::COL_DEF_I_TASK_ASSESSOR,
-            $base::COL_DEF_I_ASS_OBS_LEARNER,
-            $base::COL_DEF_I_ASS_OBS_OBSERVER,
+        $base::COL_DEF_I_TASK_LEARNER,
+        $base::COL_DEF_I_TASK_OBSERVER,
+        $base::COL_DEF_I_TASK_ASSESSOR,
+        $base::COL_DEF_I_ASS_OBS_LEARNER,
+        $base::COL_DEF_I_ASS_OBS_OBSERVER,
     ];
 
     // set the values
@@ -482,19 +482,19 @@ function observation_pluginfile(
 
     require_login($course, true, $cm);
 
-    $user_id = $args[0];
-    if (!(has_capability(observation_base::CAP_MANAGE, $context) || $user_id == $USER->id))
-    {
-        // Only evaluators and/or owners have access to files
-        return false;
-    }
-
     $fs = get_file_storage();
-    $relative_path = implode('/', $args);
-    $full_path = "/$context->id/" . OBSERVATION_MODULE . "/$filearea/$relative_path";
-    if ((!$file = $fs->get_file_by_hash(sha1($full_path))) || $file->is_directory())
+    $hash = sha1("/$context->id/" . \OBSERVATION_MODULE . "/$filearea/$args[0]/$args[1]");
+    $file = $fs->get_file_by_hash($hash);
+    if (!$file || $file->is_directory())
     {
         send_file_not_found();
+        return false;
+    }
+    else if (!has_any_capability(
+            [observation::CAP_VIEWSUBMISSIONS, observation::CAP_ASSESS, observation::CAP_MANAGE], $context)
+        && $file->get_userid() != $USER->id)
+    {
+        // Only evaluators and/or owners have access to files
         return false;
     }
     else

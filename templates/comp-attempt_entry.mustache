@@ -1,0 +1,20 @@
+<h5 class="attempt-title">
+    {{#str}}attempt_number, observation, {{attempt_number}}{{/str}}
+</h5>
+
+<div class="evidence wrapper-attempt">
+    <div class="flex-attempt">
+        <div class="attempt-evidence">{{{text}}}</div>
+        <span class="learner-name">{{name}}</span>
+        <div class="attempt-attachments">
+            <ul>
+                {{#files}}
+                    <li class="attachment">
+                        <a href="{{{url}}}">{{filename}}</a>
+                    </li>
+                {{/files}}
+            </ul>
+        </div>
+        <span class="timestamp">{{timesubmitted}}</span>
+    </div>
+</div>

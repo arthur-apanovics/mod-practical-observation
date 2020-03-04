@@ -1,3 +1,9 @@
+@border-wrapper-color: #d3d3d3;
+.border-wrapper(@thickness:2px, @color: @border-wrapper-color) {
+  border: @thickness solid @color;
+  border-radius: .25em;
+}
+
 /*[id ^= mod-observation-],
 [id ^= page-mod-observation-],*/
 body.path-mod-observation {
@@ -9,7 +15,7 @@ body.path-mod-observation {
     }
 
     .wrapper {
-      border: 2px solid #d3d3d3;
+      .border-wrapper();
       margin-bottom: 10px;
     }
 
@@ -18,7 +24,7 @@ body.path-mod-observation {
     }
 
     .flex-title {
-      display: flex;  /* Standard syntax */
+      display: flex; /* Standard syntax */
       display: -webkit-flex; /* Safari */
       align-items: flex-end;
       flex-wrap: nowrap;
@@ -49,7 +55,7 @@ body.path-mod-observation {
     }
 
     .wrapper-title {
-      border: 2px solid #d3d3d3;
+      .border-wrapper();
       margin-bottom: 30px;
     }
 
@@ -72,7 +78,7 @@ body.path-mod-observation {
     }
 
     .table {
-      border: 2px solid #d3d3d3;
+      .border-wrapper();
     }
 
     th {
@@ -141,17 +147,13 @@ body.path-mod-observation {
     }
 
     .wrapper-obs-activity {
-      border: 2px solid #d3d3d3;
+      .border-wrapper();
       margin-bottom: 40px;
     }
 
     .wrapper-task {
-      border: 2px solid #d3d3d3;
+      .border-wrapper();
       margin-bottom: 30px;
-    }
-
-    h5 {
-      margin-bottom: 3px;
     }
 
     .subtitle-criteria {
@@ -165,17 +167,19 @@ body.path-mod-observation {
       padding: 5px 5px;
       overflow-wrap: break-word;
       word-wrap: break-word;
-      border: 1px solid #d3d3d3;
+      .border-wrapper(@thickness: 1px)
     }
 
-    .attempt {
-      margin: 0 0 6px 13px;
+    .attempt-title {
+      margin: 1em;
     }
 
-    .editor {
-      margin: 0 13px 20px;
-      padding: 5px 10px;
-      border: 1px solid #d3d3d3;
+    .new-attempt {
+      padding: 1em;
+
+      .tools {
+        padding: 0 1em 1em;
+      }
     }
 
     .request-button-wrapper {
@@ -222,21 +226,23 @@ body.path-mod-observation {
       color: #c0c0c0;
     }
 
-    .wrapper-feedback {
+    .wrapper-feedback,
+    .wrapper-attempt {
       display: flex;
       align-content: space-between;
-      border: 1px solid #d3d3d3;
+      .border-wrapper(@thickness: 1px);
       margin: 0 5px 6px 69px;
     }
 
-    .flex-feedback {
+    .flex-feedback,
+    .flex-attempt {
       display: flex;
       justify-content: space-between;
       flex-wrap: wrap;
+      flex-basis: 100%;
     }
 
     .feedback-desc {
-      font-size: 13px;
       margin: 0 0;
       padding: 5px 5px;
       overflow-wrap: break-word;
@@ -275,15 +281,14 @@ body.path-mod-observation {
       padding: 0;
     }
 
-    .task-evidence {
-      font-size: 13px;
-      margin: 5px 5px;
+    .attempt-evidence {
+      margin: 1em;
       overflow-wrap: break-word;
       word-wrap: break-word;
-      flex: 0 0 40%;
+      flex: 0 0 80%;
     }
 
-    .learner-email {
+    .learner-name {
       text-align: right;
       margin-right: 8px;
       margin-top: 5px;
@@ -291,12 +296,17 @@ body.path-mod-observation {
       align-items: flex-end;
     }
 
-    .attached-evidence {
+    .attempt-attachments {
       flex: 0 0 50%;
       margin-left: 5px;
+
+      li.attachment {
+        display: inline;
+        margin-left: 0.5em;
+      }
     }
 
-    .observer-timestamp {
+    .timestamp {
       flex: 0 0 99%;
       text-align: right;
       margin-right: 8px;
@@ -308,7 +318,7 @@ body.path-mod-observation {
 
     .confirm-change-wrapper {
       width: 55%;
-      border: 2px solid #d3d3d3;
+      .border-wrapper();
       margin: 0 auto;
     }
 
@@ -325,13 +335,12 @@ body.path-mod-observation {
     }
 
     .confirm-change-wrapper > p {
-      font-size: 13px;
       padding-left: 18px;
       line-height: 7px;
     }
 
     .msg {
-      border: 2px solid #d3d3d3;
+      .border-wrapper();
       margin: 0 18px 40px;
     }
 
@@ -458,6 +467,58 @@ body.observation-task {
       list-style: none;
       counter-reset: my-awesome-counter;
       margin: 20px 8px 27px 8px;
+    }
+  }
+}
+
+// task page
+body.observation-task {
+  // observer details partial
+  div#observer-details {
+    > .header {
+      h5, #change-observer {
+        display: inline-block;
+      }
+    }
+
+    table {
+      .border-wrapper();
+      text-align: left;
+      line-height: 40px;
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      margin-bottom: 1em;
+    }
+
+    thead tr:first-child {
+      color: #fff;
+      border: none;
+    }
+
+    th:first-child,
+    td:first-child {
+      padding: 0 15px 0 20px;
+    }
+
+    th {
+      font-weight: 500;
+    }
+
+    thead tr:last-child th {
+      border-bottom: 3px solid @border-wrapper-color;
+    }
+
+    tbody tr:last-child td {
+      border: none;
+    }
+
+    tbody td {
+      border-bottom: 1px solid @border-wrapper-color;
+    }
+
+    td:last-child {
+      padding-right: 10px;
     }
   }
 }

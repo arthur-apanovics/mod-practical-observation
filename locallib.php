@@ -29,8 +29,8 @@
 
 namespace mod_observation;
 
-use context;
 use mod_observation\interfaces\templateable;
+use moodle_url;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -167,6 +167,11 @@ class lib
             throw new \coding_exception("Cannot sort in '$asc_or_desc' order. Valid options are 'asc' or 'desc'");
         }
 
+        if (count($array_to_sort) <= 1)
+        {
+            return $array_to_sort;
+        }
+
         uasort(
             $array_to_sort, function ($a, $b) use ($field_to_sort_by, $asc_or_desc)
         {
@@ -193,12 +198,6 @@ class lib
             'context'  => $context,
             'subdirs'  => false
         ];
-    }
-
-    public static function save_files(int $draftitemid, int $itemid, string $file_area, context $context)
-    {
-        file_save_draft_area_files(
-            $draftitemid, $context->id, OBSERVATION, $file_area, $itemid);
     }
 
     /**
@@ -267,5 +266,48 @@ class lib
         }
 
         return $result;
+    }
+
+    public static function save_files(int $draftitemid, int $contextid, string $file_area, int $itemid)
+    {
+        file_save_draft_area_files(
+            $draftitemid,
+            $contextid,
+            \OBSERVATION_MODULE,
+            $file_area,
+            $itemid);
+    }
+
+    /**
+     * @param \stored_file[] $stored_files
+     * @return array ['filename' => string, 'url' => string]
+     */
+    public static function get_downloads_from_stored_files(array $stored_files)
+    {
+        $attachments = [];
+        foreach ($stored_files as $file)
+        {
+            if ($file->get_filename() == '.')
+            {
+                // this is the root directory
+                continue;
+            }
+
+            $url = moodle_url::make_pluginfile_url(
+                $file->get_contextid(),
+                $file->get_component(),
+                $file->get_filearea(),
+                $file->get_itemid(),
+                '/',
+                $file->get_filename(),
+                true);
+
+            $attachments[] = [
+                'filename' => $file->get_filename(),
+                'url'      => $url->out(false)
+            ];
+        }
+
+        return $attachments;
     }
 }

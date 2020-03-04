@@ -90,7 +90,6 @@ $string['description_help'] ='Description of this criteria that will appear on t
 $string['feedback_required'] ='Feedback required';
 $string['feedback_required_help'] ='If checked, observers will have to provide textual feedback for this criteria';
 
-
 // STATUS STRINGS
 $string['status:not_complete'] = 'Not complete';
 $string['status:complete'] = 'Complete';
@@ -117,11 +116,12 @@ $string['confirm_delete_task'] = 'Are you sure you want to delete task "{$a}"?<b
 $string['deleted_task'] = 'Task "{$a}" deleted';
 $string['no_criteria'] = 'Task has no criteria';
 
-$string['request_observation'] = 'Request observation';
-
 $string['preview'] = 'Preview';
 $string['review'] = 'Review';
 $string['start'] = 'Start';
+
+$string['request_observation'] = 'Request observation';
+$string['attempt_number'] = 'Attempt #{$a}';
 
 // CRITERIA SPECIFIC
 $string['add_criteria'] = 'Add criteria';
@@ -146,6 +146,9 @@ $string['assign_observer:email_validation_message'] = 'Please enter a valid emai
 $string['assign_observer:confirm_change'] = 'Current observer for this task is <strong>{$a->current}</strong>.<br>Are you sure you want to assign <strong>{$a->new}</strong> as the observer for task "{$a->task}"?';
 $string['assign_observer:input_prompt'] = 'Briefly explain this change';
 
+$string['assign_observer:assigned_observer'] = 'Assigned observer';
+$string['assign_observer:change_observer'] = 'Change observer';
+
 // OBSERVER
 $string['fullname'] = 'Full name';
 $string['phone'] = 'Phone';
@@ -156,21 +159,7 @@ $string['message_placeholder'] = 'Optional message to appear in observer email';
 
 $string['send'] = 'Send';
 
-// $string['printthisobservation'] = 'Print this Observation';
-// $string['confirmcriteriadelete'] = 'Are you sure you want to delete this criteria?';
-// $string['error:observationnotfound'] = 'Observation not found';
-// $string['manage'] = 'Manage';
-
-// $string['submissiondate'] = 'Observation submitted on {$a}';
-// $string['nosubmissiondate'] = 'Observation has not been submitted yet';
-
-// EMAIL
-// $string['requests_disabled:title'] = 'You cannot assign new emails at the moment';
-// $string['requestobservation'] = 'Request observation';
-// $string['userxfeedback'] = '{$a}\'s Feedback';
-
-// $string['observationfieldset'] = 'Custom example fieldset';
-// $string['competencies'] = 'Competencies';
-// $string['competencies_help'] = 'Here you can select which of the assigned course competencies should be marked as proficient upon completion of this task.
-//
-// Multiple competencies can be selected by holding down \<CTRL\> and and selecting the criterias.';
+// NOTIFICATIONS
+$string['notification:observation_pending'] = 'Observation request sent to {$a}, please be patient while your observer reviews your submission';
+$string['notification:observer_assigned_same'] = 'Observation request for <i>{$a->task}</i> sent to <strong>{$a->email}</strong>';
+$string['notification:observer_assigned_new'] = 'Observer successfully changed and observation request sent to <strong>{$a->email}</strong> for <i>{$a->task}</i>';

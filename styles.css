@@ -5,6 +5,7 @@ body.path-mod-observation #page * {
 }
 body.path-mod-observation #page .wrapper {
   border: 2px solid #d3d3d3;
+  border-radius: .25em;
   margin-bottom: 10px;
 }
 body.path-mod-observation #page .title-main {
@@ -40,6 +41,7 @@ body.path-mod-observation #page .title-note {
 }
 body.path-mod-observation #page .wrapper-title {
   border: 2px solid #d3d3d3;
+  border-radius: .25em;
   margin-bottom: 30px;
 }
 body.path-mod-observation #page .title-main-task {
@@ -59,6 +61,7 @@ body.path-mod-observation #page .title-desc-task {
 }
 body.path-mod-observation #page .table {
   border: 2px solid #d3d3d3;
+  border-radius: .25em;
 }
 body.path-mod-observation #page th {
   background-color: #d3d3d3;
@@ -104,14 +107,13 @@ body.path-mod-observation #page form.atto_form input[type="url"] {
 }
 body.path-mod-observation #page .wrapper-obs-activity {
   border: 2px solid #d3d3d3;
+  border-radius: .25em;
   margin-bottom: 40px;
 }
 body.path-mod-observation #page .wrapper-task {
   border: 2px solid #d3d3d3;
+  border-radius: .25em;
   margin-bottom: 30px;
-}
-body.path-mod-observation #page h5 {
-  margin-bottom: 3px;
 }
 body.path-mod-observation #page .subtitle-criteria {
   padding-left: 0;
@@ -124,14 +126,16 @@ body.path-mod-observation #page .criteria-desc {
   overflow-wrap: break-word;
   word-wrap: break-word;
   border: 1px solid #d3d3d3;
+  border-radius: .25em;
 }
-body.path-mod-observation #page .attempt {
-  margin: 0 0 6px 13px;
+body.path-mod-observation #page .attempt-title {
+  margin: 1em;
 }
-body.path-mod-observation #page .editor {
-  margin: 0 13px 20px;
-  padding: 5px 10px;
-  border: 1px solid #d3d3d3;
+body.path-mod-observation #page .new-attempt {
+  padding: 1em;
+}
+body.path-mod-observation #page .new-attempt .tools {
+  padding: 0 1em 1em;
 }
 body.path-mod-observation #page .request-button-wrapper {
   text-align: center;
@@ -171,19 +175,22 @@ body.path-mod-observation #page .flex-criteria > span.criteria-note {
   margin-bottom: 15px;
   color: #c0c0c0;
 }
-body.path-mod-observation #page .wrapper-feedback {
+body.path-mod-observation #page .wrapper-feedback,
+body.path-mod-observation #page .wrapper-attempt {
   display: flex;
   align-content: space-between;
   border: 1px solid #d3d3d3;
+  border-radius: .25em;
   margin: 0 5px 6px 69px;
 }
-body.path-mod-observation #page .flex-feedback {
+body.path-mod-observation #page .flex-feedback,
+body.path-mod-observation #page .flex-attempt {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
+  flex-basis: 100%;
 }
 body.path-mod-observation #page .feedback-desc {
-  font-size: 13px;
   margin: 0 0;
   padding: 5px 5px;
   overflow-wrap: break-word;
@@ -216,25 +223,28 @@ body.path-mod-observation #page .evidence {
   margin: 0 13px 45px 13px;
   padding: 0;
 }
-body.path-mod-observation #page .task-evidence {
-  font-size: 13px;
-  margin: 5px 5px;
+body.path-mod-observation #page .attempt-evidence {
+  margin: 1em;
   overflow-wrap: break-word;
   word-wrap: break-word;
-  flex: 0 0 40%;
+  flex: 0 0 80%;
 }
-body.path-mod-observation #page .learner-email {
+body.path-mod-observation #page .learner-name {
   text-align: right;
   margin-right: 8px;
   margin-top: 5px;
   flex: 0 0 14%;
   align-items: flex-end;
 }
-body.path-mod-observation #page .attached-evidence {
+body.path-mod-observation #page .attempt-attachments {
   flex: 0 0 50%;
   margin-left: 5px;
 }
-body.path-mod-observation #page .observer-timestamp {
+body.path-mod-observation #page .attempt-attachments li.attachment {
+  display: inline;
+  margin-left: 0.5em;
+}
+body.path-mod-observation #page .timestamp {
   flex: 0 0 99%;
   text-align: right;
   margin-right: 8px;
@@ -245,6 +255,7 @@ body.path-mod-observation #page .align-center {
 body.path-mod-observation #page .confirm-change-wrapper {
   width: 55%;
   border: 2px solid #d3d3d3;
+  border-radius: .25em;
   margin: 0 auto;
 }
 body.path-mod-observation #page .confirm-change-wrapper > h4,
@@ -258,12 +269,12 @@ body.path-mod-observation #page .flex {
   flex-wrap: wrap;
 }
 body.path-mod-observation #page .confirm-change-wrapper > p {
-  font-size: 13px;
   padding-left: 18px;
   line-height: 7px;
 }
 body.path-mod-observation #page .msg {
   border: 2px solid #d3d3d3;
+  border-radius: .25em;
   margin: 0 18px 40px;
 }
 body.path-mod-observation #page .confirm-change-wrapper > div > p {
@@ -354,4 +365,41 @@ body.observation-manage #page ol li::before,
 body.observation-task #page ol li::before {
   content: counter(my-awesome-counter) ". ";
   font-size: 13px;
+}
+body.observation-task div#observer-details > .header h5,
+body.observation-task div#observer-details > .header #change-observer {
+  display: inline-block;
+}
+body.observation-task div#observer-details table {
+  border: 2px solid #d3d3d3;
+  border-radius: .25em;
+  text-align: left;
+  line-height: 40px;
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  margin-bottom: 1em;
+}
+body.observation-task div#observer-details thead tr:first-child {
+  color: #fff;
+  border: none;
+}
+body.observation-task div#observer-details th:first-child,
+body.observation-task div#observer-details td:first-child {
+  padding: 0 15px 0 20px;
+}
+body.observation-task div#observer-details th {
+  font-weight: 500;
+}
+body.observation-task div#observer-details thead tr:last-child th {
+  border-bottom: 3px solid #d3d3d3;
+}
+body.observation-task div#observer-details tbody tr:last-child td {
+  border: none;
+}
+body.observation-task div#observer-details tbody td {
+  border-bottom: 1px solid #d3d3d3;
+}
+body.observation-task div#observer-details td:last-child {
+  padding-right: 10px;
 }

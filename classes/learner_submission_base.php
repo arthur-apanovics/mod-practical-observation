@@ -23,7 +23,6 @@
 namespace mod_observation;
 
 use coding_exception;
-use core\command\exception;
 
 class learner_submission_base extends db_model_base
 {
@@ -45,11 +44,11 @@ class learner_submission_base extends db_model_base
     public const STATUS_OBSERVATION_INCOMPLETE  = 'observation_incomplete';
 
     // assessor statuses
-    public const STATUS_ASSESSMENT_PENDING      = 'assessment_pending';
-    public const STATUS_ASSESSMENT_IN_PROGRESS  = 'assessment_in_progress';
-    public const STATUS_ASSESSMENT_INCOMPLETE   = 'assessment_incomplete';
+    public const STATUS_ASSESSMENT_PENDING     = 'assessment_pending';
+    public const STATUS_ASSESSMENT_IN_PROGRESS = 'assessment_in_progress';
+    public const STATUS_ASSESSMENT_INCOMPLETE  = 'assessment_incomplete';
 
-    public const STATUS_COMPLETE                = 'complete';
+    public const STATUS_COMPLETE = 'complete';
 
     /**
      * @var int
@@ -60,8 +59,18 @@ class learner_submission_base extends db_model_base
      */
     protected $taskid;
     /**
-     * ENUM ('not_started', 'learner_in_progress', 'observation_pending', 'observation_in_progress',
-     * 'observation_incomplete', 'assessment_pending', 'assessment_in_progress', 'assessment_incomplete', 'complete')
+     * One of:
+     * <ul>
+     *  <li>{@link STATUS_LEARNER_PENDING}</li>
+     *  <li>{@link STATUS_LEARNER_IN_PROGRESS}</li>
+     *  <li>{@link STATUS_OBSERVATION_PENDING}</li>
+     *  <li>{@link STATUS_OBSERVATION_IN_PROGRESS}</li>
+     *  <li>{@link STATUS_OBSERVATION_INCOMPLETE}</li>
+     *  <li>{@link STATUS_ASSESSMENT_PENDING}</li>
+     *  <li>{@link STATUS_ASSESSMENT_IN_PROGRESS}</li>
+     *  <li>{@link STATUS_ASSESSMENT_INCOMPLETE}</li>
+     *  <li>{@link STATUS_COMPLETE}</li>
+     * </ul>
      *
      * @var string
      */
@@ -74,6 +83,35 @@ class learner_submission_base extends db_model_base
      * @var int
      */
     protected $timecompleted;
+
+    /**
+     * This method should be used when changing submission state as it performs validation to detect possible issues.
+     *
+     * @param string $new_status {@link status}
+     * @return self
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function update_status(string $new_status): self
+    {
+        if ($this->status == $new_status)
+        {
+            debugging(
+                sprintf(
+                    '%s %s is already "%s". This should not normally happen',
+                    self::class,
+                    self::COL_STATUS,
+                    $new_status),
+                DEBUG_DEVELOPER,
+                debug_backtrace());
+        }
+
+        // TODO: perform other status validations, e.g. status == assessor_*, new_status = observer_*, which is not permitted
+
+        $this->set(self::COL_STATUS, $new_status, true);
+
+        return $this;
+    }
 
     public function set(string $prop, $value, bool $save = false): db_model_base
     {
@@ -95,17 +133,6 @@ class learner_submission_base extends db_model_base
             {
                 throw new coding_exception(
                     sprintf("'$value' is not a valid value for '%s' in '%s'", self::COL_STATUS, get_class($this)));
-            }
-            if ($this->status === $value)
-            {
-                debugging(
-                    sprintf(
-                        '%s %s is already "%s". This should not normally happen',
-                        self::class,
-                        self::COL_STATUS,
-                        $value),
-                    DEBUG_DEVELOPER,
-                    debug_backtrace());
             }
         }
 

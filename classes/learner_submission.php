@@ -105,7 +105,7 @@ class learner_submission extends learner_submission_base implements templateable
                     // find latest attempt and check stuff
                     $attempt = $this->get_latest_attempt_or_null();
 
-                    if ($attempt->get(learner_attempt::COL_TIMESUBMITTED) == 0)
+                    if (!$attempt->is_submitted())
                     {
                         // attempt exists and is not yet submitted - NOT OK!
 
@@ -113,12 +113,12 @@ class learner_submission extends learner_submission_base implements templateable
                         // by an observer or assessor. This indicates a problem in our logic
 
                         // update to correct status
-                        $this->set(self::COL_STATUS, self::STATUS_LEARNER_IN_PROGRESS, true);
+                        $this->update_status(self::STATUS_LEARNER_IN_PROGRESS);
                         // let a dev know if he/she is watching
                         debugging(
                             sprintf(
                                 'learner submission status is set to "pending", however, an attempt already exists for submission id %n!',
-                                $this->id));
+                                $this->id), DEBUG_DEVELOPER, debug_backtrace());
 
                         return true;
                     }
@@ -134,6 +134,15 @@ class learner_submission extends learner_submission_base implements templateable
                 break;
 
             case self::STATUS_LEARNER_IN_PROGRESS:
+                if (!$this->get_latest_attempt_or_null())
+                {
+                    debugging(
+                        'learner submission is set to "learner in progress" but no attempt exists',
+                        DEBUG_DEVELOPER, debug_backtrace());
+
+                    $this->create_new_attempt();
+                }
+
                 return true;
                 break;
 
@@ -153,13 +162,13 @@ class learner_submission extends learner_submission_base implements templateable
     }
 
     /**
-     * @param bool $update_submission_state if true, will set submission state to {@link learner_submission::STATUS_LEARNER_IN_PROGRESS}
+     * @param bool $set_submission_in_progress if true, will set submission state to {@link STATUS_LEARNER_IN_PROGRESS}
      * @return learner_attempt_base
      * @throws \dml_exception
      * @throws \dml_missing_record_exception
      * @throws coding_exception
      */
-    public function create_new_attempt(bool $update_submission_state = true)
+    public function create_new_attempt(bool $set_submission_in_progress = true)
     {
         $attempt = new learner_attempt_base();
 
@@ -171,11 +180,11 @@ class learner_submission extends learner_submission_base implements templateable
         $attempt->set(learner_attempt::COL_TEXT_FORMAT, editors_get_preferred_format());
         $attempt->set(learner_attempt::COL_ATTEMPT_NUMBER, $attempt->get_next_attemptnumber_in_submission());
 
-        $this->learner_attempts[] = $attempt->create();
+        $this->learner_attempts[] = new learner_attempt($attempt->create());
 
-        if ($update_submission_state)
+        if ($set_submission_in_progress)
         {
-            $this->set(self::COL_STATUS, self::STATUS_LEARNER_IN_PROGRESS, true);
+            $this->update_status(self::STATUS_LEARNER_IN_PROGRESS);
         }
 
         return $attempt;
@@ -185,7 +194,7 @@ class learner_submission extends learner_submission_base implements templateable
      * @return learner_attempt|null null if no current attempt
      * @throws coding_exception
      */
-    public function get_latest_attempt_or_null()
+    public function get_latest_attempt_or_null(): ?learner_attempt
     {
         if (empty($this->learner_attempts))
         {
@@ -214,6 +223,11 @@ class learner_submission extends learner_submission_base implements templateable
     public function assign_observer(
         observer_base $submitted_observer, string $message, string $explanation = null): observer_assignment
     {
+        if (!$submitted_observer->get_id_or_null())
+        {
+            throw new coding_exception('Observer must exist in database before assigning to submission');
+        }
+
         if ($current_assignment = $this->get_active_observer_assignment_or_null())
         {
             // we have an existing assignment
@@ -244,6 +258,12 @@ class learner_submission extends learner_submission_base implements templateable
             $assignment = observer_assignment::create_assignment($this->id, $submitted_observer->get_id_or_null());
         }
 
+        // update learner submission status
+        $this->update_status(self::STATUS_OBSERVATION_PENDING);
+        // "submit" attempt
+        $attempt = $this->get_latest_attempt_or_null();
+        $attempt->submit();
+
         // TODO: EVENT
 
         // TODO: SEND EMAIL AND NOTIFICATION
@@ -260,7 +280,7 @@ class learner_submission extends learner_submission_base implements templateable
      * @return observer_assignment|null null if no record found
      * @throws coding_exception
      */
-    public function get_active_observer_assignment_or_null()
+    public function get_active_observer_assignment_or_null(): ?observer_assignment
     {
         return lib::find_in_assoc_array_criteria_or_null(
             $this->observer_assignments,
@@ -335,6 +355,13 @@ class learner_submission extends learner_submission_base implements templateable
         return observer_assignment::read_all_by_sql($sql, [$this->userid, $courseid]);
     }
 
+    public function is_observation_pending_or_in_progress()
+    {
+        $yes = [self::STATUS_OBSERVATION_PENDING, self::STATUS_OBSERVATION_IN_PROGRESS];
+
+        return in_array($this->status, $yes);
+    }
+
     /**
      * @inheritDoc
      */
@@ -343,7 +370,10 @@ class learner_submission extends learner_submission_base implements templateable
         $learner_attempts_data = [];
         foreach ($this->learner_attempts as $learner_attempt)
         {
-            $learner_attempts_data[] = $learner_attempt->export_template_data();
+            if ($learner_attempt->is_submitted())
+            {
+                $learner_attempts_data[] = $learner_attempt->export_template_data();
+            }
         }
 
         $observer_assignments_data = [];
@@ -361,7 +391,7 @@ class learner_submission extends learner_submission_base implements templateable
         return [
             self::COL_ID            => $this->id,
             self::COL_TIMESTARTED   => userdate($this->timestarted),
-            self::COL_TIMECOMPLETED => userdate($this->timecompleted),
+            self::COL_TIMECOMPLETED => $this->timecompleted != 0 ? userdate($this->timecompleted) : null,
 
             'learner_attempts'     => $learner_attempts_data,
             'observer_assignments' => $observer_assignments_data,

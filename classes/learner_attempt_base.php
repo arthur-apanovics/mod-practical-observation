@@ -60,6 +60,25 @@ class learner_attempt_base extends db_model_base
      */
     protected $attempt_number;
 
+    /**
+     * Performs basic validation before marking attempt as submitted
+     *
+     * @return $this
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function submit()
+    {
+        if ($this->is_submitted())
+        {
+            throw new \coding_exception("Attempt with id '$this->id' is already submitted");
+        }
+
+        $this->set(learner_attempt::COL_TIMESUBMITTED, time(), true);
+
+        return $this;
+    }
+
     public function get_next_attemptnumber_in_submission(): int
     {
         return $this->get_last_attemptnumber_in_submission() + 1;
@@ -99,5 +118,10 @@ class learner_attempt_base extends db_model_base
             ],
             self::COL_ATTEMPT_NUMBER       => $this->attempt_number,
         ];
+    }
+
+    public function is_submitted()
+    {
+        return $this->timesubmitted != 0;
     }
 }

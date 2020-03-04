@@ -28,7 +28,7 @@ use mod_observation\observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('lib.php');
-require_once($CFG->libdir.'/filelib.php');
+require_once($CFG->libdir . '/filelib.php');
 
 $cmid = required_param('cmid', PARAM_INT);
 $learner_submissionid = optional_param('learner_submission_id', null, PARAM_INT);
@@ -63,12 +63,8 @@ if ($learner_submissionid)
     $attempt->update();
 
     // save files
-    file_save_draft_area_files(
-        $draft_itemid,
-        $context->id,
-        \OBSERVATION,
-        observation::FILE_AREA_TRAINEE,
-        $attempt->get_id_or_null());
+    lib::save_files(
+        $draft_itemid, $context->id, observation::FILE_AREA_TRAINEE, $attempt->get_id_or_null());
 
     redirect(
         new moodle_url(
