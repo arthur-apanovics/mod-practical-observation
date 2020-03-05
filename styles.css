@@ -63,18 +63,9 @@ body.path-mod-observation #page .table {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
 }
-body.path-mod-observation #page th {
+body.path-mod-observation #page .table th {
   background-color: #d3d3d3;
   color: black;
-}
-body.path-mod-observation #page .table > thead > tr > th,
-body.path-mod-observation #page .table > tbody > tr > th,
-body.path-mod-observation #page .table > tfoot > tr > th,
-body.path-mod-observation #page .table > thead > tr > th,
-body.path-mod-observation #page .table > tbody > tr > th {
-  text-align: left;
-  padding: 8px 50px 8px 50px;
-  border: none;
 }
 body.path-mod-observation #page .form-group {
   margin-right: 2em;
@@ -402,4 +393,9 @@ body.observation-task div#observer-details tbody td {
 }
 body.observation-task div#observer-details td:last-child {
   padding-right: 10px;
+}
+body.observation-request .assign-from-history-container > h5 {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: #d3d3d3;
 }

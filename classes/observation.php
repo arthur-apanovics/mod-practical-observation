@@ -24,7 +24,6 @@ namespace mod_observation;
 
 use cm_info;
 use coding_exception;
-use context_module;
 use core_user;
 use dml_exception;
 use dml_missing_record_exception;
@@ -170,6 +169,27 @@ class observation extends observation_base implements templateable
         }
 
         // if we got here, then all tasks have at least one criteria
+        return true;
+    }
+
+    public function all_tasks_observation_pending_or_in_progress(int $userid)
+    {
+        foreach ($this->tasks as $task)
+        {
+            if ($submission = $task->get_current_learner_submission_or_null($userid))
+            {
+                // has a submission
+                if ($submission->get_active_observer_assignment_or_null()
+                    && $submission->is_observation_pending_or_in_progress())
+                {
+                    // has observer assigned and observation pending/in progress
+                    continue;
+                }
+            }
+
+            return false;
+        }
+
         return true;
     }
 

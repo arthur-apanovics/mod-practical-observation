@@ -265,6 +265,8 @@ class mod_observation_renderer extends plugin_renderer_base
      */
     public function activity_view(observation $observation)
     {
+        global $USER;
+
         $template_data = $observation->export_template_data();
         $caps = $template_data['capabilities'];
         $out = '';
@@ -280,6 +282,13 @@ class mod_observation_renderer extends plugin_renderer_base
         // learner view or preview
         else if ($caps['can_submit'] || $caps['can_view'])
         {
+            if ($observation->all_tasks_observation_pending_or_in_progress($USER->id))
+            {
+                notification::info(
+                    get_string(
+                        'notification:task_wait_for_observers', 'observation'));
+            }
+
             // submission/preview logic in template
             $out .= $this->render_from_template('view-activity', $template_data);
         }
@@ -417,7 +426,7 @@ class mod_observation_renderer extends plugin_renderer_base
 
                 notification::info(
                     get_string(
-                        'notification:observation_pending', 'observation',
+                        'notification:observation_request_sent', 'observation',
                         $observer->get(observer::COL_EMAIL)));
             }
 

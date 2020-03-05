@@ -22,6 +22,9 @@
 
 namespace mod_observation;
 
+use coding_exception;
+use dml_exception;
+use dml_missing_record_exception;
 use mod_observation\interfaces\templateable;
 
 class task extends task_base implements templateable
@@ -57,7 +60,7 @@ class task extends task_base implements templateable
     public function is_observed(int $userid)
     {
         // todo: implement method
-        throw new \coding_exception(__METHOD__ . ' not implemented');
+        throw new coding_exception(__METHOD__ . ' not implemented');
     }
 
     /**
@@ -87,16 +90,13 @@ class task extends task_base implements templateable
     /**
      * @param int $userid
      * @return learner_submission
-     * @throws \coding_exception
-     * @throws \dml_exception
-     * @throws \dml_missing_record_exception
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
      */
-    public function get_current_learner_submission_or_create(int $userid)
+    public function get_current_learner_submission_or_create(int $userid): learner_submission
     {
-        $submission = lib::find_in_assoc_array_key_value_or_null(
-            $this->learner_submissions, learner_submission::COL_USERID, $userid);
-
-        if (empty($submission))
+        if (!$submission = $this->get_current_learner_submission_or_null($userid))
         {
             $submission = new learner_submission_base();
             $submission->set(learner_submission::COL_TASKID, $this->id);
@@ -112,6 +112,17 @@ class task extends task_base implements templateable
         }
 
         return $submission;
+    }
+
+    /**
+     * @param int $userid
+     * @return mixed
+     * @throws coding_exception
+     */
+    public function get_current_learner_submission_or_null(int $userid): ?learner_submission
+    {
+        return lib::find_in_assoc_array_key_value_or_null(
+            $this->learner_submissions, learner_submission::COL_USERID, $userid);
     }
 
     /**

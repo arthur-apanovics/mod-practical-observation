@@ -140,6 +140,7 @@ $string['report'] = 'Report';
 // ASSIGN OBSERVER
 $string['assign_observer:page_title'] = 'Assign observer - {$a}';
 $string['assign_observer:table_title'] = 'Assign from history';
+$string['assign_observer:table_title_help'] = 'You can assign any observer you\'ve used in this module or a new observer';
 $string['assign_observer:header'] = 'Assign observer';
 $string['assign_observer:phone_validation_message'] = 'Please enter a valid NZ phone number';
 $string['assign_observer:email_validation_message'] = 'Please enter a valid email address';
@@ -161,7 +162,10 @@ $string['message_placeholder'] = 'Optional message to appear in observer email';
 $string['send'] = 'Send';
 
 // NOTIFICATIONS
-$string['notification:observation_pending'] = 'Observation request sent to {$a}, please be patient while your observer reviews your submission';
+$string['notification:observation_request_sent'] = 'Observation request sent to {$a}, please be patient while your observer reviews your submission';
 $string['notification:observer_assigned_no_change'] = '<strong>{$a->email}</strong> is already the assigned observer for task <i>{$a->task}</i>';
 $string['notification:observer_assigned_same'] = 'Observation request for <i>{$a->task}</i> sent to <strong>{$a->email}</strong>';
 $string['notification:observer_assigned_new'] = 'Observer successfully changed and observation request sent to <strong>{$a->email}</strong> for <i>{$a->task}</i>';
+$string['notification:task_wait_for_observers'] = 'You have requested observations for all tasks, please be patient while observers review your submissions';
+
+

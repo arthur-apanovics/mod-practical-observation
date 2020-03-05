@@ -79,36 +79,12 @@ body.path-mod-observation {
 
     .table {
       .border-wrapper();
-    }
 
-    th {
-      background-color: #d3d3d3;
-      color: black;
-    }
-
-    .table { // looks like it's unused
-      > thead,
-      > tbody,
-      > tfoot,
-      > thead,
-      > tbody {
-        > tr {
-          > th {
-            text-align: left;
-            padding: 8px 50px 8px 50px;
-            border: none;
-          }
-        }
+      th {
+        background-color: #d3d3d3;
+        color: black;
       }
     }
-
-    // now this is an mform
-    //#assign-observer-form {
-    //  display: flex;
-    //  padding: 1.8em;
-    //  /*align-items: flex-end;*/
-    //  flex-wrap: wrap;
-    //}
 
     .form-group {
       margin-right: 2em;
@@ -519,6 +495,16 @@ body.observation-task {
 
     td:last-child {
       padding-right: 10px;
+    }
+  }
+}
+
+body.observation-request {
+  .assign-from-history-container {
+    > h5 {
+      text-decoration-line: underline;
+      text-decoration-style: dashed;
+      text-decoration-color: @border-wrapper-color;
     }
   }
 }
