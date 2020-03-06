@@ -29,8 +29,9 @@ class observer_assignment_base extends db_model_base
     public const COL_LEARNER_SUBMISSIONID = 'learner_submissionid';
     public const COL_OBSERVERID           = 'observerid';
     public const COL_CHANGE_EXPLAIN       = 'change_explain';
-    public const COL_OBSERVATION_ACCEPTED = 'observation_accepted';
     public const COL_TIMEASSIGNED         = 'timeassigned';
+    public const COL_OBSERVATION_ACCEPTED = 'observation_accepted';
+    public const COL_TIMEACCEPTED         = 'timeaccepted';
     public const COL_TOKEN                = 'token';
     public const COL_ACTIVE               = 'active';
 
@@ -49,15 +50,19 @@ class observer_assignment_base extends db_model_base
      */
     protected $change_explain;
     /**
+     * @var int
+     */
+    protected $timeassigned;
+    /**
      * null if no decision made yet, false if observer declined observation, true if accepted and observer requirements confirmed
      *
      * @var bool
      */
     protected $observation_accepted;
     /**
-     * @var int
+     * @var null|int
      */
-    protected $timeassigned;
+    protected $timeaccepted;
     /**
      * @var string
      */

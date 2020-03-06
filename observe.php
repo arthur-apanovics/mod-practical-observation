@@ -51,7 +51,7 @@ else if ($observer_assignment->is_observation_complete())
 if (isloggedin())
 {
     $learner_submission = $observer_assignment->get_learner_submission_base();
-    if ($learner_submission->get(learner_submission::COL_USERID) == $USER->id)
+    if ($learner_submission->get_userid() == $USER->id)
     {
         print_error('You cannot observe yourself!');
 
@@ -64,9 +64,22 @@ if (isloggedin())
     }
 }
 
-// This is a hack to get around authenticating anonymous users when viewing files in observation.
-unset($SESSION->observation_usertoken);
-$SESSION->observation_usertoken = $token;
+if (optional_param('submit-accept', 0, PARAM_BOOL))
+{
+    // observation accepted.
+    // this should not happen but let's confirm just to be safe
+    if (!optional_param('acknowledge_checkbox', 0, PARAM_BOOL))
+    {
+        print_error('You haven\'t acknowledged meeting the criteria, please go back and try again');
+    }
+
+    $observer_assignment->accept();
+}
+else if (optional_param('submit-decline', 0, PARAM_BOOL))
+{
+    // TODO: declined observation
+    $observer_assignment->decline();
+}
 
 // TODO: Event
 
@@ -93,8 +106,12 @@ if (!$observer_assignment->is_accepted())
 }
 else
 {
+    // This is a hack to get around authenticating anonymous users when viewing files in observation.
+    unset($SESSION->observation_usertoken);
+    $SESSION->observation_usertoken = $token;
+
     // show observation page
-    echo $renderer->task_observer_view();
+    echo $renderer->task_observer_view($observer_assignment);
 }
 
 // Finish the page.

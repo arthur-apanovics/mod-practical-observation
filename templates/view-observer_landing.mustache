@@ -1,14 +1,56 @@
-<div class="personal-details wrapper">
-    <h5>
-        Confirm personal details
-        <a class="edit-details" href="#">{{#str}}edit_lowercase, observation{{/str}}</a>
-    </h5>
-    {{> mod_observation/comp-observer_details_table}}
-</div>
+<style>
+    html
+    {
+        /*give html full height*/
+        height: 100%;
+    }
+</style>
 
-<div class="observer-requirements wrapper">
-    <h5>External observer requirements</h5>
-    <div class="requirement-text">
-        {{{extra.int_assign_obs_observer}}}
+<div class="container">
+    <div class="personal-details wrapper">
+        <h5>
+            Confirm personal details
+            <a class="edit-details" href="#">{{#str}}edit_lowercase, observation{{/str}}</a>
+        </h5>
+        {{> mod_observation/comp-observer_details_table}}
+    </div>
+
+    <div class="observer-requirements wrapper">
+        <h5>{{#str}}observer_requirements, observation{{/str}}</h5>
+        <div class="requirement-text">
+            {{{extra.int_assign_obs_observer}}}
+        </div>
+
+        <form id="requirement-acknowledge" class="form-inline" method="post">
+            <div class="form-group">
+                <label for="acknowledge_checkbox">
+                    {{#str}}observer_requirements_acknowledge, observation{{/str}}
+                </label>
+                <input disabled type="checkbox" name="acknowledge_checkbox" id="acknowledge_checkbox">
+            </div>
+
+            <div class="button-wrapper">
+                <button id="submit-decline"
+                        name="submit-decline"
+                        type="submit"
+                        class="btn btn-secondary"
+                        value="1"
+                        onclick="alert('Tell Arthur to implement this!')">
+                    {{! TODO: implement decline logic }}
+                    {{#str}}decline, observation{{/str}}
+                </button>
+                <button id="submit-accept"
+                        name="submit-accept"
+                        type="submit"
+                        class="btn btn-primary"
+                        value="1"
+                        disabled>
+                    {{#str}}accept, observation{{/str}}
+                </button>
+            </div>
+
+            <input type="hidden" name="token" value="{{extra.token}}">
+        </form>
+
     </div>
 </div>

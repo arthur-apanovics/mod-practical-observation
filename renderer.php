@@ -354,10 +354,10 @@ class mod_observation_renderer extends plugin_renderer_base
 
         $template_data = $task->export_template_data();
         // lightweight data to render task header
-        $task_template_data =
+        $header_data =
             [
-                task::COL_NAME          => $template_data['name'],
-                task::COL_INTRO_LEARNER => $template_data['intro_learner']
+                task::COL_NAME => $template_data['name'],
+                'intro'        => $template_data['intro_learner']
             ];
         $caps = $observation_base->export_capabilities();
         $out = '';
@@ -373,8 +373,7 @@ class mod_observation_renderer extends plugin_renderer_base
                 $context = context_module::instance($cm->id);
 
                 // render task header
-                $out .= $this->render_from_template(
-                    'part-task_header', $task_template_data);
+                $out .= $this->render_from_template('part-task_header', $header_data);
 
                 // since we're not looping over submitted attempts we need to manually provide attempt number
                 $template_data['extra']['attempt_number'] = $attempt->get(learner_attempt::COL_ATTEMPT_NUMBER);
@@ -402,8 +401,7 @@ class mod_observation_renderer extends plugin_renderer_base
             else if ($submission->is_observation_pending_or_in_progress())
             {
                 // render task header
-                $out .= $this->render_from_template(
-                    'part-task_header', $task_template_data);
+                $out .= $this->render_from_template('part-task_header', $header_data);
 
                 // render observer details
                 $observer = $submission->get_active_observer_assignment_or_null()->get_observer();
@@ -605,10 +603,31 @@ class mod_observation_renderer extends plugin_renderer_base
         $task = $observer_assignment->get_task_base();
         $template_data = $observer_assignment->get_observer()->export_template_data();
         $template_data['extra'][task::COL_INT_ASSIGN_OBS_OBSERVER] = $task->get(task::COL_INT_ASSIGN_OBS_OBSERVER);
+        $template_data['extra'][observer_assignment::COL_TOKEN] =
+            $observer_assignment->get(observer_assignment::COL_TOKEN);
         $out = '';
 
         $this->page->requires->js_call_amd(OBSERVATION_MODULE . '/observer_view', 'init');
         $out .= $this->render_from_template('view-observer_landing', $template_data);
+
+        return $out;
+    }
+
+    public function task_observer_view(observer_assignment $observer_assignment)
+    {
+        $learner_submission_base = $observer_assignment->get_learner_submission_base();
+        $task = new task($learner_submission_base->get_task_base(), $learner_submission_base->get_userid());
+
+        $template_data = $task->export_template_data();
+        $out = '';
+
+        $header_data =
+            [
+                task::COL_NAME => $task->get_formatted_name(),
+                'intro'        => $task->get(task::COL_INTRO_OBSERVER)
+            ];
+        $out .= $this->render_from_template('part-task_header', $header_data);
+        $out .= $this->render_from_template('view-task_observer', $template_data);
 
         return $out;
     }

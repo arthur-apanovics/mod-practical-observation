@@ -69,9 +69,16 @@ class observation extends observation_base implements templateable
         parent::__construct($this->cm->instance);
 
         // get task records
-        $tasks = task_base::read_all_by_condition(
-            [task::COL_OBSERVATIONID => $this->cm->instance],
-            sprintf('`%s` ASC', task::COL_SEQUENCE));
+        if (!is_null($taskid))
+        {
+            $tasks = task_base::read_all_by_condition([task::COL_ID => $taskid]);
+        }
+        else
+        {
+            $tasks = task_base::read_all_by_condition(
+                [task::COL_OBSERVATIONID => $this->cm->instance],
+                sprintf('`%s` ASC', task::COL_SEQUENCE));
+        }
         // initialise task objects
         foreach ($tasks as $task)
         {

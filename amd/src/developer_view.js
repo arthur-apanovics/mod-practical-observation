@@ -10,7 +10,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'mod_observation/Sortable'],
             init: function () {
                 // sortable elements
                 var taskListId = 'mainTaskList';
-                var nestedCriteriaClass = 'nestedCriteria';
+                var nestedCriteriaClass = 'nested-criteria';
 
                 var sortList = function (listElement) {
                     $(listElement).find("li").sort(sort_li).appendTo(listElement);

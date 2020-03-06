@@ -68,7 +68,7 @@ class learner_submission extends learner_submission_base implements templateable
         $complete_statuses = [
             self::STATUS_ASSESSMENT_PENDING,
             self::STATUS_ASSESSMENT_IN_PROGRESS,
-            self::STATUS_ASSESSMENT_INCOMPLETE,
+            self::STATUS_ASSESSMENT_INCOMPLETE, // todo: will this status ever be used?
         ];
 
         return in_array($this->status, $complete_statuses);

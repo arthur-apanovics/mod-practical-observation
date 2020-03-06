@@ -172,6 +172,16 @@ class task_base extends db_model_base
         return $this;
     }
 
+    /**
+     * @return observation_base
+     * @throws \coding_exception
+     * @throws \dml_missing_record_exception
+     */
+    public function get_observation_base(): observation_base
+    {
+        return new observation_base($this->observationid);
+    }
+
     public function delete()
     {
         $sql = 'SELECT * 

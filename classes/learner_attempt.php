@@ -74,7 +74,7 @@ class learner_attempt extends learner_attempt_base implements templateable
             self::COL_ATTEMPT_NUMBER => $this->attempt_number,
 
             'name'  => fullname(
-                core_user::get_user($this->learner_submission_base->get(learner_submission::COL_USERID))),
+                core_user::get_user($this->learner_submission_base->get_userid())),
             'files' => lib::get_downloads_from_stored_files($this->get_attached_files())
         ];
     }
@@ -106,12 +106,12 @@ class learner_attempt extends learner_attempt_base implements templateable
         $sql = 'SELECT cm.id
                 FROM {course_modules} cm
                 WHERE cm.module = (SELECT id FROM {modules} WHERE name = \'' . OBSERVATION . '\')
-                    AND instance =
-                        (SELECT o.id
-                         FROM {' . observation::TABLE . '} o
-                            JOIN {' . task::TABLE . '} t ON t.' . task::COL_OBSERVATIONID . ' = o.id
-                            JOIN {' . learner_submission::TABLE . '} ls ON ls.' . learner_submission::COL_TASKID . ' = t.id
-                        WHERE ls.id = ?)';
+                AND instance =
+                    (SELECT o.id
+                     FROM {' . observation::TABLE . '} o
+                        JOIN {' . task::TABLE . '} t ON t.' . task::COL_OBSERVATIONID . ' = o.id
+                        JOIN {' . learner_submission::TABLE . '} ls ON ls.' . learner_submission::COL_TASKID . ' = t.id
+                    WHERE ls.id = ?)';
 
         return $DB->get_field_sql($sql, [$this->learner_submission_base->get_id_or_null()], MUST_EXIST);
     }

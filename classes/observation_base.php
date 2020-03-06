@@ -194,6 +194,14 @@ class observation_base extends db_model_base
      */
     public function export_capabilities(int $userid = null)
     {
+        global $USER;
+
+        if ($USER->id == 0)
+        {
+            // external observer
+            return null;
+        }
+
         $context = context_module::instance($this->get_cm()->id);
 
         return [

@@ -68,23 +68,6 @@ body.path-mod-observation .table th {
   background-color: #d3d3d3;
   color: black;
 }
-body.path-mod-observation .form-group {
-  margin-right: 2em;
-  display: flex;
-  flex-direction: column;
-  padding-bottom: 10px;
-}
-body.path-mod-observation .form-group-message {
-  display: flex;
-  flex-direction: column;
-}
-body.path-mod-observation .form-group > input {
-  flex: 1;
-  width: 100%;
-}
-body.path-mod-observation .form-group > label {
-  font-weight: normal;
-}
 body.path-mod-observation form select,
 body.path-mod-observation form input[type="text"],
 body.path-mod-observation form input[type="email"],
@@ -129,9 +112,9 @@ body.path-mod-observation .new-attempt {
 body.path-mod-observation .new-attempt .tools {
   padding: 0 1em 1em;
 }
-body.path-mod-observation .request-button-wrapper {
+body.path-mod-observation .button-wrapper {
   text-align: center;
-  margin: 45px 0 30px 0;
+  margin: 1em 0;
 }
 body.path-mod-observation .send-button-wrapper {
   width: auto;
@@ -274,11 +257,6 @@ body.path-mod-observation .confirm-change-wrapper > div > p {
   padding-top: 4px;
   padding-bottom: 50px;
 }
-body.path-mod-observation .button-wrapper {
-  text-align: right;
-  margin-right: 18px;
-  margin-bottom: 33px;
-}
 body.path-mod-observation .list-wrapper {
   width: 100%;
   margin-top: 3em;
@@ -401,10 +379,31 @@ body.observation-request .assign-from-history-container > h5 {
   text-decoration-style: dashed;
   text-decoration-color: #d3d3d3;
 }
+body.observation-observe {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 body.observation-observe .personal-details table.editing td > input[type=text] {
   height: 2em;
   padding: 0.2em;
 }
 body.observation-observe .personal-details h5 > .edit-details {
   font-style: italic;
+}
+body.observation-observe .observer-requirements form#requirement-acknowledge {
+  margin: 5em 0 0 0;
+}
+@media (min-width: 768px) {
+  body.observation-observe .observer-requirements form#requirement-acknowledge input[type=checkbox] {
+    margin-left: 10em;
+  }
+}
+body.observation-observe .observer-requirements .button-wrapper button {
+  margin: 0 1em;
+}
+body.observation-observe .observer-requirements .requirement-text {
+  margin: 0 0 2em 0;
 }

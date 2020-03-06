@@ -1,14 +1,11 @@
+
+
 <h5>Completion observations</h5>
 
 <div class="wrapper-task">
-    <ol>
+    <ol class="criteria-container">
         {{#criteria}}
             {{> mod_observation/comp-completion_criteria}}
-            <p class="flex-criteria">
-                <span class="criteria-note">
-                    {{!> mod_observation/comp-mark_criteria}}
-                </span>
-            </p>
         {{/criteria}}
     </ol>
 </div>
@@ -49,7 +46,7 @@
         <input type="hidden" name="learner_submission_id" value={{extra.learner_submission_id}}>
         <input type="hidden" name="attempt_id" value={{extra.attempt_id}}>
 
-        <div class="request-button-wrapper">
+        <div class="button-wrapper">
             <button type="submit" class="btn btn-primary">
                 {{#str}}request_observation, observation{{/str}}
             </button>

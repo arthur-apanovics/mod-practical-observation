@@ -88,27 +88,6 @@ body.path-mod-observation {
     }
   }
 
-  .form-group {
-    margin-right: 2em;
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 10px;
-  }
-
-  .form-group-message {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .form-group > input {
-    flex: 1;
-    width: 100%;
-  }
-
-  .form-group > label {
-    font-weight: normal;
-  }
-
   form {
     select,
     input[type="text"],
@@ -160,9 +139,9 @@ body.path-mod-observation {
     }
   }
 
-  .request-button-wrapper {
+  .button-wrapper {
     text-align: center;
-    margin: 45px 0 30px 0;
+    margin: 1em 0;
   }
 
   .send-button-wrapper {
@@ -328,25 +307,19 @@ body.path-mod-observation {
     padding-bottom: 50px;
   }
 
-  .button-wrapper {
-    text-align: right;
-    margin-right: 18px;
-    margin-bottom: 33px;
-  }
-
   .list-wrapper {
     width: 100%;
     margin-top: 3em;
   }
 
   #taskList > ol > li,
-  .criteria-list > ol > li {
+  .criteria-container > ol > li {
     display: flex;
     border: none;
   }
 
   #taskList > ol > li::before,
-  .criteria-list > ol > li::before {
+  .criteria-container > ol > li::before {
     content: counter(my-awesome-counter);
   }
 
@@ -515,6 +488,12 @@ body.observation-request {
 }
 
 body.observation-observe {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
   .personal-details {
     table {
       &.editing {
@@ -531,6 +510,28 @@ body.observation-observe {
 
     h5 > .edit-details {
       font-style: italic;
+    }
+  }
+
+  .observer-requirements {
+    form#requirement-acknowledge {
+      margin: 5em 0 0 0;
+
+      input[type=checkbox] {
+        @media (min-width: 768px) {
+          margin-left: 10em;
+        }
+      }
+    }
+
+    .button-wrapper {
+      button {
+        margin: 0 1em;
+      }
+    }
+
+    .requirement-text {
+      margin: 0 0 2em 0;
     }
   }
 }

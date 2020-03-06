@@ -145,6 +145,20 @@ class observer_assignment extends observer_assignment_base implements templateab
             [learner_submission::COL_ID => $this->learner_submissionid]);
     }
 
+    public function accept()
+    {
+        $this->set(self::COL_OBSERVATION_ACCEPTED, true);
+        $this->set(self::COL_TIMEACCEPTED, time());
+
+        return $this->update();
+    }
+
+    public function decline()
+    {
+        // todo: implement method
+        throw new \coding_exception(__METHOD__ . ' not implemented');
+    }
+
     /**
      * @inheritDoc
      */
@@ -157,8 +171,9 @@ class observer_assignment extends observer_assignment_base implements templateab
         return [
             self::COL_ID                   => $this->id,
             self::COL_CHANGE_EXPLAIN       => $this->change_explain,
-            self::COL_OBSERVATION_ACCEPTED => $this->observation_accepted,
             self::COL_TIMEASSIGNED         => usertime($this->timeassigned),
+            self::COL_OBSERVATION_ACCEPTED => $this->observation_accepted,
+            self::COL_TIMEACCEPTED         => !is_null($this->timeaccepted) ? usertime($this->timeaccepted) : null,
             self::COL_ACTIVE               => $this->active,
 
             'observer'            => $this->observer->export_template_data(),

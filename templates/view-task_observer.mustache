@@ -1,0 +1,18 @@
+<h5>Information and evidence from the trainee</h5>
+
+<div class="wrapper-task">
+    {{#learner_submissions}} {{! should only ever be one as we're filtering by userid in the renderer}}
+        {{#learner_attempts}}
+            {{> mod_observation/comp-attempt_entry}}
+        {{/learner_attempts}}
+    {{/learner_submissions}}
+</div>
+
+<h5>Completion observations</h5>
+<div class="wrapper-task">
+    <ol class="criteria-container">
+        {{#criteria}}
+            {{> mod_observation/comp-completion_criteria}}
+        {{/criteria}}
+    </ol>
+</div>

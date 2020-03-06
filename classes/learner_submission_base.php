@@ -138,4 +138,46 @@ class learner_submission_base extends db_model_base
 
         return parent::set($prop, $value, $save);
     }
+
+    /**
+     * @return array empty array if none found
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function get_learner_attempts(): array
+    {
+        global $DB;
+
+        // fetch stuff manually for performance reasons
+        $records = $DB->get_records(
+            learner_attempt::TABLE,
+            [learner_attempt::COL_LEARNER_SUBMISSIONID => $this->id],
+            learner_attempt::COL_TIMESUBMITTED . ' ASC');
+
+        $attempts = [];
+        foreach ($records as $record)
+        {
+            $attempts[] = new learner_attempt($record, $this);
+        }
+
+        return $attempts;
+    }
+
+    /**
+     * @return task_base
+     * @throws \dml_missing_record_exception
+     * @throws coding_exception
+     */
+    public function get_task_base()
+    {
+        return new task_base($this->taskid);
+    }
+
+    /**
+     * @return int
+     */
+    public function get_userid(): int
+    {
+        return $this->userid;
+    }
 }

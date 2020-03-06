@@ -158,9 +158,13 @@ $string['email'] = 'Email';
 $string['position_title'] = 'Position title';
 $string['message'] = 'Message';
 $string['message_placeholder'] = 'Optional message to appear in observer email';
+$string['accept'] = 'Accept';
+$string['decline'] = 'Decline';
 
 $string['send'] = 'Send';
 $string['edit_lowercase'] = 'edit';
+$string['observer_requirements'] = 'External observer requirements';
+$string['observer_requirements_acknowledge'] = 'I acknowledge that I meet the required criteria to observe this learner';
 
 // NOTIFICATIONS
 $string['notification:observation_request_sent'] = 'Observation request sent to {$a}, please be patient while your observer reviews your submission';

@@ -56,21 +56,33 @@ class task extends task_base implements templateable
      * Checks if task has been observed for given userid
      *
      * @param int $userid
+     * @return bool
+     * @throws coding_exception
      */
     public function is_observed(int $userid)
     {
-        // todo: implement method
-        throw new coding_exception(__METHOD__ . ' not implemented');
+        if ($submission = $this->get_current_learner_submission_or_null($userid))
+        {
+            return $submission->is_observation_complete();
+        }
+
+        return false;
     }
 
     /**
      * Checks if task has been completed (observed & assessed) for given user id
      *
      * @param int $userid
+     * @return bool
+     * @throws coding_exception
      */
     public function is_complete(int $userid)
     {
-        // todo: implement method
+        if ($submission = $this->get_current_learner_submission_or_null($userid))
+        {
+            return $submission->is_assessment_complete();
+        }
+
         return false;
     }
 

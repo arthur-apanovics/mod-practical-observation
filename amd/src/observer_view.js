@@ -18,7 +18,11 @@ define(['jquery', 'core/ajax', 'core/notification'],
 
                 var revertTable = function (response) {
                     // back to normal
-                    $container.find('button[type=submit]').remove();
+                    $container.find('button[type=submit]')
+                        .fadeOut(500, function () {
+                            $(this).remove();
+                        });
+
                     $container.unwrap();
                     $editBtn.show();
 
@@ -71,7 +75,6 @@ define(['jquery', 'core/ajax', 'core/notification'],
                     }], true, false);
                 };
 
-                // register click handler
                 $editBtn.on('click', function (ev) {
                     console.log('clicked!');
 
@@ -93,7 +96,9 @@ define(['jquery', 'core/ajax', 'core/notification'],
                     });
 
                     // add submit btn
-                    $container.append($('<button type="submit">Save</button>'));
+                    $container.append(
+                        $('<div style="text-align: right; display: none;"><button type="submit">Save</button></div>')
+                            .fadeIn(500));
                     // hide edit link
                     $editBtn.hide();
 
@@ -101,6 +106,15 @@ define(['jquery', 'core/ajax', 'core/notification'],
                     $form = $('<form id="edit-details-form">').on('submit', submitEditForm);
                     $container.wrap($form);
                 });
+
+                // init checkbox validation
+                var $checkbox = $('form#requirement-acknowledge #acknowledge_checkbox');
+                var $submitBtn = $('form#requirement-acknowledge #submit-accept');
+
+                $checkbox.attr('disabled', false);
+                $checkbox.on('change', function (ev) {
+                        $submitBtn.attr('disabled', !this.checked);
+                    });
             }
         };
     });
