@@ -16,6 +16,7 @@
 
 use mod_observation\criteria;
 use mod_observation\criteria_base;
+use mod_observation\observer;
 use mod_observation\task;
 use mod_observation\task_base;
 
@@ -131,6 +132,65 @@ class mod_observation_external extends external_api
                 'criteriaid'  => new external_value(PARAM_INT, 'criteria id', true, null, NULL_NOT_ALLOWED),
                 'newsequence' => new external_value(
                     PARAM_INT, 'new order of criteria', VALUE_DEFAULT, null, NULL_NOT_ALLOWED),
+            ]);
+    }
+
+    public static function observer_update_details($observerid, $fullname, $phone, $position_title)
+    {
+        $params = self::validate_parameters(
+            self::observer_update_details_parameters(),
+            [
+                'observerid'     => $observerid,
+                'fullname'       => $fullname,
+                'phone'          => $phone,
+                'position_title' => $position_title
+            ]);
+
+        $observer = observer::update_from_ajax(
+            $params['observerid'],
+            $params['fullname'],
+            $params['phone'],
+            $params['position_title']
+        );
+
+        return self::clean_returnvalue(
+            self::observer_update_details_returns(),
+            [
+                'observerid' => $observer->get_id_or_null(),
+                'fullname' => $observer->get(observer::COL_FULLNAME),
+                'phone' => $observer->get(observer::COL_PHONE),
+                'position_title' => $observer->get(observer::COL_POSITION_TITLE)
+            ]);
+    }
+
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function observer_update_details_parameters()
+    {
+        return new external_function_parameters(
+            [
+                'observerid'     => new external_value(PARAM_INT, 'observer id', true, null, NULL_NOT_ALLOWED),
+                'fullname'       => new external_value(PARAM_TEXT, 'name', true, null, NULL_NOT_ALLOWED),
+                'phone'          => new external_value(PARAM_TEXT, 'phone number', true, null, NULL_NOT_ALLOWED),
+                'position_title' => new external_value(PARAM_TEXT, 'position title', true, null, NULL_NOT_ALLOWED),
+            ]);
+    }
+
+    /**
+     * Returns description of method return values
+     *
+     * @return external_single_structure
+     */
+    public static function observer_update_details_returns()
+    {
+        return new external_single_structure(
+            [
+                'observerid'     => new external_value(PARAM_INT, 'observer id', true, null, NULL_NOT_ALLOWED),
+                'fullname'       => new external_value(PARAM_TEXT, 'name', true, null, NULL_NOT_ALLOWED),
+                'phone'          => new external_value(PARAM_TEXT, 'phone number', true, null, NULL_NOT_ALLOWED),
+                'position_title' => new external_value(PARAM_TEXT, 'position title', true, null, NULL_NOT_ALLOWED),
             ]);
     }
 }

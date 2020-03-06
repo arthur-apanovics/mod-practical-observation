@@ -23,7 +23,11 @@
 namespace mod_observation;
 
 use coding_exception;
+use dml_exception;
+use dml_missing_record_exception;
 use mod_observation\interfaces\templateable;
+use moodle_exception;
+use moodle_url;
 
 class learner_submission extends learner_submission_base implements templateable
 {
@@ -164,8 +168,8 @@ class learner_submission extends learner_submission_base implements templateable
     /**
      * @param bool $set_submission_in_progress if true, will set submission state to {@link STATUS_LEARNER_IN_PROGRESS}
      * @return learner_attempt_base
-     * @throws \dml_exception
-     * @throws \dml_missing_record_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
      * @throws coding_exception
      */
     public function create_new_attempt(bool $set_submission_in_progress = true)
@@ -216,9 +220,9 @@ class learner_submission extends learner_submission_base implements templateable
      * @param string        $message message to include in email for observer
      * @param string|null   $explanation if learner is switching observers, he/she must explain why
      * @return observer_assignment
-     * @throws \dml_exception
+     * @throws dml_exception
      * @throws coding_exception
-     * @throws \moodle_exception
+     * @throws moodle_exception
      */
     public function assign_observer(
         observer_base $submitted_observer, string $message, string $explanation = null): observer_assignment
@@ -277,7 +281,7 @@ class learner_submission extends learner_submission_base implements templateable
         // TODO: EVENT
 
         // TODO: SEND EMAIL AND NOTIFICATION
-        $review_url = new \moodle_url(null, []);
+        $review_url = new moodle_url(null, []);
         // send email
         // send notification
 
@@ -304,7 +308,7 @@ class learner_submission extends learner_submission_base implements templateable
      * Used for 'assign observer from history table' to display all observers assigned by user in activity
      *
      * @return observer_assignment[]
-     * @throws \dml_exception
+     * @throws dml_exception
      */
     public function get_course_level_observer_assignments(): array
     {
@@ -366,7 +370,7 @@ class learner_submission extends learner_submission_base implements templateable
 
     /**
      * @return int
-     * @throws \dml_exception
+     * @throws dml_exception
      */
     private function get_course_id(): int
     {
@@ -397,7 +401,12 @@ class learner_submission extends learner_submission_base implements templateable
 
     public function is_observation_in_progress()
     {
-        return $this->status == self::STATUS_LEARNER_IN_PROGRESS;
+        return $this->status == self::STATUS_OBSERVATION_IN_PROGRESS;
+    }
+
+    public function is_observation_pending()
+    {
+        return $this->status == self::STATUS_OBSERVATION_PENDING;
     }
 
     /**

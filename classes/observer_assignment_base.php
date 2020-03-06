@@ -68,4 +68,17 @@ class observer_assignment_base extends db_model_base
      * @var bool
      */
     protected $active;
+
+    public function is_active()
+    {
+        return (bool) $this->active;
+    }
+
+    /**
+     * @return bool true if accepted, false if declined OR no decision yet
+     */
+    public function is_accepted()
+    {
+        return (bool) $this->observation_accepted;
+    }
 }

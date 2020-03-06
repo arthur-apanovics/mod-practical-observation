@@ -160,6 +160,7 @@ $string['message'] = 'Message';
 $string['message_placeholder'] = 'Optional message to appear in observer email';
 
 $string['send'] = 'Send';
+$string['edit_lowercase'] = 'edit';
 
 // NOTIFICATIONS
 $string['notification:observation_request_sent'] = 'Observation request sent to {$a}, please be patient while your observer reviews your submission';
@@ -168,4 +169,8 @@ $string['notification:observer_assigned_same'] = 'Observation request for <i>{$a
 $string['notification:observer_assigned_new'] = 'Observer successfully changed and observation request sent to <strong>{$a->email}</strong> for <i>{$a->task}</i>';
 $string['notification:task_wait_for_observers'] = 'You have requested observations for all tasks, please be patient while observers review your submissions';
 
+// ERRORS
+$string['error:invalid_token'] = 'The link you are trying to access is incorrect. Please contact Akatoi support if you think this is a mistake.';
+$string['error:not_active_observer'] = 'This link is no longer valid. If you have received a newer observation email, please use the link in that email instead.';
+$string['error:observation_complete'] = 'This observation has already been completed.';
 

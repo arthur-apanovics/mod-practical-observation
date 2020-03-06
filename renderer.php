@@ -29,6 +29,7 @@ use mod_observation\lib;
 use mod_observation\observation;
 use mod_observation\observation_base;
 use mod_observation\observer;
+use mod_observation\observer_assignment;
 use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -352,10 +353,12 @@ class mod_observation_renderer extends plugin_renderer_base
         $task = new task($taskid, $USER->id);
 
         $template_data = $task->export_template_data();
-        $task_template_data = [ // lightweight data to render task header
-                                task::COL_NAME          => $template_data['name'],
-                                task::COL_INTRO_LEARNER => $template_data['intro_learner']
-        ];
+        // lightweight data to render task header
+        $task_template_data =
+            [
+                task::COL_NAME          => $template_data['name'],
+                task::COL_INTRO_LEARNER => $template_data['intro_learner']
+            ];
         $caps = $observation_base->export_capabilities();
         $out = '';
 
@@ -409,7 +412,7 @@ class mod_observation_renderer extends plugin_renderer_base
                 $observer_template_data['extra']['is_learner'] = true;
 
                 // allow to change observer if previous observer hasn't accepted yet
-                if (!$submission->is_observation_in_progress())
+                if ($submission->is_observation_pending())
                 {
                     // it is easier to generate this link here rather than the template
                     $attempt = $submission->get_latest_attempt_or_null();
@@ -593,6 +596,19 @@ class mod_observation_renderer extends plugin_renderer_base
             'learner_submission_id' => $learner_submission->get_id_or_null()
         ]);
         $out .= $form->render();
+
+        return $out;
+    }
+
+    public function observer_landing_view(observer_assignment $observer_assignment)
+    {
+        $task = $observer_assignment->get_task_base();
+        $template_data = $observer_assignment->get_observer()->export_template_data();
+        $template_data['extra'][task::COL_INT_ASSIGN_OBS_OBSERVER] = $task->get(task::COL_INT_ASSIGN_OBS_OBSERVER);
+        $out = '';
+
+        $this->page->requires->js_call_amd(OBSERVATION_MODULE . '/observer_view', 'init');
+        $out .= $this->render_from_template('view-observer_landing', $template_data);
 
         return $out;
     }

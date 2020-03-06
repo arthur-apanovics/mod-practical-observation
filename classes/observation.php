@@ -68,9 +68,16 @@ class observation extends observation_base implements templateable
         $this->cm = $cm_or_cm_info;
         parent::__construct($this->cm->instance);
 
-        $this->tasks = task::read_all_by_condition(
+        // get task records
+        $tasks = task_base::read_all_by_condition(
             [task::COL_OBSERVATIONID => $this->cm->instance],
             sprintf('`%s` ASC', task::COL_SEQUENCE));
+        // initialise task objects
+        foreach ($tasks as $task)
+        {
+            // assign tasks to field
+            $this->tasks[] = new task($task, $userid);
+        }
     }
 
     public function get_cm(): cm_info

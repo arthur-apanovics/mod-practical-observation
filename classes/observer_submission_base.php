@@ -43,11 +43,18 @@ class observer_submission_base extends db_model_base
      */
     protected $timestarted;
     /**
+     * Outcome of observation, NULL if not submitted yet.
+     * Possible values: {@link STATUS_NOT_COMPLETE}, {@link STATUS_COMPLETE}
      * @var string
      */
     protected $status;
     /**
      * @var int
      */
-    protected $timesubmitted; // todo not sure if needed here...
+    protected $timesubmitted;
+
+    public function is_complete()
+    {
+        return $this->status == self::STATUS_COMPLETE;
+    }
 }

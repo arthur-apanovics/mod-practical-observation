@@ -3,15 +3,16 @@
 body.path-mod-observation #page * {
   box-sizing: border-box;
 }
-body.path-mod-observation #page .wrapper {
+body.path-mod-observation .wrapper {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
-  margin-bottom: 10px;
+  padding: 1em;
+  margin: 1em;
 }
-body.path-mod-observation #page .title-main {
+body.path-mod-observation .title-main {
   padding-left: 10px;
 }
-body.path-mod-observation #page .flex-title {
+body.path-mod-observation .flex-title {
   display: flex;
   /* Standard syntax */
   display: -webkit-flex;
@@ -20,96 +21,96 @@ body.path-mod-observation #page .flex-title {
   flex-wrap: nowrap;
   /*padding-bottom: 10px; */
 }
-body.path-mod-observation #page .flex-title > span {
+body.path-mod-observation .flex-title > span {
   white-space: nowrap;
 }
-body.path-mod-observation #page .title-desc {
+body.path-mod-observation .title-desc {
   flex-grow: 1;
   padding: 0 10px 0 10px;
   overflow-wrap: break-word;
   word-wrap: break-word;
 }
-body.path-mod-observation #page .obs-main-title {
+body.path-mod-observation .obs-main-title {
   flex: 3;
   padding-left: 10px;
 }
-body.path-mod-observation #page .title-note {
+body.path-mod-observation .title-note {
   flex: 1;
   font-size: 15px;
   margin-top: 20px;
   margin-bottom: 10px;
 }
-body.path-mod-observation #page .wrapper-title {
+body.path-mod-observation .wrapper-title {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
   margin-bottom: 30px;
 }
-body.path-mod-observation #page .title-main-task {
+body.path-mod-observation .title-main-task {
   padding-left: 18px;
 }
-body.path-mod-observation #page .flex-title-task {
+body.path-mod-observation .flex-title-task {
   display: flex;
   align-items: flex-end;
   flex-wrap: nowrap;
 }
-body.path-mod-observation #page .title-desc-task {
+body.path-mod-observation .title-desc-task {
   flex-grow: 1;
   font-size: 13px;
   padding: 5px 22px;
   overflow-wrap: break-word;
   word-wrap: break-word;
 }
-body.path-mod-observation #page .table {
+body.path-mod-observation .table {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
 }
-body.path-mod-observation #page .table th {
+body.path-mod-observation .table th {
   background-color: #d3d3d3;
   color: black;
 }
-body.path-mod-observation #page .form-group {
+body.path-mod-observation .form-group {
   margin-right: 2em;
   display: flex;
   flex-direction: column;
   padding-bottom: 10px;
 }
-body.path-mod-observation #page .form-group-message {
+body.path-mod-observation .form-group-message {
   display: flex;
   flex-direction: column;
 }
-body.path-mod-observation #page .form-group > input {
+body.path-mod-observation .form-group > input {
   flex: 1;
   width: 100%;
 }
-body.path-mod-observation #page .form-group > label {
+body.path-mod-observation .form-group > label {
   font-weight: normal;
 }
-body.path-mod-observation #page form select,
-body.path-mod-observation #page form input[type="text"],
-body.path-mod-observation #page form input[type="email"],
-body.path-mod-observation #page form input[type="tel"],
-body.path-mod-observation #page form select.singleselect,
-body.path-mod-observation #page form.atto_form input[type="url"] {
+body.path-mod-observation form select,
+body.path-mod-observation form input[type="text"],
+body.path-mod-observation form input[type="email"],
+body.path-mod-observation form input[type="tel"],
+body.path-mod-observation form select.singleselect,
+body.path-mod-observation form.atto_form input[type="url"] {
   padding: 6px 12px;
   margin: 0 0 5px 0;
   border-radius: 0;
   width: 100%;
   max-width: 300px;
 }
-body.path-mod-observation #page .wrapper-obs-activity {
+body.path-mod-observation .wrapper-obs-activity {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
   margin-bottom: 40px;
 }
-body.path-mod-observation #page .wrapper-task {
+body.path-mod-observation .wrapper-task {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
   margin-bottom: 30px;
 }
-body.path-mod-observation #page .subtitle-criteria {
+body.path-mod-observation .subtitle-criteria {
   padding-left: 0;
 }
-body.path-mod-observation #page .criteria-desc {
+body.path-mod-observation .criteria-desc {
   flex-grow: 1;
   font-weight: normal;
   margin: 5px 5px 5px 0;
@@ -119,24 +120,24 @@ body.path-mod-observation #page .criteria-desc {
   border: 1px solid #d3d3d3;
   border-radius: .25em;
 }
-body.path-mod-observation #page .attempt-title {
+body.path-mod-observation .attempt-title {
   margin: 1em;
 }
-body.path-mod-observation #page .new-attempt {
+body.path-mod-observation .new-attempt {
   padding: 1em;
 }
-body.path-mod-observation #page .new-attempt .tools {
+body.path-mod-observation .new-attempt .tools {
   padding: 0 1em 1em;
 }
-body.path-mod-observation #page .request-button-wrapper {
+body.path-mod-observation .request-button-wrapper {
   text-align: center;
   margin: 45px 0 30px 0;
 }
-body.path-mod-observation #page .send-button-wrapper {
+body.path-mod-observation .send-button-wrapper {
   width: auto;
   margin: auto;
 }
-body.path-mod-observation #page .button {
+body.path-mod-observation .button {
   /*background-color: #FFAA00;*/
   border: none;
   color: white;
@@ -147,179 +148,179 @@ body.path-mod-observation #page .button {
   width: auto;
   padding: 6px 20px;
 }
-body.path-mod-observation #page .button:hover,
-body.path-mod-observation #page button:focus,
-body.path-mod-observation #page button:active {
+body.path-mod-observation .button:hover,
+body.path-mod-observation button:focus,
+body.path-mod-observation button:active {
   background-color: #ffaa00;
   color: white;
   text-decoration: none;
 }
-body.path-mod-observation #page .flex-criteria {
+body.path-mod-observation .flex-criteria {
   display: flex;
   align-items: flex-end;
   flex-wrap: wrap;
 }
-body.path-mod-observation #page .flex-criteria > span.criteria-note {
+body.path-mod-observation .flex-criteria > span.criteria-note {
   font-size: 10px;
   margin-left: auto;
   margin-right: 7px;
   margin-bottom: 15px;
   color: #c0c0c0;
 }
-body.path-mod-observation #page .wrapper-feedback,
-body.path-mod-observation #page .wrapper-attempt {
+body.path-mod-observation .wrapper-feedback,
+body.path-mod-observation .wrapper-attempt {
   display: flex;
   align-content: space-between;
   border: 1px solid #d3d3d3;
   border-radius: .25em;
   margin: 0 5px 6px 69px;
 }
-body.path-mod-observation #page .flex-feedback,
-body.path-mod-observation #page .flex-attempt {
+body.path-mod-observation .flex-feedback,
+body.path-mod-observation .flex-attempt {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
   flex-basis: 100%;
 }
-body.path-mod-observation #page .feedback-desc {
+body.path-mod-observation .feedback-desc {
   margin: 0 0;
   padding: 5px 5px;
   overflow-wrap: break-word;
   word-wrap: break-word;
   flex: 0 0 50%;
 }
-body.path-mod-observation #page .feedback-attempt-heading {
+body.path-mod-observation .feedback-attempt-heading {
   margin-left: 69px;
   margin-top: 18px;
 }
-body.path-mod-observation #page .feedback-email {
+body.path-mod-observation .feedback-email {
   margin-top: 5px;
   margin-right: 8px;
   flex: 0 0 14%;
   align-items: flex-end;
 }
-body.path-mod-observation #page .timestamp {
+body.path-mod-observation .timestamp {
   flex: 0 0 99%;
   text-align: right;
   margin-right: 8px;
 }
-body.path-mod-observation #page .observer-note {
+body.path-mod-observation .observer-note {
   margin-top: 55px;
   margin-right: 37px;
   font-size: 14px;
   margin-left: auto;
   color: #c0c0c0;
 }
-body.path-mod-observation #page .evidence {
+body.path-mod-observation .evidence {
   margin: 0 13px 45px 13px;
   padding: 0;
 }
-body.path-mod-observation #page .attempt-evidence {
+body.path-mod-observation .attempt-evidence {
   margin: 1em;
   overflow-wrap: break-word;
   word-wrap: break-word;
   flex: 0 0 80%;
 }
-body.path-mod-observation #page .learner-name {
+body.path-mod-observation .learner-name {
   text-align: right;
   margin-right: 8px;
   margin-top: 5px;
   flex: 0 0 14%;
   align-items: flex-end;
 }
-body.path-mod-observation #page .attempt-attachments {
+body.path-mod-observation .attempt-attachments {
   flex: 0 0 50%;
   margin-left: 5px;
 }
-body.path-mod-observation #page .attempt-attachments li.attachment {
+body.path-mod-observation .attempt-attachments li.attachment {
   display: inline;
   margin-left: 0.5em;
 }
-body.path-mod-observation #page .timestamp {
+body.path-mod-observation .timestamp {
   flex: 0 0 99%;
   text-align: right;
   margin-right: 8px;
 }
-body.path-mod-observation #page .align-center {
+body.path-mod-observation .align-center {
   text-align: center;
 }
-body.path-mod-observation #page .confirm-change-wrapper {
+body.path-mod-observation .confirm-change-wrapper {
   width: 55%;
   border: 2px solid #d3d3d3;
   border-radius: .25em;
   margin: 0 auto;
 }
-body.path-mod-observation #page .confirm-change-wrapper > h4,
-body.path-mod-observation #page .confirm-change-wrapper > h5 {
+body.path-mod-observation .confirm-change-wrapper > h4,
+body.path-mod-observation .confirm-change-wrapper > h5 {
   padding-left: 18px;
   padding-top: 15px;
   /*padding-bottom: 15px;*/
 }
-body.path-mod-observation #page .flex {
+body.path-mod-observation .flex {
   display: flex;
   flex-wrap: wrap;
 }
-body.path-mod-observation #page .confirm-change-wrapper > p {
+body.path-mod-observation .confirm-change-wrapper > p {
   padding-left: 18px;
   line-height: 7px;
 }
-body.path-mod-observation #page .msg {
+body.path-mod-observation .msg {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
   margin: 0 18px 40px;
 }
-body.path-mod-observation #page .confirm-change-wrapper > div > p {
+body.path-mod-observation .confirm-change-wrapper > div > p {
   padding-left: 4px;
   padding-top: 4px;
   padding-bottom: 50px;
 }
-body.path-mod-observation #page .button-wrapper {
+body.path-mod-observation .button-wrapper {
   text-align: right;
   margin-right: 18px;
   margin-bottom: 33px;
 }
-body.path-mod-observation #page .list-wrapper {
+body.path-mod-observation .list-wrapper {
   width: 100%;
   margin-top: 3em;
 }
-body.path-mod-observation #page #taskList > ol > li,
-body.path-mod-observation #page .criteria-list > ol > li {
+body.path-mod-observation #taskList > ol > li,
+body.path-mod-observation .criteria-list > ol > li {
   display: flex;
   border: none;
 }
-body.path-mod-observation #page #taskList > ol > li::before,
-body.path-mod-observation #page .criteria-list > ol > li::before {
+body.path-mod-observation #taskList > ol > li::before,
+body.path-mod-observation .criteria-list > ol > li::before {
   content: counter(my-awesome-counter);
 }
-body.path-mod-observation #page .page-container {
+body.path-mod-observation .page-container {
   flex-basis: 100%;
 }
-body.path-mod-observation #page .obs-task-list {
+body.path-mod-observation .obs-task-list {
   display: flex;
   border-bottom: 1px solid teal;
   padding: 1px 7px 1px 7px;
 }
-body.path-mod-observation #page .actions {
+body.path-mod-observation .actions {
   margin-left: auto;
 }
-body.path-mod-observation #page .sub-list-actions {
+body.path-mod-observation .sub-list-actions {
   margin-right: -9px;
 }
-body.path-mod-observation #page .plus {
+body.path-mod-observation .plus {
   padding-right: 5px;
 }
-body.path-mod-observation #page .edit {
+body.path-mod-observation .edit {
   padding-right: 5px;
 }
-body.path-mod-observation #page .obs-subtask-list {
+body.path-mod-observation .obs-subtask-list {
   display: flex;
   /*padding: 1px 7px 1px 7px;  */
 }
-body.path-mod-observation #page .btn-wrapper {
+body.path-mod-observation .btn-wrapper {
   text-align: center;
   margin-top: 2em;
 }
-body.path-mod-observation #page .btn-wrapper > button {
+body.path-mod-observation .btn-wrapper > button {
   margin-right: 1em;
 }
 body.observation-manage ol#mainTaskList > li {
@@ -357,11 +358,7 @@ body.observation-task #page ol li::before {
   content: counter(my-awesome-counter) ". ";
   font-size: 13px;
 }
-body.observation-task div#observer-details > .header h5,
-body.observation-task div#observer-details > .header #change-observer {
-  display: inline-block;
-}
-body.observation-task div#observer-details table {
+table.observer-details {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
   text-align: left;
@@ -371,31 +368,43 @@ body.observation-task div#observer-details table {
   width: 100%;
   margin-bottom: 1em;
 }
-body.observation-task div#observer-details thead tr:first-child {
+table.observer-details thead tr:first-child {
   color: #fff;
+  background-color: #d3d3d3;
   border: none;
 }
-body.observation-task div#observer-details th:first-child,
-body.observation-task div#observer-details td:first-child {
+table.observer-details th:first-child,
+table.observer-details td:first-child {
   padding: 0 15px 0 20px;
 }
-body.observation-task div#observer-details th {
+table.observer-details th {
   font-weight: 500;
 }
-body.observation-task div#observer-details thead tr:last-child th {
+table.observer-details thead tr:last-child th {
   border-bottom: 3px solid #d3d3d3;
 }
-body.observation-task div#observer-details tbody tr:last-child td {
+table.observer-details tbody tr:last-child td {
   border: none;
 }
-body.observation-task div#observer-details tbody td {
+table.observer-details tbody td {
   border-bottom: 1px solid #d3d3d3;
 }
-body.observation-task div#observer-details td:last-child {
+table.observer-details td:last-child {
   padding-right: 10px;
+}
+body.observation-task div.observer-details-wrapper > .header h5,
+body.observation-task div.observer-details-wrapper > .header #change-observer {
+  display: inline-block;
 }
 body.observation-request .assign-from-history-container > h5 {
   text-decoration-line: underline;
   text-decoration-style: dashed;
   text-decoration-color: #d3d3d3;
+}
+body.observation-observe .personal-details table.editing td > input[type=text] {
+  height: 2em;
+  padding: 0.2em;
+}
+body.observation-observe .personal-details h5 > .edit-details {
+  font-style: italic;
 }

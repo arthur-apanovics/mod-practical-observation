@@ -64,7 +64,7 @@ class observer_base extends db_model_base
      */
     protected $timeadded;
     /**
-     * Id of user that last modified observer record
+     * user id that last modified this record. <b>-1 means that the observer himself modified the details</b>
      *
      * @var int
      */
@@ -77,6 +77,69 @@ class observer_base extends db_model_base
     public function get_formatted_name()
     {
         return format_string($this->fullname);
+    }
+
+    public function get_email()
+    {
+        if (is_null($this->id))
+        {
+            throw new \coding_exception('observer object not initialised');
+        }
+
+        return $this->email;
+    }
+
+    /**
+     * Used when an observer updates their details
+     *
+     * @param int    $id
+     * @param string $fullname
+     * @param string $phone
+     * @param string $position_title
+     * @return observer_base
+     * @throws \coding_exception
+     * @throws \dml_missing_record_exception
+     * @throws dml_exception
+     */
+    public static function update_from_ajax(int $id, string $fullname, string $phone, string $position_title)
+    {
+        foreach (func_get_args() as $value)
+        {
+            if (empty($value))
+            {
+                throw new \coding_exception('Empty argument passed to ' . __METHOD__);
+            }
+        }
+
+        $to_update = new self($id);
+        $to_update->set(self::COL_FULLNAME, $fullname);
+        $to_update->set(self::COL_PHONE, $phone);
+        $to_update->set(self::COL_POSITION_TITLE, $position_title);
+
+        // check if anything changed
+        $original = new self($id);
+        $should_update = false;
+        $keys = [self::COL_ID, self::COL_FULLNAME, self::COL_PHONE, self::COL_POSITION_TITLE,];
+        foreach ($keys as $key)
+        {
+            if ($original->get($key) != $to_update->get($key))
+            {
+                $should_update = true;
+                break;
+            }
+        }
+
+        if ($should_update)
+        {
+            $to_update->set(self::COL_MODIFIED_BY, -1);
+            $to_update->set(self::COL_TIMEMODIFIED, time());
+
+            return $to_update->update();
+        }
+        else
+        {
+            return $original;
+        }
     }
 
     public static function update_or_create(observer_base $submitted_observer)

@@ -166,8 +166,21 @@ class task extends task_base implements templateable
         ];
     }
 
-    public function has_submission()
+    /**
+     * @param int|null $userid
+     * @return bool
+     * @throws coding_exception
+     * @throws dml_missing_record_exception
+     */
+    public function has_submission(int $userid = null): bool
     {
+        if (!is_null($userid))
+        {
+            $filtered = new task($this->to_record(), $userid);
+
+            return (bool) count($filtered->learner_submissions);
+        }
+
         return (bool) count($this->learner_submissions);
     }
 }

@@ -1,4 +1,4 @@
-<div id="observer-details">
+<div class="observer-details-wrapper">
     <div class="header">
         <h5>{{#str}}assign_observer:assigned_observer, observation{{/str}}</h5>
 
@@ -15,25 +15,7 @@
         {{#extra.is_assessor}}
             <span class="last-assigned">{{#str}}assign_observer:last_assigned, observation{{/str}}</span>
         {{/extra.is_assessor}}
-
     </div>
 
-    <table>
-        <thead>
-        <tr>
-            <th>{{#str}}fullname, observation{{/str}}</th>
-            <th>{{#str}}phone, observation{{/str}}</th>
-            <th>{{#str}}email, observation{{/str}}</th>
-            <th>{{#str}}position_title, observation{{/str}}</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>{{fullname}}</td>
-            <td>{{phone}}</td>
-            <td>{{email}}</td>
-            <td>{{position_title}}</td>
-        </tr>
-        </tbody>
-    </table>
+    {{> mod_observation/comp-observer_details_table}}
 </div>

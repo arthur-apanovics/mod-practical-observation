@@ -51,6 +51,41 @@ class observer_assignment extends observer_assignment_base implements templateab
     }
 
     /**
+     * Used when an observer is accessing the external observation page
+     *
+     * @param string $token
+     * @param bool   $create_submission if no observer submission exists, should one be created
+     * @return observer_assignment|null
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
+     */
+    public static function read_by_token_or_null(string $token, bool $create_submission = false)
+    {
+        if ($assignment = self::read_by_condition_or_null([self::COL_TOKEN => $token]))
+        {
+            if (is_null($assignment->observer_submission) && $create_submission)
+            {
+                $submission = new observer_submission_base();
+                $submission->set(observer_submission::COL_OBSERVER_ASSIGNMENTID, $assignment->get_id_or_null());
+                $submission->set(observer_submission::COL_TIMESTARTED, 0);
+                $submission->set(observer_submission::COL_STATUS, null);
+                $submission->set(observer_submission::COL_TIMESUBMITTED, 0);
+                $submission->create();
+
+                $assignment->observer_submission = new observer_submission($submission);
+            }
+        }
+
+        return $assignment;
+    }
+
+    public function is_observation_complete()
+    {
+        return $this->observer_submission->is_complete();
+    }
+
+    /**
      * @return observer
      */
     public function get_observer(): observer
@@ -95,6 +130,19 @@ class observer_assignment extends observer_assignment_base implements templateab
         $stringtohash = 'requester' . time() . random_string() . get_site_identifier();
 
         return sha1($stringtohash);
+    }
+
+    public function get_task_base(): task_base
+    {
+        $taskid = $this->get_learner_submission_base()->get(learner_submission::COL_TASKID);
+
+        return new task_base($taskid);
+    }
+
+    public function get_learner_submission_base(): learner_submission_base
+    {
+        return learner_submission_base::read_by_condition_or_null(
+            [learner_submission::COL_ID => $this->learner_submissionid]);
     }
 
     /**

@@ -47,7 +47,7 @@ require_login($course, true, $cm);
 // $event->add_record_snapshot($PAGE->cm->modname, $observation->to_record());
 // $event->trigger();
 
-$observation = new observation($cm);
+$observation = new observation($cm, $USER->id);
 $name        = $observation->get_formatted_name();
 
 // Print the page header.

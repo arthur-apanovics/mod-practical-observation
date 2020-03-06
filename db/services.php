@@ -27,6 +27,7 @@ $services = [
         'functions' => [
             'mod_observation_task_update_sequence',
             'mod_observation_criteria_update_sequence',
+            'mod_observation_observer_update_details',
         ],
         'enabled'   => true
     ]
@@ -49,5 +50,13 @@ $functions = [
         'type'         => 'write',
         'ajax'         => true,
         'capabilities' => observation::CAP_MANAGE
+    ],
+    'mod_observation_observer_update_details'  => [
+        'classname'     => 'mod_observation_external',
+        'methodname'    => 'observer_update_details',
+        'description'   => 'updates observer details',
+        'type'          => 'write',
+        'ajax'          => true,
+        'loginrequired' => false
     ],
 ];
