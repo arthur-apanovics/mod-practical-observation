@@ -30,20 +30,21 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('lib.php');
 require_once($CFG->libdir . '/filelib.php');
 
+// PROCESSES SUBMISSIONS FROM LEARNER, OBSERVER & ASSESSOR
+
 $cmid = required_param('cmid', PARAM_INT);
 $learner_submissionid = optional_param('learner_submission_id', null, PARAM_INT);
 $observer_submissionid = optional_param('observer_submission_id', null, PARAM_INT);
 $assessor_submissionid = optional_param('assessor_submission_id', null, PARAM_INT);
 
-// list($course, $cm) = get_course_and_cm_from_cmid($cmid);
 $context = context_module::instance($cmid);
-
-require_login();
 
 // TODO: Events
 
 if ($learner_submissionid)
 {
+    require_login();
+
     $attempt_id = required_param('attempt_id', PARAM_INT);
 
     // check id's are correct
@@ -77,6 +78,8 @@ else if ($observer_submissionid)
 }
 else if ($assessor_submissionid)
 {
+    require_login();
+
     required_param('assessor_feedback_id', PARAM_INT);
 }
 else

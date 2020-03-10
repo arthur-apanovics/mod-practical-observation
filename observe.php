@@ -25,7 +25,6 @@
  *
  */
 
-use mod_observation\learner_submission;
 use mod_observation\observer_assignment;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');

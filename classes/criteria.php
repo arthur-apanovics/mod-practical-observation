@@ -31,12 +31,30 @@ class criteria extends criteria_base implements templateable
      */
     private $observer_feedback;
 
-    public function __construct($id_or_record, int $userid = null)
+    public function __construct($id_or_record, int $userid = null, int $observer_submissionid = null)
     {
         parent::__construct($id_or_record);
 
-        $this->observer_feedback = observer_feedback::read_all_by_condition(
-            [observer_feedback::COL_CRITERIAID => $this->id]);
+        if (is_null($userid) && is_null($observer_submissionid))
+        {
+            // no filter, get all feedback
+            $this->observer_feedback = observer_feedback::read_all_by_condition(
+                [observer_feedback::COL_CRITERIAID => $this->id]);
+        }
+        else if (!is_null($userid) && is_null($observer_submissionid))
+        {
+            // filter feedback by user
+
+        }
+        else if (!is_null($observer_submissionid))
+        {
+            // filter feedback by observer submission (this automatically includes user)
+
+        }
+        else
+        {
+
+        }
     }
 
     /**

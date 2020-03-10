@@ -8,11 +8,20 @@
     {{/learner_submissions}}
 </div>
 
-<h5>Completion observations</h5>
-<div class="wrapper-task">
-    <ol class="criteria-container">
-        {{#criteria}}
-            {{> mod_observation/comp-completion_criteria}}
-        {{/criteria}}
-    </ol>
-</div>
+<form action="submit.php"
+      id="observation-form"
+      method="post"
+      enctype="multipart/form-data"
+      accept-charset="utf-8"
+      autocomplete="off">
+
+    <h5>Completion observations</h5>
+    <div class="wrapper-task">
+        <ol class="criteria-list">
+            {{#criteria}}
+                {{> mod_observation/comp-completion_criteria}}
+            {{/criteria}}
+        </ol>
+    </div>
+
+</form>

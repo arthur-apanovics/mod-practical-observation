@@ -1,8 +1,16 @@
 <li>
-    <span class="title">{{name}}</span>
+    <div class="criteria-header">
+        <h5>{{name}}</h5>
+        {{#extra.is_observation}}
+            {{> mod_observation/comp-observation_outcome_dropdown}}
+        {{/extra.is_observation}}
+    </div>
     <div class="flex-title-task">
         <div class="criteria-desc">
             {{{description}}}
         </div>
+        {{#extra.is_observation}}
+            {{extra.editor_html}}
+        {{/extra.is_observation}}
     </div>
 </li>

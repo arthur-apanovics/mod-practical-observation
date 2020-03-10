@@ -65,6 +65,11 @@ class criteria_base extends db_model_base
         return format_string($this->name);
     }
 
+    public function is_feedback_required()
+    {
+        return (bool) $this->feedback_required;
+    }
+
     /**
      * Mainly used when updating criteria from moodle form
      *

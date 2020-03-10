@@ -90,7 +90,7 @@ $string['description_help'] ='Description of this criteria that will appear on t
 $string['feedback_required'] ='Feedback required';
 $string['feedback_required_help'] ='If checked, observers will have to provide textual feedback for this criteria';
 
-// STATUS STRINGS
+// LEARNER SUBMISSION STATUS STRINGS
 $string['status:not_complete'] = 'Not complete';
 $string['status:complete'] = 'Complete';
 $string['status:not_started'] = 'Not started';
@@ -165,6 +165,10 @@ $string['send'] = 'Send';
 $string['edit_lowercase'] = 'edit';
 $string['observer_requirements'] = 'External observer requirements';
 $string['observer_requirements_acknowledge'] = 'I acknowledge that I meet the required criteria to observe this learner';
+
+$string['outcome:choose'] = 'Choose...';
+$string['outcome:complete'] = 'Complete';
+$string['outcome:not_complete'] = 'Not complete';
 
 // NOTIFICATIONS
 $string['notification:observation_request_sent'] = 'Observation request sent to {$a}, please be patient while your observer reviews your submission';

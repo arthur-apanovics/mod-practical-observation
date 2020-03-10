@@ -159,6 +159,12 @@ class observer_assignment extends observer_assignment_base implements templateab
         throw new \coding_exception(__METHOD__ . ' not implemented');
     }
 
+    public function get_observer_feedback_or_create(criteria_base $criteria): observer_feedback
+    {
+        // TODO FANCY QUERY TO GET FEEDBACK
+        $feedback = $criteria->get_observer_feedback();
+    }
+
     /**
      * @inheritDoc
      */

@@ -40,25 +40,8 @@ body.path-mod-observation .title-note {
   margin-top: 20px;
   margin-bottom: 10px;
 }
-body.path-mod-observation .wrapper-title {
-  border: 2px solid #d3d3d3;
-  border-radius: .25em;
-  margin-bottom: 30px;
-}
-body.path-mod-observation .title-main-task {
-  padding-left: 18px;
-}
-body.path-mod-observation .flex-title-task {
-  display: flex;
-  align-items: flex-end;
-  flex-wrap: nowrap;
-}
-body.path-mod-observation .title-desc-task {
-  flex-grow: 1;
-  font-size: 13px;
-  padding: 5px 22px;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
+body.path-mod-observation .task-header {
+  margin-bottom: 2em;
 }
 body.path-mod-observation .table {
   border: 2px solid #d3d3d3;
@@ -67,18 +50,6 @@ body.path-mod-observation .table {
 body.path-mod-observation .table th {
   background-color: #d3d3d3;
   color: black;
-}
-body.path-mod-observation form select,
-body.path-mod-observation form input[type="text"],
-body.path-mod-observation form input[type="email"],
-body.path-mod-observation form input[type="tel"],
-body.path-mod-observation form select.singleselect,
-body.path-mod-observation form.atto_form input[type="url"] {
-  padding: 6px 12px;
-  margin: 0 0 5px 0;
-  border-radius: 0;
-  width: 100%;
-  max-width: 300px;
 }
 body.path-mod-observation .wrapper-obs-activity {
   border: 2px solid #d3d3d3;
@@ -96,8 +67,8 @@ body.path-mod-observation .subtitle-criteria {
 body.path-mod-observation .criteria-desc {
   flex-grow: 1;
   font-weight: normal;
-  margin: 5px 5px 5px 0;
-  padding: 5px 5px;
+  margin: 1em 0;
+  padding: 1em;
   overflow-wrap: break-word;
   word-wrap: break-word;
   border: 1px solid #d3d3d3;
@@ -261,15 +232,6 @@ body.path-mod-observation .list-wrapper {
   width: 100%;
   margin-top: 3em;
 }
-body.path-mod-observation #taskList > ol > li,
-body.path-mod-observation .criteria-list > ol > li {
-  display: flex;
-  border: none;
-}
-body.path-mod-observation #taskList > ol > li::before,
-body.path-mod-observation .criteria-list > ol > li::before {
-  content: counter(my-awesome-counter);
-}
 body.path-mod-observation .page-container {
   flex-basis: 100%;
 }
@@ -301,6 +263,15 @@ body.path-mod-observation .btn-wrapper {
 body.path-mod-observation .btn-wrapper > button {
   margin-right: 1em;
 }
+body.observation-manage #manage-task-list > ol > li,
+body.observation-manage .manage-criteria-list > ol > li {
+  display: flex;
+  border: none;
+}
+body.observation-manage #manage-task-list > ol > li::before,
+body.observation-manage .manage-criteria-list > ol > li::before {
+  content: counter(my-awesome-counter);
+}
 body.observation-manage ol#mainTaskList > li {
   margin-bottom: 2em;
 }
@@ -322,19 +293,15 @@ body.observation-manage #page ol,
 body.observation-task #page ol {
   list-style: none;
   counter-reset: my-awesome-counter;
-  margin: 20px 8px 27px 8px;
 }
 body.observation-manage #page ol li,
 body.observation-task #page ol li {
   counter-increment: my-awesome-counter;
-  font-size: 13px;
   font-weight: bold;
-  padding: 2px 0 5px 5px;
 }
 body.observation-manage #page ol li::before,
 body.observation-task #page ol li::before {
   content: counter(my-awesome-counter) ". ";
-  font-size: 13px;
 }
 table.observer-details {
   border: 2px solid #d3d3d3;
@@ -406,4 +373,10 @@ body.observation-observe .observer-requirements .button-wrapper button {
 }
 body.observation-observe .observer-requirements .requirement-text {
   margin: 0 0 2em 0;
+}
+body.observation-observe .criteria-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }

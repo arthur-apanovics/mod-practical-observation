@@ -616,16 +616,39 @@ class mod_observation_renderer extends plugin_renderer_base
     public function task_observer_view(observer_assignment $observer_assignment)
     {
         $learner_submission_base = $observer_assignment->get_learner_submission_base();
-        $task = new task($learner_submission_base->get_task_base(), $learner_submission_base->get_userid());
+        $userid = $learner_submission_base->get_userid();
+        $task = new task($learner_submission_base->get_task_base(), $userid);
+        $observation_base = $task->get_observation_base();
+        $cm = $observation_base->get_cm();
+        $context = context_module::instance($cm->id);
 
         $template_data = $task->export_template_data();
+        $template_data['extra']['is_observation'] = true;
         $out = '';
 
-        $header_data =
-            [
-                task::COL_NAME => $task->get_formatted_name(),
-                'intro'        => $task->get(task::COL_INTRO_OBSERVER)
-            ];
+        // render editors for criteria that require feedback
+        unset($template_data['criteria']); // we will re-populate criteria data manually
+        foreach ($task->get_criteria() as $criteria)
+        {
+            $criteria_data = $criteria->export_template_data();
+            if ($criteria->is_feedback_required())
+            {
+                // text editor
+                // TODO: $feedback = $observer_assignment->get_observer_feedback_or_create($criteria);
+
+                // $criteria_data['extra']['editor_html'] = $this->text_editor(
+                //     $feedback->get(observer_feedback::COL_TEXT),
+                //     $feedback->get(observer_feedback::COL_TEXT_FORMAT),
+                //     $context);
+            }
+
+            $template_data['criteria'][] = $criteria_data;
+        }
+
+        $header_data = [
+            task::COL_NAME => $task->get_formatted_name(),
+            'intro'        => $task->get(task::COL_INTRO_OBSERVER)
+        ];
         $out .= $this->render_from_template('part-task_header', $header_data);
         $out .= $this->render_from_template('view-task_observer', $template_data);
 
