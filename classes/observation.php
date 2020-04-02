@@ -80,10 +80,18 @@ class observation extends observation_base implements templateable
                 sprintf('`%s` ASC', task::COL_SEQUENCE));
         }
         // initialise task objects
-        foreach ($tasks as $task)
+        if (!empty($tasks))
         {
-            // assign tasks to field
-            $this->tasks[] = new task($task, $userid);
+            foreach ($tasks as $task)
+            {
+                // assign tasks to field
+                $this->tasks[] = new task($task, $userid);
+            }
+        }
+        else
+        {
+            // avoid 'invalid argument' warnings
+            $this->tasks = [];
         }
     }
 
