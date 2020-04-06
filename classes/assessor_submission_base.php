@@ -56,22 +56,7 @@ class assessor_submission_base extends db_model_base
         {
             // validate status is correctly set
             $allowed = [self::STATUS_NOT_COMPLETE, self::STATUS_COMPLETE];
-            if (!in_array($value, $allowed))
-            {
-                throw new coding_exception(
-                    sprintf("'$value' is not a valid value for '%s' in '%s'", self::COL_STATUS, get_class($this)));
-            }
-            if ($this->status === $value)
-            {
-                debugging(
-                    sprintf(
-                        '%s %s is already "%s". This should not normally happen',
-                        self::class,
-                        self::COL_STATUS,
-                        $value),
-                    DEBUG_DEVELOPER,
-                    debug_backtrace());
-            }
+            lib::validate_prop(self::COL_STATUS, $this->status, $value, $allowed, false);
         }
 
         return parent::set($prop, $value, $save);

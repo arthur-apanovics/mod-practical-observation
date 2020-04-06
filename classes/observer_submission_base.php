@@ -22,6 +22,8 @@
 
 namespace mod_observation;
 
+use coding_exception;
+
 class observer_submission_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_observer_submission';
@@ -44,7 +46,7 @@ class observer_submission_base extends db_model_base
     protected $timestarted;
     /**
      * Outcome of observation, NULL if not submitted yet.
-     * Possible values: {@link STATUS_NOT_COMPLETE}, {@link STATUS_COMPLETE}
+     * Possible values: null, {@link STATUS_NOT_COMPLETE}, {@link STATUS_COMPLETE}
      * @var string
      */
     protected $status;
@@ -53,8 +55,43 @@ class observer_submission_base extends db_model_base
      */
     protected $timesubmitted;
 
-    public function is_complete()
+    public function set(string $prop, $value, bool $save = false): db_model_base
+    {
+        if ($prop == self::COL_STATUS)
+        {
+            // validate status is correctly set
+            $allowed = [self::STATUS_NOT_COMPLETE, self::STATUS_COMPLETE];
+            lib::validate_prop(self::COL_STATUS, $this->status, $value, $allowed, false);
+        }
+
+        return parent::set($prop, $value, $save);
+    }
+
+    /**
+     * @param string $outcome {@link status}
+     * @return observer_submission_base
+     */
+    public function submit(string $outcome): self
+    {
+        $this->set(self::COL_STATUS, $outcome);
+        $this->set(self::COL_TIMESUBMITTED, time());
+
+        return $this->update();
+    }
+
+    public function is_complete(): bool
     {
         return $this->status == self::STATUS_COMPLETE;
+    }
+
+    public function is_submitted(): bool
+    {
+        return !is_null($this->status);
+    }
+
+    public function get_observer_assignment_base()
+    {
+        return observer_assignment_base::read_by_condition_or_null(
+            [observer_assignment::COL_ID => $this->observer_assignmentid], true);
     }
 }

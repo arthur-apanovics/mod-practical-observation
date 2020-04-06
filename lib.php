@@ -473,14 +473,29 @@ function observation_get_file_info(
 function observation_pluginfile(
     $course, $cm, $context, $filearea, array $args, $forcedownload, array $options = array())
 {
-    global $USER;
+    global $USER, $SESSION;
 
     if ($context->contextlevel != CONTEXT_MODULE)
     {
         send_file_not_found();
     }
 
-    require_login($course, true, $cm);
+    $allow_download = false;
+    if (isset($SESSION->observation_usertoken))
+    {
+        // validate
+        if (is_null(\mod_observation\observer_assignment::read_by_token_or_null($SESSION->observation_usertoken))
+            || $filearea != observation::FILE_AREA_TRAINEE)
+        {
+            require_login($course, true, $cm);
+        }
+
+        $allow_download = true;
+    }
+    else
+    {
+        require_login($course, true, $cm);
+    }
 
     $fs = get_file_storage();
     $hash = sha1("/$context->id/" . \OBSERVATION_MODULE . "/$filearea/$args[0]/$args[1]");
@@ -490,7 +505,7 @@ function observation_pluginfile(
         send_file_not_found();
         return false;
     }
-    else if (!has_any_capability(
+    else if (!$allow_download && !has_any_capability(
             [observation::CAP_VIEWSUBMISSIONS, observation::CAP_ASSESS, observation::CAP_MANAGE], $context)
         && $file->get_userid() != $USER->id)
     {

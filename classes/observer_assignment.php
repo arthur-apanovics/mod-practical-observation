@@ -60,24 +60,50 @@ class observer_assignment extends observer_assignment_base implements templateab
      * @throws dml_exception
      * @throws dml_missing_record_exception
      */
-    public static function read_by_token_or_null(string $token, bool $create_submission = false)
+    public static function read_by_token_or_null(string $token, bool $create_submission = false): ?self
     {
         if ($assignment = self::read_by_condition_or_null([self::COL_TOKEN => $token]))
         {
-            if (is_null($assignment->observer_submission) && $create_submission)
+            if ($create_submission)
             {
-                $submission = new observer_submission_base();
-                $submission->set(observer_submission::COL_OBSERVER_ASSIGNMENTID, $assignment->get_id_or_null());
-                $submission->set(observer_submission::COL_TIMESTARTED, 0);
-                $submission->set(observer_submission::COL_STATUS, null);
-                $submission->set(observer_submission::COL_TIMESUBMITTED, 0);
-                $submission->create();
-
-                $assignment->observer_submission = new observer_submission($submission);
+                $assignment->get_observer_submission_or_create();
             }
         }
 
         return $assignment;
+    }
+
+    public function get_observer_submission_or_create(): observer_submission
+    {
+        if (!$observer_submission = $this->get_observer_submission_or_null())
+        {
+            $observer_submission = $this->create_observer_submission();
+        }
+
+        return $observer_submission;
+    }
+
+    public function get_observer_submission_or_null(): ?observer_submission
+    {
+        return $this->observer_submission;
+    }
+
+    /**
+     * @return observer_submission
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
+     */
+    public function create_observer_submission(): observer_submission
+    {
+        $submission = new observer_submission_base();
+        $submission->set(observer_submission::COL_OBSERVER_ASSIGNMENTID, $this->get_id_or_null());
+        $submission->set(observer_submission::COL_TIMESTARTED, time());
+        // $submission->set(observer_submission::COL_STATUS, null); // already null
+        $submission->set(observer_submission::COL_TIMESUBMITTED, 0);
+
+        return ($this->observer_submission =
+            new observer_submission($submission->create()));
     }
 
     public function is_observation_complete()
@@ -159,10 +185,22 @@ class observer_assignment extends observer_assignment_base implements templateab
         throw new \coding_exception(__METHOD__ . ' not implemented');
     }
 
-    public function get_observer_feedback_or_create(criteria_base $criteria): observer_feedback
+    public function get_observer_feedback_or_create(
+        criteria_base $criteria, learner_attempt $attempt): observer_feedback
     {
-        // TODO FANCY QUERY TO GET FEEDBACK
-        $feedback = $criteria->get_observer_feedback();
+        $feedback = observer_feedback::read_by_condition_or_null(
+            [
+                observer_feedback::COL_OBSERVER_SUBMISSIONID => $this->observer_submission->get_id_or_null(),
+                observer_feedback::COL_CRITERIAID            => $criteria->get_id_or_null(),
+                observer_feedback::COL_ATTEMPTID             => $attempt->get_id_or_null()
+            ]);
+        if (is_null($feedback))
+        {
+            // create feedback
+            $feedback = observer_feedback::create_new_feedback($this->observer_submission, $criteria, $attempt);
+        }
+
+        return $feedback;
     }
 
     /**

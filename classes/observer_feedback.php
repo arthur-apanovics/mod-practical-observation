@@ -26,9 +26,24 @@ use mod_observation\interfaces\templateable;
 
 class observer_feedback extends observer_feedback_base implements templateable
 {
-    public function __construct($id_or_record, int $userid)
+    public function __construct($id_or_record)
     {
         parent::__construct($id_or_record);
+    }
+
+    public static function create_new_feedback(
+        observer_submission $observer_submission, criteria_base $criteria, learner_attempt $attempt): self
+    {
+        $feedback = new observer_feedback_base();
+        $feedback->set(self::COL_ATTEMPTID, $attempt->get_id_or_null());
+        $feedback->set(self::COL_CRITERIAID, $criteria->get_id_or_null());
+        $feedback->set(self::COL_OBSERVER_SUBMISSIONID, $observer_submission->get_id_or_null());
+        // (intentionally) null by default:
+        // self::COL_STATUS
+        // self::COL_TEXT
+        // self::COL_TEXT_FORMAT
+
+        return new self($feedback->create());
     }
 
     /**
@@ -37,9 +52,9 @@ class observer_feedback extends observer_feedback_base implements templateable
     public function export_template_data(): array
     {
         return [
-            self::COL_ID     => $this->id,
+            self::COL_ID => $this->id,
             self::COL_STATUS => lib::get_status_string($this->status),
-            self::COL_TEXT   => format_text($this->text, FORMAT_HTML),
+            self::COL_TEXT => format_text($this->text, FORMAT_HTML),
         ];
     }
 }

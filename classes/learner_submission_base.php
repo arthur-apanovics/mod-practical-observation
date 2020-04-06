@@ -85,61 +85,6 @@ class learner_submission_base extends db_model_base
     protected $timecompleted;
 
     /**
-     * This method should be used when changing submission state as it performs validation to detect possible issues.
-     *
-     * @param string $new_status {@link status}
-     * @return self
-     * @throws \dml_exception
-     * @throws coding_exception
-     */
-    public function update_status(string $new_status): self
-    {
-        if ($this->status == $new_status)
-        {
-            debugging(
-                sprintf(
-                    '%s %s is already "%s". This should not normally happen',
-                    self::class,
-                    self::COL_STATUS,
-                    $new_status),
-                DEBUG_DEVELOPER,
-                debug_backtrace());
-        }
-
-        // TODO: perform other status validations, e.g. status == assessor_*, new_status = observer_*, which is not permitted
-
-        $this->set(self::COL_STATUS, $new_status, true);
-
-        return $this;
-    }
-
-    public function set(string $prop, $value, bool $save = false): db_model_base
-    {
-        if ($prop == self::COL_STATUS)
-        {
-            // validate status is correctly set
-            $allowed = [
-                self::STATUS_LEARNER_PENDING,
-                self::STATUS_LEARNER_IN_PROGRESS,
-                self::STATUS_OBSERVATION_PENDING,
-                self::STATUS_OBSERVATION_IN_PROGRESS,
-                self::STATUS_OBSERVATION_INCOMPLETE,
-                self::STATUS_ASSESSMENT_PENDING,
-                self::STATUS_ASSESSMENT_IN_PROGRESS,
-                self::STATUS_ASSESSMENT_INCOMPLETE,
-                self::STATUS_COMPLETE,
-            ];
-            if (!in_array($value, $allowed))
-            {
-                throw new coding_exception(
-                    sprintf("'$value' is not a valid value for '%s' in '%s'", self::COL_STATUS, get_class($this)));
-            }
-        }
-
-        return parent::set($prop, $value, $save);
-    }
-
-    /**
      * @return array empty array if none found
      * @throws \dml_exception
      * @throws coding_exception
@@ -179,5 +124,91 @@ class learner_submission_base extends db_model_base
     public function get_userid(): int
     {
         return $this->userid;
+    }
+
+    public function submit(learner_attempt_base $learner_attempt): self
+    {
+        $error_message = null;
+        if (empty($learner_attempt->get(learner_attempt::COL_TIMESUBMITTED))) // empty(0) = true
+        {
+            $error_message = sprintf(
+                    'learner attempt with id "%s" has invalid "%s" value',
+                    $learner_attempt->get_id_or_null(),
+                    learner_attempt::COL_TIMESUBMITTED);
+        }
+        else if (empty($learner_attempt->get(learner_attempt::COL_TEXT)))
+        {
+            $error_message = sprintf(
+                    'learner attempt with id "%s" has no text',
+                    $learner_attempt->get_id_or_null());
+        }
+        else if ($this->status != self::STATUS_LEARNER_IN_PROGRESS)
+        {
+            $error_message = sprintf(
+                    'learner attempt with id "%s" has invalid "%s" value',
+                    $learner_attempt->get_id_or_null(),
+                    learner_attempt::COL_TIMESUBMITTED);
+        }
+        // check and throw
+        if (!is_null($error_message))
+        {
+            throw new coding_exception($error_message);
+        }
+
+        $this->update_status_and_save(self::STATUS_OBSERVATION_PENDING);
+        //TODO: NOTIFICATIONS
+
+        return $this;
+    }
+
+    /**
+     * This method should be used when changing submission state as it performs validation to detect possible issues.
+     *
+     * @param string $new_status {@link status}
+     * @return self
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function update_status_and_save(string $new_status): self
+    {
+        if ($this->status == $new_status)
+        {
+            debugging(
+                sprintf(
+                    '%s %s is already "%s". This should not normally happen',
+                    self::class,
+                    self::COL_STATUS,
+                    $new_status),
+                DEBUG_DEVELOPER,
+                debug_backtrace());
+        }
+
+        // TODO: perform other status validations, e.g. status == assessor_*, new_status = observer_*, which is not permitted
+
+        $this->set(self::COL_STATUS, $new_status, true);
+
+        return $this;
+    }
+
+    public function set(string $prop, $value, bool $save = false): db_model_base
+    {
+        if ($prop == self::COL_STATUS)
+        {
+            // validate status is correctly set
+            $allowed = [
+                self::STATUS_LEARNER_PENDING,
+                self::STATUS_LEARNER_IN_PROGRESS,
+                self::STATUS_OBSERVATION_PENDING,
+                self::STATUS_OBSERVATION_IN_PROGRESS,
+                self::STATUS_OBSERVATION_INCOMPLETE,
+                self::STATUS_ASSESSMENT_PENDING,
+                self::STATUS_ASSESSMENT_IN_PROGRESS,
+                self::STATUS_ASSESSMENT_INCOMPLETE,
+                self::STATUS_COMPLETE,
+            ];
+            lib::validate_prop(self::COL_STATUS, $this->status, $value, $allowed, true);
+        }
+
+        return parent::set($prop, $value, $save);
     }
 }

@@ -51,17 +51,26 @@ class observer_feedback_base extends db_model_base
      */
     protected $observer_submissionid;
     /**
-     * ENUM ('not_complete', 'complete')
+     * One of:
+     * <ul>
+     * <li>null (null means no decision has been made yet)</li>
+     * <li>{@link STATUS_NOT_COMPLETE},</li>
+     * <li>{@link STATUS_COMPLETE}</li>
+     *</ul>
      *
-     * @var string
+     * @var string|null
      */
     protected $status;
     /**
-     * @var string
+     * null when feedback not requried
+     *
+     * @var string|null
      */
     protected $text;
     /**
-     * @var int
+     * null when feedback not requried
+     *
+     * @var int|null
      */
     protected $text_format;
 
@@ -71,22 +80,7 @@ class observer_feedback_base extends db_model_base
         {
             // validate status is correctly set
             $allowed = [self::STATUS_COMPLETE, self::STATUS_NOT_COMPLETE];
-            if (!in_array($value, $allowed))
-            {
-                throw new coding_exception(
-                    sprintf("'$value' is not a valid value for '%s' in '%s'", self::COL_STATUS, get_class($this)));
-            }
-            if ($this->status === $value)
-            {
-                debugging(
-                    sprintf(
-                        '%s %s is already "%s". This should not normally happen',
-                        self::class,
-                        self::COL_STATUS,
-                        $value),
-                    DEBUG_DEVELOPER,
-                    debug_backtrace());
-            }
+            lib::validate_prop(self::COL_STATUS, $this->status, $value, $allowed, true);
         }
 
         return parent::set($prop, $value, $save);

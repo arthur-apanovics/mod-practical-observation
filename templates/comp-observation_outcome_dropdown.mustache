@@ -1,5 +1,8 @@
-<select name="observation-outcome" id="observation-outcome" required>
-    <option>
+<select
+        id="observation-outcome"
+        name="criteria[{{id}}][outcome]"
+        required>
+    <option selected disabled value>
         {{#str}}outcome:choose, observation{{/str}}
     </option>
     <option value="complete">

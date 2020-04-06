@@ -30,6 +30,7 @@ use mod_observation\observation;
 use mod_observation\observation_base;
 use mod_observation\observer;
 use mod_observation\observer_assignment;
+use mod_observation\observer_feedback;
 use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -381,9 +382,11 @@ class mod_observation_renderer extends plugin_renderer_base
                 // TODO: DISABLE 'request observation' WHEN NO INPUT
                 // text editor
                 $template_data['extra']['editor_html'] = $this->text_editor(
+                    learner_attempt::class,
+                    $context,
                     $attempt->get(learner_attempt::COL_TEXT),
-                    $attempt->get(learner_attempt::COL_TEXT_FORMAT),
-                    $context);
+                    $attempt->get(learner_attempt::COL_TEXT_FORMAT)
+                );
 
                 // file manager
                 $template_data['extra']['filemanager_html'] =
@@ -449,14 +452,23 @@ class mod_observation_renderer extends plugin_renderer_base
         return $out;
     }
 
-    public function text_editor(string $text, int $format, context $context): string
+    public function text_editor(
+        string $class_name,
+        context $context,
+        string $text = null,
+        int $format = null,
+        string $form_input_base_name = null): string
     {
         global $CFG;
         require_once($CFG->dirroot . '/repository/lib.php');
 
-        $input_name = lib::get_input_field_name_from_class(learner_attempt::class);
-        $id = $input_name . '_id';
         $output = '';
+        $text = $text ?: '';
+        $format = $format ?: 1;
+
+        // get input field names
+        list($input_base, $input_name, $input_name_format) = lib::get_editor_attributes_for_class($class_name);
+        $id = $input_base . '_id';
 
         // get available formats
         $response_format = $format;
@@ -476,13 +488,13 @@ class mod_observation_renderer extends plugin_renderer_base
             $id, ['context' => $context, 'autosave' => true], ['return_types' => FILE_INTERNAL | FILE_EXTERNAL]);
 
         // editor wrapper
-        $output .= html_writer::start_tag('div', ['class' => 'attempt-response']);
+        $output .= html_writer::start_tag('div', ['class' => "${input_base}-editor"]);
         // editor textarea
         $output .= html_writer::tag(
             'div', html_writer::tag(
             'textarea', s($text), [
             'id'    => $id,
-            'name'  => $input_name,
+            'name'  => $form_input_base_name ? "${form_input_base_name}[text]" : $input_name,
             'rows'  => 10,
             // 'cols' => 50
             'style' => 'width: 100%;'
@@ -497,7 +509,7 @@ class mod_observation_renderer extends plugin_renderer_base
             $output .= html_writer::empty_tag(
                 'input', array(
                 'type'  => 'hidden',
-                'name'  => $input_name . '_format',
+                'name'  => $form_input_base_name ? "${form_input_base_name}[format]" : $input_name_format,
                 'value' => key($formats)
             ));
         }
@@ -505,9 +517,9 @@ class mod_observation_renderer extends plugin_renderer_base
         {
             // format selector for plain text editors
             $output .= html_writer::label(
-                get_string('format'), 'menu' . $input_name . 'format', false);
+                get_string('format'), 'menu' . $form_input_base_name . 'format', false);
             $output .= ' ';
-            $output .= html_writer::select($formats, $input_name . 'format', $response_format, '');
+            $output .= html_writer::select($formats, $form_input_base_name . 'format', $response_format, '');
         }
 
         // /editor wrapper
@@ -615,31 +627,42 @@ class mod_observation_renderer extends plugin_renderer_base
 
     public function task_observer_view(observer_assignment $observer_assignment)
     {
-        $learner_submission_base = $observer_assignment->get_learner_submission_base();
-        $userid = $learner_submission_base->get_userid();
-        $task = new task($learner_submission_base->get_task_base(), $userid);
+        $learner_submission = new learner_submission($observer_assignment->get_learner_submission_base());
+        $observer_submission = $observer_assignment->get_observer_submission_or_create();
+        $userid = $learner_submission->get_userid();
+        $task = new task($learner_submission->get_task_base(), $userid);
         $observation_base = $task->get_observation_base();
         $cm = $observation_base->get_cm();
         $context = context_module::instance($cm->id);
 
         $template_data = $task->export_template_data();
-        $template_data['extra']['is_observation'] = true;
+        $template_data['extra']['cmid'] = $cm->id;
+        $template_data['extra']['observer_submission_id'] = $observer_submission->get_id_or_null();
         $out = '';
 
         // render editors for criteria that require feedback
         unset($template_data['criteria']); // we will re-populate criteria data manually
         foreach ($task->get_criteria() as $criteria)
         {
+            // ensure feedback exists
+            $attempt = $learner_submission->get_latest_attempt_or_null();
+            $feedback = $observer_assignment->get_observer_feedback_or_create($criteria, $attempt);
+
             $criteria_data = $criteria->export_template_data();
+            $criteria_data['extra']['is_observation'] = true;
+            $criteria_data['extra']['attempt_number'] = $attempt->get(learner_attempt::COL_ATTEMPT_NUMBER);
+            $criteria_data['extra']['feedback_id'] = $feedback->get_id_or_null();
+
             if ($criteria->is_feedback_required())
             {
-                // text editor
-                // TODO: $feedback = $observer_assignment->get_observer_feedback_or_create($criteria);
-
-                // $criteria_data['extra']['editor_html'] = $this->text_editor(
-                //     $feedback->get(observer_feedback::COL_TEXT),
-                //     $feedback->get(observer_feedback::COL_TEXT_FORMAT),
-                //     $context);
+                list($base) = lib::get_editor_attributes_for_class(observer_feedback::class);
+                $criteria_data['extra']['editor_html'] = $this->text_editor(
+                    observer_feedback::class,
+                    $context,
+                    $feedback->get(observer_feedback::COL_TEXT),
+                    $feedback->get(observer_feedback::COL_TEXT_FORMAT),
+                    sprintf('criteria[%d][%s]', $criteria->get_id_or_null(), $base)
+                );
             }
 
             $template_data['criteria'][] = $criteria_data;
@@ -651,8 +674,15 @@ class mod_observation_renderer extends plugin_renderer_base
         ];
         $out .= $this->render_from_template('part-task_header', $header_data);
         $out .= $this->render_from_template('view-task_observer', $template_data);
+        // wrap all in container
+        $out = html_writer::div($out, 'container', ['class' => 'spacer']);
 
         return $out;
+    }
+
+    public function observer_completed_view()
+    {
+        return $this->render_from_template('view-observer_completed', null);
     }
 
     /**

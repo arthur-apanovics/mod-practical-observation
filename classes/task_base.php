@@ -244,4 +244,12 @@ class task_base extends db_model_base
             ],
         ];
     }
+
+    public function get_criteria_count(): int
+    {
+        global $DB;
+
+        $count = $DB->count_records(criteria::TABLE, [criteria::COL_TASKID => $this->id]);
+        return $count !== false ? $count : 0;
+    }
 }

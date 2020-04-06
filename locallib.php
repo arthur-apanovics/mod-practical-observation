@@ -29,6 +29,7 @@
 
 namespace mod_observation;
 
+use coding_exception;
 use mod_observation\interfaces\templateable;
 use moodle_url;
 
@@ -40,15 +41,15 @@ class lib
     /**
      * Returns observation activity status string for ANY class
      *
-     * @param string $status
-     * @return string
+     * @param string|null $status
+     * @return string|null if null is passed, null is returned
      * @throws \coding_exception
      */
-    public static function get_status_string(string $status): string
+    public static function get_status_string(?string $status): ?string
     {
         if (!$status)
         {
-            throw new \coding_exception(sprintf('No status provided for %s', __METHOD__));
+            return null;
         }
 
         return get_string(sprintf('status:%s', $status), OBSERVATION);
@@ -202,29 +203,37 @@ class lib
 
     /**
      * @param string $class object::class string
-     * @return string
+     * @return array ['input_base_name', 'input_format', 'input_class']
      * @throws \coding_exception
+     * TODO: this would probably be better as an interface
      */
-    public static function get_input_field_name_from_class(string $class): string
+    public static function get_editor_attributes_for_class(string $class): array
     {
         // even though all fields are named the same at the moment, their names might change
         // in the future via a refactoring therefore we still check for each class here
         switch ($class)
         {
             case learner_attempt::class:
-                $text_field = learner_attempt::COL_TEXT;
+                $column_name = learner_attempt::COL_TEXT;
                 break;
             case observer_feedback::class:
-                $text_field = observer_feedback::COL_TEXT;
+                $column_name = observer_feedback::COL_TEXT;
                 break;
             case assessor_feedback::class:
-                $text_field = assessor_feedback::COL_TEXT;
+                $column_name = assessor_feedback::COL_TEXT;
                 break;
             default:
-                throw new \coding_exception('Unsupported classname');
+                throw new \coding_exception('Unsupported classname - cannot retrieve input name');
         }
 
-        return sprintf('%s_%s', lib::remove_namespace_from_classname($class), $text_field);
+        $clean_classname = lib::remove_namespace_from_classname($class);
+        $base = "${clean_classname}_${column_name}";
+        return
+            [
+                $base, // used to retrieve values
+                "${base}[text]",
+                "${base}[format]"
+            ];
     }
 
     /**
@@ -309,5 +318,128 @@ class lib
         }
 
         return $attachments;
+    }
+
+    /**
+     * Workaround for moodle not being able to precess nested arrays from required_param...<br>
+     * See {@link required_param_array()} for details
+     */
+    public static function required_param_array($parname, $type)
+    {
+        if (func_num_args() != 2 or empty($parname) or empty($type))
+        {
+            throw new coding_exception(
+                'required_param_array() requires $parname and $type to be specified (parameter: ' . $parname . ')');
+        }
+        // POST has precedence.
+        if (isset($_POST[$parname]))
+        {
+            $param = $_POST[$parname];
+        }
+        else if (isset($_GET[$parname]))
+        {
+            $param = $_GET[$parname];
+        }
+        else
+        {
+            print_error('missingparam', '', '', $parname);
+        }
+        if (!is_array($param))
+        {
+            print_error('missingparam', '', '', $parname);
+        }
+
+        $result = array();
+        foreach ($param as $key => $value)
+        {
+            if (!preg_match('/^[a-z0-9_-]+$/i', $key))
+            {
+                debugging('Invalid key name in required_param_array() detected: ' . $key . ', parameter: ' . $parname);
+                continue;
+            }
+            $result[$key] = self::clean_param_array($value, $type);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Used by {@link optional_param()} and {@link required_param()} to
+     * clean the variables and/or cast to specific types, based on
+     * an options field.
+     * <code>
+     * $course->format = clean_param($course->format, PARAM_ALPHA);
+     * $selectedgradeitem = clean_param($selectedgradeitem, PARAM_INT);
+     * </code>
+     *
+     * @param mixed  $param the variable we are cleaning
+     * @param string $type expected format of param after cleaning.
+     * @return mixed
+     * @throws coding_exception
+     */
+    public static function clean_param_array($param, $type)
+    {
+        global $CFG;
+
+        if (is_array($param))
+        {
+            $param = clean_param_array($param, PARAM_RAW, true);
+        }
+        else if (is_object($param))
+        {
+            if (method_exists($param, '__toString'))
+            {
+                $param = $param->__toString();
+            }
+            else
+            {
+                throw new coding_exception(
+                    'clean_param() can not process objects, please use clean_param_array() instead.');
+            }
+        }
+
+        switch ($type)
+        {
+            case PARAM_RAW:
+                // No cleaning at all.
+                $param = fix_utf8($param);
+                return $param;
+
+            default:
+                throw new \coding_exception('We only support RAW params');
+        }
+    }
+
+    public static function validate_prop(
+        string $property_name, $current_value, $new_value, array $allowed_values, bool $allow_same_value)
+    {
+        if (!in_array($new_value, $allowed_values))
+        {
+            throw new coding_exception(
+                sprintf("'$new_value' is not a valid value for property '%s' in '%s'", $property_name, static::class));
+        }
+        if ($current_value === $new_value)
+        {
+            if ($allow_same_value)
+            {
+                debugging(
+                    sprintf(
+                        '"%s"->"%s" is already "%s". This should not normally happen',
+                        self::class,
+                        $property_name,
+                        $new_value),
+                    DEBUG_DEVELOPER,
+                    debug_backtrace());
+            }
+            else
+            {
+                throw new coding_exception(
+                    sprintf(
+                        'Cannot set property "%s" - value is already "%s" in %s',
+                        $property_name,
+                        $current_value,
+                        static::class));
+            }
+        }
     }
 }

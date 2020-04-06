@@ -63,6 +63,7 @@ if (isloggedin())
     }
 }
 
+// form submissions
 if (optional_param('submit-accept', 0, PARAM_BOOL))
 {
     // observation accepted.
@@ -98,7 +99,12 @@ $renderer = $PAGE->get_renderer('observation');
 
 echo $OUTPUT->header();
 
-if (!$observer_assignment->is_accepted())
+$observer_submission = $observer_assignment->get_observer_submission_or_null();
+if (!is_null($observer_submission) && $observer_submission->is_submitted())
+{
+    echo $renderer->observer_completed_view();
+}
+else if (!$observer_assignment->is_accepted())
 {
     // show observation EULA page
     echo $renderer->observer_landing_view($observer_assignment);

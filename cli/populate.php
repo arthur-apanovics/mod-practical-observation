@@ -150,7 +150,7 @@ foreach ($task_names as $index => $task_name)
             $criteria->set(criteria::COL_TASKID, $task->get_id_or_null());
             $criteria->set(criteria::COL_NAME, get_random_todo());
             $criteria->set(criteria::COL_DESCRIPTION, get_random_lorem_paragraph());
-            $criteria->set(criteria::COL_DESCRIPTION_FORMAT, '');
+            $criteria->set(criteria::COL_DESCRIPTION_FORMAT, 1);
             $criteria->set(criteria::COL_FEEDBACK_REQUIRED, rand(0,1));
             $criteria->set(criteria::COL_SEQUENCE, $criteria->get_next_sequence_number_in_task());
 

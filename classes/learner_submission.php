@@ -117,7 +117,7 @@ class learner_submission extends learner_submission_base implements templateable
                         // by an observer or assessor. This indicates a problem in our logic
 
                         // update to correct status
-                        $this->update_status(self::STATUS_LEARNER_IN_PROGRESS);
+                        $this->update_status_and_save(self::STATUS_LEARNER_IN_PROGRESS);
                         // let a dev know if he/she is watching
                         debugging(
                             sprintf(
@@ -188,7 +188,7 @@ class learner_submission extends learner_submission_base implements templateable
 
         if ($set_submission_in_progress)
         {
-            $this->update_status(self::STATUS_LEARNER_IN_PROGRESS);
+            $this->update_status_and_save(self::STATUS_LEARNER_IN_PROGRESS);
         }
 
         return $attempt;
@@ -266,7 +266,7 @@ class learner_submission extends learner_submission_base implements templateable
             // no assignment yet, create
             $assignment = observer_assignment::create_assignment($this->id, $submitted_observer->get_id_or_null());
             // update learner submission status
-            $this->update_status(self::STATUS_OBSERVATION_PENDING);
+            $this->update_status_and_save(self::STATUS_OBSERVATION_PENDING);
         }
 
         // attempt will be already submitted if learner
@@ -281,7 +281,8 @@ class learner_submission extends learner_submission_base implements templateable
         // TODO: EVENT
 
         // TODO: SEND EMAIL AND NOTIFICATION
-        $review_url = new moodle_url(null, []);
+        $review_url = new moodle_url(OBSERVATION_MODULE_PATH . 'observe.php',
+            ['token' => $assignment->get(observer_assignment::COL_TOKEN)]);
         // send email
         // send notification
 
