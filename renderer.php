@@ -468,7 +468,10 @@ class mod_observation_renderer extends plugin_renderer_base
 
         // get input field names
         list($input_base, $input_name, $input_name_format) = lib::get_editor_attributes_for_class($class_name);
-        $id = $input_base . '_id';
+        $id = sprintf(
+            '%s_id_%d',
+            $input_base,
+            floor(time() / rand(1, 100))); // needs to be unique for editor js init
 
         // get available formats
         $response_format = $format;
@@ -532,12 +535,14 @@ class mod_observation_renderer extends plugin_renderer_base
 
     /**
      * @param int     $itemid for learner - attempt id, for observer & assessor - feedback id
+     * @param string  $file_area
      * @param context $context
      * @param int     $max_files
      * @return string
      * @throws coding_exception
      */
-    private function files_input(int $itemid, string $file_area, context $context, int $max_files = 10): string
+    private function files_input(
+        int $itemid, string $file_area, context $context, int $max_files = 10): string
     {
         global $CFG;
         require_once($CFG->dirroot . '/lib/form/filemanager.php');
@@ -574,11 +579,23 @@ class mod_observation_renderer extends plugin_renderer_base
      */
     public function prepare_response_files_draft_itemid(string $file_area, int $contextid, int $itemid = null)
     {
+        global $CFG, $USER;
+
         $draftid = 0; // Will be filled in by file_prepare_draft_area.
 
         // if files exist for this itemid they will be automatically copied over
-        file_prepare_draft_area(
-            $draftid, $contextid, \OBSERVATION, $file_area, $itemid);
+        if ($USER->id == $CFG->siteguest || $USER->id == 0)
+        {
+            // external user, e.g. observer
+            lib::file_prepare_anonymous_draft_area(
+                $draftid, $contextid, \OBSERVATION, $file_area, $itemid);
+        }
+        else
+        {
+            // regular logged in user
+            file_prepare_draft_area(
+                $draftid, $contextid, \OBSERVATION, $file_area, $itemid);
+        }
 
         return $draftid;
     }
@@ -663,6 +680,8 @@ class mod_observation_renderer extends plugin_renderer_base
                     $feedback->get(observer_feedback::COL_TEXT_FORMAT),
                     sprintf('criteria[%d][%s]', $criteria->get_id_or_null(), $base)
                 );
+                $criteria_data['extra']['filepicker_html'] =
+                    $this->files_input($feedback->get_id_or_null(), observation::FILE_AREA_OBSERVER, $context);
             }
 
             $template_data['criteria'][] = $criteria_data;

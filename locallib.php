@@ -30,8 +30,11 @@
 namespace mod_observation;
 
 use coding_exception;
+use context_user;
+use file_storage;
 use mod_observation\interfaces\templateable;
 use moodle_url;
+use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -318,6 +321,129 @@ class lib
         }
 
         return $attachments;
+    }
+
+    /**
+     * Same as {@link file_prepare_draft_area()} but for users who do not have a local account (anonymous/guest).
+     *
+     * @param int $draftitemid the id of the draft area to use, or 0 to create a new one, in which case this parameter is updated.
+     * @param int $contextid This parameter and the next two identify the file area to copy files from.
+     * @param string $component
+     * @param string $filearea helps indentify the file area.
+     * @param int $itemid helps identify the file area. Can be null if there are no files yet.
+     * @param array $options text and file options ('subdirs'=>false, 'forcehttps'=>false)
+     * @param string $text some html content that needs to have embedded links rewritten to point to the draft area.
+     * @return string|null returns string if $text was passed in, the rewritten $text is returned. Otherwise NULL.
+     */
+    public static function file_prepare_anonymous_draft_area(
+        &$draftitemid, $contextid, $component, $filearea, $itemid, array $options = null, $text = null)
+    {
+        global $CFG;
+
+        $options = (array) $options;
+        if (!isset($options['subdirs']))
+        {
+            $options['subdirs'] = false;
+        }
+        if (!isset($options['forcehttps']))
+        {
+            $options['forcehttps'] = false;
+        }
+
+        $usercontext = context_user::instance($CFG->siteguest);
+        $fs = get_file_storage();
+
+        if (empty($draftitemid))
+        {
+            // create a new area and copy existing files into
+            $draftitemid = self::file_get_unused_draft_itemid_allow_guest_and_set_global();
+            $file_record = array(
+                'contextid' => $usercontext->id,
+                'component' => 'user',
+                'filearea'  => 'draft',
+                'itemid'    => $draftitemid
+            );
+            if (!is_null($itemid) and $files = $fs->get_area_files($contextid, $component, $filearea, $itemid))
+            {
+                foreach ($files as $file)
+                {
+                    if ($file->is_directory() and $file->get_filepath() === '/')
+                    {
+                        // we need a way to mark the age of each draft area,
+                        // by not copying the root dir we force it to be created automatically with current timestamp
+                        continue;
+                    }
+                    if (!$options['subdirs'] and ($file->is_directory() or $file->get_filepath() !== '/'))
+                    {
+                        continue;
+                    }
+                    $draftfile = $fs->create_file_from_storedfile($file_record, $file);
+                    // XXX: This is a hack for file manager (MDL-28666)
+                    // File manager needs to know the original file information before copying
+                    // to draft area, so we append these information in mdl_files.source field
+                    // {@link file_storage::search_references()}
+                    // {@link file_storage::search_references_count()}
+                    $sourcefield = $file->get_source();
+                    $newsourcefield = new stdClass;
+                    $newsourcefield->source = $sourcefield;
+                    $original = new stdClass;
+                    $original->contextid = $contextid;
+                    $original->component = $component;
+                    $original->filearea = $filearea;
+                    $original->itemid = $itemid;
+                    $original->filename = $file->get_filename();
+                    $original->filepath = $file->get_filepath();
+                    $newsourcefield->original = file_storage::pack_reference($original);
+                    // Check we can read the file before we update it.
+                    if ($fs->content_exists($file->get_contenthash()))
+                    {
+                        $draftfile->set_source(serialize($newsourcefield));
+                    }
+                    // End of file manager hack
+                }
+            }
+            if (!is_null($text))
+            {
+                // at this point there should not be any draftfile links yet,
+                // because this is a new text from database that should still contain the @@pluginfile@@ links
+                // this happens when developers forget to post process the text
+                $text =
+                    str_replace("\"$CFG->httpswwwroot/draftfile.php", "\"$CFG->httpswwwroot/brokenfile.php#", $text);
+            }
+        }
+
+        if (is_null($text))
+        {
+            return null;
+        }
+
+        // relink embedded files - editor can not handle @@PLUGINFILE@@ !
+        return file_rewrite_pluginfile_urls(
+            $text, 'draftfile.php', $usercontext->id, 'user', 'draft', $draftitemid, $options);
+    }
+
+    /**
+     * {@link file_get_unused_draft_itemid())
+     *
+     * @return int a random but available draft itemid that can be used to create a new draft
+     * file area.
+     */
+    public static function file_get_unused_draft_itemid_allow_guest_and_set_global() {
+        global $CFG, $USER;
+
+        // TODO: most likely will have to create a local user with limited permissions to avoid guest limitations...
+        $guest = \core_user::get_user($CFG->siteguest);
+        $USER = $guest; // this will be needed further down the line
+
+        $contextid = context_user::instance($guest->id)->id;
+
+        $fs = get_file_storage();
+        $draftitemid = rand(1, 999999999);
+        while ($files = $fs->get_area_files($contextid, 'user', 'draft', $draftitemid)) {
+            $draftitemid = rand(1, 999999999);
+        }
+
+        return $draftitemid;
     }
 
     /**
