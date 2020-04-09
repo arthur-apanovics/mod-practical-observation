@@ -84,6 +84,96 @@ class learner_submission_base extends db_model_base
      */
     protected $timecompleted;
 
+    public function is_observation_complete()
+    {
+        $this->validate_status();
+
+        // if status is either one of these, then observation is complete
+        $complete_statuses = [
+            self::STATUS_ASSESSMENT_PENDING,
+            self::STATUS_ASSESSMENT_IN_PROGRESS,
+            self::STATUS_ASSESSMENT_INCOMPLETE, // todo: will this status ever be used?
+        ];
+
+        return in_array($this->status, $complete_statuses);
+    }
+
+    private function validate_status(): void
+    {
+        if (empty($this->status))
+        {
+            throw new coding_exception(
+                sprintf('Accessing observation status on an uninitialized %s class', self::class));
+        }
+    }
+
+    public function is_assessment_in_progress_or_incomplete()
+    {
+        $this->validate_status();
+        return $this->status === self::STATUS_ASSESSMENT_IN_PROGRESS || $this->status === self::STATUS_ASSESSMENT_INCOMPLETE;
+    }
+
+    public function is_assessment_in_progress()
+    {
+        $this->validate_status();
+        return $this->status === self::STATUS_ASSESSMENT_IN_PROGRESS;
+    }
+
+    public function is_assessment_complete()
+    {
+        $this->validate_status();
+        return $this->status === self::STATUS_COMPLETE;
+    }
+
+    public function is_observation_pending_or_in_progress()
+    {
+        $this->validate_status();
+        return in_array($this->status, [self::STATUS_OBSERVATION_PENDING, self::STATUS_OBSERVATION_IN_PROGRESS]);
+    }
+
+    public function is_observation_in_progress()
+    {
+        $this->validate_status();
+        return $this->status == self::STATUS_OBSERVATION_IN_PROGRESS;
+    }
+
+    public function is_observation_pending()
+    {
+        $this->validate_status();
+        return $this->status == self::STATUS_OBSERVATION_PENDING;
+    }
+
+    public function is_learner_pending()
+    {
+        $this->validate_status();
+        return $this->status == self::STATUS_LEARNER_PENDING;
+    }
+
+    public function is_learner_action_required()
+    {
+        $this->validate_status();
+        return ($this->status === self::STATUS_LEARNER_PENDING || $this->status === self::STATUS_LEARNER_IN_PROGRESS);
+    }
+
+    public function has_been_observed()
+    {
+        if ($assignment = $this->get_observer_assignment_base_or_null())
+        {
+            if ($observer_submission = $assignment->get_observer_submission_base_or_null())
+            {
+                return $observer_submission->is_submitted();
+            }
+        }
+
+        return false;
+    }
+
+    public function get_observer_assignment_base_or_null(): ?observer_assignment_base
+    {
+        return observer_assignment_base::read_by_condition_or_null(
+            [observer_assignment::COL_LEARNER_SUBMISSIONID => $this->id]);
+    }
+
     /**
      * @return array empty array if none found
      * @throws \dml_exception
@@ -132,22 +222,22 @@ class learner_submission_base extends db_model_base
         if (empty($learner_attempt->get(learner_attempt::COL_TIMESUBMITTED))) // empty(0) = true
         {
             $error_message = sprintf(
-                    'learner attempt with id "%s" has invalid "%s" value',
-                    $learner_attempt->get_id_or_null(),
-                    learner_attempt::COL_TIMESUBMITTED);
+                'learner attempt with id "%s" has invalid "%s" value',
+                $learner_attempt->get_id_or_null(),
+                learner_attempt::COL_TIMESUBMITTED);
         }
         else if (empty($learner_attempt->get(learner_attempt::COL_TEXT)))
         {
             $error_message = sprintf(
-                    'learner attempt with id "%s" has no text',
-                    $learner_attempt->get_id_or_null());
+                'learner attempt with id "%s" has no text',
+                $learner_attempt->get_id_or_null());
         }
         else if ($this->status != self::STATUS_LEARNER_IN_PROGRESS)
         {
             $error_message = sprintf(
-                    'learner attempt with id "%s" has invalid "%s" value',
-                    $learner_attempt->get_id_or_null(),
-                    learner_attempt::COL_TIMESUBMITTED);
+                'learner submission with id "%s" has invalid "%s" value',
+                $learner_attempt->get_id_or_null(),
+                self::COL_STATUS);
         }
         // check and throw
         if (!is_null($error_message))
@@ -171,18 +261,6 @@ class learner_submission_base extends db_model_base
      */
     public function update_status_and_save(string $new_status): self
     {
-        if ($this->status == $new_status)
-        {
-            debugging(
-                sprintf(
-                    '%s %s is already "%s". This should not normally happen',
-                    self::class,
-                    self::COL_STATUS,
-                    $new_status),
-                DEBUG_DEVELOPER,
-                debug_backtrace());
-        }
-
         // TODO: perform other status validations, e.g. status == assessor_*, new_status = observer_*, which is not permitted
 
         $this->set(self::COL_STATUS, $new_status, true);

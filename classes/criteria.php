@@ -35,25 +35,29 @@ class criteria extends criteria_base implements templateable
     {
         parent::__construct($id_or_record);
 
-        if (is_null($userid) && is_null($observer_submissionid))
-        {
-            // no filter, get all feedback
-            $this->observer_feedback = observer_feedback::read_all_by_condition(
-                [observer_feedback::COL_CRITERIAID => $this->id]);
-        }
-        else if (!is_null($userid) && is_null($observer_submissionid))
+        if (!is_null($userid))
         {
             // filter feedback by user
-
+            $sql = 'select f.*
+                    from mdl_observation_observer_feedback f
+                        join {'.criteria::TABLE.'} c on c.id = f.'.observer_feedback::COL_CRITERIAID.'
+                        join {'.observer_submission::TABLE.'} os on os.id = f.'.observer_feedback::COL_OBSERVER_SUBMISSIONID.'
+                        join {'.observer_assignment::TABLE.'} oa on oa.id = os.'.observer_submission::COL_OBSERVER_ASSIGNMENTID.'
+                        join {'.learner_submission::TABLE.'} ls on ls.id = oa.'.observer_assignment::COL_LEARNER_SUBMISSIONID.'
+                    where c.id = ? and ls.userid = ?';
+            $this->observer_feedback = observer_feedback::read_all_by_sql($sql, [$this->id, $userid]);
         }
         else if (!is_null($observer_submissionid))
         {
             // filter feedback by observer submission (this automatically includes user)
-
+            $this->observer_feedback =  observer_feedback::read_all_by_condition(
+                [observer_feedback::COL_OBSERVER_SUBMISSIONID => $observer_submissionid]);
         }
         else
         {
-
+            // no filter, get all feedback for criteria
+            $this->observer_feedback = observer_feedback::read_all_by_condition(
+                [observer_feedback::COL_CRITERIAID => $this->id]);
         }
     }
 

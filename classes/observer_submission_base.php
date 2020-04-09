@@ -22,19 +22,17 @@
 
 namespace mod_observation;
 
-use coding_exception;
-
 class observer_submission_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_observer_submission';
 
     public const COL_OBSERVER_ASSIGNMENTID = 'observer_assignmentid';
     public const COL_TIMESTARTED           = 'timestarted';
-    public const COL_STATUS                = 'status';
+    public const COL_OUTCOME               = 'outcome';
     public const COL_TIMESUBMITTED         = 'timesubmitted';
 
-    public const STATUS_NOT_COMPLETE = 'not_complete';
-    public const STATUS_COMPLETE     = 'complete';
+    public const OUTCOME_NOT_COMPLETE = 'not_complete';
+    public const OUTCOME_COMPLETE     = 'complete';
 
     /**
      * @var int
@@ -46,47 +44,58 @@ class observer_submission_base extends db_model_base
     protected $timestarted;
     /**
      * Outcome of observation, NULL if not submitted yet.
-     * Possible values: null, {@link STATUS_NOT_COMPLETE}, {@link STATUS_COMPLETE}
-     * @var string
+     * Possible values: null, {@link OUTCOME_NOT_COMPLETE}, {@link OUTCOME_COMPLETE}
+     * @var string|null
      */
-    protected $status;
+    protected $outcome;
     /**
      * @var int
      */
     protected $timesubmitted;
 
+    /**
+     * @param string $outcome {@link outcome}
+     * @return observer_submission_base
+     */
+    public function submit(string $outcome): self
+    {
+        // setting outcome here also validates that correct value has been passed
+        $this->set(self::COL_OUTCOME, $outcome);
+        $this->set(self::COL_TIMESUBMITTED, time());
+
+        $observer_assignment = $this->get_observer_assignment_base();
+        $learner_submission = $observer_assignment->get_learner_submission_base();
+
+        $status = ($outcome == self::OUTCOME_COMPLETE)
+            ? learner_submission::STATUS_ASSESSMENT_PENDING
+            : learner_submission::STATUS_OBSERVATION_INCOMPLETE;
+        $learner_submission->update_status_and_save($status);
+
+        //TODO: notifications
+
+        return $this->update();
+    }
+
     public function set(string $prop, $value, bool $save = false): db_model_base
     {
-        if ($prop == self::COL_STATUS)
+        if ($prop == self::COL_OUTCOME)
         {
             // validate status is correctly set
-            $allowed = [self::STATUS_NOT_COMPLETE, self::STATUS_COMPLETE];
-            lib::validate_prop(self::COL_STATUS, $this->status, $value, $allowed, false);
+            $allowed = [self::OUTCOME_NOT_COMPLETE, self::OUTCOME_COMPLETE];
+            lib::validate_prop(self::COL_OUTCOME, $this->outcome, $value, $allowed, false);
         }
 
         return parent::set($prop, $value, $save);
     }
 
-    /**
-     * @param string $outcome {@link status}
-     * @return observer_submission_base
-     */
-    public function submit(string $outcome): self
-    {
-        $this->set(self::COL_STATUS, $outcome);
-        $this->set(self::COL_TIMESUBMITTED, time());
-
-        return $this->update();
-    }
-
     public function is_complete(): bool
     {
-        return $this->status == self::STATUS_COMPLETE;
+        return $this->outcome == self::OUTCOME_COMPLETE;
     }
 
     public function is_submitted(): bool
     {
-        return !is_null($this->status);
+        return !is_null($this->outcome);
     }
 
     public function get_observer_assignment_base()

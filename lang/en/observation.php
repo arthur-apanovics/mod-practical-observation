@@ -175,7 +175,9 @@ $string['notification:observation_request_sent'] = 'Observation request sent to 
 $string['notification:observer_assigned_no_change'] = '<strong>{$a->email}</strong> is already the assigned observer for task <i>{$a->task}</i>';
 $string['notification:observer_assigned_same'] = 'Observation request for <i>{$a->task}</i> sent to <strong>{$a->email}</strong>';
 $string['notification:observer_assigned_new'] = 'Observer successfully changed and observation request sent to <strong>{$a->email}</strong> for <i>{$a->task}</i>';
-$string['notification:task_wait_for_observers'] = 'You have requested observations for all tasks, please be patient while observers review your submissions';
+$string['notification:activity_wait_for_observers'] = 'You have requested observations for all tasks, please be patient while observers review your submissions';
+$string['notification:activity_wait_for_mixed'] = 'Please pe patient while your submissions are observed and assessed';
+$string['notification:activity_complete'] = 'Congratulations, you have completed this activity!';
 
 // ERRORS
 $string['error:invalid_token'] = 'The link you are trying to access is incorrect. Please contact Akatoi support if you think this is a mistake.';

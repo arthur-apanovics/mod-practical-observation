@@ -156,7 +156,6 @@ body.path-mod-observation .feedback-attempt-heading {
 body.path-mod-observation .feedback-email {
   margin-top: 5px;
   margin-right: 8px;
-  flex: 0 0 14%;
   align-items: flex-end;
 }
 body.path-mod-observation .timestamp {
@@ -305,7 +304,8 @@ body.observation-manage #page ol li::before,
 body.observation-task #page ol li::before {
   content: counter(my-awesome-counter) ". ";
 }
-table.observer-details {
+table.observer-details,
+table.submissions-summary {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
   text-align: left;
@@ -315,28 +315,36 @@ table.observer-details {
   width: 100%;
   margin-bottom: 1em;
 }
-table.observer-details thead tr:first-child {
+table.observer-details thead tr:first-child,
+table.submissions-summary thead tr:first-child {
   color: #fff;
   background-color: #d3d3d3;
   border: none;
 }
 table.observer-details th:first-child,
-table.observer-details td:first-child {
+table.submissions-summary th:first-child,
+table.observer-details td:first-child,
+table.submissions-summary td:first-child {
   padding: 0 15px 0 20px;
 }
-table.observer-details th {
+table.observer-details th,
+table.submissions-summary th {
   font-weight: 500;
 }
-table.observer-details thead tr:last-child th {
+table.observer-details thead tr:last-child th,
+table.submissions-summary thead tr:last-child th {
   border-bottom: 3px solid #d3d3d3;
 }
-table.observer-details tbody tr:last-child td {
+table.observer-details tbody tr:last-child td,
+table.submissions-summary tbody tr:last-child td {
   border: none;
 }
-table.observer-details tbody td {
+table.observer-details tbody td,
+table.submissions-summary tbody td {
   border-bottom: 1px solid #d3d3d3;
 }
-table.observer-details td:last-child {
+table.observer-details td:last-child,
+table.submissions-summary td:last-child {
   padding-right: 10px;
 }
 body.observation-task div.observer-details-wrapper > .header h5,

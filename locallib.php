@@ -158,17 +158,17 @@ class lib
      *
      * @param array  $array_to_sort
      * @param string $field_to_sort_by
-     * @param string $asc_or_desc "asc"|"desc" sort in ascending (asc) or descending (desc) order
+     * @param string $sort_direction "asc"|"desc" sort in ascending (asc) or descending (desc) order
      * @return array sorted array with array keys preserved
      * @throws \coding_exception
      */
     public static function sort_by_field(
-        array $array_to_sort, string $field_to_sort_by, string $asc_or_desc = 'asc'): array
+        array $array_to_sort, string $field_to_sort_by, string $sort_direction = 'asc'): array
     {
-        $asc_or_desc = strtolower($asc_or_desc);
-        if (!in_array($asc_or_desc, ['asc', 'desc']))
+        $sort_direction = strtolower($sort_direction);
+        if (!in_array($sort_direction, ['asc', 'desc']))
         {
-            throw new \coding_exception("Cannot sort in '$asc_or_desc' order. Valid options are 'asc' or 'desc'");
+            throw new \coding_exception("Cannot sort in '$sort_direction' order. Valid options are 'asc' or 'desc'");
         }
 
         if (count($array_to_sort) <= 1)
@@ -177,9 +177,33 @@ class lib
         }
 
         uasort(
-            $array_to_sort, function ($a, $b) use ($field_to_sort_by, $asc_or_desc)
+            $array_to_sort, function ($a, $b) use ($field_to_sort_by, $sort_direction)
         {
-            if ($a[$field_to_sort_by] === $b[$field_to_sort_by])
+            $mapped = array_map(
+                function ($el) use ($field_to_sort_by)
+                {
+                    $val = null;
+                    if ($el instanceof db_model_base)
+                    {
+                        $val = $el->get($field_to_sort_by);
+                    }
+                    else if (is_object($el))
+                    {
+                        $val = $el->{$field_to_sort_by};
+                    }
+                    else if (is_array($el))
+                    {
+                        $val = $el[$field_to_sort_by];
+                    }
+                    else
+                    {
+                        throw new coding_exception(sprintf('Unsupported value type "%s" passed to sort', gettype($el)));
+                    }
+
+                    return $val;
+                }, [$a, $b]);
+
+            if ($mapped[0] === $mapped[1])
             {
                 debugging(
                     sprintf(
@@ -187,8 +211,9 @@ class lib
                         $field_to_sort_by, print_r(array_keys($a), true), $a['id'], $b['id']), DEBUG_DEVELOPER);
             }
 
-            return $asc_or_desc == 'asc' ? ($a[$field_to_sort_by] <=> $b[$field_to_sort_by])
-                : ($b[$field_to_sort_by] <=> $a[$field_to_sort_by]);
+            return $sort_direction == 'asc'
+                ? ($mapped[0] <=> $mapped[1])
+                : ($mapped[1] <=> $mapped[0]);
         });
 
         return $array_to_sort;
@@ -326,12 +351,12 @@ class lib
     /**
      * Same as {@link file_prepare_draft_area()} but for users who do not have a local account (anonymous/guest).
      *
-     * @param int $draftitemid the id of the draft area to use, or 0 to create a new one, in which case this parameter is updated.
-     * @param int $contextid This parameter and the next two identify the file area to copy files from.
+     * @param int    $draftitemid the id of the draft area to use, or 0 to create a new one, in which case this parameter is updated.
+     * @param int    $contextid This parameter and the next two identify the file area to copy files from.
      * @param string $component
      * @param string $filearea helps indentify the file area.
-     * @param int $itemid helps identify the file area. Can be null if there are no files yet.
-     * @param array $options text and file options ('subdirs'=>false, 'forcehttps'=>false)
+     * @param int    $itemid helps identify the file area. Can be null if there are no files yet.
+     * @param array  $options text and file options ('subdirs'=>false, 'forcehttps'=>false)
      * @param string $text some html content that needs to have embedded links rewritten to point to the draft area.
      * @return string|null returns string if $text was passed in, the rewritten $text is returned. Otherwise NULL.
      */
@@ -428,7 +453,8 @@ class lib
      * @return int a random but available draft itemid that can be used to create a new draft
      * file area.
      */
-    public static function file_get_unused_draft_itemid_allow_guest_and_set_global() {
+    public static function file_get_unused_draft_itemid_allow_guest_and_set_global()
+    {
         global $CFG, $USER;
 
         // TODO: most likely will have to create a local user with limited permissions to avoid guest limitations...
@@ -439,7 +465,8 @@ class lib
 
         $fs = get_file_storage();
         $draftitemid = rand(1, 999999999);
-        while ($files = $fs->get_area_files($contextid, 'user', 'draft', $draftitemid)) {
+        while ($files = $fs->get_area_files($contextid, 'user', 'draft', $draftitemid))
+        {
             $draftitemid = rand(1, 999999999);
         }
 
@@ -542,7 +569,7 @@ class lib
         if (!in_array($new_value, $allowed_values))
         {
             throw new coding_exception(
-                sprintf("'$new_value' is not a valid value for property '%s' in '%s'", $property_name, static::class));
+                sprintf("'$new_value' is not a valid value for property '%s'", $property_name));
         }
         if ($current_value === $new_value)
         {
@@ -550,8 +577,7 @@ class lib
             {
                 debugging(
                     sprintf(
-                        '"%s"->"%s" is already "%s". This should not normally happen',
-                        self::class,
+                        '"%s" is already "%s". This should not normally happen',
                         $property_name,
                         $new_value),
                     DEBUG_DEVELOPER,
@@ -561,10 +587,9 @@ class lib
             {
                 throw new coding_exception(
                     sprintf(
-                        'Cannot set property "%s" - value is already "%s" in %s',
+                        'Cannot set property "%s" - value is already "%s"',
                         $property_name,
-                        $current_value,
-                        static::class));
+                        $current_value));
             }
         }
     }

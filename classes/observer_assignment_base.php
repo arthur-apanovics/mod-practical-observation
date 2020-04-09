@@ -86,4 +86,15 @@ class observer_assignment_base extends db_model_base
     {
         return (bool) $this->observation_accepted;
     }
+
+    public function get_learner_submission_base()
+    {
+        return new learner_submission_base($this->learner_submissionid);
+    }
+
+    public function get_observer_submission_base_or_null(): ?observer_submission_base
+    {
+        return observer_submission_base::read_by_condition_or_null(
+            [observer_submission::COL_OBSERVER_ASSIGNMENTID => $this->id]);
+    }
 }

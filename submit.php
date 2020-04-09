@@ -65,6 +65,7 @@ if ($learner_submissionid = optional_param('learner_submission_id', null, PARAM_
     // update attempt
     $attempt->set(learner_attempt::COL_TEXT, $attempt_editor['text']);
     $attempt->set(learner_attempt::COL_TEXT_FORMAT, $attempt_editor['format']);
+    $attempt->set(learner_attempt::COL_TIMESUBMITTED, time());
     $attempt->update();
 
     // save files
@@ -78,8 +79,7 @@ if ($learner_submissionid = optional_param('learner_submission_id', null, PARAM_
             OBSERVATION_MODULE_PATH . 'request.php',
             ['id' => $cmid, 'learner_submission_id' => $learner_submission->get_id_or_null()]));
 }
-
-
+/* ================================================================================================================== */
 else if ($observer_submissionid = optional_param('observer_submission_id', null, PARAM_INT))
 {
     // gather data from post request
@@ -122,18 +122,15 @@ else if ($observer_submissionid = optional_param('observer_submission_id', null,
             }
         }
 
-        $observer_feedback->set(observer_feedback::COL_STATUS, $observation_outcome['outcome']);
+        $observer_feedback->set(observer_feedback::COL_OUTCOME, $observation_outcome['outcome']);
         $observer_feedback->update();
+
+        $completed_count += ($observation_outcome['outcome'] == observer_feedback::OUTCOME_COMPLETE);
     }
 
-    if ($completed_count === $criteria_count)
-    {
-        $observation_submission_outcome = observer_submission::STATUS_COMPLETE;
-    }
-    else
-    {
-        $observation_submission_outcome = observer_submission::STATUS_NOT_COMPLETE;
-    }
+    $observation_submission_outcome = ($completed_count === $criteria_count)
+        ? observer_submission::OUTCOME_COMPLETE
+        : observer_submission::OUTCOME_NOT_COMPLETE;
 
     $observer_submission_base->submit($observation_submission_outcome);
 
@@ -143,16 +140,14 @@ else if ($observer_submissionid = optional_param('observer_submission_id', null,
             OBSERVATION_MODULE_PATH . 'observe.php',
             ['token' => $observer_assignment->get(observer_assignment::COL_TOKEN)]));
 }
-
-
+/* ================================================================================================================== */
 else if ($assessor_submissionid = optional_param('assessor_submission_id', null, PARAM_INT))
 {
     require_login();
 
     required_param('assessor_feedback_id', PARAM_INT);
 }
-
-
+/* ================================================================================================================== */
 else
 {
     throw new coding_exception('No submission id provided, cannot proceed with submission!');

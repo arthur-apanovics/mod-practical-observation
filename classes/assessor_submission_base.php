@@ -30,10 +30,10 @@ class assessor_submission_base extends db_model_base
 
     public const COL_ASSESSORID           = 'assessorid';
     public const COL_LEARNER_SUBMISSIONID = 'learner_submissionid';
-    public const COL_STATUS               = 'status';
+    public const COL_OUTCOME              = 'outcome';
 
-    public const STATUS_NOT_COMPLETE = 'not_complete';
-    public const STATUS_COMPLETE     = 'complete';
+    public const OUTCOME_NOT_COMPLETE = 'not_complete';
+    public const OUTCOME_COMPLETE     = 'complete';
 
     /**
      * @var int
@@ -44,19 +44,23 @@ class assessor_submission_base extends db_model_base
      */
     protected $learner_submissionid;
     /**
-     * ENUM ('requested_new_observation', 'not_complete', 'complete')
-     *
+     * One of:
+     * <ul>
+     * <li>null (not yet submitted)</li>
+     * <li>{@link OUTCOME_COMPLETE}</li>
+     * <li>{@link OUTCOME_NOT_COMPLETE}</li>
+     *</ul>
      * @var string
      */
-    protected $status;
+    protected $outcome;
 
     public function set(string $prop, $value, bool $save = false): db_model_base
     {
-        if ($prop == self::COL_STATUS)
+        if ($prop == self::COL_OUTCOME)
         {
             // validate status is correctly set
-            $allowed = [self::STATUS_NOT_COMPLETE, self::STATUS_COMPLETE];
-            lib::validate_prop(self::COL_STATUS, $this->status, $value, $allowed, false);
+            $allowed = [self::OUTCOME_NOT_COMPLETE, self::OUTCOME_COMPLETE];
+            lib::validate_prop(self::COL_OUTCOME, $this->outcome, $value, $allowed, false);
         }
 
         return parent::set($prop, $value, $save);

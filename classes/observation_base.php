@@ -224,6 +224,77 @@ class observation_base extends db_model_base
             get_coursemodule_from_instance(OBSERVATION, $this->id, $this->course, false, MUST_EXIST));
     }
 
+    public function get_tasks()
+    {
+        return task_base::read_all_by_condition([task::COL_OBSERVATIONID => $this->id]);
+    }
+
+    public function get_task_ids()
+    {
+        global $DB;
+
+        // using $DB will be faster in this case
+        $ids = $DB->get_fieldset_select(task::TABLE, 'id',
+            sprintf('%s = ?', task::COL_OBSERVATIONID), [$this->id]);
+
+        return empty($ids) ? [] : $ids;
+    }
+
+    public function get_task_count()
+    {
+        global $DB;
+
+        return $DB->count_records(task::TABLE, [task::COL_OBSERVATIONID => $this->id]);
+    }
+
+    /**
+     * @param int $userid
+     * @return learner_submission_base[]
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     * @throws coding_exception
+     */
+    public function get_learner_submissions(int $userid): array
+    {
+        $res = [];
+        foreach (self::get_tasks() as $task)
+        {
+            $res[] = learner_submission_base::read_by_condition_or_null(
+                [learner_submission::COL_TASKID => $task->id, learner_submission::COL_USERID => $userid]);
+        }
+
+        return $res;
+    }
+
+    /**
+     * @return learner_submission_base[]
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     * @throws coding_exception
+     */
+    public function get_all_submisisons(): array
+    {
+        $submisisons = [];
+        foreach ($this->get_task_ids() as $id)
+        {
+            $submisisons[$id] = learner_submission_base::read_by_condition_or_null(
+                [learner_submission::COL_TASKID => $id]);
+        }
+
+        return $submisisons;
+    }
+
+    public function is_observed(int $userid): int
+    {
+        $observed = 0;
+        foreach ($this->get_learner_submissions($userid) as $learner_submission)
+        {
+            $observed += $learner_submission->is_observation_complete();
+        }
+
+        return ($observed == $this->get_task_count());
+    }
+
     /**
      * @return array ['column_name' =>
      *                 [

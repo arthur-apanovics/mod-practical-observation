@@ -42,7 +42,20 @@ class task extends task_base implements templateable
     {
         parent::__construct($id_or_record);
 
-        $this->criteria = criteria::read_all_by_condition([criteria::COL_TASKID => $this->id], criteria::COL_SEQUENCE);
+        $criterias =
+            criteria_base::read_all_by_condition([criteria::COL_TASKID => $this->id], criteria::COL_SEQUENCE);
+
+        if (!empty($criterias))
+        {
+            foreach ($criterias as $criteria_base)
+            {
+                $this->criteria[] = new criteria($criteria_base, $userid);
+            }
+        }
+        else
+        {
+            $this->criteria = [];
+        }
 
         $params = [learner_submission::COL_TASKID => $this->id];
         if (!is_null($userid))
@@ -67,6 +80,22 @@ class task extends task_base implements templateable
         }
 
         return false;
+    }
+
+    public function get_learner_submissions(): array
+    {
+        return $this->learner_submissions;
+    }
+
+    /**
+     * @param int $userid
+     * @return mixed
+     * @throws coding_exception
+     */
+    public function get_current_learner_submission_or_null(int $userid): ?learner_submission
+    {
+        return lib::find_in_assoc_array_key_value_or_null(
+            $this->learner_submissions, learner_submission::COL_USERID, $userid);
     }
 
     /**
@@ -124,17 +153,6 @@ class task extends task_base implements templateable
         }
 
         return $submission;
-    }
-
-    /**
-     * @param int $userid
-     * @return mixed
-     * @throws coding_exception
-     */
-    public function get_current_learner_submission_or_null(int $userid): ?learner_submission
-    {
-        return lib::find_in_assoc_array_key_value_or_null(
-            $this->learner_submissions, learner_submission::COL_USERID, $userid);
     }
 
     /**

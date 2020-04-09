@@ -56,41 +56,11 @@ class learner_submission extends learner_submission_base implements templateable
 
         $this->assessor_submission = assessor_submission::read_by_condition_or_null(
             [assessor_submission::COL_LEARNER_SUBMISSIONID => $this->id],
-            $this->is_observation_complete() // must exist if observation complete
+            $this->is_assessment_in_progress() // must exist if observation complete
         );
     }
 
-    public function is_observation_complete()
-    {
-        $this->validate_status();
-
-        // if status is either one of these, then observation is complete
-        $complete_statuses = [
-            self::STATUS_ASSESSMENT_PENDING,
-            self::STATUS_ASSESSMENT_IN_PROGRESS,
-            self::STATUS_ASSESSMENT_INCOMPLETE, // todo: will this status ever be used?
-        ];
-
-        return in_array($this->status, $complete_statuses);
-    }
-
-    private function validate_status(): void
-    {
-        if (empty($this->status))
-        {
-            throw new coding_exception(
-                sprintf('Accessing observation status on an uninitialized %s class', self::class));
-        }
-    }
-
-    public function is_assessment_complete()
-    {
-        $this->validate_status();
-
-        return $this->status === self::STATUS_COMPLETE;
-    }
-
-    public function learner_can_attempt()
+    public function learner_can_attempt_or_create()
     {
         switch ($this->status)
         {
@@ -99,7 +69,7 @@ class learner_submission extends learner_submission_base implements templateable
             case self::STATUS_LEARNER_PENDING:
                 if (!$this->has_attempts())
                 {
-                    // no attempts ever - ok
+                    // no attempts, ever - ok
                     $this->create_new_attempt(true);
 
                     return true;
@@ -121,15 +91,20 @@ class learner_submission extends learner_submission_base implements templateable
                         // let a dev know if he/she is watching
                         debugging(
                             sprintf(
-                                'learner submission status is set to "pending", however, an attempt already exists for submission id %n!',
+                                'learner submission status is set to "pending", however, an attempt already exists for submission id %d!',
                                 $this->id), DEBUG_DEVELOPER, debug_backtrace());
 
                         return true;
                     }
                     else
                     {
+                        // NOT OK
                         // latest attempt has been submitted and status indicates that
                         // another attempt has to be made by learner
+                        debugging(
+                            'attempt submitted and observed but status is set to pending, creating new attempt',
+                            DEBUG_DEVELOPER, debug_backtrace());
+
                         $this->create_new_attempt(true);
 
                         return true;
@@ -140,12 +115,19 @@ class learner_submission extends learner_submission_base implements templateable
             case self::STATUS_LEARNER_IN_PROGRESS:
                 if (!$this->get_latest_attempt_or_null())
                 {
+                    // NOT OK
                     debugging(
                         'learner submission is set to "learner in progress" but no attempt exists',
                         DEBUG_DEVELOPER, debug_backtrace());
 
                     $this->create_new_attempt();
                 }
+
+                return true;
+                break;
+
+            case self::STATUS_OBSERVATION_INCOMPLETE:
+                $this->create_new_attempt(true);
 
                 return true;
                 break;
@@ -265,8 +247,6 @@ class learner_submission extends learner_submission_base implements templateable
         {
             // no assignment yet, create
             $assignment = observer_assignment::create_assignment($this->id, $submitted_observer->get_id_or_null());
-            // update learner submission status
-            $this->update_status_and_save(self::STATUS_OBSERVATION_PENDING);
         }
 
         // attempt will be already submitted if learner
@@ -281,7 +261,8 @@ class learner_submission extends learner_submission_base implements templateable
         // TODO: EVENT
 
         // TODO: SEND EMAIL AND NOTIFICATION
-        $review_url = new moodle_url(OBSERVATION_MODULE_PATH . 'observe.php',
+        $review_url = new moodle_url(
+            OBSERVATION_MODULE_PATH . 'observe.php',
             ['token' => $assignment->get(observer_assignment::COL_TOKEN)]);
         // send email
         // send notification
@@ -391,23 +372,6 @@ class learner_submission extends learner_submission_base implements templateable
                 WHERE ls.id = ?';
 
         return $DB->get_field_sql($sql, [$this->id], MUST_EXIST);
-    }
-
-    public function is_observation_pending_or_in_progress()
-    {
-        $yes = [self::STATUS_OBSERVATION_PENDING, self::STATUS_OBSERVATION_IN_PROGRESS];
-
-        return in_array($this->status, $yes);
-    }
-
-    public function is_observation_in_progress()
-    {
-        return $this->status == self::STATUS_OBSERVATION_IN_PROGRESS;
-    }
-
-    public function is_observation_pending()
-    {
-        return $this->status == self::STATUS_OBSERVATION_PENDING;
     }
 
     /**

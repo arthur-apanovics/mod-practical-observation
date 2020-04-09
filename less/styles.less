@@ -199,7 +199,6 @@ body.path-mod-observation {
   .feedback-email {
     margin-top: 5px;
     margin-right: 8px;
-    flex: 0 0 14%;
     align-items: flex-end;
   }
 
@@ -400,46 +399,49 @@ body.observation-task {
 }
 
 // observer details table
-table.observer-details {
+table {
+  &.observer-details,
+  &.submissions-summary {
 
-  .border-wrapper();
-  text-align: left;
-  line-height: 40px;
-  border-collapse: separate;
-  border-spacing: 0;
-  width: 100%;
-  margin-bottom: 1em;
+    .border-wrapper();
+    text-align: left;
+    line-height: 40px;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    margin-bottom: 1em;
 
-  // table header
-  thead tr:first-child {
-    color: #fff;
-    background-color: @border-wrapper-color;
-    border: none;
-  }
+    // table header
+    thead tr:first-child {
+      color: #fff;
+      background-color: @border-wrapper-color;
+      border: none;
+    }
 
-  th:first-child,
-  td:first-child {
-    padding: 0 15px 0 20px;
-  }
+    th:first-child,
+    td:first-child {
+      padding: 0 15px 0 20px;
+    }
 
-  th {
-    font-weight: 500;
-  }
+    th {
+      font-weight: 500;
+    }
 
-  thead tr:last-child th {
-    border-bottom: 3px solid @border-wrapper-color;
-  }
+    thead tr:last-child th {
+      border-bottom: 3px solid @border-wrapper-color;
+    }
 
-  tbody tr:last-child td {
-    border: none;
-  }
+    tbody tr:last-child td {
+      border: none;
+    }
 
-  tbody td {
-    border-bottom: 1px solid @border-wrapper-color;
-  }
+    tbody td {
+      border-bottom: 1px solid @border-wrapper-color;
+    }
 
-  td:last-child {
-    padding-right: 10px;
+    td:last-child {
+      padding-right: 10px;
+    }
   }
 }
 

@@ -24,6 +24,7 @@ namespace mod_observation;
 
 use cm_info;
 use coding_exception;
+use context_module;
 use core_user;
 use dml_exception;
 use dml_missing_record_exception;
@@ -46,6 +47,13 @@ class observation extends observation_base implements templateable
      * @var task[]
      */
     private $tasks;
+
+    /**
+     * True if observation is filtered by userid or taskid
+     *
+     * @var bool
+     */
+    private $is_filtered = false;
 
     /**
      * observation_instance constructor.
@@ -93,6 +101,8 @@ class observation extends observation_base implements templateable
             // avoid 'invalid argument' warnings
             $this->tasks = [];
         }
+
+        $this->is_filtered = (!is_null($userid) || !is_null($taskid));
     }
 
     public function get_cm(): cm_info
@@ -112,6 +122,60 @@ class observation extends observation_base implements templateable
         $this->deleted = true;
 
         return $this->update();
+    }
+
+    public function get_tasks()
+    {
+        return $this->tasks;
+    }
+
+    /**
+     * @param int $userid
+     * @return learner_submission[]
+     * @throws coding_exception
+     */
+    public function get_learner_submissions(int $userid): array
+    {
+        $submissions = [];
+        foreach ($this->tasks as $task)
+        {
+            $submissions[] = $task->get_current_learner_submission_or_null($userid);
+        }
+
+        return $submissions;
+    }
+
+    /**
+     * null NOT included
+     *
+     * @return learner_submission[]
+     */
+    public function get_all_submisisons(): array
+    {
+        global $USER;
+
+        // double check user has required capabilities
+        $context = context_module::instance($this->get_cm()->id);
+        if (!has_any_capability([self::CAP_VIEWSUBMISSIONS, self::CAP_ASSESS], $context))
+        {
+            throw new coding_exception('You are not permitted to view all submissions');
+        }
+
+        $submissions = [];
+        if ($this->is_filtered)
+        {
+            $submissions = learner_submission::to_class_instances(
+                parent::get_all_submisisons());
+        }
+        else
+        {
+            foreach ($this->tasks as $task)
+            {
+                $submissions[] = $task->get_learner_submissions();
+            }
+        }
+
+        return $submissions;
     }
 
     /**
@@ -137,11 +201,6 @@ class observation extends observation_base implements templateable
         }
 
         return true;
-    }
-
-    public function get_tasks()
-    {
-        return $this->tasks;
     }
 
     public function create_task(task_base $task)
@@ -213,6 +272,51 @@ class observation extends observation_base implements templateable
         }
 
         return true;
+    }
+
+    public function all_tasks_no_learner_action_required(int $userid)
+    {
+        foreach ($this->tasks as $task)
+        {
+            if ($submission = $task->get_current_learner_submission_or_null($userid))
+            {
+                // has a submission
+                if ($submission->is_learner_action_required())
+                {
+                    // nothing for learner to do
+                    continue;
+                }
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public function export_submissions_summary_template_data(): array
+    {
+        $data = [];
+        foreach ($this->get_all_submisisons() as $submisison)
+        {
+            $attempt = $submisison->get_latest_attempt_or_null();
+            $total = $this->get_task_count();
+            $observed = array_reduce(
+                $this->tasks, function (int $carry, task $task) use ($submisison)
+            {
+                return ($carry += $task->is_observed($submisison->get_userid()));
+            }, 0);
+
+            $data[] = [
+                'userid'   => $submisison->get_userid(),
+                'name'     => fullname(core_user::get_user($submisison->get_userid())),
+                'attempt'  => !is_null($attempt) ? $attempt->get_last_attemptnumber_in_submission() : '-',
+                'observed' => "$observed/$total",
+                'complete' => $submisison->is_assessment_complete(),
+            ];
+        }
+
+        return $data;
     }
 
     /**

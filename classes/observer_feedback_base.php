@@ -31,12 +31,12 @@ class observer_feedback_base extends db_model_base
     public const COL_ATTEMPTID             = 'attemptid';
     public const COL_CRITERIAID            = 'criteriaid';
     public const COL_OBSERVER_SUBMISSIONID = 'observer_submissionid';
-    public const COL_STATUS                = 'status';
+    public const COL_OUTCOME               = 'outcome';
     public const COL_TEXT                  = 'text';
     public const COL_TEXT_FORMAT           = 'text_format';
 
-    public const STATUS_NOT_COMPLETE = 'not_complete';
-    public const STATUS_COMPLETE     = 'complete';
+    public const OUTCOME_NOT_COMPLETE = 'not_complete';
+    public const OUTCOME_COMPLETE     = 'complete';
 
     /**
      * @var int
@@ -54,13 +54,13 @@ class observer_feedback_base extends db_model_base
      * One of:
      * <ul>
      * <li>null (null means no decision has been made yet)</li>
-     * <li>{@link STATUS_NOT_COMPLETE},</li>
-     * <li>{@link STATUS_COMPLETE}</li>
+     * <li>{@link OUTCOME_NOT_COMPLETE},</li>
+     * <li>{@link OUTCOME_COMPLETE}</li>
      *</ul>
      *
      * @var string|null
      */
-    protected $status;
+    protected $outcome;
     /**
      * null when feedback not requried
      *
@@ -76,11 +76,11 @@ class observer_feedback_base extends db_model_base
 
     public function set(string $prop, $value, bool $save = false): db_model_base
     {
-        if ($prop == self::COL_STATUS)
+        if ($prop == self::COL_OUTCOME)
         {
             // validate status is correctly set
-            $allowed = [self::STATUS_COMPLETE, self::STATUS_NOT_COMPLETE];
-            lib::validate_prop(self::COL_STATUS, $this->status, $value, $allowed, true);
+            $allowed = [self::OUTCOME_COMPLETE, self::OUTCOME_NOT_COMPLETE];
+            lib::validate_prop(self::COL_OUTCOME, $this->outcome, $value, $allowed, true);
         }
 
         return parent::set($prop, $value, $save);

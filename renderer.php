@@ -270,25 +270,39 @@ class mod_observation_renderer extends plugin_renderer_base
         global $USER;
 
         $template_data = $observation->export_template_data();
-        $caps = $template_data['capabilities'];
+        $capabilities = $template_data['capabilities'];
         $out = '';
 
         $out .= $this->activity_header($template_data);
 
         // assessor view
-        if ($caps['can_assess'] || $caps['can_viewsubmissions'])
+        if ($capabilities['can_assess'] || $capabilities['can_viewsubmissions'])
         {
-            // TODO: ASSESSOR TABLE
+            $template_data['extra']['submission_summary_data'] =
+                $observation->export_submissions_summary_template_data();
+
             $out .= $this->render_from_template('part-assessor_table', $template_data);
         }
         // learner view or preview
-        else if ($caps['can_submit'] || $caps['can_view'])
+        else if ($capabilities['can_submit'] || $capabilities['can_view'])
         {
             if ($observation->all_tasks_observation_pending_or_in_progress($USER->id))
             {
                 notification::info(
                     get_string(
-                        'notification:task_wait_for_observers', 'observation'));
+                        'notification:activity_wait_for_observers', 'observation'));
+            }
+            else if ($observation->all_tasks_no_learner_action_required($USER->id))
+            {
+                notification::info(
+                    get_string(
+                        'notification:activity_wait_for_mixed', 'observation'));
+            }
+            else if ($observation->is_activity_complete($USER->id))
+            {
+                notification::info(
+                    get_string(
+                        'notification:activity_complete', 'observation'));
             }
 
             // submission/preview logic in template
@@ -296,7 +310,7 @@ class mod_observation_renderer extends plugin_renderer_base
         }
 
         // validation for 'managers'
-        if ($caps['can_manage'])
+        if ($capabilities['can_manage'])
         {
             // check all tasks have criteria
             if (!$observation->all_tasks_have_criteria())
@@ -360,15 +374,15 @@ class mod_observation_renderer extends plugin_renderer_base
                 task::COL_NAME => $template_data['name'],
                 'intro'        => $template_data['intro_learner']
             ];
-        $caps = $observation_base->export_capabilities();
+        $capabilities = $observation_base->export_capabilities();
         $out = '';
 
-        if ($caps['can_submit'])
+        if ($capabilities['can_submit'])
         {
             // learner submission
             $submission = $task->get_current_learner_submission_or_create($USER->id);
 
-            if ($submission->learner_can_attempt())
+            if ($submission->learner_can_attempt_or_create())
             {
                 $attempt = $submission->get_latest_attempt_or_null();
                 $context = context_module::instance($cm->id);
@@ -438,7 +452,7 @@ class mod_observation_renderer extends plugin_renderer_base
 
             $out .= $this->render_from_template('view-task_learner', $template_data);
         }
-        else if ($caps['can_view'])
+        else if ($capabilities['can_view'])
         {
             // preview
             $out .= $this->render_from_template('task_view_preview', $template_data);
@@ -702,6 +716,11 @@ class mod_observation_renderer extends plugin_renderer_base
     public function observer_completed_view()
     {
         return $this->render_from_template('view-observer_completed', null);
+    }
+
+    public function assess_activity_view(observation $observation)
+    {
+        throw new coding_exception('not implemented');
     }
 
     /**

@@ -146,7 +146,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="observer_assignmentid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timestarted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="status" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="Outcome of observation, NULL if not submitted yet"/>
+        <FIELD NAME="outcome" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="Outcome of observation, NULL if not yet submitted"/>
         <FIELD NAME="timesubmitted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
@@ -160,7 +160,7 @@
         <FIELD NAME="attemptid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="criteriaid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="observer_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="status" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="null means no decision has been made yet"/>
+        <FIELD NAME="outcome" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="null means no decision has been made yet"/>
         <FIELD NAME="text" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="null when feedback not requried"/>
         <FIELD NAME="text_format" TYPE="int" LENGTH="2" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="null when feedback not requried"/>
       </FIELDS>
@@ -181,7 +181,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="assessorid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="learner_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="status" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="outcome" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="null if not yet graded"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
