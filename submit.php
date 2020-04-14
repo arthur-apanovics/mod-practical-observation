@@ -56,6 +56,7 @@ if ($learner_submissionid = optional_param('learner_submission_id', null, PARAM_
     $attempt = new learner_attempt_base($attempt_id);
 
     // get editor content
+    // TODO: SANITISE INPUT!!!!!
     list($input_base) = lib::get_editor_attributes_for_class(learner_attempt::class);
     $attempt_editor = required_param_array($input_base, PARAM_RAW);
 

@@ -284,7 +284,14 @@ class observation_base extends db_model_base
         return $submisisons;
     }
 
-    public function is_observed(int $userid): int
+    /**
+     * @param int $userid
+     * @return bool
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     * @throws coding_exception
+     */
+    public function is_observed(int $userid): bool
     {
         $observed = 0;
         foreach ($this->get_learner_submissions($userid) as $learner_submission)

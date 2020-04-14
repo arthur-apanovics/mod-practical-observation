@@ -2,6 +2,17 @@
 .border-wrapper(@thickness:2px, @color: @border-wrapper-color) {
   border: @thickness solid @color;
   border-radius: .25em;
+
+  margin-bottom: 3em;
+}
+
+.task-highlight(@color) {
+  box-shadow: 5px 0 0 0 @color;
+  transition: box-shadow 0.2s ease-out;
+
+  &:hover {
+    box-shadow: 15px 0 0 0 @color;
+  }
 }
 
 /*[id ^= mod-observation-],
@@ -82,16 +93,32 @@ body.path-mod-observation {
     padding-left: 10px;
   }
 
-  .title-note {
-    flex: 1;
-    font-size: 15px;
-    margin-top: 20px;
-    margin-bottom: 10px;
-  }
+  .task {
+    &-header {
+      //.border-wrapper();
+      margin-bottom: 2em;
+    }
 
-  .task-header {
-    //.border-wrapper();
-    margin-bottom: 2em;
+    &-action {
+      flex: 1;
+      font-size: 15px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    &.status {
+      &-pending {
+        .task-highlight(#5c809e);
+      }
+
+      &-complete {
+        .task-highlight(#589e44);
+      }
+
+      &-not_complete {
+        .task-highlight(#9e0c00);
+      }
+    }
   }
 
   .intro-container { //general container for various intro's in activity
@@ -109,12 +136,10 @@ body.path-mod-observation {
 
   .wrapper-obs-activity {
     .border-wrapper();
-    margin-bottom: 40px;
   }
 
-  .wrapper-task {
+  .wrapper-border {
     .border-wrapper();
-    margin-bottom: 30px;
   }
 
   .criteria-list {
@@ -139,6 +164,18 @@ body.path-mod-observation {
 
   .editor-container {
     padding: 1em 1em 1em 4em;
+
+    > .assessment-outcome {
+      margin: 1em 0;
+
+      > label {
+        font-weight: bold;
+      }
+
+      > select {
+        float: right;
+      }
+    }
   }
 
   .new-attempt {
@@ -183,23 +220,37 @@ body.path-mod-observation {
     margin: 0 5px 6px 69px;
   }
 
-  .feedback-desc {
-    margin: 0 0;
-    padding: 5px 5px;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    flex: 0 0 50%;
-  }
+  .feedback {
+    &-desc {
+      margin: 0 0;
+      padding: 5px 5px;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      flex: 0 0 50%;
+    }
 
-  .feedback-attempt-heading {
-    margin-left: 69px;
-    margin-top: 18px;
-  }
+    &-attempt-heading {
+      margin-left: 69px;
+      margin-top: 18px;
+    }
 
-  .feedback-email {
-    margin-top: 5px;
-    margin-right: 8px;
-    align-items: flex-end;
+    &-email {
+      margin-top: 5px;
+      margin-right: 8px;
+      align-items: flex-end;
+    }
+
+    &-outcome {
+      &-pending {
+        // TODO
+      }
+      &-complete {
+        // TODO
+      }
+      &-not_complete {
+        // TODO
+      }
+    }
   }
 
   .timestamp {
@@ -446,11 +497,14 @@ table {
 }
 
 // task page
-body.observation-task {
+body.observation-task,
+body.observation-task-assess {
   // observer details partial
-  div.observer-details-wrapper {
+  .observer-details-wrapper {
+    margin-bottom: 3em;
+
     > .header {
-      h5, #change-observer {
+      h5, #change-observer, #last-assigned {
         display: inline-block;
       }
     }

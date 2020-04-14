@@ -98,19 +98,26 @@ class learner_submission_base extends db_model_base
         return in_array($this->status, $complete_statuses);
     }
 
-    private function validate_status(): void
+    public function is_assessment_started_inprogress_or_complete()
     {
-        if (empty($this->status))
-        {
-            throw new coding_exception(
-                sprintf('Accessing observation status on an uninitialized %s class', self::class));
-        }
+        $this->validate_status();
+        return $this->status === self::STATUS_ASSESSMENT_IN_PROGRESS
+            || $this->status === self::STATUS_ASSESSMENT_INCOMPLETE
+            || $this->status === self::STATUS_COMPLETE;
+    }
+
+    public function is_assessment_in_progress_or_complete()
+    {
+        $this->validate_status();
+        return $this->status === self::STATUS_ASSESSMENT_IN_PROGRESS
+            || $this->status === self::STATUS_COMPLETE;
     }
 
     public function is_assessment_in_progress_or_incomplete()
     {
         $this->validate_status();
-        return $this->status === self::STATUS_ASSESSMENT_IN_PROGRESS || $this->status === self::STATUS_ASSESSMENT_INCOMPLETE;
+        return $this->status === self::STATUS_ASSESSMENT_IN_PROGRESS
+            || $this->status === self::STATUS_ASSESSMENT_INCOMPLETE;
     }
 
     public function is_assessment_in_progress()
@@ -196,6 +203,35 @@ class learner_submission_base extends db_model_base
         }
 
         return $attempts;
+    }
+
+    public function get_latest_learner_attempt_or_null(): ?learner_attempt_base
+    {
+        global $DB;
+
+        $sql = 'SELECT * 
+                FROM {' . learner_attempt::TABLE . '}
+                WHERE ' . learner_attempt::COL_LEARNER_SUBMISSIONID . ' = ?
+                AND ' . learner_attempt::COL_ATTEMPT_NUMBER . ' = ?';
+        $record = $DB->get_record_sql($sql, [$this->id, $this->get_last_attemptnumber()]);
+
+        return $record === false ? null : new learner_attempt_base($record);
+    }
+
+    /**
+     * @return int 0 if no attempts
+     * @throws \dml_exception
+     */
+    public function get_last_attemptnumber(): int
+    {
+        global $DB;
+
+        $sql = 'SELECT max(' . learner_attempt::COL_ATTEMPT_NUMBER . ')
+        FROM {' . learner_attempt::TABLE . '}
+        WHERE ' . learner_attempt::COL_LEARNER_SUBMISSIONID . ' = ?';
+        $res = $DB->get_field_sql($sql, [$this->id]);
+
+        return $res === false ? 0 : $res;
     }
 
     /**
@@ -288,5 +324,14 @@ class learner_submission_base extends db_model_base
         }
 
         return parent::set($prop, $value, $save);
+    }
+
+    private function validate_status(): void
+    {
+        if (empty($this->status))
+        {
+            throw new coding_exception(
+                sprintf('Accessing observation status on an uninitialized %s class', self::class));
+        }
     }
 }

@@ -54,6 +54,12 @@ class assessor_submission_base extends db_model_base
      */
     protected $outcome;
 
+    public function get_learner_submission()
+    {
+        return learner_submission_base::read_by_condition_or_null(
+            [learner_submission::COL_ID => $this->learner_submissionid], true);
+    }
+
     public function set(string $prop, $value, bool $save = false): db_model_base
     {
         if ($prop == self::COL_OUTCOME)

@@ -159,21 +159,28 @@ abstract class db_model_base implements crud
 
     /**
      * Fetch record from database and instantiate class.
-     * @param int $id
-     * @return static|false false if record not found
+     * @param int  $id
+     * @param bool $must_exist
+     * @return static|null null if record not found
      *
-     * @throws dml_exception
      * @throws coding_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
      */
-    public static function read(int $id)
+    public static function read_or_null(int $id, bool $must_exist = false): ?self
     {
         if ($record = self::read_record($id))
         {
             // overwrite with class instance
             $record = new static($record);
         }
+        else if ($must_exist)
+        {
+            throw new coding_exception(
+                sprintf('%s with id "%d" does not exist', static::class, $id));
+        }
 
-        return $record;
+        return $record === false ? null : $record;
     }
 
     /**

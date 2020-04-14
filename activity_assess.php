@@ -20,38 +20,39 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_observation\event\course_module_viewed;
 use mod_observation\observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('lib.php');
 
 $cmid = required_param('id', PARAM_INT);
+$learnerid = required_param('learnerid', PARAM_INT);
 
 list($course, $cm) = get_course_and_cm_from_cmid($cmid);
 $context = context_module::instance($cmid);
 
-require_login($course, true, $cm);
+// TODO: should cap_view_submisisons be allowed here & task view?
+require_capability(observation::CAP_ASSESS, $context);
+require_login($course, false, $cm);
 
 // TODO: Event
 
-$observation = new observation($cm, $USER->id);
-$name        = $observation->get_formatted_name();
+$observation = new observation($cm, $learnerid);
+$name = $observation->get_formatted_name();
 
 // Print the page header.
-$PAGE->set_url('/mod/observation/activity_assess.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/observation/activity_assess.php', array('id' => $cm->id, 'learnerid' => $learnerid));
 $PAGE->set_title($name);
 $PAGE->set_heading(format_string($course->fullname));
 
-$PAGE->add_body_class('observation-view');
+$PAGE->add_body_class('observation-view-assess');
 
 // Output starts here.
 echo $OUTPUT->header();
 
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
-
-echo $renderer->assess_activity_view($observation);
+echo $renderer->view_activity_assess($observation, $learnerid);
 
 // Finish the page.
 echo $OUTPUT->footer();

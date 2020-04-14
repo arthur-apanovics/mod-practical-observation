@@ -278,12 +278,46 @@ class learner_submission extends learner_submission_base implements templateable
      */
     public function get_active_observer_assignment_or_null(): ?observer_assignment
     {
-        return lib::find_in_assoc_array_criteria_or_null(
+        return lib::find_in_assoc_array_by_criteria_or_null(
             $this->observer_assignments,
             [
                 observer_assignment::COL_LEARNER_SUBMISSIONID => $this->id,
                 observer_assignment::COL_ACTIVE               => true
             ]);
+    }
+
+    public function get_assessor_submission_or_null(): ?assessor_submission
+    {
+        return $this->assessor_submission;
+    }
+
+    public function get_assessor_submission_or_create(int $assessorid = null): assessor_submission
+    {
+        global $USER;
+
+        if (!$submission = $this->get_assessor_submission_or_null())
+        {
+            $userid = is_null($assessorid) ? $USER->id : $assessorid;
+
+            $submission = new assessor_submission_base();
+            $submission->set(assessor_submission::COL_ASSESSORID, $userid);
+            $submission->set(assessor_submission::COL_LEARNER_SUBMISSIONID, $this->id);
+            // COL_OUTCOME intentionally null
+
+            $submission = new assessor_submission($submission->create());
+        }
+        else if (!is_null($assessorid) && $submission->get(assessor_submission::COL_ASSESSORID) != $assessorid)
+        {
+            debugging(
+                sprintf(
+                    'Provided assessor id "%d" does not match existing assessor id "%d" in submission with id "%d"',
+                    $assessorid,
+                    $submission->get(assessor_submission::COL_ASSESSORID),
+                    $submission->get_id_or_null()
+                ));
+        }
+
+        return $submission;
     }
 
     /**

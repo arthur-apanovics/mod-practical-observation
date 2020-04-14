@@ -130,6 +130,24 @@ class observation extends observation_base implements templateable
     }
 
     /**
+     * Get task by id from instantiated Observation class. WILL THROW EXCEPTION if task not found
+     *
+     * @param $taskid
+     * @return mixed
+     * @throws coding_exception
+     */
+    public function get_task($taskid): task
+    {
+        if (!$task = lib::find_in_assoc_array_by_key_value_or_null($this->tasks, task::COL_ID, $taskid))
+        {
+            throw new coding_exception(
+                sprintf('Task with id %d does not exist in observation with id %d', $taskid, $this->id));
+        }
+
+        return $task;
+    }
+
+    /**
      * @param int $userid
      * @return learner_submission[]
      * @throws coding_exception
@@ -139,7 +157,7 @@ class observation extends observation_base implements templateable
         $submissions = [];
         foreach ($this->tasks as $task)
         {
-            $submissions[] = $task->get_current_learner_submission_or_null($userid);
+            $submissions[] = $task->get_learner_submission_or_null($userid);
         }
 
         return $submissions;
@@ -203,6 +221,28 @@ class observation extends observation_base implements templateable
         return true;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function is_observed(int $userid): bool
+    {
+        if (empty($this->tasks))
+        {
+            // nothing to observe
+            return false;
+        }
+
+        foreach ($this->tasks as $task)
+        {
+            if (!$task->is_observed($userid))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public function create_task(task_base $task)
     {
         if (!$task->get_id_or_null())
@@ -257,7 +297,7 @@ class observation extends observation_base implements templateable
     {
         foreach ($this->tasks as $task)
         {
-            if ($submission = $task->get_current_learner_submission_or_null($userid))
+            if ($submission = $task->get_learner_submission_or_null($userid))
             {
                 // has a submission
                 if ($submission->get_active_observer_assignment_or_null()
@@ -278,7 +318,7 @@ class observation extends observation_base implements templateable
     {
         foreach ($this->tasks as $task)
         {
-            if ($submission = $task->get_current_learner_submission_or_null($userid))
+            if ($submission = $task->get_learner_submission_or_null($userid))
             {
                 // has a submission
                 if ($submission->is_learner_action_required())

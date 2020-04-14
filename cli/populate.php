@@ -114,7 +114,7 @@ for ($i = 1; $i < $num_of_tasks; $i++)
 foreach ($task_names as $index => $task_name)
 {
     // check if task with same name already exists
-    if (!$task = lib::find_in_assoc_array_key_value_or_null($existing_tasks, task::COL_NAME, $task_name))
+    if (!$task = lib::find_in_assoc_array_by_key_value_or_null($existing_tasks, task::COL_NAME, $task_name))
     {
         $task = new task_base();
         $task->set(task::COL_NAME, $task_name);

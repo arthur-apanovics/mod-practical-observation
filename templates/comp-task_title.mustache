@@ -1,41 +1,55 @@
-<div class="wrapper">
+{{! TODO: task status }}
+<div class="task status-{{extra.task_status}} wrapper">
+    {{! task title }}
     <div class="flex-title">
-
         <div class="obs-main-title">
             <h3>{{name}}</h3>
         </div>
-
-        <div class="title-note">
-            <a href="{{{module_root}}}/task.php?id={{cmid}}&taskid={{id}}">
+        {{! task action link }}
+        <div class="task-action">
+            {{! start task action link }}
+            {{! get link based on capability }}
+            {{#capabilities.can_assess}}
+                <a href=" {{{module_root}}}/task_assess.php?id={{cmid}}&taskid={{id}}&learnerid={{extra.learnerid}}">
+            {{/capabilities.can_assess}}
+            {{^capabilities.can_assess}}
+                <a href=" {{{module_root}}}/task.php?id={{cmid}}&taskid={{id}}">
+            {{/capabilities.can_assess}}
             {{! set correct text for btn}}
-
+            {{! if empty($submissions) }}
             {{^has_submission}}
-            {{! check if submission or preview}}
+                {{! if assessor }}
+                {{#capabilities.can_assess}}
+                    {{#str}}view_task, observation{{/str}}
+                {{/capabilities.can_assess}}
+                {{! if learner }}
                 {{#capabilities.can_submit}}
-                    {{#str}}start, observation{{/str}}
+                    {{#str}}start_task, observation{{/str}}
                 {{/capabilities.can_submit}}
-
+                {{! else }}
                 {{^capabilities.can_submit}}
-                {{! can't submit, check if can preview }}
-
+                {{! if can view }}
                     {{#capabilities.can_view}}
-                        {{#str}}preview, observation{{/str}}
+                        {{#str}}preview_task, observation{{/str}}
                     {{/capabilities.can_view}}
-
                 {{/capabilities.can_submit}}
             {{/has_submission}}
-
+            {{! if !empty($submissions) }}
             {{#has_submission}}
-                {{#str}}review, observation{{/str}}
+                {{! if assessor }}
+                {{#capabilities.can_assess}}
+                    {{#str}}assess_task, observation{{/str}}
+                {{/capabilities.can_assess}}
+                {{! else }}
+                {{^capabilities.can_assess}}
+                    {{#str}}review_task, observation{{/str}}
+                {{/capabilities.can_assess}}
             {{/has_submission}}
-
-            </a>
+            </a> {{! close task action link }}
         </div>
-
     </div>
-
+    {{! task description }}
     <div class="title-desc">
         <p>{{{intro_learner}}}</p>
     </div>
-
 </div>

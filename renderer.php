@@ -23,6 +23,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 use core\notification;
+use mod_observation\assessor_feedback;
 use mod_observation\learner_attempt;
 use mod_observation\learner_submission;
 use mod_observation\lib;
@@ -165,107 +166,13 @@ class mod_observation_renderer extends plugin_renderer_base
     // }
 
     /**
-     * Sets 'confirm' as a boolean in GET request to check result
-     *
-     * @param string      $confirmation_text
-     * @param array|null  $additional_params
-     * @param bool        $require_input if true, user will need to provide text input.
-     * @param string|null $input_prompt_text text to be displayed above input box
-     * @throws coding_exception
-     * @throws moodle_exception
-     */
-    public function echo_confirmation_page_and_die(
-        string $confirmation_text,
-        array $additional_params = null,
-        bool $require_input = false,
-        string $input_prompt_text = null)
-    {
-        $confirm_url = $this->page->url;
-        $confirm_url->params(['confirm' => 1, 'sesskey' => sesskey()] + $additional_params);
-
-        echo $this->output->header();
-
-        // output modal
-        $output = $this->output->box_start('generalbox modal modal-dialog modal-in-page show', 'notice');
-        $output .= $this->output->box_start('modal-content', 'modal-content');
-        $output .= $this->output->box_start('modal-header', 'modal-header');
-        $output .= html_writer::tag('h4', get_string('confirm'));
-        $output .= $this->output->box_end();
-        $output .= $this->output->box_start('modal-body', 'modal-body');
-        $output .= html_writer::tag('p', $confirmation_text);
-        $output .= $this->output->box_end();
-
-        if ($require_input)
-        {
-            // TODO VALIDATE INPUT HAS CONTENT
-            $output .= html_writer::start_tag('form', ['method' => 'POST', 'action' => $confirm_url]);
-            $output .= $this->output->box_start('modal-body', 'user-input');
-            $output .= html_writer::tag(
-                'p', (is_null($input_prompt_text) ? 'Please provide a brief explanation' : $input_prompt_text));
-            $output .= html_writer::div(
-                html_writer::tag(
-                    'textarea', '',
-                    [
-                        'id'       => 'user_input',
-                        'name'     => 'user_input',
-                        'rows'     => 5,
-                        'style'    => 'width: 100%;',
-                        'required' => true
-                    ]));
-            $output .= $this->output->box_end();
-
-            $output .= $this->output->box_start('modal-footer', 'modal-footer');
-            $output .= html_writer::start_div('buttons');
-            // submit
-            $output .= html_writer::empty_tag(
-                'input',
-                [
-                    'class' => 'btn btn-primary form-submit',
-                    'type'  => 'submit',
-                    'value' => get_string('continue')
-                ]);
-            // cancel
-            $output .= html_writer::link(
-                $this->page->url, get_string('cancel'), ['class' => 'btn btn-secondary']);
-
-            $output .= html_writer::end_div();
-            $output .= $this->output->box_end();
-
-            $output .= html_writer::end_tag('form');
-        }
-        else
-        {
-            $output .= $this->output->box_start('modal-footer', 'modal-footer');
-
-            $continue = new single_button($confirm_url, get_string('continue'), 'post', true);
-            $cancel = new single_button($this->page->url, get_string('cancel'), 'get');
-            $output .= html_writer::tag(
-                'div',
-                $this->render($continue) . $this->render($cancel),
-                array('class' => 'buttons'));
-
-            $output .= $this->output->box_end();
-        }
-
-        $output .= $this->output->box_end();
-        $output .= $this->output->box_end();
-
-        echo $output;
-
-        // echo $this->output->confirm($confirmation_text, $confirm_url, $this->page->url);
-        echo $this->output->footer();
-
-        die();
-    }
-
-    /**
      * Render main activity view
      *
      * @param observation $observation
      * @return string
      * @throws moodle_exception
      */
-    public function activity_view(observation $observation)
+    public function view_activity(observation $observation): string
     {
         global $USER;
 
@@ -325,31 +232,19 @@ class mod_observation_renderer extends plugin_renderer_base
     }
 
     /**
-     * Renders activity header with title and description
-     *
-     * @param array $template_data has to contain ['name' => string, 'intro' => string], everything else will be ignored
-     * @return string html
+     * @param observation $observation filtered by learner
+     * @param int         $learnerid
+     * @return string
      */
-    private function activity_header(array $template_data): string
+    public function view_activity_assess(observation $observation, int $learnerid): string
     {
-        return $this->render_from_template(
-            'part-activity_header', [
-            observation::COL_NAME  => $template_data[observation::COL_NAME],
-            observation::COL_INTRO => $template_data[observation::COL_INTRO],
-        ]);
+        $template_data = $observation->export_template_data();
+        $template_data['extra']['learnerid'] = $learnerid;
+
+        return $this->render_from_template_with_header('view-activity', $template_data);
     }
 
-    public function render_from_template($templatename, $context)
-    {
-        if (strpos($templatename, OBSERVATION_MODULE) === false)
-        {
-            $templatename = sprintf('%s/%s', OBSERVATION_MODULE, $templatename);
-        }
-
-        return parent::render_from_template($templatename, $context);
-    }
-
-    public function manage_view(observation $observation)
+    public function view_manage(observation $observation): string
     {
         $template_data = $observation->export_template_data();
         $out = '';
@@ -359,7 +254,49 @@ class mod_observation_renderer extends plugin_renderer_base
         return $out;
     }
 
-    public function task_learner_view(observation_base $observation_base, int $taskid)
+    public function view_request_observation(task $task, learner_submission $learner_submission): string
+    {
+        $observation_base = new observation_base($task->get(task::COL_OBSERVATIONID));
+        $template_data = $learner_submission->export_template_data();
+        $out = '';
+
+        // save resources by not exporting all task data
+        $template_data['extra'][task::COL_NAME] = $task->get_formatted_name();
+        $template_data['extra'][task::COL_INT_ASSIGN_OBS_LEARNER] = format_text(
+            $task->get(task::COL_INT_ASSIGN_OBS_LEARNER), FORMAT_HTML);
+
+        $template_data['extra']['course_observer_assignments'] = lib::export_template_data_from_array(
+            $learner_submission->get_course_level_observer_assignments());
+
+        $this->page->requires->js_call_amd(OBSERVATION_MODULE . '/assign_observer_view', 'init');
+        $out .= $this->render_from_template('view-assign_observer', $template_data);
+
+        $form = new observation_assign_observer_form(
+            null, [
+            'id'                    => $observation_base->get_cm()->id,
+            'learner_submission_id' => $learner_submission->get_id_or_null()
+        ]);
+        $out .= $form->render();
+
+        return $out;
+    }
+
+    public function view_observer_landing(observer_assignment $observer_assignment): string
+    {
+        $task = $observer_assignment->get_task_base();
+        $template_data = $observer_assignment->get_observer()->export_template_data();
+        $template_data['extra'][task::COL_INT_ASSIGN_OBS_OBSERVER] = $task->get(task::COL_INT_ASSIGN_OBS_OBSERVER);
+        $template_data['extra'][observer_assignment::COL_TOKEN] =
+            $observer_assignment->get(observer_assignment::COL_TOKEN);
+        $out = '';
+
+        $this->page->requires->js_call_amd(OBSERVATION_MODULE . '/observer_view', 'init');
+        $out .= $this->render_from_template('view-observer_landing', $template_data);
+
+        return $out;
+    }
+
+    public function view_task_learner(observation_base $observation_base, int $taskid): string
     {
         global $USER;
 
@@ -380,7 +317,7 @@ class mod_observation_renderer extends plugin_renderer_base
         if ($capabilities['can_submit'])
         {
             // learner submission
-            $submission = $task->get_current_learner_submission_or_create($USER->id);
+            $submission = $task->get_learner_submission_or_create($USER->id);
 
             if ($submission->learner_can_attempt_or_create())
             {
@@ -464,6 +401,172 @@ class mod_observation_renderer extends plugin_renderer_base
         }
 
         return $out;
+    }
+
+    public function view_task_observer(observer_assignment $observer_assignment): string
+    {
+        $learner_submission = new learner_submission($observer_assignment->get_learner_submission_base());
+        $observer_submission = $observer_assignment->get_observer_submission_or_create();
+        $userid = $learner_submission->get_userid();
+        $task = new task($learner_submission->get_task_base(), $userid);
+        $observation_base = $task->get_observation_base();
+        $cm = $observation_base->get_cm();
+        $context = context_module::instance($cm->id);
+
+        $template_data = $task->export_template_data();
+        $template_data['extra']['cmid'] = $cm->id;
+        $template_data['extra']['observer_submission_id'] = $observer_submission->get_id_or_null();
+        $out = '';
+
+        // render editors for criteria that require feedback
+        unset($template_data['criteria']); // we will re-populate criteria data manually
+        foreach ($task->get_criteria() as $criteria)
+        {
+            // ensure feedback exists
+            $attempt = $learner_submission->get_latest_attempt_or_null();
+            $feedback = $observer_assignment->get_observer_feedback_or_create($criteria, $attempt);
+
+            $criteria_data = $criteria->export_template_data();
+            $criteria_data['extra']['is_observation'] = true;
+            $criteria_data['extra']['attempt_number'] = $attempt->get(learner_attempt::COL_ATTEMPT_NUMBER);
+            $criteria_data['extra']['feedback_id'] = $feedback->get_id_or_null();
+
+            if ($criteria->is_feedback_required())
+            {
+                list($base) = lib::get_editor_attributes_for_class(observer_feedback::class);
+                $criteria_data['extra']['editor_html'] = $this->text_editor(
+                    observer_feedback::class,
+                    $context,
+                    $feedback->get(observer_feedback::COL_TEXT),
+                    $feedback->get(observer_feedback::COL_TEXT_FORMAT),
+                    sprintf('criteria[%d][%s]', $criteria->get_id_or_null(), $base)
+                );
+                $criteria_data['extra']['filepicker_html'] =
+                    $this->files_input($feedback->get_id_or_null(), observation::FILE_AREA_OBSERVER, $context);
+            }
+
+            $template_data['criteria'][] = $criteria_data;
+        }
+
+        $header_data = [
+            task::COL_NAME => $task->get_formatted_name(),
+            'intro'        => $task->get(task::COL_INTRO_OBSERVER)
+        ];
+        $out .= $this->render_from_template('part-task_header', $header_data);
+        $out .= $this->render_from_template('view-task_observer', $template_data);
+        // wrap all in container
+        $out = html_writer::div($out, 'container', ['class' => 'spacer']);
+
+        return $out;
+    }
+
+    /**
+     * @param observation $observation pre-filtered by userid and taskid
+     * @param             $learnerid
+     * @param             $taskid
+     * @return string
+     */
+    public function view_task_assessor(observation $observation, $learnerid, $taskid): string
+    {
+        $task = $observation->get_task($taskid);
+        $learner_submission = $task->get_learner_submission_or_null($learnerid); // can be null at this point!
+        $context = context_module::instance($observation->get_cm()->id);
+        $out = '';
+
+        $template_data = $task->export_template_data();
+        // header specific
+        $header_data = [
+                observation::COL_NAME  => $observation->get(observation::COL_NAME),
+                observation::COL_INTRO => $observation->get(observation::COL_INTRO)
+            ];
+        $out .= $this->activity_header($header_data);
+
+        $include_observer_details = false;
+        $is_assessing = false;
+        if ($observation->is_observed($learnerid))
+        {
+            $include_observer_details = true;
+            $is_assessing = true;
+            $assessor_submission = $learner_submission->get_assessor_submission_or_create();
+            $feedback = $assessor_submission->get_latest_feedback_or_create();
+
+            // add text editor for assessor feedback
+            $template_data['extra']['editor_html'] = $this->text_editor(
+                assessor_feedback::class,
+                $context,
+                $feedback->get(assessor_feedback::COL_TEXT),
+                $feedback->get(assessor_feedback::COL_TEXT_FORMAT));
+            // add fielpicker
+            $template_data['extra']['filepicker_html'] = $this->files_input(
+                $feedback->get_id_or_null(),
+                observation::FILE_AREA_ASSESSOR,
+                $context);
+        }
+        else if ($learner_submission->is_observation_pending_or_in_progress())
+        {
+            $include_observer_details = true;
+            notification::add('notification:observation_pending_or_in_progress', notification::INFO);
+        }
+        else
+        {
+            notification::add('notification:submission_pending_or_in_progress', notification::INFO);
+        }
+
+        if ($include_observer_details)
+        {
+            $observer = $learner_submission->get_active_observer_assignment_or_null()->get_observer(); // has to exist
+            $observer_template_data = $observer->export_template_data();
+            $observer_template_data['extra']['is_assessor'] = true;
+            $observer_template_data['extra']['is_assessing'] = $is_assessing;
+
+            $template_data['extra']['observer'] = $observer_template_data;
+        }
+
+        $out .= $this->render_from_template('view-task_assessor', $template_data);
+
+        return $out;
+    }
+
+    public function view_observer_completed(): string
+    {
+        return $this->render_from_template('view-observer_completed', null);
+    }
+
+    /**
+     * Renders activity header with title and description
+     *
+     * @param array $template_data has to contain ['name' => string, 'intro' => string], everything else will be ignored
+     * @return string html
+     */
+    private function activity_header(array $template_data): string
+    {
+        return $this->render_from_template(
+            'part-activity_header', [
+            observation::COL_NAME  => $template_data[observation::COL_NAME],
+            observation::COL_INTRO => $template_data[observation::COL_INTRO],
+        ]);
+    }
+
+    public function render_from_template($templatename, $context): string
+    {
+        if (strpos($templatename, OBSERVATION_MODULE) === false)
+        {
+            $templatename = sprintf('%s/%s', OBSERVATION_MODULE, $templatename);
+        }
+
+        return parent::render_from_template($templatename, $context);
+    }
+
+    /**
+     * Renders specified template with an activity header
+     *
+     * @param string     $templatename template name
+     * @param array|null $context
+     * @return string html
+     */
+    private function render_from_template_with_header(string $templatename, array $context = null): string
+    {
+        return $this->activity_header($context) . $this->render_from_template($templatename, $context);
     }
 
     public function text_editor(
@@ -591,7 +694,7 @@ class mod_observation_renderer extends plugin_renderer_base
      * @param int    $itemid
      * @return int the draft itemid.
      */
-    public function prepare_response_files_draft_itemid(string $file_area, int $contextid, int $itemid = null)
+    public function prepare_response_files_draft_itemid(string $file_area, int $contextid, int $itemid = null): int
     {
         global $CFG, $USER;
 
@@ -614,125 +717,98 @@ class mod_observation_renderer extends plugin_renderer_base
         return $draftid;
     }
 
-    public function request_observation_view(task $task, learner_submission $learner_submission)
+    /**
+     * Sets 'confirm' as a boolean in GET request to check result
+     *
+     * @param string      $confirmation_text
+     * @param array|null  $additional_params
+     * @param bool        $require_input if true, user will need to provide text input.
+     * @param string|null $input_prompt_text text to be displayed above input box
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
+    public function echo_confirmation_page_and_die(
+        string $confirmation_text,
+        array $additional_params = null,
+        bool $require_input = false,
+        string $input_prompt_text = null): void
     {
-        $observation_base = new observation_base($task->get(task::COL_OBSERVATIONID));
-        $template_data = $learner_submission->export_template_data();
-        $out = '';
+        $confirm_url = $this->page->url;
+        $confirm_url->params(['confirm' => 1, 'sesskey' => sesskey()] + $additional_params);
 
-        // save resources by not exporting all task data
-        $template_data['extra'][task::COL_NAME] = $task->get_formatted_name();
-        $template_data['extra'][task::COL_INT_ASSIGN_OBS_LEARNER] = format_text(
-            $task->get(task::COL_INT_ASSIGN_OBS_LEARNER), FORMAT_HTML);
+        echo $this->output->header();
 
-        $template_data['extra']['course_observer_assignments'] = lib::export_template_data_from_array(
-            $learner_submission->get_course_level_observer_assignments());
+        // output modal
+        $output = $this->output->box_start('generalbox modal modal-dialog modal-in-page show', 'notice');
+        $output .= $this->output->box_start('modal-content', 'modal-content');
+        $output .= $this->output->box_start('modal-header', 'modal-header');
+        $output .= html_writer::tag('h4', get_string('confirm'));
+        $output .= $this->output->box_end();
+        $output .= $this->output->box_start('modal-body', 'modal-body');
+        $output .= html_writer::tag('p', $confirmation_text);
+        $output .= $this->output->box_end();
 
-        $this->page->requires->js_call_amd(OBSERVATION_MODULE . '/assign_observer_view', 'init');
-        $out .= $this->render_from_template('view-assign_observer', $template_data);
-
-        $form = new observation_assign_observer_form(
-            null, [
-            'id'                    => $observation_base->get_cm()->id,
-            'learner_submission_id' => $learner_submission->get_id_or_null()
-        ]);
-        $out .= $form->render();
-
-        return $out;
-    }
-
-    public function observer_landing_view(observer_assignment $observer_assignment)
-    {
-        $task = $observer_assignment->get_task_base();
-        $template_data = $observer_assignment->get_observer()->export_template_data();
-        $template_data['extra'][task::COL_INT_ASSIGN_OBS_OBSERVER] = $task->get(task::COL_INT_ASSIGN_OBS_OBSERVER);
-        $template_data['extra'][observer_assignment::COL_TOKEN] =
-            $observer_assignment->get(observer_assignment::COL_TOKEN);
-        $out = '';
-
-        $this->page->requires->js_call_amd(OBSERVATION_MODULE . '/observer_view', 'init');
-        $out .= $this->render_from_template('view-observer_landing', $template_data);
-
-        return $out;
-    }
-
-    public function task_observer_view(observer_assignment $observer_assignment)
-    {
-        $learner_submission = new learner_submission($observer_assignment->get_learner_submission_base());
-        $observer_submission = $observer_assignment->get_observer_submission_or_create();
-        $userid = $learner_submission->get_userid();
-        $task = new task($learner_submission->get_task_base(), $userid);
-        $observation_base = $task->get_observation_base();
-        $cm = $observation_base->get_cm();
-        $context = context_module::instance($cm->id);
-
-        $template_data = $task->export_template_data();
-        $template_data['extra']['cmid'] = $cm->id;
-        $template_data['extra']['observer_submission_id'] = $observer_submission->get_id_or_null();
-        $out = '';
-
-        // render editors for criteria that require feedback
-        unset($template_data['criteria']); // we will re-populate criteria data manually
-        foreach ($task->get_criteria() as $criteria)
+        if ($require_input)
         {
-            // ensure feedback exists
-            $attempt = $learner_submission->get_latest_attempt_or_null();
-            $feedback = $observer_assignment->get_observer_feedback_or_create($criteria, $attempt);
+            // TODO VALIDATE INPUT HAS CONTENT
+            $output .= html_writer::start_tag('form', ['method' => 'POST', 'action' => $confirm_url]);
+            $output .= $this->output->box_start('modal-body', 'user-input');
+            $output .= html_writer::tag(
+                'p', (is_null($input_prompt_text) ? 'Please provide a brief explanation' : $input_prompt_text));
+            $output .= html_writer::div(
+                html_writer::tag(
+                    'textarea', '',
+                    [
+                        'id'       => 'user_input',
+                        'name'     => 'user_input',
+                        'rows'     => 5,
+                        'style'    => 'width: 100%;',
+                        'required' => true
+                    ]));
+            $output .= $this->output->box_end();
 
-            $criteria_data = $criteria->export_template_data();
-            $criteria_data['extra']['is_observation'] = true;
-            $criteria_data['extra']['attempt_number'] = $attempt->get(learner_attempt::COL_ATTEMPT_NUMBER);
-            $criteria_data['extra']['feedback_id'] = $feedback->get_id_or_null();
+            $output .= $this->output->box_start('modal-footer', 'modal-footer');
+            $output .= html_writer::start_div('buttons');
+            // submit
+            $output .= html_writer::empty_tag(
+                'input',
+                [
+                    'class' => 'btn btn-primary form-submit',
+                    'type'  => 'submit',
+                    'value' => get_string('continue')
+                ]);
+            // cancel
+            $output .= html_writer::link(
+                $this->page->url, get_string('cancel'), ['class' => 'btn btn-secondary']);
 
-            if ($criteria->is_feedback_required())
-            {
-                list($base) = lib::get_editor_attributes_for_class(observer_feedback::class);
-                $criteria_data['extra']['editor_html'] = $this->text_editor(
-                    observer_feedback::class,
-                    $context,
-                    $feedback->get(observer_feedback::COL_TEXT),
-                    $feedback->get(observer_feedback::COL_TEXT_FORMAT),
-                    sprintf('criteria[%d][%s]', $criteria->get_id_or_null(), $base)
-                );
-                $criteria_data['extra']['filepicker_html'] =
-                    $this->files_input($feedback->get_id_or_null(), observation::FILE_AREA_OBSERVER, $context);
-            }
+            $output .= html_writer::end_div();
+            $output .= $this->output->box_end();
 
-            $template_data['criteria'][] = $criteria_data;
+            $output .= html_writer::end_tag('form');
+        }
+        else
+        {
+            $output .= $this->output->box_start('modal-footer', 'modal-footer');
+
+            $continue = new single_button($confirm_url, get_string('continue'), 'post', true);
+            $cancel = new single_button($this->page->url, get_string('cancel'), 'get');
+            $output .= html_writer::tag(
+                'div',
+                $this->render($continue) . $this->render($cancel),
+                array('class' => 'buttons'));
+
+            $output .= $this->output->box_end();
         }
 
-        $header_data = [
-            task::COL_NAME => $task->get_formatted_name(),
-            'intro'        => $task->get(task::COL_INTRO_OBSERVER)
-        ];
-        $out .= $this->render_from_template('part-task_header', $header_data);
-        $out .= $this->render_from_template('view-task_observer', $template_data);
-        // wrap all in container
-        $out = html_writer::div($out, 'container', ['class' => 'spacer']);
+        $output .= $this->output->box_end();
+        $output .= $this->output->box_end();
 
-        return $out;
-    }
+        echo $output;
 
-    public function observer_completed_view()
-    {
-        return $this->render_from_template('view-observer_completed', null);
-    }
+        // echo $this->output->confirm($confirmation_text, $confirm_url, $this->page->url);
+        echo $this->output->footer();
 
-    public function assess_activity_view(observation $observation)
-    {
-        throw new coding_exception('not implemented');
-    }
-
-    /**
-     * Renders specified template with an activity header
-     *
-     * @param string     $templatename template name
-     * @param array|null $context
-     * @return string html
-     */
-    private function render_from_template_with_header(string $templatename, array $context = null)
-    {
-        return $this->activity_header($context) . $this->render_from_template($templatename, $context);
+        die();
     }
 }
 

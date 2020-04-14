@@ -102,12 +102,12 @@ echo $OUTPUT->header();
 $observer_submission = $observer_assignment->get_observer_submission_or_null();
 if (!is_null($observer_submission) && $observer_submission->is_submitted())
 {
-    echo $renderer->observer_completed_view();
+    echo $renderer->view_observer_completed();
 }
 else if (!$observer_assignment->is_accepted())
 {
     // show observation EULA page
-    echo $renderer->observer_landing_view($observer_assignment);
+    echo $renderer->view_observer_landing($observer_assignment);
 }
 else
 {
@@ -116,7 +116,7 @@ else
     $SESSION->observation_usertoken = $token;
 
     // show observation page
-    echo $renderer->task_observer_view($observer_assignment);
+    echo $renderer->view_task_observer($observer_assignment);
 }
 
 // Finish the page.

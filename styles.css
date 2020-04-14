@@ -6,6 +6,7 @@ body.path-mod-observation #page * {
 body.path-mod-observation .wrapper {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
+  margin-bottom: 3em;
   padding: 1em;
   margin: 1em;
 }
@@ -59,18 +60,40 @@ body.path-mod-observation .obs-main-title {
   flex: 3;
   padding-left: 10px;
 }
-body.path-mod-observation .title-note {
+body.path-mod-observation .task-header {
+  margin-bottom: 2em;
+}
+body.path-mod-observation .task-action {
   flex: 1;
   font-size: 15px;
   margin-top: 20px;
   margin-bottom: 10px;
 }
-body.path-mod-observation .task-header {
-  margin-bottom: 2em;
+body.path-mod-observation .task.status-pending {
+  box-shadow: 5px 0 0 0 #5c809e;
+  transition: box-shadow 0.2s ease-out;
+}
+body.path-mod-observation .task.status-pending:hover {
+  box-shadow: 15px 0 0 0 #5c809e;
+}
+body.path-mod-observation .task.status-complete {
+  box-shadow: 5px 0 0 0 #589e44;
+  transition: box-shadow 0.2s ease-out;
+}
+body.path-mod-observation .task.status-complete:hover {
+  box-shadow: 15px 0 0 0 #589e44;
+}
+body.path-mod-observation .task.status-not_complete {
+  box-shadow: 5px 0 0 0 #9e0c00;
+  transition: box-shadow 0.2s ease-out;
+}
+body.path-mod-observation .task.status-not_complete:hover {
+  box-shadow: 15px 0 0 0 #9e0c00;
 }
 body.path-mod-observation .table {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
+  margin-bottom: 3em;
 }
 body.path-mod-observation .table th {
   background-color: #d3d3d3;
@@ -79,12 +102,12 @@ body.path-mod-observation .table th {
 body.path-mod-observation .wrapper-obs-activity {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
-  margin-bottom: 40px;
+  margin-bottom: 3em;
 }
-body.path-mod-observation .wrapper-task {
+body.path-mod-observation .wrapper-border {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
-  margin-bottom: 30px;
+  margin-bottom: 3em;
 }
 body.path-mod-observation .criteria-list li {
   margin: 2em 1em;
@@ -101,9 +124,19 @@ body.path-mod-observation .criteria-desc {
   word-wrap: break-word;
   border: 1px solid #d3d3d3;
   border-radius: .25em;
+  margin-bottom: 3em;
 }
 body.path-mod-observation .editor-container {
   padding: 1em 1em 1em 4em;
+}
+body.path-mod-observation .editor-container > .assessment-outcome {
+  margin: 1em 0;
+}
+body.path-mod-observation .editor-container > .assessment-outcome > label {
+  font-weight: bold;
+}
+body.path-mod-observation .editor-container > .assessment-outcome > select {
+  float: right;
 }
 body.path-mod-observation .new-attempt {
   padding: 1em;
@@ -140,6 +173,7 @@ body.path-mod-observation .wrapper-attempt {
   align-content: space-between;
   border: 1px solid #d3d3d3;
   border-radius: .25em;
+  margin-bottom: 3em;
   margin: 0 5px 6px 69px;
 }
 body.path-mod-observation .feedback-desc {
@@ -207,6 +241,7 @@ body.path-mod-observation .confirm-change-wrapper {
   width: 55%;
   border: 2px solid #d3d3d3;
   border-radius: .25em;
+  margin-bottom: 3em;
   margin: 0 auto;
 }
 body.path-mod-observation .confirm-change-wrapper > h4,
@@ -222,6 +257,7 @@ body.path-mod-observation .confirm-change-wrapper > p {
 body.path-mod-observation .msg {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
+  margin-bottom: 3em;
   margin: 0 18px 40px;
 }
 body.path-mod-observation .confirm-change-wrapper > div > p {
@@ -308,6 +344,7 @@ table.observer-details,
 table.submissions-summary {
   border: 2px solid #d3d3d3;
   border-radius: .25em;
+  margin-bottom: 3em;
   text-align: left;
   line-height: 40px;
   border-collapse: separate;
@@ -347,8 +384,16 @@ table.observer-details td:last-child,
 table.submissions-summary td:last-child {
   padding-right: 10px;
 }
-body.observation-task div.observer-details-wrapper > .header h5,
-body.observation-task div.observer-details-wrapper > .header #change-observer {
+body.observation-task .observer-details-wrapper,
+body.observation-task-assess .observer-details-wrapper {
+  margin-bottom: 3em;
+}
+body.observation-task .observer-details-wrapper > .header h5,
+body.observation-task-assess .observer-details-wrapper > .header h5,
+body.observation-task .observer-details-wrapper > .header #change-observer,
+body.observation-task-assess .observer-details-wrapper > .header #change-observer,
+body.observation-task .observer-details-wrapper > .header #last-assigned,
+body.observation-task-assess .observer-details-wrapper > .header #last-assigned {
   display: inline-block;
 }
 body.observation-request .assign-from-history-container > h5 {

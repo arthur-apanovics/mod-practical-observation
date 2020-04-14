@@ -11,11 +11,25 @@
                 )
             {{/extra.change_observer_url}}
         {{/extra.is_learner}}
-
         {{#extra.is_assessor}}
-            <span class="last-assigned">{{#str}}assign_observer:last_assigned, observation{{/str}}</span>
+            (
+            <span id="last-assigned">
+                {{#str}}assess:last_assigned, observation{{/str}}
+            </span>
+            )
         {{/extra.is_assessor}}
     </div>
 
     {{> mod_observation/comp-observer_details_table}}
+
+    {{#extra.is_assessor}}
+        {{#extra.is_assessing}}
+            <div class="meets-criteria-wrapper">
+                <label for="meets-criteria">
+                    {{#str}}assess:observer_meets_criteria, observation{{/str}}
+                </label>
+                <input name="meets-criteria" id="meets-criteria" type="checkbox" required>
+            </div>
+        {{/extra.is_assessing}}
+    {{/extra.is_assessor}}
 </div>

@@ -116,9 +116,11 @@ $string['confirm_delete_task'] = 'Are you sure you want to delete task "{$a}"?<b
 $string['deleted_task'] = 'Task "{$a}" deleted';
 $string['no_criteria'] = 'Task has no criteria';
 
-$string['preview'] = 'Preview';
-$string['review'] = 'Review';
-$string['start'] = 'Start';
+$string['preview_task'] = 'Preview';
+$string['review_task'] = 'Review';
+$string['start_task'] = 'Start';
+$string['assess_task'] = 'Assess';
+$string['view_task'] = 'View';
 
 $string['request_observation'] = 'Request observation';
 $string['attempt_number'] = 'Attempt #{$a}';
@@ -149,7 +151,6 @@ $string['assign_observer:input_prompt'] = 'Briefly explain this change';
 
 $string['assign_observer:assigned_observer'] = 'Assigned observer';
 $string['assign_observer:change_observer'] = 'change observer';
-$string['assign_observer:last_assigned'] = 'Last assigned';
 
 // OBSERVER
 $string['fullname'] = 'Full name';
@@ -170,11 +171,17 @@ $string['outcome:choose'] = 'Choose...';
 $string['outcome:complete'] = 'Complete';
 $string['outcome:not_complete'] = 'Not complete';
 
+// ASSESSOR
+$string['assess:observer_meets_criteria'] = 'Observer meets required criteria';
+$string['assess:last_assigned'] = 'last assigned';
+
 // NOTIFICATIONS
 $string['notification:observation_request_sent'] = 'Observation request sent to {$a}, please be patient while your observer reviews your submission';
 $string['notification:observer_assigned_no_change'] = '<strong>{$a->email}</strong> is already the assigned observer for task <i>{$a->task}</i>';
 $string['notification:observer_assigned_same'] = 'Observation request for <i>{$a->task}</i> sent to <strong>{$a->email}</strong>';
 $string['notification:observer_assigned_new'] = 'Observer successfully changed and observation request sent to <strong>{$a->email}</strong> for <i>{$a->task}</i>';
+$string['notification:observation_pending_or_in_progress'] = 'Observation for this task is not yet complete';
+$string['notification:submission_pending_or_in_progress'] = 'Learner has not yet submitted this an attempt for this task';
 $string['notification:activity_wait_for_observers'] = 'You have requested observations for all tasks, please be patient while observers review your submissions';
 $string['notification:activity_wait_for_mixed'] = 'Please pe patient while your submissions are observed and assessed';
 $string['notification:activity_complete'] = 'Congratulations, you have completed this activity!';

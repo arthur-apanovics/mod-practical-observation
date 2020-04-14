@@ -11,7 +11,7 @@ interface crud
      * @param int $id
      * @return stdClass|false false if record not found
      */
-    public static function read(int $id);
+    public static function read_or_null(int $id);
 
     /**
      * Create DB entry from current state

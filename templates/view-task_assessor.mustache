@@ -1,0 +1,60 @@
+<form action="submit.php"
+      id="assessment-form"
+      method="post"
+      enctype="multipart/form-data"
+      accept-charset="utf-8"
+      autocomplete="off">
+
+    {{#extra.observer}}
+        {{> mod_observation/part-observer_details}}
+    {{/extra.observer}}
+
+    <h5>Information and evidence from the trainee</h5>
+    <div class="wrapper-border">
+        {{#learner_submissions}} {{! should only ever be one as we're filtering by userid in the renderer}}
+            {{#learner_attempts}}
+                {{> mod_observation/comp-attempt_entry}}
+            {{/learner_attempts}}
+        {{/learner_submissions}}
+    </div>
+
+    <h5>Completion observations</h5>
+    <div class="wrapper-border">
+        <ol class="criteria-list">
+            {{#criteria}}
+                {{> mod_observation/comp-completion_criteria}}
+            {{/criteria}}
+        </ol>
+    </div>
+
+    {{#extra.editor_html}}
+        <div class="editor-container">
+            <h5>
+                Please provide assessment feedback:
+            </h5>
+            {{{extra.editor_html}}}
+            {{{extra.filepicker_html}}}
+            <div class="assessment-outcome">
+                <label for="assessment-outcome">Assessment outcome</label>
+                <select name="outcome" id="assessment-outcome" required>
+                    <option selected disabled value>
+                        {{#str}}outcome:choose, observation{{/str}}
+                    </option>
+                    <option value="complete">
+                        {{#str}}outcome:complete, observation{{/str}}
+                    </option>
+                    <option value="not_complete">
+                        {{#str}}outcome:not_complete, observation{{/str}}
+                    </option>
+                </select>
+            </div>
+        </div>
+    {{/extra.editor_html}}
+
+    <div class="submit-wrapper align-center">
+        <button type="submit">Submit</button>
+        <input type="hidden" name="cmid" value="{{extra.cmid}}">
+        <input type="hidden" name="observer_submission_id" value="{{extra.observer_submission_id}}">
+    </div>
+
+</form>

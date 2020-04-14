@@ -157,7 +157,7 @@ if ($data = $form->get_data())
 
 echo $OUTPUT->header();
 
-echo $renderer->request_observation_view($task, $learner_submission);
+echo $renderer->view_request_observation($task, $learner_submission);
 
 // Finish the page.
 echo $OUTPUT->footer();

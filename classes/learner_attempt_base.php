@@ -79,6 +79,11 @@ class learner_attempt_base extends db_model_base
         return $this;
     }
 
+    public function get_attempt_number(): int
+    {
+        return $this->attempt_number;
+    }
+
     public function get_next_attemptnumber_in_submission(): int
     {
         return $this->get_last_attemptnumber_in_submission() + 1;

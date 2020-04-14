@@ -20,32 +20,32 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_observation\event\course_module_viewed;
 use mod_observation\observation;
-use mod_observation\observation_base;
-use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('lib.php');
 
 $cmid = required_param('id', PARAM_INT);
 $taskid = required_param('taskid', PARAM_INT);
+$learnerid = required_param('learnerid', PARAM_INT);
 
 list($course, $cm) = get_course_and_cm_from_cmid($cmid);
 $context = context_module::instance($cmid);
 
-require_login($course, true, $cm);
+require_capability(observation::CAP_ASSESS, $context);
+require_login($course, false, $cm);
 
 // TODO: Event
 
-$observation_base = new observation_base($cm->instance);
+$observation = new observation($cm, $learnerid, $taskid);
+$name = $observation->get_formatted_name();
 
 // Print the page header.
-$PAGE->set_url('/mod/observation/task.php', array('id' => $cm->id));
-$PAGE->set_title($observation_base->get_formatted_name());
+$PAGE->set_url('/mod/observation/assess_task.php', array('id' => $cm->id));
+$PAGE->set_title($name);
 $PAGE->set_heading(format_string($course->fullname));
 
-$PAGE->add_body_class('observation-task');
+$PAGE->add_body_class('observation-task-assess');
 
 // Output starts here.
 echo $OUTPUT->header();
@@ -53,12 +53,7 @@ echo $OUTPUT->header();
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
 
-// check if learner
-echo $renderer->view_task_learner($observation_base, $taskid);
-
-// todo check if observer
-
-// todo check if assessor
+echo $renderer->view_task_assessor($observation, $learnerid, $taskid);
 
 // Finish the page.
 echo $OUTPUT->footer();

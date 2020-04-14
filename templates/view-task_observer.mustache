@@ -1,6 +1,6 @@
-<h5>Information and evidence from the trainee</h5>
+¡<h5>Information and evidence from the trainee</h5>
 
-<div class="wrapper-task">
+<div class="wrapper-border">
     {{#learner_submissions}} {{! should only ever be one as we're filtering by userid in the renderer}}
         {{#learner_attempts}}
             {{> mod_observation/comp-attempt_entry}}
@@ -16,7 +16,7 @@
       autocomplete="off">
 
     <h5>Completion observations</h5>
-    <div class="wrapper-task">
+    <div class="wrapper-border">
         <ol class="criteria-list">
             {{#criteria}}
                 {{> mod_observation/comp-completion_criteria}}
@@ -24,7 +24,7 @@
         </ol>
     </div>
 
-    <div class="align-center">
+    <div class="submit-wrapper align-center">
         <button type="submit">Submit</button>
         <input type="hidden" name="cmid" value="{{extra.cmid}}">
         <input type="hidden" name="observer_submission_id" value="{{extra.observer_submission_id}}">

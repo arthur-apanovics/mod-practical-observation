@@ -63,7 +63,7 @@ echo $OUTPUT->header();
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
 
-echo $renderer->activity_view($observation);
+echo $renderer->view_activity($observation);
 
 // Finish the page.
 echo $OUTPUT->footer();

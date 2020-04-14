@@ -68,7 +68,7 @@ class lib
      * @return mixed FIRST matched entry in array
      * @throws \coding_exception
      */
-    public static function find_in_assoc_array_key_value_or_null($input, $key, $value)
+    public static function find_in_assoc_array_by_key_value_or_null($input, $key, $value)
     {
         if (is_array($input))
         {
@@ -111,7 +111,7 @@ class lib
      * @return mixed FIRST matched entry in array
      * @throws \coding_exception
      */
-    public static function find_in_assoc_array_criteria_or_null($input, array $criteria)
+    public static function find_in_assoc_array_by_criteria_or_null($input, array $criteria)
     {
         // sometimes $input can be null, we want to keep this flexibility by not adding a type constraint
         if (is_array($input) && !empty($criteria))

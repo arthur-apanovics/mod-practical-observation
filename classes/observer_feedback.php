@@ -51,10 +51,16 @@ class observer_feedback extends observer_feedback_base implements templateable
      */
     public function export_template_data(): array
     {
+        // todo: replace with query
+        $attempt = learner_attempt_base::read_or_null($this->attemptid, true);
+
         return [
             self::COL_ID      => $this->id,
             self::COL_OUTCOME => lib::get_status_string($this->outcome),
             self::COL_TEXT    => format_text($this->text, FORMAT_HTML),
+
+            // extra
+            learner_attempt::COL_ATTEMPT_NUMBER => $attempt->get_attempt_number()
         ];
     }
 }

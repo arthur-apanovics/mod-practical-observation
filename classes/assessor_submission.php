@@ -26,9 +26,47 @@ use mod_observation\interfaces\templateable;
 
 class assessor_submission extends assessor_submission_base implements templateable
 {
+    /**
+     * @var assessor_feedback[]
+     */
+    private $feedback;
+
     public function __construct($id_or_record)
     {
         parent::__construct($id_or_record);
+
+        $this->feedback = assessor_feedback::read_all_by_condition(
+            [assessor_feedback::COL_ASSESSOR_SUBMISSIONID => $this->id]);
+    }
+
+    /**
+     * @return assessor_feedback[]
+     */
+    public function get_all_feedback(): array
+    {
+        return $this->feedback;
+    }
+
+    /**
+     * @return assessor_feedback
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     */
+    public function get_latest_feedback_or_create(): assessor_feedback
+    {
+        if (empty($this->get_all_feedback()))
+        {
+            $feedback = new assessor_feedback_base();
+            $feedback->set(assessor_feedback::COL_ASSESSOR_SUBMISSIONID, $this->id);
+            $feedback->set(assessor_feedback::COL_TEXT, '');
+            $feedback->set(assessor_feedback::COL_TEXT_FORMAT, editors_get_preferred_format());
+            $feedback->set(assessor_feedback::COL_TIMESUBMITTED, 0);
+
+            $this->feedback[] = new assessor_feedback($feedback->create());
+        }
+
+        return $this->feedback[count($this->feedback)];
     }
 
     /**
