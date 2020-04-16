@@ -243,7 +243,7 @@ class mod_observation_renderer extends plugin_renderer_base
     {
         $template_data = $observation->export_template_data();
 
-        if ($observation->is_observed($learnerid))
+        if ($observation->can_assess($learnerid))
         {
             $template_data['extra']['is_assessing'] = true;
             $template_data['extra']['cmid'] = $observation->get_cm()->id;
@@ -495,7 +495,7 @@ class mod_observation_renderer extends plugin_renderer_base
 
         $include_observer_details = false;
         $is_assessing = false;
-        if ($observation->is_observed($learnerid))
+        if ($observation->can_assess($learnerid))
         {
             // assessing is good to go
             $include_observer_details = true;
@@ -540,7 +540,7 @@ class mod_observation_renderer extends plugin_renderer_base
             $include_observer_details = true;
             notification::add('notification:observation_pending_or_in_progress', notification::INFO);
         }
-        else
+        else if ($learner_task_submission->is_learner_action_required())
         {
             notification::add(
                 get_string('notification:submission_pending_or_in_progress', OBSERVATION), notification::INFO);
@@ -553,14 +553,17 @@ class mod_observation_renderer extends plugin_renderer_base
             $observer_template_data['extra']['is_assessor'] = true;
             $observer_template_data['extra']['is_assessing'] = $is_assessing;
 
-            // this is ugly but we need to repeat this data here to populate page based on existing feedback
-            $observer_template_data['extra']['existing_feedback']['is_complete'] =
-                $feedback->is_marked_complete();
+            if ($is_assessing)
+            { // this is ugly but we need to repeat this data here to populate page based on existing feedback
+                $observer_template_data['extra']['existing_feedback']['is_complete'] =
+                    $feedback->is_marked_complete();
+            }
 
             $template_data['extra']['observer'] = $observer_template_data;
         }
 
-        $out .= $this->render_from_template('view-task_assessor', $template_data);
+        $template_name = $is_assessing ? 'view-task_assessor' : 'view-task_learner';
+        $out .= $this->render_from_template($template_name, $template_data);
 
         return $out;
     }

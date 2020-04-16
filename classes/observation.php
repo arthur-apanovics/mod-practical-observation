@@ -201,6 +201,13 @@ class observation extends observation_base implements templateable
         return true;
     }
 
+    public function can_assess(int $learnerid)
+    {
+        $submission = $this->get_submission_or_null($learnerid);
+
+        return $submission->is_assessment_pending() || $submission->is_assessment_in_progress();
+    }
+
     /**
      * @inheritDoc
      */
@@ -262,7 +269,7 @@ class observation extends observation_base implements templateable
         return $task;
     }
 
-    public function get_submission_or_null(int $learnerid)
+    public function get_submission_or_null(int $learnerid): ?submission
     {
         return submission::read_by_condition_or_null(
             [submission::COL_OBSERVATIONID => $this->id, submission::COL_USERID => $learnerid]);

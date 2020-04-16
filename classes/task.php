@@ -227,9 +227,14 @@ class task extends task_base implements templateable
         $criteria_data = lib::sort_by_field($criteria_data, criteria::COL_SEQUENCE);
 
         $learner_task_submissions_data = [];
+        $assessor_feedback_data = [];
         foreach ($this->learner_task_submissions as $learner_task_submission)
         {
             $learner_task_submissions_data[] = $learner_task_submission->export_template_data();
+            foreach ($learner_task_submission->get_all_assessor_feedback() as $assessor_feedback)
+            {
+                $assessor_feedback_data[] = $assessor_feedback->export_template_data();
+            }
         }
 
         return [
@@ -245,11 +250,12 @@ class task extends task_base implements templateable
             self::COL_INT_ASSIGN_OBS_LEARNER  => $this->int_assign_obs_learner,
             self::COL_INT_ASSIGN_OBS_OBSERVER => $this->int_assign_obs_observer,
 
-            'criteria'            => $criteria_data,
+            'criteria'                 => $criteria_data,
             'learner_task_submissions' => $learner_task_submissions_data,
+            'assessor_feedback'        => $assessor_feedback_data,
 
             // other data
-            'has_submission'      => $this->has_submission(),
+            'has_submission'           => $this->has_submission(),
         ];
     }
 

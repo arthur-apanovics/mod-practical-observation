@@ -292,6 +292,11 @@ class learner_task_submission extends learner_task_submission_base implements te
             ]);
     }
 
+    public function get_all_assessor_feedback()
+    {
+        return $this->assessor_task_submission->get_all_feedback();
+    }
+
     public function get_assessor_task_submission_or_null(): ?assessor_task_submission
     {
         return $this->assessor_task_submission;
@@ -445,9 +450,9 @@ class learner_task_submission extends learner_task_submission_base implements te
             self::COL_TIMESTARTED   => userdate($this->timestarted),
             self::COL_TIMECOMPLETED => $this->timecompleted != 0 ? userdate($this->timecompleted) : null,
 
-            'learner_attempts'     => $learner_attempts_data,
-            'observer_assignments' => $observer_assignments_data,
-            'assessor_task_submission'  => $assessor_task_submission_data
+            'learner_attempts'         => $learner_attempts_data,
+            'observer_assignments'     => $observer_assignments_data,
+            'assessor_task_submission' => $assessor_task_submission_data
         ];
     }
 }

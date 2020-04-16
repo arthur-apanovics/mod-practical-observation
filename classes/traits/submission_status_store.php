@@ -66,6 +66,12 @@ abstract class submission_status_store extends db_model_base implements learner_
         return $this->status === self::STATUS_ASSESSMENT_IN_PROGRESS;
     }
 
+    public function is_assessment_pending()
+    {
+        $this->validate_status();
+        return $this->status === self::STATUS_ASSESSMENT_PENDING;
+    }
+
     public function is_assessment_complete()
     {
         $this->validate_status();
