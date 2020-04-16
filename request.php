@@ -21,7 +21,7 @@
  */
 
 use core\output\notification;
-use mod_observation\learner_submission;
+use mod_observation\learner_task_submission;
 use mod_observation\observer;
 use mod_observation\observer_base;
 use mod_observation\task;
@@ -31,7 +31,7 @@ require_once('lib.php');
 require_once('forms.php');
 
 $cmid = required_param('id', PARAM_INT);
-$learner_submission_id = required_param('learner_submission_id', PARAM_INT);
+$learner_task_submission_id = required_param('learner_task_submission_id', PARAM_INT);
 
 list($course, $cm) = get_course_and_cm_from_cmid($cmid);
 $context = context_module::instance($cmid);
@@ -40,8 +40,8 @@ require_login($course, true, $cm);
 
 // TODO: Event
 
-$learner_submission = new learner_submission($learner_submission_id);
-$task_id = $learner_submission->get($learner_submission::COL_TASKID);
+$learner_task_submission = new learner_task_submission($learner_task_submission_id);
+$task_id = $learner_task_submission->get($learner_task_submission::COL_TASKID);
 $task = new task($task_id, $USER->id);
 $name = get_string('assign_observer:page_title', 'observation', $task->get_formatted_name());
 
@@ -50,7 +50,7 @@ $activity_url = new moodle_url(OBSERVATION_MODULE_PATH . 'view.php', ['id' => $c
 // Print the page header.
 $PAGE->set_url(
     OBSERVATION_MODULE_PATH . 'request.php',
-    ['id' => $cm->id, 'learner_submission_id' => $learner_submission_id]);
+    ['id' => $cm->id, 'learner_task_submission_id' => $learner_task_submission_id]);
 $PAGE->set_title($name);
 $PAGE->set_heading('wazaaaa');
 
@@ -73,7 +73,7 @@ if (optional_param('confirm', 0, PARAM_BOOL))
     $observer = observer::update_or_create($submitted);
 
     $explanation = required_param('user_input', PARAM_TEXT);
-    $learner_submission->assign_observer($observer, $message, $explanation);
+    $learner_task_submission->assign_observer($observer, $message, $explanation);
 
     redirect(
         $activity_url,
@@ -97,7 +97,7 @@ if ($data = $form->get_data())
     $id = observer_base::try_get_id_for_observer($submitted);
 
     // check if an assignment already exists
-    if ($current_assignment = $learner_submission->get_active_observer_assignment_or_null())
+    if ($current_assignment = $learner_task_submission->get_active_observer_assignment_or_null())
     {
         // observer already exists, we need to make some checks.
         // check if submitted observer exists in database OR if submitted observer is NOT same as current one
@@ -132,19 +132,22 @@ if ($data = $form->get_data())
         {
             // assignment exists and it's for the same observer, nothing to do here
             redirect(
-                $activity_url,
-                get_string(
-                    'notification:observer_assigned_no_change', 'observation',
-                    ['task' => $task->get_formatted_name(), 'email' => $submitted->get(observer::COL_EMAIL)]),
-                null,
-                notification::NOTIFY_WARNING);
+                $activity_url
+                // TODO: notification appeared on a normal second attempt with same assessor
+                // and not when re-assigning an observer. Will this scenario even happen?
+                // get_string(
+                //     'notification:observer_assigned_no_change', 'observation',
+                //     ['task' => $task->get_formatted_name(), 'email' => $submitted->get(observer::COL_EMAIL)]),
+                // null,
+                // notification::NOTIFY_WARNING
+            );
         }
     }
 
     //  no observer assignment OR submitted observer is the same as currently assigned observer
     $observer = observer::update_or_create($submitted);
     // assign observer to this submission
-    $learner_submission->assign_observer($observer, $data->message);
+    $learner_task_submission->assign_observer($observer, $data->message);
 
     redirect(
         $activity_url,
@@ -157,7 +160,7 @@ if ($data = $form->get_data())
 
 echo $OUTPUT->header();
 
-echo $renderer->view_request_observation($task, $learner_submission);
+echo $renderer->view_request_observation($task, $learner_task_submission);
 
 // Finish the page.
 echo $OUTPUT->footer();

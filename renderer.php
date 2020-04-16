@@ -25,7 +25,7 @@ defined('MOODLE_INTERNAL') || die();
 use core\notification;
 use mod_observation\assessor_feedback;
 use mod_observation\learner_attempt;
-use mod_observation\learner_submission;
+use mod_observation\learner_task_submission;
 use mod_observation\lib;
 use mod_observation\observation;
 use mod_observation\observation_base;
@@ -193,6 +193,9 @@ class mod_observation_renderer extends plugin_renderer_base
         // learner view or preview
         else if ($capabilities['can_submit'] || $capabilities['can_view'])
         {
+            // create submission if none exists
+            $observation->get_submission_or_create($USER->id);
+
             if ($observation->all_tasks_observation_pending_or_in_progress($USER->id))
             {
                 notification::info(
@@ -239,6 +242,15 @@ class mod_observation_renderer extends plugin_renderer_base
     public function view_activity_assess(observation $observation, int $learnerid): string
     {
         $template_data = $observation->export_template_data();
+
+        if ($observation->is_observed($learnerid))
+        {
+            $template_data['extra']['is_assessing'] = true;
+            $template_data['extra']['cmid'] = $observation->get_cm()->id;
+            $template_data['extra']['activity_submission_id'] = $observation->get_submission_or_null($learnerid)->get_id_or_null();
+            $template_data['extra']['can_release_grade'] = $observation->can_release_grade($learnerid);
+        }
+
         $template_data['extra']['learnerid'] = $learnerid;
 
         return $this->render_from_template_with_header('view-activity', $template_data);
@@ -254,10 +266,10 @@ class mod_observation_renderer extends plugin_renderer_base
         return $out;
     }
 
-    public function view_request_observation(task $task, learner_submission $learner_submission): string
+    public function view_request_observation(task $task, learner_task_submission $learner_task_submission): string
     {
         $observation_base = new observation_base($task->get(task::COL_OBSERVATIONID));
-        $template_data = $learner_submission->export_template_data();
+        $template_data = $learner_task_submission->export_template_data();
         $out = '';
 
         // save resources by not exporting all task data
@@ -266,7 +278,7 @@ class mod_observation_renderer extends plugin_renderer_base
             $task->get(task::COL_INT_ASSIGN_OBS_LEARNER), FORMAT_HTML);
 
         $template_data['extra']['course_observer_assignments'] = lib::export_template_data_from_array(
-            $learner_submission->get_course_level_observer_assignments());
+            $learner_task_submission->get_course_level_observer_assignments());
 
         $this->page->requires->js_call_amd(OBSERVATION_MODULE . '/assign_observer_view', 'init');
         $out .= $this->render_from_template('view-assign_observer', $template_data);
@@ -274,7 +286,7 @@ class mod_observation_renderer extends plugin_renderer_base
         $form = new observation_assign_observer_form(
             null, [
             'id'                    => $observation_base->get_cm()->id,
-            'learner_submission_id' => $learner_submission->get_id_or_null()
+            'learner_task_submission_id' => $learner_task_submission->get_id_or_null()
         ]);
         $out .= $form->render();
 
@@ -316,8 +328,8 @@ class mod_observation_renderer extends plugin_renderer_base
 
         if ($capabilities['can_submit'])
         {
-            // learner submission
-            $submission = $task->get_learner_submission_or_create($USER->id);
+            // learner task submission
+            $submission = $task->get_learner_task_submission_or_create($USER->id);
 
             if ($submission->learner_can_attempt_or_create())
             {
@@ -344,7 +356,7 @@ class mod_observation_renderer extends plugin_renderer_base
                     $this->files_input($attempt->get_id_or_null(), observation::FILE_AREA_TRAINEE, $context);
 
                 // id's
-                $template_data['extra']['learner_submission_id'] = $submission->get_id_or_null();
+                $template_data['extra']['learner_task_submission_id'] = $submission->get_id_or_null();
                 $template_data['extra']['attempt_id'] = $attempt->get_id_or_null();
 
                 // tell template that there will be a new attempt
@@ -372,7 +384,7 @@ class mod_observation_renderer extends plugin_renderer_base
                         OBSERVATION_MODULE_PATH . 'request.php',
                         [
                             'id'                    => $cm->id,
-                            'learner_submission_id' => $submission->get_id_or_null(),
+                            'learner_task_submission_id' => $submission->get_id_or_null(),
                             'attempt_id'            => $attempt->get_id_or_null(),
                         ]);
                 }
@@ -405,10 +417,10 @@ class mod_observation_renderer extends plugin_renderer_base
 
     public function view_task_observer(observer_assignment $observer_assignment): string
     {
-        $learner_submission = new learner_submission($observer_assignment->get_learner_submission_base());
+        $learner_task_submission = new learner_task_submission($observer_assignment->get_learner_task_submission_base());
         $observer_submission = $observer_assignment->get_observer_submission_or_create();
-        $userid = $learner_submission->get_userid();
-        $task = new task($learner_submission->get_task_base(), $userid);
+        $userid = $learner_task_submission->get_userid();
+        $task = new task($learner_task_submission->get_task_base(), $userid);
         $observation_base = $task->get_observation_base();
         $cm = $observation_base->get_cm();
         $context = context_module::instance($cm->id);
@@ -423,7 +435,7 @@ class mod_observation_renderer extends plugin_renderer_base
         foreach ($task->get_criteria() as $criteria)
         {
             // ensure feedback exists
-            $attempt = $learner_submission->get_latest_attempt_or_null();
+            $attempt = $learner_task_submission->get_latest_attempt_or_null();
             $feedback = $observer_assignment->get_observer_feedback_or_create($criteria, $attempt);
 
             $criteria_data = $criteria->export_template_data();
@@ -469,7 +481,7 @@ class mod_observation_renderer extends plugin_renderer_base
     public function view_task_assessor(observation $observation, $learnerid, $taskid): string
     {
         $task = $observation->get_task($taskid);
-        $learner_submission = $task->get_learner_submission_or_null($learnerid); // can be null at this point!
+        $learner_task_submission = $task->get_learner_task_submission_or_null($learnerid); // can be null at this point!
         $context = context_module::instance($observation->get_cm()->id);
         $out = '';
 
@@ -485,10 +497,13 @@ class mod_observation_renderer extends plugin_renderer_base
         $is_assessing = false;
         if ($observation->is_observed($learnerid))
         {
+            // assessing is good to go
             $include_observer_details = true;
             $is_assessing = true;
-            $assessor_submission = $learner_submission->get_assessor_submission_or_create();
-            $feedback = $assessor_submission->get_latest_feedback_or_create();
+
+            $assessor_task_submission = $learner_task_submission->get_assessor_task_submission_or_create();
+            $learner_attempt = $assessor_task_submission->get_learner_task_submission()->get_latest_learner_attempt_or_null();
+            $feedback = $assessor_task_submission->get_feedback_or_create($learner_attempt->get_id_or_null());
 
             // add text editor for assessor feedback
             $template_data['extra']['editor_html'] = $this->text_editor(
@@ -497,27 +512,50 @@ class mod_observation_renderer extends plugin_renderer_base
                 $feedback->get(assessor_feedback::COL_TEXT),
                 $feedback->get(assessor_feedback::COL_TEXT_FORMAT));
             // add fielpicker
+            // TODO: files do not appear on feedback edit
             $template_data['extra']['filepicker_html'] = $this->files_input(
                 $feedback->get_id_or_null(),
                 observation::FILE_AREA_ASSESSOR,
                 $context);
+
+            // update learner task submission status
+            if (!$learner_task_submission->is_assessment_in_progress())
+            {
+                $learner_task_submission->update_status_and_save(learner_task_submission::STATUS_ASSESSMENT_IN_PROGRESS);
+            }
+            else
+            {
+                // we need to pre-populate page based on previously saved feedback
+                $template_data['extra']['existing_feedback']['is_complete'] =
+                    $feedback->is_marked_complete();
+            }
+
+            // id's
+            $template_data['extra']['cmid'] = $observation->get_cm()->id;
+            $template_data['extra']['assessor_task_submission_id'] = $assessor_task_submission->get_id_or_null();
+            $template_data['extra']['assessor_feedback_id'] = $feedback->get_id_or_null();
         }
-        else if ($learner_submission->is_observation_pending_or_in_progress())
+        else if ($learner_task_submission->is_observation_pending_or_in_progress())
         {
             $include_observer_details = true;
             notification::add('notification:observation_pending_or_in_progress', notification::INFO);
         }
         else
         {
-            notification::add('notification:submission_pending_or_in_progress', notification::INFO);
+            notification::add(
+                get_string('notification:submission_pending_or_in_progress', OBSERVATION), notification::INFO);
         }
 
         if ($include_observer_details)
         {
-            $observer = $learner_submission->get_active_observer_assignment_or_null()->get_observer(); // has to exist
+            $observer = $learner_task_submission->get_active_observer_assignment_or_null()->get_observer(); // has to exist
             $observer_template_data = $observer->export_template_data();
             $observer_template_data['extra']['is_assessor'] = true;
             $observer_template_data['extra']['is_assessing'] = $is_assessing;
+
+            // this is ugly but we need to repeat this data here to populate page based on existing feedback
+            $observer_template_data['extra']['existing_feedback']['is_complete'] =
+                $feedback->is_marked_complete();
 
             $template_data['extra']['observer'] = $observer_template_data;
         }

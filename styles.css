@@ -11,7 +11,13 @@ body.path-mod-observation .wrapper {
   margin: 1em;
 }
 body.path-mod-observation .title-main {
-  padding-left: 1em;
+  padding: 0 0.5em;
+}
+body.path-mod-observation .title-desc {
+  padding: 1em;
+  flex-grow: 1;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 body.path-mod-observation .title-secondary {
   margin: 1em;
@@ -49,12 +55,6 @@ body.path-mod-observation .flex-attempt {
   justify-content: space-between;
   flex-wrap: wrap;
   flex-basis: 100%;
-}
-body.path-mod-observation .title-desc {
-  flex-grow: 1;
-  padding: 0 10px 0 10px;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
 }
 body.path-mod-observation .obs-main-title {
   flex: 3;
@@ -137,6 +137,7 @@ body.path-mod-observation .editor-container > .assessment-outcome > label {
 }
 body.path-mod-observation .editor-container > .assessment-outcome > select {
   float: right;
+  min-width: 15em;
 }
 body.path-mod-observation .new-attempt {
   padding: 1em;
@@ -234,8 +235,14 @@ body.path-mod-observation .timestamp {
   text-align: right;
   margin-right: 8px;
 }
+body.path-mod-observation form .meets-criteria-wrapper {
+  text-align: right;
+}
 body.path-mod-observation .align-center {
   text-align: center;
+}
+body.path-mod-observation .submit-wrapper {
+  margin: 4em 0;
 }
 body.path-mod-observation .confirm-change-wrapper {
   width: 55%;
@@ -299,6 +306,16 @@ body.path-mod-observation .btn-wrapper {
 }
 body.path-mod-observation .btn-wrapper > button {
   margin-right: 1em;
+}
+body.path-mod-observation .hover-hint {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: #d3d3d3;
+}
+body.path-mod-observation .hover-hint-inverted {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: #535353;
 }
 body.observation-manage #manage-task-list > ol > li,
 body.observation-manage .manage-criteria-list > ol > li {
@@ -384,6 +401,16 @@ table.observer-details td:last-child,
 table.submissions-summary td:last-child {
   padding-right: 10px;
 }
+table.submissions-summary .submissions-row .completion {
+  font-size: 1.5em;
+  color: #bababa;
+}
+table.submissions-summary .submissions-row .completion > .complete {
+  color: #589e44;
+}
+table.submissions-summary .submissions-row .completion > .not-complete {
+  color: #44639e;
+}
 body.observation-task .observer-details-wrapper,
 body.observation-task-assess .observer-details-wrapper {
   margin-bottom: 3em;
@@ -395,11 +422,6 @@ body.observation-task-assess .observer-details-wrapper > .header #change-observe
 body.observation-task .observer-details-wrapper > .header #last-assigned,
 body.observation-task-assess .observer-details-wrapper > .header #last-assigned {
   display: inline-block;
-}
-body.observation-request .assign-from-history-container > h5 {
-  text-decoration-line: underline;
-  text-decoration-style: dashed;
-  text-decoration-color: #d3d3d3;
 }
 body.observation-observe {
   height: 100%;

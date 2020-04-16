@@ -34,9 +34,9 @@ class observer_assignment extends observer_assignment_base implements templateab
      */
     private $observer;
     /**
-     * @var observer_submission
+     * @var observer_task_submission
      */
-    private $observer_submission;
+    private $observer_task_submission;
 
     public function __construct($id_or_record)
     {
@@ -44,8 +44,8 @@ class observer_assignment extends observer_assignment_base implements templateab
 
         $this->observer = new observer($this->observerid);
 
-        $this->observer_submission = observer_submission::read_by_condition_or_null(
-            [observer_submission::COL_OBSERVER_ASSIGNMENTID => $this->id],
+        $this->observer_task_submission = observer_task_submission::read_by_condition_or_null(
+            [observer_task_submission::COL_OBSERVER_ASSIGNMENTID => $this->id],
             (bool) $this->observation_accepted // must exist if observation has been accepted
         );
     }
@@ -73,7 +73,7 @@ class observer_assignment extends observer_assignment_base implements templateab
         return $assignment;
     }
 
-    public function get_observer_submission_or_create(): observer_submission
+    public function get_observer_submission_or_create(): observer_task_submission
     {
         if (!$observer_submission = $this->get_observer_submission_or_null())
         {
@@ -83,32 +83,32 @@ class observer_assignment extends observer_assignment_base implements templateab
         return $observer_submission;
     }
 
-    public function get_observer_submission_or_null(): ?observer_submission
+    public function get_observer_submission_or_null(): ?observer_task_submission
     {
-        return $this->observer_submission;
+        return $this->observer_task_submission;
     }
 
     /**
-     * @return observer_submission
+     * @return observer_task_submission
      * @throws coding_exception
      * @throws dml_exception
      * @throws dml_missing_record_exception
      */
-    public function create_observer_submission(): observer_submission
+    public function create_observer_submission(): observer_task_submission
     {
-        $submission = new observer_submission_base();
-        $submission->set(observer_submission::COL_OBSERVER_ASSIGNMENTID, $this->get_id_or_null());
-        $submission->set(observer_submission::COL_TIMESTARTED, time());
+        $submission = new observer_task_submission_base();
+        $submission->set(observer_task_submission::COL_OBSERVER_ASSIGNMENTID, $this->get_id_or_null());
+        $submission->set(observer_task_submission::COL_TIMESTARTED, time());
         // $submission->set(observer_submission::COL_STATUS, null); // already null
-        $submission->set(observer_submission::COL_TIMESUBMITTED, 0);
+        $submission->set(observer_task_submission::COL_TIMESUBMITTED, 0);
 
-        return ($this->observer_submission =
-            new observer_submission($submission->create()));
+        return ($this->observer_task_submission =
+            new observer_task_submission($submission->create()));
     }
 
     public function is_observation_complete()
     {
-        return $this->observer_submission->is_complete();
+        return $this->observer_task_submission->is_complete();
     }
 
     /**
@@ -122,7 +122,7 @@ class observer_assignment extends observer_assignment_base implements templateab
     /**
      * Create assignment and sets it as the active one
      *
-     * @param int    $learner_submissionid
+     * @param int    $learner_task_submissionid
      * @param int    $observer_id
      * @param string $explanation if learner is switching observers, he/she must explain why
      * @return observer_assignment
@@ -131,10 +131,10 @@ class observer_assignment extends observer_assignment_base implements templateab
      * @throws dml_missing_record_exception
      */
     public static function create_assignment(
-        int $learner_submissionid, int $observer_id, string $explanation = null): observer_assignment
+        int $learner_task_submissionid, int $observer_id, string $explanation = null): observer_assignment
     {
         $assignment = new observer_assignment_base();
-        $assignment->set(observer_assignment::COL_LEARNER_SUBMISSIONID, $learner_submissionid);
+        $assignment->set(observer_assignment::COL_LEARNER_TASK_SUBMISSIONID, $learner_task_submissionid);
         $assignment->set(observer_assignment::COL_OBSERVERID, $observer_id);
         $assignment->set(observer_assignment::COL_CHANGE_EXPLAIN, $explanation);
         $assignment->set(observer_assignment::COL_OBSERVATION_ACCEPTED, null);
@@ -160,21 +160,23 @@ class observer_assignment extends observer_assignment_base implements templateab
 
     public function get_task_base(): task_base
     {
-        $taskid = $this->get_learner_submission_base()->get(learner_submission::COL_TASKID);
+        $taskid = $this->get_learner_task_submission_base()->get(learner_task_submission::COL_TASKID);
 
         return new task_base($taskid);
     }
 
-    public function get_learner_submission_base(): learner_submission_base
+    public function get_learner_task_submission_base(): learner_task_submission_base
     {
-        return learner_submission_base::read_by_condition_or_null(
-            [learner_submission::COL_ID => $this->learner_submissionid]);
+        return learner_task_submission_base::read_or_null($this->learner_task_submissionid);
     }
 
     public function accept()
     {
         $this->set(self::COL_OBSERVATION_ACCEPTED, true);
         $this->set(self::COL_TIMEACCEPTED, time());
+
+        $task_submission = $this->get_learner_task_submission_base();
+        $task_submission->update_status_and_save(learner_task_submission::STATUS_OBSERVATION_IN_PROGRESS);
 
         return $this->update();
     }
@@ -190,14 +192,14 @@ class observer_assignment extends observer_assignment_base implements templateab
     {
         $feedback = observer_feedback::read_by_condition_or_null(
             [
-                observer_feedback::COL_OBSERVER_SUBMISSIONID => $this->observer_submission->get_id_or_null(),
+                observer_feedback::COL_OBSERVER_SUBMISSIONID => $this->observer_task_submission->get_id_or_null(),
                 observer_feedback::COL_CRITERIAID            => $criteria->get_id_or_null(),
                 observer_feedback::COL_ATTEMPTID             => $attempt->get_id_or_null()
             ]);
         if (is_null($feedback))
         {
             // create feedback
-            $feedback = observer_feedback::create_new_feedback($this->observer_submission, $criteria, $attempt);
+            $feedback = observer_feedback::create_new_feedback($this->observer_task_submission, $criteria, $attempt);
         }
 
         return $feedback;
@@ -208,8 +210,8 @@ class observer_assignment extends observer_assignment_base implements templateab
      */
     public function export_template_data(): array
     {
-        $observer_submission = !is_null($this->observer_submission)
-            ? $this->observer_submission->export_template_data()
+        $observer_submission = !is_null($this->observer_task_submission)
+            ? $this->observer_task_submission->export_template_data()
             : null;
 
         return [

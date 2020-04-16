@@ -174,6 +174,8 @@ $string['outcome:not_complete'] = 'Not complete';
 // ASSESSOR
 $string['assess:observer_meets_criteria'] = 'Observer meets required criteria';
 $string['assess:last_assigned'] = 'last assigned';
+$string['assess:release_grade'] = 'Release';
+$string['assess:release_grade_title'] = 'All tasks have to be assessed before releasing';
 
 // NOTIFICATIONS
 $string['notification:observation_request_sent'] = 'Observation request sent to {$a}, please be patient while your observer reviews your submission';
@@ -181,7 +183,8 @@ $string['notification:observer_assigned_no_change'] = '<strong>{$a->email}</stro
 $string['notification:observer_assigned_same'] = 'Observation request for <i>{$a->task}</i> sent to <strong>{$a->email}</strong>';
 $string['notification:observer_assigned_new'] = 'Observer successfully changed and observation request sent to <strong>{$a->email}</strong> for <i>{$a->task}</i>';
 $string['notification:observation_pending_or_in_progress'] = 'Observation for this task is not yet complete';
-$string['notification:submission_pending_or_in_progress'] = 'Learner has not yet submitted this an attempt for this task';
+$string['notification:assessment_released'] = 'Assessment for <i>{$a}</i>\'s submission succsesfully released';
+$string['notification:submission_pending_or_in_progress'] = 'Learner has not yet submitted an attempt for this task';
 $string['notification:activity_wait_for_observers'] = 'You have requested observations for all tasks, please be patient while observers review your submissions';
 $string['notification:activity_wait_for_mixed'] = 'Please pe patient while your submissions are observed and assessed';
 $string['notification:activity_complete'] = 'Congratulations, you have completed this activity!';

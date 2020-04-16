@@ -22,6 +22,8 @@
 
 namespace mod_observation;
 
+use coding_exception;
+
 class task_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_task';
@@ -208,6 +210,34 @@ class task_base extends db_model_base
         }
 
         return $result;
+    }
+
+    /**
+     * @param int $userid
+     * @return learner_task_submission_base|null
+     * @throws coding_exception
+     */
+    public function get_learner_task_submission_or_null(int $userid)
+    {
+        return learner_task_submission_base::read_by_condition_or_null(
+            [learner_task_submission::COL_USERID => $userid, learner_task_submission::COL_TASKID => $this->id]);
+    }
+
+    /**
+     * Checks if task has been completed (observed & assessed) for given user id
+     *
+     * @param int $userid
+     * @return bool
+     * @throws coding_exception
+     */
+    public function is_complete(int $userid): bool
+    {
+        if ($submission = $this->get_learner_task_submission_or_null($userid))
+        {
+            return $submission->is_assessment_complete();
+        }
+
+        return false;
     }
 
     public function get_moodle_form_data()

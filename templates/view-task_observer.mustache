@@ -1,11 +1,11 @@
-¡<h5>Information and evidence from the trainee</h5>
+<h5>Information and evidence from the trainee</h5>
 
 <div class="wrapper-border">
-    {{#learner_submissions}} {{! should only ever be one as we're filtering by userid in the renderer}}
+    {{#learner_task_submissions}} {{! should only ever be one as we're filtering by userid in the renderer}}
         {{#learner_attempts}}
             {{> mod_observation/comp-attempt_entry}}
         {{/learner_attempts}}
-    {{/learner_submissions}}
+    {{/learner_task_submissions}}
 </div>
 
 <form action="submit.php"

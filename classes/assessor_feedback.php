@@ -42,18 +42,18 @@ class assessor_feedback extends assessor_feedback_base implements templateable
      */
     public function export_template_data(): array
     {
-        $assessor_submission = assessor_submission_base::read_or_null($this->assessor_submissionid, true);
-        $attempt_number = $assessor_submission->get_learner_submission()->get_last_attemptnumber();
-        $outcome = $assessor_submission->get(assessor_submission::COL_OUTCOME);
+        $assessor_task_submission = assessor_task_submission_base::read_or_null($this->assessor_task_submissionid, true);
+        $attempt_number = $assessor_task_submission->get_learner_task_submission()->get_last_attemptnumber();
+        $outcome = $assessor_task_submission->get(assessor_task_submission::COL_OUTCOME);
 
         return [
-            self::COL_ID            => $this->id,
-            self::COL_TEXT          => format_text($this->text, FORMAT_HTML, ['trusted' => false]),
-            self::COL_TIMESUBMITTED => usertime($this->timesubmitted),
+            self::COL_ID                          => $this->id,
+            self::COL_TEXT                        => format_text($this->text, FORMAT_HTML, ['trusted' => false]),
+            self::COL_TIMESUBMITTED               => usertime($this->timesubmitted),
 
             // extra
-            observer_submission::COL_OUTCOME => is_null($outcome) ? 'pending' : $outcome,
-            learner_attempt::COL_ATTEMPT_NUMBER => $attempt_number
+            observer_task_submission::COL_OUTCOME => is_null($outcome) ? 'pending' : $outcome,
+            learner_attempt::COL_ATTEMPT_NUMBER   => $attempt_number
         ];
     }
 }

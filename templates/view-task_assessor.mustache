@@ -11,11 +11,11 @@
 
     <h5>Information and evidence from the trainee</h5>
     <div class="wrapper-border">
-        {{#learner_submissions}} {{! should only ever be one as we're filtering by userid in the renderer}}
+        {{#learner_task_submissions}} {{! should only ever be one as we're filtering by userid in the renderer}}
             {{#learner_attempts}}
                 {{> mod_observation/comp-attempt_entry}}
             {{/learner_attempts}}
-        {{/learner_submissions}}
+        {{/learner_task_submissions}}
     </div>
 
     <h5>Completion observations</h5>
@@ -36,14 +36,29 @@
             {{{extra.filepicker_html}}}
             <div class="assessment-outcome">
                 <label for="assessment-outcome">Assessment outcome</label>
+                {{! custom validation message? https://stackoverflow.com/questions/5272433/html5-form-required-attribute-set-custom-validation-message}}
+                {{! WARNING: do not rename values of each option as they are tied to the "outcome" column in database}}
                 <select name="outcome" id="assessment-outcome" required>
-                    <option selected disabled value>
-                        {{#str}}outcome:choose, observation{{/str}}
-                    </option>
-                    <option value="complete">
+                    {{! no existing feedback? }}
+                    {{^extra.existing_feedback}}
+                        <option disabled value selected>
+                            {{#str}}outcome:choose, observation{{/str}}
+                        </option>
+                    {{/extra.existing_feedback}}
+                    <option value="complete"
+                        {{! set as complete earlier? }}
+                        {{#extra.existing_feedback.is_complete}}
+                            selected
+                        {{/extra.existing_feedback.is_complete}}
+                    >
                         {{#str}}outcome:complete, observation{{/str}}
                     </option>
-                    <option value="not_complete">
+                    <option value="not_complete"
+                        {{! set as not_complete earlier? }}
+                        {{^extra.existing_feedback.is_complete}}
+                            selected
+                        {{/extra.existing_feedback.is_complete}}
+                    >
                         {{#str}}outcome:not_complete, observation{{/str}}
                     </option>
                 </select>
@@ -52,9 +67,10 @@
     {{/extra.editor_html}}
 
     <div class="submit-wrapper align-center">
-        <button type="submit">Submit</button>
+        <button type="submit">Save</button>
         <input type="hidden" name="cmid" value="{{extra.cmid}}">
-        <input type="hidden" name="observer_submission_id" value="{{extra.observer_submission_id}}">
+        <input type="hidden" name="assessor_task_submission_id" value="{{extra.assessor_task_submission_id}}">
+        <input type="hidden" name="assessor_feedback_id" value="{{extra.assessor_feedback_id}}">
     </div>
 
 </form>

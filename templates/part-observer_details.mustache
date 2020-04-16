@@ -20,15 +20,25 @@
         {{/extra.is_assessor}}
     </div>
 
+    {{! print the actual table with observer details }}
     {{> mod_observation/comp-observer_details_table}}
 
     {{#extra.is_assessor}}
         {{#extra.is_assessing}}
             <div class="meets-criteria-wrapper">
-                <label for="meets-criteria">
+                <label title="If an observer does not meet criteria, mark this submission as Not Complete and provide an explanation in feedback"
+                       for="meets-criteria">
                     {{#str}}assess:observer_meets_criteria, observation{{/str}}
                 </label>
-                <input name="meets-criteria" id="meets-criteria" type="checkbox" required>
+                {{TODO: disable submit button if unchecked}}
+                <input name="meets-criteria"
+                       id="meets-criteria"
+                       type="checkbox"
+                    {{#extra.existing_feedback.is_complete}}
+                    {{! based on earlier feedback, this checkbox was ticked }}
+                       checked
+                    {{/extra.existing_feedback.is_complete}}
+                >
             </div>
         {{/extra.is_assessing}}
     {{/extra.is_assessor}}

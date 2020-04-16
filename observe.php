@@ -41,16 +41,17 @@ else if (!$observer_assignment->is_active())
 {
     print_error(get_string('error:not_active_observer', 'observation'));
 }
-else if ($observer_assignment->is_observation_complete())
-{
-    print_error(get_string('error:observation_complete', 'observation'));
-}
+// TODO: seems to print error once a second observation has been submitted instead of printing 'complete' view
+// else if ($observer_assignment->is_observation_complete())
+// {
+//     print_error(get_string('error:observation_complete', 'observation'));
+// }
 
 //Check id a user is trying to observe himself somehow or observer has account in lms
 if (isloggedin())
 {
-    $learner_submission = $observer_assignment->get_learner_submission_base();
-    if ($learner_submission->get_userid() == $USER->id)
+    $learner_task_submission = $observer_assignment->get_learner_task_submission_base();
+    if ($learner_task_submission->get_userid() == $USER->id)
     {
         print_error('You cannot observe yourself!');
 

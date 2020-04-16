@@ -23,13 +23,14 @@
 namespace mod_observation;
 
 use coding_exception;
+use core\notification;
 use dml_exception;
 use dml_missing_record_exception;
 use mod_observation\interfaces\templateable;
 use moodle_exception;
 use moodle_url;
 
-class learner_submission extends learner_submission_base implements templateable
+class learner_task_submission extends learner_task_submission_base implements templateable
 {
     /**
      * @var learner_attempt[]
@@ -40,22 +41,22 @@ class learner_submission extends learner_submission_base implements templateable
      */
     private $observer_assignments;
     /**
-     * @var assessor_submission
+     * @var assessor_task_submission
      */
-    private $assessor_submission;
+    private $assessor_task_submission;
 
     public function __construct($id_or_record)
     {
         parent::__construct($id_or_record);
 
         $this->learner_attempts = learner_attempt::read_all_by_condition(
-            [learner_attempt::COL_LEARNER_SUBMISSIONID => $this->id]);
+            [learner_attempt::COL_LEARNER_TASK_SUBMISSIONID => $this->id]);
 
         $this->observer_assignments = observer_assignment::read_all_by_condition(
-            [observer_assignment::COL_LEARNER_SUBMISSIONID => $this->id]);
+            [observer_assignment::COL_LEARNER_TASK_SUBMISSIONID => $this->id]);
 
-        $this->assessor_submission = assessor_submission::read_by_condition_or_null(
-            [assessor_submission::COL_LEARNER_SUBMISSIONID => $this->id],
+        $this->assessor_task_submission = assessor_task_submission::read_by_condition_or_null(
+            [assessor_task_submission::COL_LEARNER_TASK_SUBMISSIONID => $this->id],
             $this->is_assessment_in_progress() // must exist if observation complete
         );
     }
@@ -91,7 +92,7 @@ class learner_submission extends learner_submission_base implements templateable
                         // let a dev know if he/she is watching
                         debugging(
                             sprintf(
-                                'learner submission status is set to "pending", however, an attempt already exists for submission id %d!',
+                                'learner task submission status is set to "pending", however, an attempt already exists for submission id %d!',
                                 $this->id), DEBUG_DEVELOPER, debug_backtrace());
 
                         return true;
@@ -117,7 +118,7 @@ class learner_submission extends learner_submission_base implements templateable
                 {
                     // NOT OK
                     debugging(
-                        'learner submission is set to "learner in progress" but no attempt exists',
+                        'learner task submission is set to "learner in progress" but no attempt exists',
                         DEBUG_DEVELOPER, debug_backtrace());
 
                     $this->create_new_attempt();
@@ -127,6 +128,7 @@ class learner_submission extends learner_submission_base implements templateable
                 break;
 
             case self::STATUS_OBSERVATION_INCOMPLETE:
+            case self::STATUS_ASSESSMENT_INCOMPLETE:
                 $this->create_new_attempt(true);
 
                 return true;
@@ -148,7 +150,7 @@ class learner_submission extends learner_submission_base implements templateable
     }
 
     /**
-     * @param bool $set_submission_in_progress if true, will set submission state to {@link STATUS_LEARNER_IN_PROGRESS}
+     * @param bool $set_submission_in_progress if true, will set submission and task submission state to {@link STATUS_LEARNER_IN_PROGRESS}
      * @return learner_attempt_base
      * @throws dml_exception
      * @throws dml_missing_record_exception
@@ -159,7 +161,7 @@ class learner_submission extends learner_submission_base implements templateable
         $attempt = new learner_attempt_base();
 
         // set defaults
-        $attempt->set(learner_attempt::COL_LEARNER_SUBMISSIONID, $this->id);
+        $attempt->set(learner_attempt::COL_LEARNER_TASK_SUBMISSIONID, $this->id);
         $attempt->set(learner_attempt::COL_TIMESTARTED, time());
         $attempt->set(learner_attempt::COL_TIMESUBMITTED, 0);
         $attempt->set(learner_attempt::COL_TEXT, '');
@@ -196,7 +198,7 @@ class learner_submission extends learner_submission_base implements templateable
     }
 
     /**
-     * Assigns submitted observer to this learner submission.
+     * Assigns submitted observer to this learner task submission.
      *
      * @param observer_base $submitted_observer
      * @param string        $message message to include in email for observer
@@ -264,6 +266,10 @@ class learner_submission extends learner_submission_base implements templateable
         $review_url = new moodle_url(
             OBSERVATION_MODULE_PATH . 'observe.php',
             ['token' => $assignment->get(observer_assignment::COL_TOKEN)]);
+        // TODO: REMOVE TEMPORARY OBSERVATION NOTIFICATION
+        notification::add(
+            'As emails don\'t work at the moment, use this link in incognito mode to "observe" task you\'ve just submitted - <br>' .
+        $review_url->out(false), notification::WARNING);
         // send email
         // send notification
 
@@ -276,48 +282,48 @@ class learner_submission extends learner_submission_base implements templateable
      * @return observer_assignment|null null if no record found
      * @throws coding_exception
      */
-    public function get_active_observer_assignment_or_null(): ?observer_assignment
+    public function get_active_observer_assignment_or_null()
     {
         return lib::find_in_assoc_array_by_criteria_or_null(
             $this->observer_assignments,
             [
-                observer_assignment::COL_LEARNER_SUBMISSIONID => $this->id,
-                observer_assignment::COL_ACTIVE               => true
+                observer_assignment::COL_LEARNER_TASK_SUBMISSIONID => $this->id,
+                observer_assignment::COL_ACTIVE                    => true
             ]);
     }
 
-    public function get_assessor_submission_or_null(): ?assessor_submission
+    public function get_assessor_task_submission_or_null(): ?assessor_task_submission
     {
-        return $this->assessor_submission;
+        return $this->assessor_task_submission;
     }
 
-    public function get_assessor_submission_or_create(int $assessorid = null): assessor_submission
+    public function get_assessor_task_submission_or_create(int $assessorid = null): assessor_task_submission
     {
         global $USER;
 
-        if (!$submission = $this->get_assessor_submission_or_null())
+        if (!$assessor_task_submission = $this->get_assessor_task_submission_or_null())
         {
             $userid = is_null($assessorid) ? $USER->id : $assessorid;
 
-            $submission = new assessor_submission_base();
-            $submission->set(assessor_submission::COL_ASSESSORID, $userid);
-            $submission->set(assessor_submission::COL_LEARNER_SUBMISSIONID, $this->id);
+            $assessor_task_submission = new assessor_task_submission_base();
+            $assessor_task_submission->set(assessor_task_submission::COL_ASSESSORID, $userid);
+            $assessor_task_submission->set(assessor_task_submission::COL_LEARNER_TASK_SUBMISSIONID, $this->id);
             // COL_OUTCOME intentionally null
 
-            $submission = new assessor_submission($submission->create());
+            $assessor_task_submission = new assessor_task_submission($assessor_task_submission->create());
         }
-        else if (!is_null($assessorid) && $submission->get(assessor_submission::COL_ASSESSORID) != $assessorid)
+        else if (!is_null($assessorid) && $assessor_task_submission->get(assessor_task_submission::COL_ASSESSORID) != $assessorid)
         {
             debugging(
                 sprintf(
-                    'Provided assessor id "%d" does not match existing assessor id "%d" in submission with id "%d"',
+                    'Provided assessor id "%d" does not match existing assessor id "%d" in assessor_task_submission with id "%d"',
                     $assessorid,
-                    $submission->get(assessor_submission::COL_ASSESSORID),
-                    $submission->get_id_or_null()
+                    $assessor_task_submission->get(assessor_task_submission::COL_ASSESSORID),
+                    $assessor_task_submission->get_id_or_null()
                 ));
         }
 
-        return $submission;
+        return $assessor_task_submission;
     }
 
     /**
@@ -330,13 +336,13 @@ class learner_submission extends learner_submission_base implements templateable
     {
         // get all assignments in course for user:
         // SELECT oa.id
-        // , oa.learner_submissionid
+        // , oa.learner_task_submissionid
         // , oa.observerid
         // , oa.change_explain
         // , oa.observation_accepted
         // , oa.timeassigned
         // , oa.token
-        // , if(oa.learner_submissionid != ?, 0, oa.active) active
+        // , if(oa.learner_task_submissionid != ?, 0, oa.active) active
         // FROM mdl_observation_observer_assignment oa
         //          INNER JOIN (SELECT x.token
         //                           , x.active
@@ -346,8 +352,8 @@ class learner_submission extends learner_submission_base implements templateable
         //                                        WHERE x.observerid = observerid)
         //                      GROUP BY x.observerid) g
         //                     ON g.token = oa.token AND g.active = oa.active
-        //          JOIN mdl_observation_learner_submission ls
-        //               ON ls.id = oa.learner_submissionid
+        //          JOIN mdl_observation_learner_task_submission ls
+        //               ON ls.id = oa.learner_task_submissionid
         //          JOIN mdl_observation_task t ON t.id = ls.taskid
         //          JOIN mdl_observation o ON o.id = t.observationid
         // WHERE ls.userid = ?
@@ -355,13 +361,13 @@ class learner_submission extends learner_submission_base implements templateable
 
         $sql =
             'SELECT oa.id
-            , oa.' . observer_assignment::COL_LEARNER_SUBMISSIONID . '
+            , oa.' . observer_assignment::COL_LEARNER_TASK_SUBMISSIONID . '
             , oa.' . observer_assignment::COL_OBSERVERID . '
             , oa.' . observer_assignment::COL_CHANGE_EXPLAIN . '
             , oa.' . observer_assignment::COL_OBSERVATION_ACCEPTED . '
             , oa.' . observer_assignment::COL_TIMEASSIGNED . '
             , oa.' . observer_assignment::COL_TOKEN . '
-            , if(oa.' . observer_assignment::COL_LEARNER_SUBMISSIONID . ' != ?, 0, oa.'
+            , if(oa.' . observer_assignment::COL_LEARNER_TASK_SUBMISSIONID . ' != ?, 0, oa.'
             . observer_assignment::COL_ACTIVE . ') active
             FROM {' . observer_assignment::TABLE . '} oa
                  INNER JOIN (SELECT x.' . observer_assignment::COL_TOKEN . '
@@ -374,11 +380,11 @@ class learner_submission extends learner_submission_base implements templateable
                      GROUP BY x.' . observer_assignment::COL_OBSERVERID . ') g
                     ON g.' . observer_assignment::COL_TOKEN . ' = oa.' . observer_assignment::COL_TOKEN
             . ' AND g.' . observer_assignment::COL_ACTIVE . ' = oa.' . observer_assignment::COL_ACTIVE . '
-                    JOIN {' . learner_submission::TABLE . '} ls
-                        ON ls.id = oa.' . observer_assignment::COL_LEARNER_SUBMISSIONID . '
-                    JOIN {' . task::TABLE . '} t ON t.id = ls.' . learner_submission::COL_TASKID . '
+                    JOIN {' . learner_task_submission::TABLE . '} ls
+                        ON ls.id = oa.' . observer_assignment::COL_LEARNER_TASK_SUBMISSIONID . '
+                    JOIN {' . task::TABLE . '} t ON t.id = ls.' . learner_task_submission::COL_TASKID . '
                     JOIN {' . observation::TABLE . '} o ON o.id = t.' . task::COL_OBSERVATIONID . '
-                WHERE ls.' . learner_submission::COL_USERID . ' = ?
+                WHERE ls.' . learner_task_submission::COL_USERID . ' = ?
                 AND o.' . observation::COL_COURSE . ' = ?';
 
         return observer_assignment::read_all_by_sql($sql, [$this->id, $this->userid, $this->get_course_id()]);
@@ -396,13 +402,13 @@ class learner_submission extends learner_submission_base implements templateable
         //  SELECT o.course
         //  FROM mdl_observation o
         //  JOIN mdl_observation_task t on t.observationid = o.id
-        //  JOIN mdl_observation_learner_submission ls ON ls.taskid = t.id
+        //  JOIN mdl_observation_learner_task_submission ls ON ls.taskid = t.id
         //  WHERE ls.id = 6
 
         $sql = 'SELECT o.' . observation::COL_COURSE . '
                 FROM {' . observation::TABLE . '} o
                     JOIN {' . task::TABLE . '} t on t.' . task::COL_OBSERVATIONID . ' = o.id
-                    JOIN {' . learner_submission::TABLE . '} ls ON ls.' . learner_submission::COL_TASKID . ' = t.id
+                    JOIN {' . learner_task_submission::TABLE . '} ls ON ls.' . learner_task_submission::COL_TASKID . ' = t.id
                 WHERE ls.id = ?';
 
         return $DB->get_field_sql($sql, [$this->id], MUST_EXIST);
@@ -428,10 +434,10 @@ class learner_submission extends learner_submission_base implements templateable
             $observer_assignments_data[] = $observer_assignment->export_template_data();
         }
 
-        $assessor_submission_data = null;
-        if (!is_null($this->assessor_submission))
+        $assessor_task_submission_data = null;
+        if (!is_null($this->assessor_task_submission))
         {
-            $assessor_submission_data = $this->assessor_submission->export_template_data();
+            $assessor_task_submission_data = $this->assessor_task_submission->export_template_data();
         }
 
         return [
@@ -441,7 +447,7 @@ class learner_submission extends learner_submission_base implements templateable
 
             'learner_attempts'     => $learner_attempts_data,
             'observer_assignments' => $observer_assignments_data,
-            'assessor_submission'  => $assessor_submission_data
+            'assessor_task_submission'  => $assessor_task_submission_data
         ];
     }
 }

@@ -20,17 +20,22 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core\output\notification;
+use mod_observation\assessor_feedback;
+use mod_observation\assessor_task_submission;
 use mod_observation\criteria;
 use mod_observation\criteria_base;
 use mod_observation\learner_attempt;
 use mod_observation\learner_attempt_base;
-use mod_observation\learner_submission_base;
+use mod_observation\learner_task_submission_base;
 use mod_observation\lib;
 use mod_observation\observation;
 use mod_observation\observer_assignment;
 use mod_observation\observer_feedback;
-use mod_observation\observer_submission;
-use mod_observation\observer_submission_base;
+use mod_observation\observer_task_submission;
+use mod_observation\observer_task_submission_base;
+use mod_observation\submission;
+use mod_observation\submission_base;
 use mod_observation\task_base;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -45,23 +50,20 @@ $context = context_module::instance($cmid);
 
 // TODO: Events
 
-if ($learner_submissionid = optional_param('learner_submission_id', null, PARAM_INT))
+if ($learner_task_submissionid = optional_param('learner_task_submission_id', null, PARAM_INT))
 {
     require_login();
 
     $attempt_id = required_param('attempt_id', PARAM_INT);
 
     // check id's are correct
-    $learner_submission = new learner_submission_base($learner_submissionid);
+    $learner_task_submission = new learner_task_submission_base($learner_task_submissionid);
     $attempt = new learner_attempt_base($attempt_id);
 
     // get editor content
     // TODO: SANITISE INPUT!!!!!
     list($input_base) = lib::get_editor_attributes_for_class(learner_attempt::class);
     $attempt_editor = required_param_array($input_base, PARAM_RAW);
-
-    // get files
-    $draft_itemid = required_param('attachments_itemid', PARAM_INT);
 
     // update attempt
     $attempt->set(learner_attempt::COL_TEXT, $attempt_editor['text']);
@@ -70,21 +72,22 @@ if ($learner_submissionid = optional_param('learner_submission_id', null, PARAM_
     $attempt->update();
 
     // save files
+    $draft_itemid = required_param('attachments_itemid', PARAM_INT);
     lib::save_files(
         $draft_itemid, $context->id, observation::FILE_AREA_TRAINEE, $attempt->get_id_or_null());
 
-    $learner_submission->submit($attempt);
+    $learner_task_submission->submit($attempt);
 
     redirect(
         new moodle_url(
             OBSERVATION_MODULE_PATH . 'request.php',
-            ['id' => $cmid, 'learner_submission_id' => $learner_submission->get_id_or_null()]));
+            ['id' => $cmid, 'learner_task_submission_id' => $learner_task_submission->get_id_or_null()]));
 }
 /* ================================================================================================================== */
 else if ($observer_submissionid = optional_param('observer_submission_id', null, PARAM_INT))
 {
     // gather data from post request
-    $observer_submission_base = new observer_submission_base($observer_submissionid);
+    $observer_submission_base = new observer_task_submission_base($observer_submissionid);
     $observations = lib::required_param_array('criteria', PARAM_RAW);
 
     if ($observer_submission_base->is_complete())
@@ -104,6 +107,7 @@ else if ($observer_submissionid = optional_param('observer_submission_id', null,
 
     // needed to extract text and format from editor
     list($feedback_editor_base) = lib::get_editor_attributes_for_class(observer_feedback::class);
+    // keep track of how many criteria are completed to determine task outcome
     $completed_count = 0;
     foreach ($observations as $criteria_id => $observation_outcome)
     {
@@ -130,8 +134,8 @@ else if ($observer_submissionid = optional_param('observer_submission_id', null,
     }
 
     $observation_submission_outcome = ($completed_count === $criteria_count)
-        ? observer_submission::OUTCOME_COMPLETE
-        : observer_submission::OUTCOME_NOT_COMPLETE;
+        ? observer_task_submission::OUTCOME_COMPLETE
+        : observer_task_submission::OUTCOME_NOT_COMPLETE;
 
     $observer_submission_base->submit($observation_submission_outcome);
 
@@ -142,11 +146,67 @@ else if ($observer_submissionid = optional_param('observer_submission_id', null,
             ['token' => $observer_assignment->get(observer_assignment::COL_TOKEN)]));
 }
 /* ================================================================================================================== */
-else if ($assessor_submissionid = optional_param('assessor_submission_id', null, PARAM_INT))
+else if ($assessor_task_submissionid = optional_param('assessor_task_submission_id', null, PARAM_INT))
 {
     require_login();
 
-    required_param('assessor_feedback_id', PARAM_INT);
+    $assessor_task_submission = new assessor_task_submission($assessor_task_submissionid);
+    $assessor_feedback = new assessor_feedback(
+        required_param('assessor_feedback_id', PARAM_INT));
+
+    // get outcome and validate
+    $outcome = required_param('outcome', PARAM_TEXT);
+    if (!in_array($outcome, [assessor_task_submission::OUTCOME_NOT_COMPLETE, assessor_task_submission::OUTCOME_COMPLETE]))
+    {
+        throw new coding_exception("Invalid outcome '$outcome'");
+    }
+    // if outcome is 'complete' then observer has to meet criteria
+    if ($outcome == assessor_task_submission::OUTCOME_COMPLETE)
+    {
+        // we don't use this param for anything apart from validation
+        required_param('meets-criteria', PARAM_BOOL);
+    }
+
+    // needed to extract text and format from editor
+    list($feedback_editor_base) = lib::get_editor_attributes_for_class(assessor_feedback::class);
+    $editor = required_param_array($feedback_editor_base, PARAM_RAW);
+
+    // update feedback
+    $assessor_feedback->set(assessor_feedback::COL_TIMESUBMITTED, time());
+    $assessor_feedback->set(assessor_feedback::COL_TEXT, $editor['text']);
+    $assessor_feedback->set(assessor_feedback::COL_TEXT_FORMAT, $editor['format']);
+    $assessor_feedback->set(assessor_feedback::COL_OUTCOME, $outcome);
+    $assessor_feedback->update();
+
+    // save files
+    $draft_itemid = required_param('attachments_itemid', PARAM_INT);
+    lib::save_files(
+        $draft_itemid, $context->id, observation::FILE_AREA_ASSESSOR, $assessor_feedback->get_id_or_null());
+
+    $assessor_task_submission->submit($outcome, $assessor_feedback);
+
+    $learnerid = $assessor_task_submission->get_learner_task_submission()->get_userid();
+    redirect(
+        new moodle_url(
+            OBSERVATION_MODULE_PATH . 'activity_assess.php', ['id' => $cmid, 'learnerid' => $learnerid]));
+}
+/* ================================================================================================================== */
+else if ($submission_id = optional_param('activity_submission_id', null, PARAM_INT))
+{
+    // releasing grade
+    $submisison = new submission(
+        new submission_base($submission_id));
+    $submisison->release_assessment();
+
+    redirect(
+        new moodle_url(OBSERVATION_MODULE_PATH . 'view.php', ['id' => $cmid]),
+        get_string(
+            'notification:assessment_released',
+            'observation',
+            fullname(core_user::get_user($submisison->get_userid()))),
+        null,
+        notification::NOTIFY_SUCCESS
+    );
 }
 /* ================================================================================================================== */
 else

@@ -34,6 +34,7 @@
         <KEY NAME="course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
+
     <TABLE NAME="observation_task" COMMENT="Task details">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
@@ -56,6 +57,7 @@
         <KEY NAME="observationid" TYPE="foreign" FIELDS="observationid" REFTABLE="observation" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
+
     <TABLE NAME="observation_criteria" COMMENT="Criteria for task">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
@@ -71,10 +73,28 @@
         <KEY NAME="taskid" TYPE="foreign" FIELDS="taskid" REFTABLE="observation_task" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="observation_learner_submission" COMMENT="Learner submission for individual task">
+
+    <TABLE NAME="observation_submission" COMMENT="Learner submission for whole activity">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="observationid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="One of 'not_started', 'learner_in_progress', 'observation_pending', 'observation_in_progress', 'observation_incomplete', 'assessment_pending', 'assessment_in_progress', 'assessment_incomplete', 'complete'"/>
+        <FIELD NAME="timestarted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="observationid" TYPE="foreign" FIELDS="observationid" REFTABLE="observation" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="observation_learner_task_submission" COMMENT="Learner submission for individual task">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="taskid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="submisisonid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="status" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="One of 'not_started', 'learner_in_progress', 'observation_pending', 'observation_in_progress', 'observation_incomplete', 'assessment_pending', 'assessment_in_progress', 'assessment_incomplete', 'complete'"/>
         <FIELD NAME="timestarted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -86,10 +106,11 @@
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
+
     <TABLE NAME="observation_learner_attempt" COMMENT="Learner attempt for task">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="learner_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="learner_task_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timestarted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timesubmitted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="text" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
@@ -98,9 +119,10 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="learner_submissionid" TYPE="foreign" FIELDS="learner_submissionid" REFTABLE="observation_learner_submission" REFFIELDS="id"/>
+        <KEY NAME="learner_task_submissionid" TYPE="foreign" FIELDS="learner_task_submissionid" REFTABLE="observation_learner_task_submission" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
+
     <TABLE NAME="observation_observer" COMMENT="External observer profile details">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
@@ -119,29 +141,31 @@
         <KEY NAME="modified_by" TYPE="foreign" FIELDS="modified_by" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
+
     <TABLE NAME="observation_observer_assignment" COMMENT="External observer assignment to learner submission">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="learner_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="learner_task_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="observerid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="change_explain" TYPE="text" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="optional. used when observer change is requested"/>
         <FIELD NAME="timeassigned" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="observation_accepted" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="null if no decision made yet, false if observer declined observation, true if accepted and observer requirements confirmed"/>
         <FIELD NAME="timeaccepted" TYPE="int" LENGTH="18" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="token" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="active" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="indicates if this is the current assignment for related learner_submission"/>
+        <FIELD NAME="active" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="indicates if this is the current assignment for related learner_task_submission"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="learner_submissionid" TYPE="foreign" FIELDS="learner_submissionid" REFTABLE="observation_learner_submission" REFFIELDS="id"/>
+        <KEY NAME="learner_task_submissionid" TYPE="foreign" FIELDS="learner_task_submissionid" REFTABLE="observation_learner_task_submission" REFFIELDS="id"/>
         <KEY NAME="observerid" TYPE="foreign" FIELDS="observerid" REFTABLE="observation_observer" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="learner_submissionid" UNIQUE="false" FIELDS="learner_submissionid"/>
+        <INDEX NAME="learner_task_submissionid" UNIQUE="false" FIELDS="learner_task_submissionid"/>
         <INDEX NAME="observerid" UNIQUE="false" FIELDS="observerid"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="observation_observer_submission" COMMENT="External observer task submission">
+
+    <TABLE NAME="observation_observer_task_submission" COMMENT="External observer task submission">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="observer_assignmentid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
@@ -154,6 +178,7 @@
         <KEY NAME="observer_assignmentid" TYPE="foreign" FIELDS="observer_assignmentid" REFTABLE="observation_observer_assignment" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
+
     <TABLE NAME="observation_observer_feedback" COMMENT="Feedback from external observer for criteria">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
@@ -176,31 +201,37 @@
         <INDEX NAME="observer_submissionid" UNIQUE="false" FIELDS="observer_submissionid"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="observation_assessor_submission" COMMENT="Assessor submission for task">
+
+    <TABLE NAME="observation_assessor_task_submission" COMMENT="Assessor submission for task">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="assessorid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="learner_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="learner_task_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="outcome" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="null if not yet graded"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="assessorid" TYPE="foreign" FIELDS="assessorid" REFTABLE="user" REFFIELDS="id"/>
-        <KEY NAME="learner_submissionid" TYPE="foreign" FIELDS="learner_submissionid" REFTABLE="observation_learner_submission" REFFIELDS="id"/>
+        <KEY NAME="learner_task_submissionid" TYPE="foreign" FIELDS="learner_task_submissionid" REFTABLE="observation_learner_task_submission" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
+
     <TABLE NAME="observation_assessor_feedback" COMMENT="Assessor feedback for task">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="assessor_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="attemptid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="assessor_task_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="text" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="text_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="outcome" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="Outcome of assessment, NULL if not yet submitted"/>
         <FIELD NAME="timesubmitted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="assessor_submissionid" TYPE="foreign" FIELDS="assessor_submissionid" REFTABLE="observation_assessor_submission" REFFIELDS="id"/>
+        <KEY NAME="assessor_task_submissionid" TYPE="foreign" FIELDS="assessor_task_submissionid" REFTABLE="observation_assessor_task_submission" REFFIELDS="id"/>
+        <KEY NAME="attemptid" TYPE="foreign" FIELDS="attemptid" REFTABLE="observation_attempt" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
+
   </TABLES>
 </XMLDB>

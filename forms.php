@@ -145,7 +145,7 @@ class observation_assign_observer_form extends moodleform
         $mform->updateAttributes(['id' => 'assign-observer-form']);
 
         $cmid = $this->_customdata['id'];
-        $learner_submission_id = $this->_customdata['learner_submission_id'];
+        $learner_task_submission_id = $this->_customdata['learner_task_submission_id'];
 
         $element = 'assign_observer:header';
         $mform->addElement('header', $element, get_string('assign_observer:header', OBSERVATION));
@@ -204,10 +204,10 @@ class observation_assign_observer_form extends moodleform
         $mform->setType($element, PARAM_INT);
         $mform->setDefault($element, $cmid);
         // submission id
-        $element = 'learner_submission_id';
+        $element = 'learner_task_submission_id';
         $mform->addElement('hidden', $element);
         $mform->setType($element, PARAM_INT);
-        $mform->setDefault($element, $learner_submission_id);
+        $mform->setDefault($element, $learner_task_submission_id);
 
         $this->add_action_buttons(false, get_string('send', 'observation'));
     }

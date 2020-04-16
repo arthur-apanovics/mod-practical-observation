@@ -26,19 +26,19 @@ class observer_assignment_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_observer_assignment';
 
-    public const COL_LEARNER_SUBMISSIONID = 'learner_submissionid';
-    public const COL_OBSERVERID           = 'observerid';
-    public const COL_CHANGE_EXPLAIN       = 'change_explain';
-    public const COL_TIMEASSIGNED         = 'timeassigned';
-    public const COL_OBSERVATION_ACCEPTED = 'observation_accepted';
-    public const COL_TIMEACCEPTED         = 'timeaccepted';
-    public const COL_TOKEN                = 'token';
-    public const COL_ACTIVE               = 'active';
+    public const COL_LEARNER_TASK_SUBMISSIONID = 'learner_task_submissionid';
+    public const COL_OBSERVERID                = 'observerid';
+    public const COL_CHANGE_EXPLAIN            = 'change_explain';
+    public const COL_TIMEASSIGNED              = 'timeassigned';
+    public const COL_OBSERVATION_ACCEPTED      = 'observation_accepted';
+    public const COL_TIMEACCEPTED              = 'timeaccepted';
+    public const COL_TOKEN                     = 'token';
+    public const COL_ACTIVE                    = 'active';
 
     /**
      * @var int
      */
-    protected $learner_submissionid;
+    protected $learner_task_submissionid;
     /**
      * @var int
      */
@@ -68,7 +68,7 @@ class observer_assignment_base extends db_model_base
      */
     protected $token;
     /**
-     * indicates if this is the current assignment for related learner_submission
+     * indicates if this is the current assignment for related learner_task_submission
      *
      * @var bool
      */
@@ -87,14 +87,14 @@ class observer_assignment_base extends db_model_base
         return (bool) $this->observation_accepted;
     }
 
-    public function get_learner_submission_base()
+    public function get_learner_task_submission_base()
     {
-        return new learner_submission_base($this->learner_submissionid);
+        return new learner_task_submission_base($this->learner_task_submissionid);
     }
 
-    public function get_observer_submission_base_or_null(): ?observer_submission_base
+    public function get_observer_submission_base_or_null(): ?observer_task_submission_base
     {
-        return observer_submission_base::read_by_condition_or_null(
-            [observer_submission::COL_OBSERVER_ASSIGNMENTID => $this->id]);
+        return observer_task_submission_base::read_by_condition_or_null(
+            [observer_task_submission::COL_OBSERVER_ASSIGNMENTID => $this->id]);
     }
 }

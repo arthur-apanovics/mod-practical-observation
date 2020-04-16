@@ -130,34 +130,16 @@ class observation extends observation_base implements templateable
     }
 
     /**
-     * Get task by id from instantiated Observation class. WILL THROW EXCEPTION if task not found
-     *
-     * @param $taskid
-     * @return mixed
-     * @throws coding_exception
-     */
-    public function get_task($taskid): task
-    {
-        if (!$task = lib::find_in_assoc_array_by_key_value_or_null($this->tasks, task::COL_ID, $taskid))
-        {
-            throw new coding_exception(
-                sprintf('Task with id %d does not exist in observation with id %d', $taskid, $this->id));
-        }
-
-        return $task;
-    }
-
-    /**
      * @param int $userid
-     * @return learner_submission[]
+     * @return learner_task_submission[]
      * @throws coding_exception
      */
-    public function get_learner_submissions(int $userid): array
+    public function get_learner_task_submissions(int $userid): array
     {
         $submissions = [];
         foreach ($this->tasks as $task)
         {
-            $submissions[] = $task->get_learner_submission_or_null($userid);
+            $submissions[] = $task->get_learner_task_submission_or_null($userid);
         }
 
         return $submissions;
@@ -166,12 +148,10 @@ class observation extends observation_base implements templateable
     /**
      * null NOT included
      *
-     * @return learner_submission[]
+     * @return learner_task_submission[]
      */
-    public function get_all_submisisons(): array
+    public function get_all_task_submisisons(): array
     {
-        global $USER;
-
         // double check user has required capabilities
         $context = context_module::instance($this->get_cm()->id);
         if (!has_any_capability([self::CAP_VIEWSUBMISSIONS, self::CAP_ASSESS], $context))
@@ -182,14 +162,14 @@ class observation extends observation_base implements templateable
         $submissions = [];
         if ($this->is_filtered)
         {
-            $submissions = learner_submission::to_class_instances(
-                parent::get_all_submisisons());
+            $submissions = learner_task_submission::to_class_instances(
+                parent::get_all_task_submisisons());
         }
         else
         {
             foreach ($this->tasks as $task)
             {
-                $submissions[] = $task->get_learner_submissions();
+                $submissions[] = $task->get_learner_task_submissions();
             }
         }
 
@@ -243,6 +223,66 @@ class observation extends observation_base implements templateable
         return true;
     }
 
+    public function all_tasks_observation_pending_or_in_progress(int $userid): bool
+    {
+        foreach ($this->tasks as $task)
+        {
+            if ($submission = $task->get_learner_task_submission_or_null($userid))
+            {
+                // has a submission
+                if ($submission->get_active_observer_assignment_or_null()
+                    && $submission->is_observation_pending_or_in_progress())
+                {
+                    // has observer assigned and observation pending/in progress
+                    continue;
+                }
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get task by id from instantiated Observation class. WILL THROW EXCEPTION if task not found
+     *
+     * @param $taskid
+     * @return mixed
+     * @throws coding_exception
+     */
+    public function get_task($taskid): task
+    {
+        if (!$task = lib::find_in_assoc_array_by_key_value_or_null($this->tasks, task::COL_ID, $taskid))
+        {
+            throw new coding_exception(
+                sprintf('Task with id %d does not exist in observation with id %d', $taskid, $this->id));
+        }
+
+        return $task;
+    }
+
+    public function get_submission_or_null(int $learnerid)
+    {
+        return submission::read_by_condition_or_null(
+            [submission::COL_OBSERVATIONID => $this->id, submission::COL_USERID => $learnerid]);
+    }
+
+    public function get_submission_or_create(int $learnerid)
+    {
+        if (!$submission = $this->get_submission_or_null($learnerid))
+        {
+            $submission = new submission_base();
+            $submission->set(submission::COL_OBSERVATIONID, $this->id);
+            $submission->set(submission::COL_USERID, $learnerid);
+            $submission->set(submission::COL_STATUS, submission::STATUS_LEARNER_PENDING);
+            $submission->set(submission::COL_TIMESTARTED, time());
+            $submission->set(submission::COL_TIMECOMPLETED, 0);
+
+            $submission->create();
+        }
+    }
+
     public function create_task(task_base $task)
     {
         if (!$task->get_id_or_null())
@@ -293,32 +333,11 @@ class observation extends observation_base implements templateable
         return true;
     }
 
-    public function all_tasks_observation_pending_or_in_progress(int $userid)
-    {
-        foreach ($this->tasks as $task)
-        {
-            if ($submission = $task->get_learner_submission_or_null($userid))
-            {
-                // has a submission
-                if ($submission->get_active_observer_assignment_or_null()
-                    && $submission->is_observation_pending_or_in_progress())
-                {
-                    // has observer assigned and observation pending/in progress
-                    continue;
-                }
-            }
-
-            return false;
-        }
-
-        return true;
-    }
-
     public function all_tasks_no_learner_action_required(int $userid)
     {
         foreach ($this->tasks as $task)
         {
-            if ($submission = $task->get_learner_submission_or_null($userid))
+            if ($submission = $task->get_learner_task_submission_or_null($userid))
             {
                 // has a submission
                 if ($submission->is_learner_action_required())
@@ -334,10 +353,34 @@ class observation extends observation_base implements templateable
         return true;
     }
 
+    /**
+     * Check if all tasks have been graded for learner
+     *
+     * @param int $learnerid
+     * @return bool
+     */
+    public function can_release_grade(int $learnerid): bool
+    {
+        $submitted = 0;
+        foreach ($this->get_learner_task_submissions($learnerid) as $learner_task_submission)
+        {
+            $feedback = $learner_task_submission
+                ->get_latest_learner_attempt_or_null()
+                ->get_assessor_feedback_or_null();
+
+            if (!is_null($feedback))
+            {
+                $submitted += $feedback->is_submitted();
+            }
+        }
+
+        return ($submitted == $this->get_task_count());
+    }
+
     public function export_submissions_summary_template_data(): array
     {
         $data = [];
-        foreach ($this->get_all_submisisons() as $submisison)
+        foreach ($this->get_all_task_submisisons() as $submisison)
         {
             $attempt = $submisison->get_latest_attempt_or_null();
             $total = $this->get_task_count();

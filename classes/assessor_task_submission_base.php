@@ -22,15 +22,13 @@
 
 namespace mod_observation;
 
-use coding_exception;
-
-class assessor_submission_base extends db_model_base
+class assessor_task_submission_base extends db_model_base
 {
-    public const TABLE = OBSERVATION . '_assessor_submission';
+    public const TABLE = OBSERVATION . '_assessor_task_submission';
 
-    public const COL_ASSESSORID           = 'assessorid';
-    public const COL_LEARNER_SUBMISSIONID = 'learner_submissionid';
-    public const COL_OUTCOME              = 'outcome';
+    public const COL_ASSESSORID                = 'assessorid';
+    public const COL_LEARNER_TASK_SUBMISSIONID = 'learner_task_submissionid';
+    public const COL_OUTCOME                   = 'outcome';
 
     public const OUTCOME_NOT_COMPLETE = 'not_complete';
     public const OUTCOME_COMPLETE     = 'complete';
@@ -42,7 +40,7 @@ class assessor_submission_base extends db_model_base
     /**
      * @var int
      */
-    protected $learner_submissionid;
+    protected $learner_task_submissionid;
     /**
      * One of:
      * <ul>
@@ -54,10 +52,10 @@ class assessor_submission_base extends db_model_base
      */
     protected $outcome;
 
-    public function get_learner_submission()
+    public function get_learner_task_submission()
     {
-        return learner_submission_base::read_by_condition_or_null(
-            [learner_submission::COL_ID => $this->learner_submissionid], true);
+        return learner_task_submission_base::read_by_condition_or_null(
+            [learner_task_submission::COL_ID => $this->learner_task_submissionid], true);
     }
 
     public function set(string $prop, $value, bool $save = false): db_model_base

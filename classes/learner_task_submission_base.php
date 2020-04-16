@@ -23,41 +23,31 @@
 namespace mod_observation;
 
 use coding_exception;
+use mod_observation\traits\submission_status_store;
 
-class learner_submission_base extends db_model_base
+class learner_task_submission_base extends submission_status_store
 {
-    public const TABLE = OBSERVATION . '_learner_submission';
+    public const TABLE = OBSERVATION . '_learner_task_submission';
 
     public const COL_TASKID        = 'taskid';
+    public const COL_SUBMISISONID  = 'submisisonid';
     public const COL_USERID        = 'userid';
     public const COL_STATUS        = 'status';
     public const COL_TIMESTARTED   = 'timestarted';
     public const COL_TIMECOMPLETED = 'timecompleted';
 
-    // learner statuses
-    public const STATUS_LEARNER_PENDING     = 'learner_pending';
-    public const STATUS_LEARNER_IN_PROGRESS = 'learner_in_progress';
-
-    // observer statuses
-    public const STATUS_OBSERVATION_PENDING     = 'observation_pending';
-    public const STATUS_OBSERVATION_IN_PROGRESS = 'observation_in_progress';
-    public const STATUS_OBSERVATION_INCOMPLETE  = 'observation_incomplete';
-
-    // assessor statuses
-    public const STATUS_ASSESSMENT_PENDING     = 'assessment_pending';
-    public const STATUS_ASSESSMENT_IN_PROGRESS = 'assessment_in_progress';
-    public const STATUS_ASSESSMENT_INCOMPLETE  = 'assessment_incomplete';
-
-    public const STATUS_COMPLETE = 'complete';
-
-    /**
-     * @var int
-     */
-    protected $userid;
     /**
      * @var int
      */
     protected $taskid;
+    /**
+     * @var int {@link submission_base}
+     */
+    protected $submisisonid;
+    /**
+     * @var int
+     */
+    protected $userid;
     /**
      * One of:
      * <ul>
@@ -84,83 +74,6 @@ class learner_submission_base extends db_model_base
      */
     protected $timecompleted;
 
-    public function is_observation_complete()
-    {
-        $this->validate_status();
-
-        // if status is either one of these, then observation is complete
-        $complete_statuses = [
-            self::STATUS_ASSESSMENT_PENDING,
-            self::STATUS_ASSESSMENT_IN_PROGRESS,
-            self::STATUS_ASSESSMENT_INCOMPLETE, // todo: will this status ever be used?
-        ];
-
-        return in_array($this->status, $complete_statuses);
-    }
-
-    public function is_assessment_started_inprogress_or_complete()
-    {
-        $this->validate_status();
-        return $this->status === self::STATUS_ASSESSMENT_IN_PROGRESS
-            || $this->status === self::STATUS_ASSESSMENT_INCOMPLETE
-            || $this->status === self::STATUS_COMPLETE;
-    }
-
-    public function is_assessment_in_progress_or_complete()
-    {
-        $this->validate_status();
-        return $this->status === self::STATUS_ASSESSMENT_IN_PROGRESS
-            || $this->status === self::STATUS_COMPLETE;
-    }
-
-    public function is_assessment_in_progress_or_incomplete()
-    {
-        $this->validate_status();
-        return $this->status === self::STATUS_ASSESSMENT_IN_PROGRESS
-            || $this->status === self::STATUS_ASSESSMENT_INCOMPLETE;
-    }
-
-    public function is_assessment_in_progress()
-    {
-        $this->validate_status();
-        return $this->status === self::STATUS_ASSESSMENT_IN_PROGRESS;
-    }
-
-    public function is_assessment_complete()
-    {
-        $this->validate_status();
-        return $this->status === self::STATUS_COMPLETE;
-    }
-
-    public function is_observation_pending_or_in_progress()
-    {
-        $this->validate_status();
-        return in_array($this->status, [self::STATUS_OBSERVATION_PENDING, self::STATUS_OBSERVATION_IN_PROGRESS]);
-    }
-
-    public function is_observation_in_progress()
-    {
-        $this->validate_status();
-        return $this->status == self::STATUS_OBSERVATION_IN_PROGRESS;
-    }
-
-    public function is_observation_pending()
-    {
-        $this->validate_status();
-        return $this->status == self::STATUS_OBSERVATION_PENDING;
-    }
-
-    public function is_learner_pending()
-    {
-        $this->validate_status();
-        return $this->status == self::STATUS_LEARNER_PENDING;
-    }
-
-    public function is_learner_action_required()
-    {
-        $this->validate_status();
-        return ($this->status === self::STATUS_LEARNER_PENDING || $this->status === self::STATUS_LEARNER_IN_PROGRESS);
-    }
 
     public function has_been_observed()
     {
@@ -178,7 +91,34 @@ class learner_submission_base extends db_model_base
     public function get_observer_assignment_base_or_null(): ?observer_assignment_base
     {
         return observer_assignment_base::read_by_condition_or_null(
-            [observer_assignment::COL_LEARNER_SUBMISSIONID => $this->id]);
+            [observer_assignment::COL_LEARNER_TASK_SUBMISSIONID => $this->id]);
+    }
+
+    /**
+     * Fetches currently active observer assignment or null if one does not exist
+     *
+     * @return observer_assignment_base|null null if no record found
+     * @throws coding_exception
+     */
+    public function get_active_observer_assignment_or_null()
+    {
+        return observer_assignment_base::read_by_condition_or_null(
+            [
+                observer_assignment::COL_LEARNER_TASK_SUBMISSIONID => $this->id,
+                observer_assignment::COL_ACTIVE                    => true
+            ]);
+    }
+
+    /**
+     * @return assessor_task_submission_base|null
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     * @throws coding_exception
+     */
+    public function get_assessor_task_submission(): ?assessor_task_submission_base
+    {
+        return assessor_task_submission_base::read_by_condition_or_null(
+            [assessor_task_submission::COL_LEARNER_TASK_SUBMISSIONID => $this->id]);
     }
 
     /**
@@ -193,7 +133,7 @@ class learner_submission_base extends db_model_base
         // fetch stuff manually for performance reasons
         $records = $DB->get_records(
             learner_attempt::TABLE,
-            [learner_attempt::COL_LEARNER_SUBMISSIONID => $this->id],
+            [learner_attempt::COL_LEARNER_TASK_SUBMISSIONID => $this->id],
             learner_attempt::COL_TIMESUBMITTED . ' ASC');
 
         $attempts = [];
@@ -211,7 +151,7 @@ class learner_submission_base extends db_model_base
 
         $sql = 'SELECT * 
                 FROM {' . learner_attempt::TABLE . '}
-                WHERE ' . learner_attempt::COL_LEARNER_SUBMISSIONID . ' = ?
+                WHERE ' . learner_attempt::COL_LEARNER_TASK_SUBMISSIONID . ' = ?
                 AND ' . learner_attempt::COL_ATTEMPT_NUMBER . ' = ?';
         $record = $DB->get_record_sql($sql, [$this->id, $this->get_last_attemptnumber()]);
 
@@ -228,10 +168,20 @@ class learner_submission_base extends db_model_base
 
         $sql = 'SELECT max(' . learner_attempt::COL_ATTEMPT_NUMBER . ')
         FROM {' . learner_attempt::TABLE . '}
-        WHERE ' . learner_attempt::COL_LEARNER_SUBMISSIONID . ' = ?';
+        WHERE ' . learner_attempt::COL_LEARNER_TASK_SUBMISSIONID . ' = ?';
         $res = $DB->get_field_sql($sql, [$this->id]);
 
         return $res === false ? 0 : $res;
+    }
+
+    /**
+     * @return submission_base
+     * @throws \dml_missing_record_exception
+     * @throws coding_exception
+     */
+    public function get_submission(): submission_base
+    {
+        return new submission_base($this->submisisonid);
     }
 
     /**
@@ -271,17 +221,26 @@ class learner_submission_base extends db_model_base
         else if ($this->status != self::STATUS_LEARNER_IN_PROGRESS)
         {
             $error_message = sprintf(
-                'learner submission with id "%s" has invalid "%s" value',
+                'learner task submission with id "%s" has invalid "%s" value',
                 $learner_attempt->get_id_or_null(),
                 self::COL_STATUS);
         }
-        // check and throw
+        // check and throw (note: this will only throw the last error message - not ideal)
         if (!is_null($error_message))
         {
             throw new coding_exception($error_message);
         }
 
         $this->update_status_and_save(self::STATUS_OBSERVATION_PENDING);
+
+        $submisison = $this->get_submission();
+        $observation = $submisison->get_observation();
+        if ($observation->all_tasks_observation_pending_or_in_progress($this->get_userid()))
+        {
+            // submission for every task has been made, update activity submission status
+            $submisison->update_status_and_save(submission::STATUS_OBSERVATION_PENDING);
+        }
+
         //TODO: NOTIFICATIONS
 
         return $this;
@@ -302,36 +261,5 @@ class learner_submission_base extends db_model_base
         $this->set(self::COL_STATUS, $new_status, true);
 
         return $this;
-    }
-
-    public function set(string $prop, $value, bool $save = false): db_model_base
-    {
-        if ($prop == self::COL_STATUS)
-        {
-            // validate status is correctly set
-            $allowed = [
-                self::STATUS_LEARNER_PENDING,
-                self::STATUS_LEARNER_IN_PROGRESS,
-                self::STATUS_OBSERVATION_PENDING,
-                self::STATUS_OBSERVATION_IN_PROGRESS,
-                self::STATUS_OBSERVATION_INCOMPLETE,
-                self::STATUS_ASSESSMENT_PENDING,
-                self::STATUS_ASSESSMENT_IN_PROGRESS,
-                self::STATUS_ASSESSMENT_INCOMPLETE,
-                self::STATUS_COMPLETE,
-            ];
-            lib::validate_prop(self::COL_STATUS, $this->status, $value, $allowed, true);
-        }
-
-        return parent::set($prop, $value, $save);
-    }
-
-    private function validate_status(): void
-    {
-        if (empty($this->status))
-        {
-            throw new coding_exception(
-                sprintf('Accessing observation status on an uninitialized %s class', self::class));
-        }
     }
 }

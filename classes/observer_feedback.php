@@ -32,7 +32,7 @@ class observer_feedback extends observer_feedback_base implements templateable
     }
 
     public static function create_new_feedback(
-        observer_submission $observer_submission, criteria_base $criteria, learner_attempt $attempt): self
+        observer_task_submission $observer_submission, criteria_base $criteria, learner_attempt $attempt): self
     {
         $feedback = new observer_feedback_base();
         $feedback->set(self::COL_ATTEMPTID, $attempt->get_id_or_null());

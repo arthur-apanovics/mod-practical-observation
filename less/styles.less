@@ -34,7 +34,15 @@ body.path-mod-observation {
 
   .title {
     &-main {
-      padding-left: 1em;
+      padding: 0 0.5em;
+    }
+
+    &-desc {
+      padding: 1em;
+
+      flex-grow: 1;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
     }
 
     &-secondary {
@@ -79,13 +87,6 @@ body.path-mod-observation {
       flex-wrap: wrap;
       flex-basis: 100%;
     }
-  }
-
-  .title-desc {
-    flex-grow: 1;
-    padding: 0 10px 0 10px;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
   }
 
   .obs-main-title {
@@ -174,6 +175,7 @@ body.path-mod-observation {
 
       > select {
         float: right;
+        min-width: 15em;
       }
     }
   }
@@ -244,9 +246,11 @@ body.path-mod-observation {
       &-pending {
         // TODO
       }
+
       &-complete {
         // TODO
       }
+
       &-not_complete {
         // TODO
       }
@@ -303,8 +307,18 @@ body.path-mod-observation {
     margin-right: 8px;
   }
 
+  form {
+    .meets-criteria-wrapper {
+      text-align: right;
+    }
+  }
+
   .align-center {
     text-align: center;
+  }
+
+  .submit-wrapper {
+    margin: 4em 0;
   }
 
   .confirm-change-wrapper {
@@ -379,6 +393,19 @@ body.path-mod-observation {
 
   .btn-wrapper > button {
     margin-right: 1em;
+  }
+
+  // for highlighting elements with html titles
+  .hover-hint {
+    text-decoration-line: underline;
+    text-decoration-style: dashed;
+    text-decoration-color: @border-wrapper-color;
+
+    &-inverted {
+      text-decoration-line: underline;
+      text-decoration-style: dashed;
+      text-decoration-color: darken(@border-wrapper-color, 50%);
+    }
   }
 }
 
@@ -496,6 +523,23 @@ table {
   }
 }
 
+table.submissions-summary {
+  .submissions-row {
+    .completion {
+      font-size: 1.5em;
+      color: darken(@border-wrapper-color, 10%);
+
+      > .complete {
+        color: #589e44;
+      }
+      > .not-complete {
+        color: #44639e;
+      }
+    }
+  }
+}
+
+
 // task page
 body.observation-task,
 body.observation-task-assess {
@@ -507,17 +551,6 @@ body.observation-task-assess {
       h5, #change-observer, #last-assigned {
         display: inline-block;
       }
-    }
-  }
-}
-
-// request observation page
-body.observation-request {
-  .assign-from-history-container {
-    > h5 {
-      text-decoration-line: underline;
-      text-decoration-style: dashed;
-      text-decoration-color: @border-wrapper-color;
     }
   }
 }

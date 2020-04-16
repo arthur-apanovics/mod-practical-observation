@@ -32,33 +32,33 @@ use stored_file;
 class learner_attempt extends learner_attempt_base implements templateable
 {
     /**
-     * @var learner_submission_base
+     * @var learner_task_submission_base
      */
-    private $learner_submission_base;
+    private $learner_task_submission_base;
 
-    public function __construct($id_or_record, learner_submission_base $submission_base = null)
+    public function __construct($id_or_record, learner_task_submission_base $submission_base = null)
     {
         parent::__construct($id_or_record);
 
         if ($submission_base)
         {
-            $this->learner_submission_base = $submission_base;
+            $this->learner_task_submission_base = $submission_base;
         }
         else
         {
-            $this->get_learner_submission_base();
+            $this->get_learner_task_submission_base();
         }
     }
 
-    public function get_learner_submission_base()
+    public function get_learner_task_submission_base()
     {
-        if (is_null($this->learner_submission_base))
+        if (is_null($this->learner_task_submission_base))
         {
-            $this->learner_submission_base = learner_submission_base::read_by_condition_or_null(
-                [learner_submission_base::COL_ID => $this->learner_submissionid], true);
+            $this->learner_task_submission_base = learner_task_submission_base::read_by_condition_or_null(
+                [learner_task_submission_base::COL_ID => $this->learner_task_submissionid], true);
         }
 
-        return $this->learner_submission_base;
+        return $this->learner_task_submission_base;
     }
 
     /**
@@ -74,7 +74,7 @@ class learner_attempt extends learner_attempt_base implements templateable
             self::COL_ATTEMPT_NUMBER => $this->attempt_number,
 
             'name'  => fullname(
-                core_user::get_user($this->learner_submission_base->get_userid())),
+                core_user::get_user($this->learner_task_submission_base->get_userid())),
             'files' => lib::get_downloads_from_stored_files($this->get_attached_files())
         ];
     }
@@ -110,9 +110,9 @@ class learner_attempt extends learner_attempt_base implements templateable
                     (SELECT o.id
                      FROM {' . observation::TABLE . '} o
                         JOIN {' . task::TABLE . '} t ON t.' . task::COL_OBSERVATIONID . ' = o.id
-                        JOIN {' . learner_submission::TABLE . '} ls ON ls.' . learner_submission::COL_TASKID . ' = t.id
+                        JOIN {' . learner_task_submission::TABLE . '} ls ON ls.' . learner_task_submission::COL_TASKID . ' = t.id
                     WHERE ls.id = ?)';
 
-        return $DB->get_field_sql($sql, [$this->learner_submission_base->get_id_or_null()], MUST_EXIST);
+        return $DB->get_field_sql($sql, [$this->learner_task_submission_base->get_id_or_null()], MUST_EXIST);
     }
 }

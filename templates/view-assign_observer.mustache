@@ -2,13 +2,11 @@
     <h3>
         {{#str}}assign_observer:page_title, observation, {{{extra.name}}}{{/str}}
     </h3>
-<!--    <div class="intro-container">-->
-        {{{extra.int_assign_obs_learner}}}
-<!--    </div>-->
+    {{{extra.int_assign_obs_learner}}}
 </div>
 
 <div class="assign-from-history-container">
-    <h5 title="{{#str}}assign_observer:table_title_help, observation{{/str}}">
+    <h5 class="hover-hint" title="{{#str}}assign_observer:table_title_help, observation{{/str}}">
         {{#str}}assign_observer:table_title, observation{{/str}}
     </h5>
     <table id="observer-history-table" class="table">
@@ -40,23 +38,6 @@
                 <td></td>
             </tr>
         {{/extra.course_observer_assignments}}
-        <!--    <tr data-id="one"
-        data-fullname="joe"
-        data-phone="0245639874"
-        data-email="joe@blogs.com"
-        data-position_title="software dev"
-        data-active="{{active}}">
-        <td>joe@blogs.com {{#is_current}}<i>(current observer)</i>{{/is_current}}</td>
-        <td>
-            <a href="#" class="assign">Assign</a>
-        </td>
-    </tr>
-    <tr data-id="two" data-fullname="bruce" data-phone="3456789" data-email="bruce@blogs.com" data-position_title="dev">
-        <td>bruce@wayne.com</td>
-        <td>
-            <a href="#" class="assign">Assign</a>
-        </td>
-    </tr>-->
         </tbody>
     </table>
 </div>

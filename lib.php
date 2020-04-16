@@ -292,12 +292,11 @@ function observation_get_completion_progress($cm, $userid)
  *   value depends on comparison type)
  * @throws dml_exception
  * @throws coding_exception
- * @throws ReflectionException
  */
 function observation_get_completion_state($course, $cm, $userid, $type)
 {
     // Get observation.
-    $observation = new  observation($cm);
+    $observation = new  observation_base($cm->instance);
 
     // This means that if only view is required we don't end up with a false state.
     if (empty($observation->get(observation_base::COL_COMPLETION_TASKS)))

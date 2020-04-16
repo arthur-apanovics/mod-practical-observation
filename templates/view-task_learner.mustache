@@ -21,11 +21,11 @@
 
     <h5>Information and evidence from the trainee</h5>
     <div class="wrapper-border">
-        {{#learner_submissions}} {{! should only ever be one as we're filtering by userid in the renderer}}
+        {{#learner_task_submissions}} {{! should only ever be one as we're filtering by userid in the renderer}}
             {{#learner_attempts}}
                 {{> mod_observation/comp-attempt_entry}}
             {{/learner_attempts}}
-        {{/learner_submissions}}
+        {{/learner_task_submissions}}
 
         {{#extra.is_submission}}
             <div class="new-attempt">
@@ -43,7 +43,7 @@
 {{#extra.is_submission}}
 
         <input type="hidden" name="cmid" value={{extra.cmid}}>
-        <input type="hidden" name="learner_submission_id" value={{extra.learner_submission_id}}>
+        <input type="hidden" name="learner_task_submission_id" value={{extra.learner_task_submission_id}}>
         <input type="hidden" name="attempt_id" value={{extra.attempt_id}}>
 
         <div class="button-wrapper">

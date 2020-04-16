@@ -22,9 +22,9 @@
 
 namespace mod_observation;
 
-class observer_submission_base extends db_model_base
+class observer_task_submission_base extends db_model_base
 {
-    public const TABLE = OBSERVATION . '_observer_submission';
+    public const TABLE = OBSERVATION . '_observer_task_submission';
 
     public const COL_OBSERVER_ASSIGNMENTID = 'observer_assignmentid';
     public const COL_TIMESTARTED           = 'timestarted';
@@ -55,7 +55,7 @@ class observer_submission_base extends db_model_base
 
     /**
      * @param string $outcome {@link outcome}
-     * @return observer_submission_base
+     * @return observer_task_submission_base
      */
     public function submit(string $outcome): self
     {
@@ -64,12 +64,33 @@ class observer_submission_base extends db_model_base
         $this->set(self::COL_TIMESUBMITTED, time());
 
         $observer_assignment = $this->get_observer_assignment_base();
-        $learner_submission = $observer_assignment->get_learner_submission_base();
+        $learner_task_submission = $observer_assignment->get_learner_task_submission_base();
+        $task = $learner_task_submission->get_task_base();
+        $observation = $task->get_observation_base();
 
         $status = ($outcome == self::OUTCOME_COMPLETE)
-            ? learner_submission::STATUS_ASSESSMENT_PENDING
-            : learner_submission::STATUS_OBSERVATION_INCOMPLETE;
-        $learner_submission->update_status_and_save($status);
+            ? learner_task_submission::STATUS_ASSESSMENT_PENDING
+            : learner_task_submission::STATUS_OBSERVATION_INCOMPLETE;
+        $learner_task_submission->update_status_and_save($status);
+
+        $submission = $learner_task_submission->get_submission();
+        if ($observation->is_observed($learner_task_submission->get_userid()))
+        {
+            // all tasks observed, assessment needed
+            $submission->update_status_and_save(submission::STATUS_ASSESSMENT_PENDING);
+        }
+        else if ($observation->is_observed_as_incomplete($learner_task_submission->get_userid()))
+        {
+            // all observations marked as not complete
+            $submission->update_status_and_save(submission::STATUS_OBSERVATION_INCOMPLETE);
+        }
+        else
+        {
+            if ($submission->get(submission::COL_STATUS) === submission::STATUS_OBSERVATION_PENDING)
+            {
+                $submission->update_status_and_save(submission::STATUS_OBSERVATION_IN_PROGRESS);
+            }
+        }
 
         //TODO: notifications
 

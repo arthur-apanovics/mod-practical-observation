@@ -41,9 +41,9 @@ class criteria extends criteria_base implements templateable
             $sql = 'select f.*
                     from mdl_observation_observer_feedback f
                         join {'.criteria::TABLE.'} c on c.id = f.'.observer_feedback::COL_CRITERIAID.'
-                        join {'.observer_submission::TABLE.'} os on os.id = f.'.observer_feedback::COL_OBSERVER_SUBMISSIONID.'
-                        join {'.observer_assignment::TABLE.'} oa on oa.id = os.'.observer_submission::COL_OBSERVER_ASSIGNMENTID.'
-                        join {'.learner_submission::TABLE.'} ls on ls.id = oa.'.observer_assignment::COL_LEARNER_SUBMISSIONID.'
+                        join {'.observer_task_submission::TABLE.'} os on os.id = f.'.observer_feedback::COL_OBSERVER_SUBMISSIONID.'
+                        join {'.observer_assignment::TABLE.'} oa on oa.id = os.'.observer_task_submission::COL_OBSERVER_ASSIGNMENTID.'
+                        join {'.learner_task_submission::TABLE.'} ls on ls.id = oa.'.observer_assignment::COL_LEARNER_TASK_SUBMISSIONID.'
                     where c.id = ? and ls.userid = ?';
             $this->observer_feedback = observer_feedback::read_all_by_sql($sql, [$this->id, $userid]);
         }

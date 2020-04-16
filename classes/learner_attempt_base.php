@@ -26,8 +26,8 @@ class learner_attempt_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_learner_attempt';
 
-    public const COL_LEARNER_SUBMISSIONID = 'learner_submissionid';
-    public const COL_TIMESTARTED          = 'timestarted';
+    public const COL_LEARNER_TASK_SUBMISSIONID = 'learner_task_submissionid';
+    public const COL_TIMESTARTED               = 'timestarted';
     public const COL_TIMESUBMITTED        = 'timesubmitted';
     public const COL_TEXT                 = 'text';
     public const COL_TEXT_FORMAT          = 'text_format';
@@ -36,7 +36,7 @@ class learner_attempt_base extends db_model_base
     /**
      * @var int
      */
-    protected $learner_submissionid;
+    protected $learner_task_submissionid;
     /**
      * @var int
      */
@@ -98,30 +98,36 @@ class learner_attempt_base extends db_model_base
     {
         global $DB;
 
-        if (empty($this->learner_submissionid))
+        if (empty($this->learner_task_submissionid))
         {
             throw new \coding_exception('submission id missing or un-initialized class instance');
         }
 
         $sql = 'SELECT max(' . self::COL_ATTEMPT_NUMBER . ')
                 FROM {' . self::TABLE . '} a
-                WHERE ' . self::COL_LEARNER_SUBMISSIONID . ' = :learner_submissionid';
-        $num = $DB->get_field_sql($sql, ['learner_submissionid' => $this->learner_submissionid]);
+                WHERE ' . self::COL_LEARNER_TASK_SUBMISSIONID . ' = ?';
+        $num = $DB->get_field_sql($sql, [$this->learner_task_submissionid]);
 
         return $num != false ? $num : 0;
+    }
+
+    public function get_assessor_feedback_or_null(): ?assessor_feedback_base
+    {
+        return assessor_feedback_base::read_by_condition_or_null(
+            [assessor_feedback::COL_ATTEMPTID => $this->id]);
     }
 
     public function get_moodle_form_data()
     {
         return [
-            self::COL_LEARNER_SUBMISSIONID => $this->learner_submissionid,
-            self::COL_TIMESTARTED          => $this->timestarted,
-            self::COL_TIMESUBMITTED        => $this->timesubmitted,
-            self::COL_TEXT                 => [
+            self::COL_LEARNER_TASK_SUBMISSIONID => $this->learner_task_submissionid,
+            self::COL_TIMESTARTED               => $this->timestarted,
+            self::COL_TIMESUBMITTED             => $this->timesubmitted,
+            self::COL_TEXT                      => [
                 'text'   => $this->text,
                 'format' => $this->text_format
             ],
-            self::COL_ATTEMPT_NUMBER       => $this->attempt_number,
+            self::COL_ATTEMPT_NUMBER            => $this->attempt_number,
         ];
     }
 

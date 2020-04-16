@@ -24,7 +24,7 @@ namespace mod_observation;
 
 use mod_observation\interfaces\templateable;
 
-class observer_submission extends observer_submission_base implements templateable
+class observer_task_submission extends observer_task_submission_base implements templateable
 {
     /**
      * @var observer_feedback[]

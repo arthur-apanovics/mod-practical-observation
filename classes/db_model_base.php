@@ -57,6 +57,12 @@ abstract class db_model_base implements crud
         }
     }
 
+    // public function __destruct()
+    // {
+    //     // TODO: Implement __destruct() method?
+    //     // this could be used to detect if a field has been updated but not saved
+    // }
+
     /**
      * Used to populate Moodle QuickForm fields with existing data.
      * Classes with editor elements HAVE TO override this method and return editor data

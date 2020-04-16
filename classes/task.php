@@ -34,9 +34,14 @@ class task extends task_base implements templateable
      */
     private $criteria;
     /**
-     * @var learner_submission[]
+     * @var learner_task_submission[]
      */
-    private $learner_submissions;
+    private $learner_task_submissions;
+
+    /**
+     * @var bool Determines if task is filtered by userid
+     */
+    private $is_filtered = false;
 
     public function __construct($id_or_record, int $userid = null)
     {
@@ -56,12 +61,13 @@ class task extends task_base implements templateable
             $this->criteria = [];
         }
 
-        $params = [learner_submission::COL_TASKID => $this->id];
+        $params = [learner_task_submission::COL_TASKID => $this->id];
         if (!is_null($userid))
         {
-            $params[learner_submission::COL_USERID] = $userid;
+            $params[learner_task_submission::COL_USERID] = $userid;
+            $this->is_filtered = true;
         }
-        $this->learner_submissions = learner_submission::read_all_by_condition($params);
+        $this->learner_task_submissions = learner_task_submission::read_all_by_condition($params);
     }
 
     /**
@@ -73,7 +79,7 @@ class task extends task_base implements templateable
      */
     public function is_observed(int $userid)
     {
-        if ($submission = $this->get_learner_submission_or_null($userid))
+        if ($submission = $this->get_learner_task_submission_or_null($userid))
         {
             return $submission->is_observation_complete();
         }
@@ -81,9 +87,9 @@ class task extends task_base implements templateable
         return false;
     }
 
-    public function get_learner_submissions(): array
+    public function get_learner_task_submissions(): array
     {
-        return $this->learner_submissions;
+        return $this->learner_task_submissions;
     }
 
     /**
@@ -91,10 +97,18 @@ class task extends task_base implements templateable
      * @return mixed
      * @throws coding_exception
      */
-    public function get_learner_submission_or_null(int $userid): ?learner_submission
+    public function get_learner_task_submission_or_null(int $userid): ?learner_task_submission
     {
-        return lib::find_in_assoc_array_by_key_value_or_null(
-            $this->learner_submissions, learner_submission::COL_USERID, $userid);
+        if ($this->is_filtered)
+        {
+            return learner_task_submission::read_by_condition_or_null(
+                [learner_task_submission::COL_USERID => $userid, learner_task_submission::COL_TASKID => $this->id]);
+        }
+        else
+        {
+            return lib::find_in_assoc_array_by_key_value_or_null(
+                $this->learner_task_submissions, learner_task_submission::COL_USERID, $userid);
+        }
     }
 
     /**
@@ -106,7 +120,7 @@ class task extends task_base implements templateable
      */
     public function is_complete(int $userid): bool
     {
-        if ($submission = $this->get_learner_submission_or_null($userid))
+        if ($submission = $this->get_learner_task_submission_or_null($userid))
         {
             return $submission->is_assessment_complete();
         }
@@ -116,12 +130,22 @@ class task extends task_base implements templateable
 
     public function is_submitted(int $userid): bool
     {
-        if ($submission = $this->get_learner_submission_or_null($userid))
+        if ($submission = $this->get_learner_task_submission_or_null($userid))
         {
             return $submission->is_observation_pending_or_in_progress();
         }
 
         return false;
+    }
+
+    public function is_assessed(int $userid): bool
+    {
+        if (!$submission = $this->get_learner_task_submission_or_null($userid))
+        {
+            return false;
+        }
+
+        return $submission->is_assessment_complete_or_incomplete();
     }
 
     /**
@@ -139,29 +163,53 @@ class task extends task_base implements templateable
 
     /**
      * @param int $userid
-     * @return learner_submission
+     * @return learner_task_submission
      * @throws coding_exception
      * @throws dml_exception
      * @throws dml_missing_record_exception
      */
-    public function get_learner_submission_or_create(int $userid): learner_submission
+    public function get_learner_task_submission_or_create(int $userid): learner_task_submission
     {
-        if (!$submission = $this->get_learner_submission_or_null($userid))
+        if (!$task_submission = $this->get_learner_task_submission_or_null($userid))
         {
-            $submission = new learner_submission_base();
-            $submission->set(learner_submission::COL_TASKID, $this->id);
-            $submission->set(learner_submission::COL_USERID, $userid);
-            $submission->set(learner_submission::COL_STATUS, learner_submission::STATUS_LEARNER_PENDING);
-            $submission->set(learner_submission::COL_TIMESTARTED, time());
-            $submission->set(learner_submission::COL_TIMECOMPLETED, 0);
+            // TODO: Submission needs to be created elsewhere, this is a quick and dirty hack
+            $submission = submission::read_by_condition_or_null(
+                [submission::COL_OBSERVATIONID => $this->observationid, submission::COL_USERID => $userid]);
+            if (is_null($submission))
+            {
+                $submission = new submission_base();
+                $submission->set(submission::COL_OBSERVATIONID, $this->observationid);
+                $submission->set(submission::COL_USERID, $userid);
+                $submission->set(submission::COL_STATUS, submission::STATUS_LEARNER_IN_PROGRESS);
+                $submission->set(submission::COL_TIMESTARTED, time());
+                $submission->set(submission::COL_TIMECOMPLETED, 0);
+
+                $submission->create();
+            }
+            else
+            {
+                if ($submission->is_learner_pending())
+                {
+                    $submission->update_status_and_save(submission::STATUS_LEARNER_IN_PROGRESS);
+                }
+            }
+
+            $task_submission = new learner_task_submission_base();
+            $task_submission->set(learner_task_submission::COL_TASKID, $this->id);
+            $task_submission->set(learner_task_submission::COL_SUBMISISONID, $submission->get_id_or_null());
+            $task_submission->set(learner_task_submission::COL_USERID, $userid);
+            $task_submission->set(learner_task_submission::COL_TIMESTARTED, time());
+            $task_submission->set(learner_task_submission::COL_TIMECOMPLETED, 0);
+            $task_submission->set(
+                learner_task_submission::COL_STATUS, learner_task_submission::STATUS_LEARNER_PENDING);
 
             // create record and initialize submission class instance
-            $submission = new learner_submission($submission->create());
+            $task_submission = new learner_task_submission($task_submission->create());
 
-            $this->learner_submissions[] = $submission;
+            $this->learner_task_submissions[] = $task_submission;
         }
 
-        return $submission;
+        return $task_submission;
     }
 
     /**
@@ -178,10 +226,10 @@ class task extends task_base implements templateable
         // sort by sequence again, just in case
         $criteria_data = lib::sort_by_field($criteria_data, criteria::COL_SEQUENCE);
 
-        $learner_submissions_data = [];
-        foreach ($this->learner_submissions as $learner_submission)
+        $learner_task_submissions_data = [];
+        foreach ($this->learner_task_submissions as $learner_task_submission)
         {
-            $learner_submissions_data[] = $learner_submission->export_template_data();
+            $learner_task_submissions_data[] = $learner_task_submission->export_template_data();
         }
 
         return [
@@ -198,7 +246,7 @@ class task extends task_base implements templateable
             self::COL_INT_ASSIGN_OBS_OBSERVER => $this->int_assign_obs_observer,
 
             'criteria'            => $criteria_data,
-            'learner_submissions' => $learner_submissions_data,
+            'learner_task_submissions' => $learner_task_submissions_data,
 
             // other data
             'has_submission'      => $this->has_submission(),
@@ -217,9 +265,9 @@ class task extends task_base implements templateable
         {
             $filtered = new task($this->to_record(), $userid);
 
-            return (bool) count($filtered->learner_submissions);
+            return (bool) count($filtered->learner_task_submissions);
         }
 
-        return (bool) count($this->learner_submissions);
+        return (bool) count($this->learner_task_submissions);
     }
 }

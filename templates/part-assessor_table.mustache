@@ -1,48 +1,52 @@
-<div class="group-container" style="float: right; margin: 1em;">
-    <label for="group-selector">Group selector</label>
-    <select style="display: inline;" name="group-selector" id="group-selector" >
-        {{! TODO: group selector}}
-        <option value selected disabled>todo</option>
-    </select>
-</div>
+<div>
+    <div class="group-container" style="float: right; margin: 1em;">
+        <label for="group-selector">Group selector</label>
+        <select style="display: inline;" name="group-selector" id="group-selector">
+            {{! TODO: group selector}}
+            <option value selected disabled>todo</option>
+        </select>
+    </div>
 
-<table class="submissions-summary">
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Attempt</th>
-        <th>Observed</th>
-        <th>Complete</th>
-        <th>Actions</th>
-    </tr>
-    </thead>
-    <tbody>
-    {{#extra.submission_summary_data}}
-        <tr>
-            <td>{{name}}</td>
-            <td>{{attempt}}</td>
-            <td>{{observed}}</td>
-            <td style="font-size: 1.5em;">
-                {{#complete}}
-                    {{#flex_icon}}check-circle-o, {"alt":"Activity complete"}{{/flex_icon}}
-                {{/complete}}
-                {{^complete}}
-                    {{#flex_icon}}times-circle-o, {"alt":"Activity not complete"}{{/flex_icon}}
-                {{/complete}}
-            </td>
-            <td>
-                <a href="{{{module_root}}}/activity_assess.php?id={{cmid}}&learnerid={{userid}}">
+    <h5>Learner submissions</h5>
+    <table class="submissions-summary">
+        <thead>
+        <tr class="submisisons-header">
+            <th>Name</th>
+            <th>Attempt</th>
+            <th>Observed</th>
+            <th>Complete</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#extra.submission_summary_data}}
+            <tr class="submissions-row">
+                {{! TODO: link to user profile }}
+                <td class="name">{{name}}</td>
+                <td class="attempt">{{attempt}}</td>
+                <td class="observed">{{observed}}</td>
+                <td class="completion">
+                    {{#complete}}
+                        {{#flex_icon}}check-circle-o, {"alt":"Activity complete", "classes":"complete"}{{/flex_icon}}
+                    {{/complete}}
+                    {{^complete}}
+                        {{#flex_icon}}times-circle-o, {"alt":"Activity not complete", "classes":"not-complete"}{{/flex_icon}}
+                    {{/complete}}
+                </td>
+                <td class="actions">
+                    <a href="{{{module_root}}}/activity_assess.php?id={{cmid}}&learnerid={{userid}}">
                     {{#flex_icon}}edit, {"alt":"todo: lang string"}{{/flex_icon}}
-                </a>
-            </td>
-        </tr>
-    {{/extra.submission_summary_data}}
+                    </a>
+                </td>
+            </tr>
+        {{/extra.submission_summary_data}}
 
-    {{^extra.submission_summary_data}}
-        <tr>
-            <td>No submissions</td>
-        </tr>
-    {{/extra.submission_summary_data}}
+        {{^extra.submission_summary_data}}
+            <tr>
+                <td>No submissions yet</td>
+            </tr>
+        {{/extra.submission_summary_data}}
 
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>

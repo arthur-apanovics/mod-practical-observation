@@ -234,7 +234,8 @@ class observation_base extends db_model_base
         global $DB;
 
         // using $DB will be faster in this case
-        $ids = $DB->get_fieldset_select(task::TABLE, 'id',
+        $ids = $DB->get_fieldset_select(
+            task::TABLE, 'id',
             sprintf('%s = ?', task::COL_OBSERVATIONID), [$this->id]);
 
         return empty($ids) ? [] : $ids;
@@ -249,39 +250,68 @@ class observation_base extends db_model_base
 
     /**
      * @param int $userid
-     * @return learner_submission_base[]
+     * @return learner_task_submission_base[]
      * @throws \dml_exception
      * @throws \dml_missing_record_exception
      * @throws coding_exception
      */
-    public function get_learner_submissions(int $userid): array
+    public function get_learner_task_submissions(int $userid): array
     {
         $res = [];
-        foreach (self::get_tasks() as $task)
+        foreach ($this->get_tasks() as $task)
         {
-            $res[] = learner_submission_base::read_by_condition_or_null(
-                [learner_submission::COL_TASKID => $task->id, learner_submission::COL_USERID => $userid]);
+            $res[] = learner_task_submission_base::read_by_condition_or_null(
+                [learner_task_submission::COL_TASKID => $task->id, learner_task_submission::COL_USERID => $userid]);
         }
 
         return $res;
     }
 
     /**
-     * @return learner_submission_base[]
+     * @return learner_task_submission_base[]
      * @throws \dml_exception
-     * @throws \dml_missing_record_exception
      * @throws coding_exception
+     * TODO: use submision class instead of looping over tasks
      */
-    public function get_all_submisisons(): array
+    public function get_all_task_submisisons(): array
     {
         $submisisons = [];
         foreach ($this->get_task_ids() as $id)
         {
-            $submisisons[$id] = learner_submission_base::read_by_condition_or_null(
-                [learner_submission::COL_TASKID => $id]);
+            foreach (learner_task_submission_base::read_all_by_condition(
+                [learner_task_submission::COL_TASKID => $id]) as $submisison)
+            {
+                $submisisons[] = $submisison;
+            }
         }
 
         return $submisisons;
+    }
+
+    /**
+     * Checks if all criteria for completing this observation are complete
+     * @param int $userid
+     * @return bool complete or not
+     */
+    public function is_activity_complete(int $userid): bool
+    {
+        $tasks = $this->get_tasks();
+        if (empty($tasks))
+        {
+            // no tasks = not complete
+            return false;
+        }
+
+        foreach ($tasks as $task)
+        {
+            if (!$task->is_complete($userid))
+            {
+                // return early as all tasks have to be complete
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -294,12 +324,55 @@ class observation_base extends db_model_base
     public function is_observed(int $userid): bool
     {
         $observed = 0;
-        foreach ($this->get_learner_submissions($userid) as $learner_submission)
+        foreach ($this->get_learner_task_submissions($userid) as $learner_task_submission)
         {
-            $observed += $learner_submission->is_observation_complete();
+            $observed += $learner_task_submission->is_observation_complete();
         }
 
         return ($observed == $this->get_task_count());
+    }
+
+    public function is_observed_as_incomplete(int $learnerid): bool
+    {
+        $incomplete = 0;
+        foreach ($this->get_learner_task_submissions($learnerid) as $learner_task_submission)
+        {
+            $incomplete += $learner_task_submission->is_observation_incomplete();
+        }
+
+        return ($incomplete == $this->get_task_count());
+    }
+
+    public function is_assessed_as_incomplete($learnerid)
+    {
+        $incomplete = 0;
+        foreach ($this->get_learner_task_submissions($learnerid) as $learner_task_submission)
+        {
+            $incomplete += $learner_task_submission->is_assessment_incomplete();
+        }
+
+        return ($incomplete == $this->get_task_count());
+    }
+
+    public function all_tasks_observation_pending_or_in_progress(int $userid): bool
+    {
+        foreach ($this->get_tasks() as $task)
+        {
+            if ($task_submission = $task->get_learner_task_submission_or_null($userid))
+            {
+                // has a task_submission
+                if ($task_submission->get_active_observer_assignment_or_null()
+                    && $task_submission->is_observation_pending_or_in_progress())
+                {
+                    // has observer assigned and observation pending/in progress
+                    continue;
+                }
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
