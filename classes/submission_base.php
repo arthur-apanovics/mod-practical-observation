@@ -29,11 +29,13 @@ class submission_base extends submission_status_store
 {
     public const TABLE = OBSERVATION . '_submission';
 
-    public const COL_OBSERVATIONID = 'observationid';
-    public const COL_USERID        = 'userid';
-    public const COL_STATUS        = 'status';
-    public const COL_TIMESTARTED   = 'timestarted';
-    public const COL_TIMECOMPLETED = 'timecompleted';
+    public const COL_OBSERVATIONID        = 'observationid';
+    public const COL_USERID               = 'userid';
+    public const COL_STATUS               = 'status';
+    public const COL_ATTEMPTS_OBSERVATION = 'attempts_observation';
+    public const COL_ATTEMPTS_ASSESSMENT  = 'attempts_assessment';
+    public const COL_TIMESTARTED          = 'timestarted';
+    public const COL_TIMECOMPLETED        = 'timecompleted';
 
     /**
      * @var int
@@ -65,32 +67,18 @@ class submission_base extends submission_status_store
      */
     protected $timestarted;
     /**
+     * @var int number of observation attempts
+     */
+    protected $attempts_observation;
+    /**
+     * @var int number of assessment attempts
+     */
+    protected $attempts_assessment;
+    /**
      * @var int
      */
     protected $timecompleted;
 
-
-    public function set(string $prop, $value, bool $save = false): db_model_base
-    {
-        if ($prop == self::COL_STATUS)
-        {
-            // validate status is correctly set
-            $allowed = [
-                self::STATUS_LEARNER_PENDING,
-                self::STATUS_LEARNER_IN_PROGRESS,
-                self::STATUS_OBSERVATION_PENDING,
-                self::STATUS_OBSERVATION_IN_PROGRESS,
-                self::STATUS_OBSERVATION_INCOMPLETE,
-                self::STATUS_ASSESSMENT_PENDING,
-                self::STATUS_ASSESSMENT_IN_PROGRESS,
-                self::STATUS_ASSESSMENT_INCOMPLETE,
-                self::STATUS_COMPLETE,
-            ];
-            lib::validate_prop(self::COL_STATUS, $this->status, $value, $allowed, true);
-        }
-
-        return parent::set($prop, $value, $save);
-    }
 
     public function update_status_and_save(string $new_status): self
     {
@@ -113,9 +101,10 @@ class submission_base extends submission_status_store
      */
     public function get_learner_task_submisisons(): array
     {
-        return learner_task_submission_base::read_all_by_condition([
+        return learner_task_submission_base::read_all_by_condition(
+            [
                 learner_task_submission::COL_SUBMISISONID => $this->id,
-                learner_task_submission::COL_USERID => $this->userid,
+                learner_task_submission::COL_USERID       => $this->userid,
             ]);
     }
 
@@ -128,5 +117,29 @@ class submission_base extends submission_status_store
     public function get_observation()
     {
         return new observation_base($this->observationid);
+    }
+
+    /**
+     * @return int current observation attempt
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function increment_observation_attempt_number_and_save(): int
+    {
+        $this->set(self::COL_ATTEMPTS_ASSESSMENT, ($this->attempts_observation + 1), true);
+
+        return $this->attempts_observation;
+    }
+
+    /**
+     * @return int current assessment attempt
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function increment_assessment_attempt_number_and_save(): int
+    {
+        $this->set(self::COL_ATTEMPTS_ASSESSMENT, ($this->attempts_assessment + 1), true);
+
+        return $this->attempts_assessment;
     }
 }

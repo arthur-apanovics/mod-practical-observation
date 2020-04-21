@@ -22,10 +22,12 @@
 
 namespace mod_observation;
 
-use mod_observation\interfaces\templateable;
-
 class submission extends submission_base /*TODO: implements templateable*/
 {
+    /**
+     * @var learner_task_submission[]
+     */
+    private $task_submissions;
 
     /**
      * submission constructor.
@@ -36,6 +38,13 @@ class submission extends submission_base /*TODO: implements templateable*/
     public function __construct($id_or_record)
     {
         parent::__construct($id_or_record);
+
+        $this->task_submissions = learner_task_submission::read_all_by_condition(
+            [
+                learner_task_submission::COL_SUBMISISONID => $this->id,
+                learner_task_submission::COL_USERID       => $this->userid,
+            ]
+        );
     }
 
     /**
@@ -49,6 +58,17 @@ class submission extends submission_base /*TODO: implements templateable*/
     {
         return new observation(
             new observation_base($this->observationid));
+    }
+
+    public function get_observed_task_count(): int
+    {
+        $observed = 0;
+        foreach ($this->task_submissions as $task_submission)
+        {
+            $observed += $task_submission->is_observation_complete();
+        }
+
+        return $observed;
     }
 
     public function release_assessment(observation_base $observation = null)
@@ -71,7 +91,8 @@ class submission extends submission_base /*TODO: implements templateable*/
             if (!$feedback->is_submitted())
             {
                 throw new \coding_exception(
-                    sprintf('Cannot release assessment - feedback with id "%d" has not been submitted'), $feedback->get_id_or_null());
+                    sprintf('Cannot release assessment - feedback with id "%d" has not been submitted'),
+                    $feedback->get_id_or_null());
             }
 
             // update learner task submission status

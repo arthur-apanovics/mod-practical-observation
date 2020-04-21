@@ -1,6 +1,6 @@
 <h5>Completion observations</h5>
 
-<div class="wrapper-border">
+<div class="wrapper-border criteria-container">
     <ol class="criteria-list">
         {{#criteria}}
             {{> mod_observation/comp-completion_criteria}}
@@ -8,12 +8,12 @@
     </ol>
 </div>
 
-<h5>Assessor feedback</h5>
-<div class="wrapper-border">
-    {{#assessor_feedback}} {{! should only ever be one as we're filtering by userid in the renderer}}
+{{#assessor_feedback}}
+    <h5>Assessor feedback</h5>
+    <div class="wrapper-border">
         {{> mod_observation/comp-attempt_entry}}
-    {{/assessor_feedback}}
-</div>
+    </div>
+{{/assessor_feedback}}
 
 {{#extra.is_submission}}
     <form action="submit.php"
@@ -34,10 +34,10 @@
 
         {{#extra.is_submission}}
             <div class="new-attempt">
-                <h5 class="title-secondary">
-                    {{#str}}attempt_number, observation, {{extra.attempt_number}}{{/str}}
-                </h5>
                 <div class="editor-container">
+                    <h5 class="title-secondary">
+                        {{#str}}attempt_number, observation, {{extra.attempt_number}}{{/str}}
+                    </h5>
                     {{{extra.editor_html}}}
                     {{{extra.filemanager_html}}}
                 </div>

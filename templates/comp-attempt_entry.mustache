@@ -1,20 +1,23 @@
-<h5 class="title-secondary">
-    {{#str}}attempt_number, observation, {{attempt_number}}{{/str}}
-</h5>
-
-<div class="evidence wrapper-attempt">
-    <div class="flex-attempt">
-        <div class="attempt-evidence">{{{text}}}</div>
-        <span class="learner-name">{{name}}</span>
-        <div class="attempt-attachments">
-            <ul>
-                {{#files}}
-                    <li class="attachment">
-                        <a href="{{{url}}}">{{filename}}</a>
-                    </li>
-                {{/files}}
-            </ul>
+<div class="attempt">
+    <div class="heading">
+        <h5 class="title-secondary">
+            {{#str}}attempt_number, observation, {{attempt_number}}{{/str}}
+        </h5>
+        <div class="attributes">
+            <span class="name">{{name}}</span> / <span class="timestamp">{{timesubmitted}}</span>
         </div>
-        <span class="timestamp">{{timesubmitted}}</span>
+    </div>
+
+    <div class="entry wrapper">
+        <div class="text">
+            {{{text}}}
+        </div>
+        <ul class="attachments">
+            {{#files}}
+                <li>
+                    <a href="{{{url}}}">{{filename}}</a>
+                </li>
+            {{/files}}
+        </ul>
     </div>
 </div>

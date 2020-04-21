@@ -76,12 +76,17 @@ if ($learner_task_submissionid = optional_param('learner_task_submission_id', nu
     lib::save_files(
         $draft_itemid, $context->id, observation::FILE_AREA_TRAINEE, $attempt->get_id_or_null());
 
-    $learner_task_submission->submit($attempt);
+    // do not submit yet as learner needs to assign an observer first
+    $attempt->save($learner_task_submission);
 
     redirect(
         new moodle_url(
             OBSERVATION_MODULE_PATH . 'request.php',
-            ['id' => $cmid, 'learner_task_submission_id' => $learner_task_submission->get_id_or_null()]));
+            [
+                'id'                         => $cmid,
+                'learner_task_submission_id' => $learner_task_submission->get_id_or_null(),
+                'attempt_id'                 => $attempt->get_id_or_null()
+            ]));
 }
 /* ================================================================================================================== */
 else if ($observer_submissionid = optional_param('observer_submission_id', null, PARAM_INT))

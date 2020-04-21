@@ -289,6 +289,17 @@ class observation_base extends db_model_base
     }
 
     /**
+     * @return submission[]
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function get_all_submissions(): array
+    {
+        return submission::read_all_by_condition([submission::COL_OBSERVATIONID => $this->id]);
+    }
+
+    /**
      * Checks if all criteria for completing this observation are complete
      * @param int $userid
      * @return bool complete or not

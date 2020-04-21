@@ -21,6 +21,7 @@
  */
 
 use core\output\notification;
+use mod_observation\learner_attempt_base;
 use mod_observation\learner_task_submission;
 use mod_observation\observer;
 use mod_observation\observer_base;
@@ -32,6 +33,7 @@ require_once('forms.php');
 
 $cmid = required_param('id', PARAM_INT);
 $learner_task_submission_id = required_param('learner_task_submission_id', PARAM_INT);
+$attempt_id = required_param('attempt_id', PARAM_INT);
 
 list($course, $cm) = get_course_and_cm_from_cmid($cmid);
 $context = context_module::instance($cmid);
@@ -40,7 +42,9 @@ require_login($course, true, $cm);
 
 // TODO: Event
 
+// creating class instances also validates provided id's
 $learner_task_submission = new learner_task_submission($learner_task_submission_id);
+$attempt = new learner_attempt_base($attempt_id);
 $task_id = $learner_task_submission->get($learner_task_submission::COL_TASKID);
 $task = new task($task_id, $USER->id);
 $name = get_string('assign_observer:page_title', 'observation', $task->get_formatted_name());
@@ -50,9 +54,9 @@ $activity_url = new moodle_url(OBSERVATION_MODULE_PATH . 'view.php', ['id' => $c
 // Print the page header.
 $PAGE->set_url(
     OBSERVATION_MODULE_PATH . 'request.php',
-    ['id' => $cm->id, 'learner_task_submission_id' => $learner_task_submission_id]);
+    ['id' => $cm->id, 'learner_task_submission_id' => $learner_task_submission_id, 'attempt_id' => $attempt_id]);
 $PAGE->set_title($name);
-$PAGE->set_heading('wazaaaa');
+$PAGE->set_heading('TODO');
 
 $PAGE->add_body_class('observation-request');
 
@@ -75,6 +79,8 @@ if (optional_param('confirm', 0, PARAM_BOOL))
     $explanation = required_param('user_input', PARAM_TEXT);
     $learner_task_submission->assign_observer($observer, $message, $explanation);
 
+    $learner_task_submission->submit($attempt);
+
     redirect(
         $activity_url,
         get_string(
@@ -93,8 +99,6 @@ if ($data = $form->get_data())
     $submitted->set(observer::COL_PHONE, $data->{observer::COL_PHONE});
     $submitted->set(observer::COL_EMAIL, $data->{observer::COL_EMAIL});
     $submitted->set(observer::COL_POSITION_TITLE, $data->{observer::COL_POSITION_TITLE});
-
-    $id = observer_base::try_get_id_for_observer($submitted);
 
     // check if an assignment already exists
     if ($current_assignment = $learner_task_submission->get_active_observer_assignment_or_null())
@@ -133,7 +137,7 @@ if ($data = $form->get_data())
             // assignment exists and it's for the same observer, nothing to do here
             redirect(
                 $activity_url
-                // TODO: notification appeared on a normal second attempt with same assessor
+                //TODO: notification appeared on a normal second attempt with same assessor
                 // and not when re-assigning an observer. Will this scenario even happen?
                 // get_string(
                 //     'notification:observer_assigned_no_change', 'observation',
@@ -160,7 +164,7 @@ if ($data = $form->get_data())
 
 echo $OUTPUT->header();
 
-echo $renderer->view_request_observation($task, $learner_task_submission);
+echo $renderer->view_request_observation($task, $learner_task_submission, $attempt);
 
 // Finish the page.
 echo $OUTPUT->footer();

@@ -115,7 +115,7 @@ class learner_task_submission_base extends submission_status_store
      * @throws \dml_missing_record_exception
      * @throws coding_exception
      */
-    public function get_assessor_task_submission(): ?assessor_task_submission_base
+    public function get_assessor_task_submission_or_null()
     {
         return assessor_task_submission_base::read_by_condition_or_null(
             [assessor_task_submission::COL_LEARNER_TASK_SUBMISSIONID => $this->id]);
@@ -204,32 +204,7 @@ class learner_task_submission_base extends submission_status_store
 
     public function submit(learner_attempt_base $learner_attempt): self
     {
-        $error_message = null;
-        if (empty($learner_attempt->get(learner_attempt::COL_TIMESUBMITTED))) // empty(0) = true
-        {
-            $error_message = sprintf(
-                'learner attempt with id "%s" has invalid "%s" value',
-                $learner_attempt->get_id_or_null(),
-                learner_attempt::COL_TIMESUBMITTED);
-        }
-        else if (empty($learner_attempt->get(learner_attempt::COL_TEXT)))
-        {
-            $error_message = sprintf(
-                'learner attempt with id "%s" has no text',
-                $learner_attempt->get_id_or_null());
-        }
-        else if ($this->status != self::STATUS_LEARNER_IN_PROGRESS)
-        {
-            $error_message = sprintf(
-                'learner task submission with id "%s" has invalid "%s" value',
-                $learner_attempt->get_id_or_null(),
-                self::COL_STATUS);
-        }
-        // check and throw (note: this will only throw the last error message - not ideal)
-        if (!is_null($error_message))
-        {
-            throw new coding_exception($error_message);
-        }
+        $learner_attempt->validate($this);
 
         $this->update_status_and_save(self::STATUS_OBSERVATION_PENDING);
 
@@ -239,6 +214,8 @@ class learner_task_submission_base extends submission_status_store
         {
             // submission for every task has been made, update activity submission status
             $submisison->update_status_and_save(submission::STATUS_OBSERVATION_PENDING);
+            // increment observation attempt count
+            $submisison->increment_observation_attempt_number_and_save();
         }
 
         //TODO: NOTIFICATIONS

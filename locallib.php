@@ -564,7 +564,7 @@ class lib
     }
 
     public static function validate_prop(
-        string $property_name, $current_value, $new_value, array $allowed_values, bool $allow_same_value)
+        string $property_name, $current_value, $new_value, array $allowed_values, bool $allow_same_value): bool
     {
         if (!in_array($new_value, $allowed_values))
         {
@@ -582,6 +582,8 @@ class lib
                         $new_value),
                     DEBUG_DEVELOPER,
                     debug_backtrace());
+
+                return false;
             }
             else
             {
@@ -592,5 +594,7 @@ class lib
                         $current_value));
             }
         }
+
+        return true;
     }
 }

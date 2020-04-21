@@ -43,6 +43,10 @@ class observation extends observation_base implements templateable
      */
     private $cm;
     /**
+     * @var submission[]
+     */
+    private $submisisons;
+    /**
      * Tasks in this observation, sorted by sequence
      * @var task[]
      */
@@ -76,6 +80,14 @@ class observation extends observation_base implements templateable
         $this->cm = $cm_or_cm_info;
         parent::__construct($this->cm->instance);
 
+        // get submissions
+        $args = [submission::COL_OBSERVATIONID => $this->id];
+        if (!is_null($userid))
+        {
+            $args += [submission::COL_USERID => $userid];
+        }
+        $this->submisisons = submission::read_all_by_condition($args);
+
         // get task records
         if (!is_null($taskid))
         {
@@ -84,7 +96,7 @@ class observation extends observation_base implements templateable
         else
         {
             $tasks = task_base::read_all_by_condition(
-                [task::COL_OBSERVATIONID => $this->cm->instance],
+                [task::COL_OBSERVATIONID => $this->id],
                 sprintf('`%s` ASC', task::COL_SEQUENCE));
         }
         // initialise task objects
@@ -143,6 +155,24 @@ class observation extends observation_base implements templateable
         }
 
         return $submissions;
+    }
+
+    /**
+     * @return submission[]
+     * @throws \ReflectionException
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public function get_all_submissions(): array
+    {
+        if ($this->is_filtered)
+        {
+            return parent::get_all_submissions();
+        }
+        else
+        {
+            return $this->submisisons;
+        }
     }
 
     /**
@@ -283,6 +313,8 @@ class observation extends observation_base implements templateable
             $submission->set(submission::COL_OBSERVATIONID, $this->id);
             $submission->set(submission::COL_USERID, $learnerid);
             $submission->set(submission::COL_STATUS, submission::STATUS_LEARNER_PENDING);
+            $submission->set(submission::COL_ATTEMPTS_OBSERVATION, 0);
+            $submission->set(submission::COL_ATTEMPTS_ASSESSMENT, 0);
             $submission->set(submission::COL_TIMESTARTED, time());
             $submission->set(submission::COL_TIMECOMPLETED, 0);
 
@@ -387,22 +419,18 @@ class observation extends observation_base implements templateable
     public function export_submissions_summary_template_data(): array
     {
         $data = [];
-        foreach ($this->get_all_task_submisisons() as $submisison)
+        foreach ($this->get_all_submissions() as $submission)
         {
-            $attempt = $submisison->get_latest_attempt_or_null();
             $total = $this->get_task_count();
-            $observed = array_reduce(
-                $this->tasks, function (int $carry, task $task) use ($submisison)
-            {
-                return ($carry += $task->is_observed($submisison->get_userid()));
-            }, 0);
+            $observed = $submission->get_observed_task_count();
 
             $data[] = [
-                'userid'   => $submisison->get_userid(),
-                'name'     => fullname(core_user::get_user($submisison->get_userid())),
-                'attempt'  => !is_null($attempt) ? $attempt->get_last_attemptnumber_in_submission() : '-',
-                'observed' => "$observed/$total",
-                'complete' => $submisison->is_assessment_complete(),
+                'userid'                     => $submission->get_userid(),
+                'learner'                    => fullname(core_user::get_user($submission->get_userid())),
+                'attempt_number_observation' => $submission->get(submission::COL_ATTEMPTS_OBSERVATION),
+                'attempt_number_assessment'  => $submission->get(submission::COL_ATTEMPTS_ASSESSMENT),
+                'observed_count_formatted'   => sprintf('%d/%d', $observed, $total),
+                'is_complete'                => $submission->is_assessment_complete(),
             ];
         }
 

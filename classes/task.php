@@ -170,30 +170,11 @@ class task extends task_base implements templateable
      */
     public function get_learner_task_submission_or_create(int $userid): learner_task_submission
     {
+        $submission = submission::read_by_condition_or_null(
+            [submission::COL_OBSERVATIONID => $this->observationid, submission::COL_USERID => $userid], true);
+
         if (!$task_submission = $this->get_learner_task_submission_or_null($userid))
         {
-            // TODO: Submission needs to be created elsewhere, this is a quick and dirty hack
-            $submission = submission::read_by_condition_or_null(
-                [submission::COL_OBSERVATIONID => $this->observationid, submission::COL_USERID => $userid]);
-            if (is_null($submission))
-            {
-                $submission = new submission_base();
-                $submission->set(submission::COL_OBSERVATIONID, $this->observationid);
-                $submission->set(submission::COL_USERID, $userid);
-                $submission->set(submission::COL_STATUS, submission::STATUS_LEARNER_IN_PROGRESS);
-                $submission->set(submission::COL_TIMESTARTED, time());
-                $submission->set(submission::COL_TIMECOMPLETED, 0);
-
-                $submission->create();
-            }
-            else
-            {
-                if ($submission->is_learner_pending())
-                {
-                    $submission->update_status_and_save(submission::STATUS_LEARNER_IN_PROGRESS);
-                }
-            }
-
             $task_submission = new learner_task_submission_base();
             $task_submission->set(learner_task_submission::COL_TASKID, $this->id);
             $task_submission->set(learner_task_submission::COL_SUBMISISONID, $submission->get_id_or_null());

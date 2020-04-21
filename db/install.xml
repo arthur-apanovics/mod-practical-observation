@@ -80,6 +80,8 @@
         <FIELD NAME="observationid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="status" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="One of 'not_started', 'learner_in_progress', 'observation_pending', 'observation_in_progress', 'observation_incomplete', 'assessment_pending', 'assessment_in_progress', 'assessment_incomplete', 'complete'"/>
+        <FIELD NAME="attempts_observation" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false" COMMENT="number of observation attempts"/>
+        <FIELD NAME="attempts_assessment" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false" COMMENT="number of assessment attempts"/>
         <FIELD NAME="timestarted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecompleted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>

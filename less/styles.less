@@ -1,9 +1,11 @@
-@border-wrapper-color: #d3d3d3;
-.border-wrapper(@thickness:2px, @color: @border-wrapper-color) {
+@wrapper-border-color: #d3d3d3;
+@wrapper-margin: 3em;
+
+.border-wrapper(@thickness:1px, @color: @wrapper-border-color) {
   border: @thickness solid @color;
   border-radius: .25em;
 
-  margin-bottom: 3em;
+  margin-bottom: @wrapper-margin;
 }
 
 .task-highlight(@color) {
@@ -15,21 +17,27 @@
   }
 }
 
-/*[id ^= mod-observation-],
-[id ^= page-mod-observation-],*/
+// ====================================================================================================================
+// ====================================================================================================================
+
 body.path-mod-observation {
-
-  #page {
-
-    * {
-      box-sizing: border-box;
-    }
-  }
 
   .wrapper {
     .border-wrapper();
     padding: 1em;
     margin: 1em;
+
+    &-border {
+      .border-wrapper();
+    }
+
+    &-activity {
+      margin-bottom: @wrapper-margin;
+    }
+
+    &-submit {
+      margin: 4em 0;
+    }
   }
 
   .title {
@@ -37,67 +45,32 @@ body.path-mod-observation {
       padding: 0 0.5em;
     }
 
-    &-desc {
-      padding: 1em;
-
-      flex-grow: 1;
-      overflow-wrap: break-word;
-      word-wrap: break-word;
-    }
-
     &-secondary {
-      margin: 1em;
+      margin: 1em 0;
     }
   }
 
   .flex {
-
     display: flex;
     flex-wrap: wrap;
-
-    &-title {
-      display: flex; /* Standard syntax */
-      display: -webkit-flex; /* Safari */
-      align-items: flex-end;
-      flex-wrap: nowrap;
-
-      > span {
-        white-space: nowrap;
-      }
-    }
-
-    &-criteria {
-      display: flex;
-      align-items: flex-end;
-      flex-wrap: wrap;
-
-      > span.criteria-note {
-        font-size: 10px;
-        margin-left: auto;
-        margin-right: 7px;
-        margin-bottom: 15px;
-        color: #c0c0c0;
-      }
-    }
-
-    &-feedback,
-    &-attempt {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      flex-basis: 100%;
-    }
-  }
-
-  .obs-main-title {
-    flex: 3;
-    padding-left: 10px;
   }
 
   .task {
     &-header {
       //.border-wrapper();
       margin-bottom: 2em;
+    }
+
+    &-title {
+      display: flex;
+      flex-wrap: nowrap;
+
+      justify-content: space-between;
+      align-items: baseline;
+
+      > .action {
+        margin-right: @wrapper-margin;
+      }
     }
 
     &-action {
@@ -122,8 +95,23 @@ body.path-mod-observation {
     }
   }
 
-  .intro-container { //general container for various intro's in activity
+  .criteria {
+    &-container {
+      padding: 2em;
+    }
 
+    &-list {
+      ol {
+        li {
+          margin: 2em 1em;
+        }
+      }
+    }
+
+    &-desc {
+      .border-wrapper();
+      padding: 1em;
+    }
   }
 
   .table {
@@ -135,36 +123,8 @@ body.path-mod-observation {
     }
   }
 
-  .wrapper-obs-activity {
-    .border-wrapper();
-  }
-
-  .wrapper-border {
-    .border-wrapper();
-  }
-
-  .criteria-list {
-    li {
-      margin: 2em 1em;
-    }
-  }
-
-  .subtitle-criteria {
-    padding-left: 0;
-  }
-
-  .criteria-desc {
-    flex-grow: 1;
-    font-weight: normal;
-    margin: 1em 0;
-    padding: 1em;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    .border-wrapper(@thickness: 1px)
-  }
-
   .editor-container {
-    padding: 1em 1em 1em 4em;
+    padding: 0 1em 1em 4em;
 
     > .assessment-outcome {
       margin: 1em 0;
@@ -189,38 +149,25 @@ body.path-mod-observation {
     margin: 1em 0;
   }
 
-  .send-button-wrapper {
-    width: auto;
-    margin: auto;
-  }
-
-  .button {
-    /*background-color: #FFAA00;*/
-    border: none;
-    color: white;
-    border-radius: 5px;
-    text-decoration: none;
-    cursor: pointer;
-    font-size: 14px;
-    width: auto;
-    padding: 6px 20px;
-  }
-
-  .button:hover,
-  button:focus,
-  button:active {
-    background-color: #ffaa00;
-    color: white;
-    text-decoration: none;
-  }
-
-  .wrapper-feedback,
-  .wrapper-attempt {
-    display: flex;
-    align-content: space-between;
-    .border-wrapper(@thickness: 1px);
-    margin: 0 5px 6px 69px;
-  }
+  //.button {
+  //  /*background-color: #FFAA00;*/
+  //  border: none;
+  //  color: white;
+  //  border-radius: 5px;
+  //  text-decoration: none;
+  //  cursor: pointer;
+  //  font-size: 14px;
+  //  width: auto;
+  //  padding: 6px 20px;
+  //}
+  //
+  //.button:hover,
+  //button:focus,
+  //button:active {
+  //  background-color: #ffaa00;
+  //  color: white;
+  //  text-decoration: none;
+  //}
 
   .feedback {
     &-desc {
@@ -257,47 +204,34 @@ body.path-mod-observation {
     }
   }
 
-  .timestamp {
-    flex: 0 0 99%;
-    text-align: right;
-    margin-right: 8px;
-  }
+  .attempt {
+    padding: 2em;
 
-  .observer-note {
-    margin-top: 55px;
-    margin-right: 37px;
-    font-size: 14px;
-    margin-left: auto;
-    color: #c0c0c0;
-  }
+    .heading {
+      display: flex;
+      justify-content: space-between;
 
-  .evidence {
-    margin: 0 13px 45px 13px;
-    padding: 0;
-  }
+      .title-secondary {
+        margin: 0;
+      }
 
-  .attempt-evidence {
-    margin: 1em;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    flex: 0 0 80%;
-  }
+      .attributes {
+        font-size: 0.9em;
 
-  .learner-name {
-    text-align: right;
-    margin-right: 8px;
-    margin-top: 5px;
-    flex: 0 0 14%;
-    align-items: flex-end;
-  }
+        .name {
+          font-weight: bold;
+        }
 
-  .attempt-attachments {
-    flex: 0 0 50%;
-    margin-left: 5px;
+        .timestamp {
+        }
+      }
+    }
 
-    li.attachment {
-      display: inline;
-      margin-left: 0.5em;
+    .entry {
+      margin: 0;
+
+      &attachments {
+      }
     }
   }
 
@@ -315,10 +249,6 @@ body.path-mod-observation {
 
   .align-center {
     text-align: center;
-  }
-
-  .submit-wrapper {
-    margin: 4em 0;
   }
 
   .confirm-change-wrapper {
@@ -399,27 +329,33 @@ body.path-mod-observation {
   .hover-hint {
     text-decoration-line: underline;
     text-decoration-style: dashed;
-    text-decoration-color: @border-wrapper-color;
+    text-decoration-color: @wrapper-border-color;
 
     &-inverted {
       text-decoration-line: underline;
       text-decoration-style: dashed;
-      text-decoration-color: darken(@border-wrapper-color, 50%);
+      text-decoration-color: darken(@wrapper-border-color, 50%);
     }
   }
 }
+
+// ====================================================================================================================
+// ====================================================================================================================
 
 // "manage" page
 body.observation-manage {
   #manage-task-list,
   .manage-criteria-list {
     > ol {
+      counter-reset: li-counter;
+
       > li {
+        counter-increment: li-counter;
         display: flex;
         border: none;
 
         &::before {
-          content: counter(my-awesome-counter);
+          content: counter(li-counter);
         }
       }
     }
@@ -436,7 +372,6 @@ body.observation-manage {
       &.list-group-item {
         .my-handle {
           cursor: move;
-          cursor: -webkit-grabbing;
         }
       }
 
@@ -454,29 +389,10 @@ body.observation-manage {
   }
 }
 
-// common list styling
-body.observation-manage,
-body.observation-task {
-  #page { // without this our styles will 'leak' to outer scope
-    ol {
+// ====================================================================================================================
+// ====================================================================================================================
 
-      li {
-        counter-increment: my-awesome-counter;
-        font-weight: bold;
-
-        &::before {
-          content: counter(my-awesome-counter) ". ";
-        }
-      }
-
-      list-style: none;
-      counter-reset: my-awesome-counter;
-      //margin: 20px 8px 27px 8px;
-    }
-  }
-}
-
-// observer details table
+@table-border-color: darken(@wrapper-border-color, 5%);
 table {
   &.observer-details,
   &.submissions-summary {
@@ -489,11 +405,8 @@ table {
     width: 100%;
     margin-bottom: 1em;
 
-    // table header
-    thead tr:first-child {
-      color: #fff;
-      background-color: @border-wrapper-color;
-      border: none;
+    th {
+      font-weight: 500;
     }
 
     th:first-child,
@@ -501,37 +414,75 @@ table {
       padding: 0 15px 0 20px;
     }
 
-    th {
-      font-weight: 500;
-    }
-
-    thead tr:last-child th {
-      border-bottom: 3px solid @border-wrapper-color;
-    }
-
-    tbody tr:last-child td {
-      border: none;
-    }
-
-    tbody td {
-      border-bottom: 1px solid @border-wrapper-color;
-    }
-
     td:last-child {
       padding-right: 10px;
+    }
+
+    // table header
+    thead {
+      tr {
+        color: #fff;
+        background-color: @wrapper-border-color;
+        border: none;
+      }
+
+      tr:last-child {
+        th {
+          border-bottom: 1px solid @table-border-color;
+        }
+      }
+    }
+
+    tbody {
+      tr:last-child {
+        td, td {
+          border: none;
+        }
+      }
+
+      td, th {
+        border-bottom: 1px solid @wrapper-border-color;
+      }
     }
   }
 }
 
-table.submissions-summary {
+// assessor subission summary table
+.submissions-summary {
+  tr > th:not(:first-child),
+  tr > td:not(:first-child) {
+    text-align: center;
+  }
+
+  .submisisons-header {
+    th.attempts-group {
+      &:nth-child(even) {
+        border-left: 1px solid @table-border-color;
+      }
+
+      &:nth-child(odd) {
+        border-right: 1px solid @table-border-color;
+        border-left: 1px solid @table-border-color;
+      }
+
+      &[colspan="2"] {
+        border-right: 1px solid @table-border-color;
+        border-left: 1px solid @table-border-color;
+        border-bottom: 1px solid @table-border-color;
+      }
+    }
+  }
+
   .submissions-row {
+
     .completion {
       font-size: 1.5em;
-      color: darken(@border-wrapper-color, 10%);
+      color: darken(@wrapper-border-color, 10%);
 
       > .complete {
         color: #589e44;
       }
+
       > .not-complete {
         color: #44639e;
       }
@@ -539,6 +490,8 @@ table.submissions-summary {
   }
 }
 
+// ====================================================================================================================
+// ====================================================================================================================
 
 // task page
 body.observation-task,
@@ -554,6 +507,9 @@ body.observation-task-assess {
     }
   }
 }
+
+// ====================================================================================================================
+// ====================================================================================================================
 
 body.observation-observe {
   height: 100%;
@@ -608,10 +564,12 @@ body.observation-observe {
     margin-bottom: 5em;
   }
 
-  .criteria-header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+  .criteria {
+    &-header {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
   }
 }

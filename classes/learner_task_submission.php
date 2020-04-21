@@ -63,6 +63,7 @@ class learner_task_submission extends learner_task_submission_base implements te
 
     public function learner_can_attempt_or_create()
     {
+        $submission = $this->get_submission();
         switch ($this->status)
         {
             // this status gets set when no attempts have been made
@@ -121,14 +122,21 @@ class learner_task_submission extends learner_task_submission_base implements te
                         'learner task submission is set to "learner in progress" but no attempt exists',
                         DEBUG_DEVELOPER, debug_backtrace());
 
-                    $this->create_new_attempt();
+                    $this->create_new_attempt(false);
                 }
 
                 return true;
                 break;
 
             case self::STATUS_OBSERVATION_INCOMPLETE:
+                $this->create_new_attempt(true);
+
+                return true;
+                break;
+
             case self::STATUS_ASSESSMENT_INCOMPLETE:
+                // update attempt number in submission
+                $submission->increment_assessment_attempt_number_and_save();
                 $this->create_new_attempt(true);
 
                 return true;
@@ -150,13 +158,13 @@ class learner_task_submission extends learner_task_submission_base implements te
     }
 
     /**
-     * @param bool $set_submission_in_progress if true, will set submission and task submission state to {@link STATUS_LEARNER_IN_PROGRESS}
+     * @param bool   $update_submission_status if true, will set submission and task submission state to {@link STATUS_LEARNER_IN_PROGRESS}
      * @return learner_attempt_base
+     * @throws coding_exception
      * @throws dml_exception
      * @throws dml_missing_record_exception
-     * @throws coding_exception
      */
-    public function create_new_attempt(bool $set_submission_in_progress = true)
+    public function create_new_attempt(bool $update_submission_status)
     {
         $attempt = new learner_attempt_base();
 
@@ -170,9 +178,25 @@ class learner_task_submission extends learner_task_submission_base implements te
 
         $this->learner_attempts[] = new learner_attempt($attempt->create());
 
-        if ($set_submission_in_progress)
+        if ($update_submission_status)
         {
+            // task submission
             $this->update_status_and_save(self::STATUS_LEARNER_IN_PROGRESS);
+
+            // activity submission
+            $submission = $this->get_submission();
+            $submission->update_status_and_save(submission::STATUS_LEARNER_IN_PROGRESS);
+            // update attempt number in submission
+            switch ($this->status)
+            {
+                case self::STATUS_OBSERVATION_INCOMPLETE:
+                    $submission->increment_observation_attempt_number_and_save();
+                    break;
+
+                case self::STATUS_ASSESSMENT_INCOMPLETE:
+                    $submission->increment_assessment_attempt_number_and_save();
+                    break;
+            }
         }
 
         return $attempt;
@@ -292,12 +316,21 @@ class learner_task_submission extends learner_task_submission_base implements te
             ]);
     }
 
-    public function get_all_assessor_feedback()
+    public function get_all_assessor_feedback(): array
     {
-        return $this->assessor_task_submission->get_all_feedback();
+        $feedback = [];
+        if ($assessor_task_submission = $this->get_assessor_task_submission_or_null())
+        {
+            $feedback = $assessor_task_submission->get_all_feedback();
+        }
+
+        return $feedback;
     }
 
-    public function get_assessor_task_submission_or_null(): ?assessor_task_submission
+    /**
+     * @return assessor_task_submission|null
+     */
+    public function get_assessor_task_submission_or_null()
     {
         return $this->assessor_task_submission;
     }

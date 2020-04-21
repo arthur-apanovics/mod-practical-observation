@@ -1,5 +1,5 @@
 {{#tasks}}
-    {{> mod_observation/comp-task_title}}
+    {{> mod_observation/comp-task}}
 {{/tasks}}
 
 {{#extra.is_assessing}}
@@ -10,7 +10,7 @@
               enctype="multipart/form-data"
               accept-charset="utf-8"
               autocomplete="off">
-            <div class="submit-wrapper align-center">
+            <div class="wrapper-submit align-center">
                 <button type="submit">
                     {{#str}}assess:release_grade, observation{{/str}}
                 </button>
@@ -20,7 +20,7 @@
         </form>
     {{/extra.can_release_grade}}
     {{^extra.can_release_grade}}
-        <div class="submit-wrapper align-center">
+        <div class="wrapper-submit align-center">
             <button class="hover-hint-inverted"
                     title="{{#str}}assess:release_grade_title, observation{{/str}}"
                     type="button"

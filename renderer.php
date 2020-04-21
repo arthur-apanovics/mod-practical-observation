@@ -25,6 +25,7 @@ defined('MOODLE_INTERNAL') || die();
 use core\notification;
 use mod_observation\assessor_feedback;
 use mod_observation\learner_attempt;
+use mod_observation\learner_attempt_base;
 use mod_observation\learner_task_submission;
 use mod_observation\lib;
 use mod_observation\observation;
@@ -196,23 +197,21 @@ class mod_observation_renderer extends plugin_renderer_base
             // create submission if none exists
             $observation->get_submission_or_create($USER->id);
 
+            // TODO: MOVE LEARNER STATUS CHECKS TO SUBMISSION CLASS
             if ($observation->all_tasks_observation_pending_or_in_progress($USER->id))
             {
                 notification::info(
-                    get_string(
-                        'notification:activity_wait_for_observers', 'observation'));
+                    get_string('notification:activity_wait_for_observers', 'observation'));
             }
             else if ($observation->all_tasks_no_learner_action_required($USER->id))
             {
                 notification::info(
-                    get_string(
-                        'notification:activity_wait_for_mixed', 'observation'));
+                    get_string('notification:activity_wait_for_mixed', 'observation'));
             }
             else if ($observation->is_activity_complete($USER->id))
             {
                 notification::info(
-                    get_string(
-                        'notification:activity_complete', 'observation'));
+                    get_string('notification:activity_complete', 'observation'));
             }
 
             // submission/preview logic in template
@@ -266,7 +265,8 @@ class mod_observation_renderer extends plugin_renderer_base
         return $out;
     }
 
-    public function view_request_observation(task $task, learner_task_submission $learner_task_submission): string
+    public function view_request_observation(
+        task $task, learner_task_submission $learner_task_submission, learner_attempt_base $attempt): string
     {
         $observation_base = new observation_base($task->get(task::COL_OBSERVATIONID));
         $template_data = $learner_task_submission->export_template_data();
@@ -286,7 +286,8 @@ class mod_observation_renderer extends plugin_renderer_base
         $form = new observation_assign_observer_form(
             null, [
             'id'                    => $observation_base->get_cm()->id,
-            'learner_task_submission_id' => $learner_task_submission->get_id_or_null()
+            'learner_task_submission_id' => $learner_task_submission->get_id_or_null(),
+            'attempt_id' => $attempt->get_id_or_null(),
         ]);
         $out .= $form->render();
 
@@ -329,11 +330,11 @@ class mod_observation_renderer extends plugin_renderer_base
         if ($capabilities['can_submit'])
         {
             // learner task submission
-            $submission = $task->get_learner_task_submission_or_create($USER->id);
+            $task_submission = $task->get_learner_task_submission_or_create($USER->id);
 
-            if ($submission->learner_can_attempt_or_create())
+            if ($task_submission->learner_can_attempt_or_create())
             {
-                $attempt = $submission->get_latest_attempt_or_null();
+                $attempt = $task_submission->get_latest_attempt_or_null();
                 $context = context_module::instance($cm->id);
 
                 // render task header
@@ -356,7 +357,7 @@ class mod_observation_renderer extends plugin_renderer_base
                     $this->files_input($attempt->get_id_or_null(), observation::FILE_AREA_TRAINEE, $context);
 
                 // id's
-                $template_data['extra']['learner_task_submission_id'] = $submission->get_id_or_null();
+                $template_data['extra']['learner_task_submission_id'] = $task_submission->get_id_or_null();
                 $template_data['extra']['attempt_id'] = $attempt->get_id_or_null();
 
                 // tell template that there will be a new attempt
@@ -364,28 +365,28 @@ class mod_observation_renderer extends plugin_renderer_base
                 // save time later by including cmid while whe have it easily available
                 $template_data['extra']['cmid'] = $cm->id;
             }
-            else if ($submission->is_observation_pending_or_in_progress())
+            else if ($task_submission->is_observation_pending_or_in_progress())
             {
                 // render task header
                 $out .= $this->render_from_template('part-task_header', $header_data);
 
                 // render observer details
-                $observer = $submission->get_active_observer_assignment_or_null()->get_observer();
+                $observer = $task_submission->get_active_observer_assignment_or_null()->get_observer();
                 $observer_template_data = $observer->export_template_data();
                 // enables 'change observer' link
                 $observer_template_data['extra']['is_learner'] = true;
 
                 // allow to change observer if previous observer hasn't accepted yet
-                if ($submission->is_observation_pending())
+                if ($task_submission->is_observation_pending())
                 {
                     // it is easier to generate this link here rather than the template
-                    $attempt = $submission->get_latest_attempt_or_null();
+                    $attempt = $task_submission->get_latest_attempt_or_null();
                     $observer_template_data['extra']['change_observer_url'] = new moodle_url(
                         OBSERVATION_MODULE_PATH . 'request.php',
                         [
-                            'id'                    => $cm->id,
-                            'learner_task_submission_id' => $submission->get_id_or_null(),
-                            'attempt_id'            => $attempt->get_id_or_null(),
+                            'id'                         => $cm->id,
+                            'learner_task_submission_id' => $task_submission->get_id_or_null(),
+                            'attempt_id'                 => $attempt->get_id_or_null(),
                         ]);
                 }
 

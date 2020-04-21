@@ -22,6 +22,8 @@
 
 namespace mod_observation;
 
+use coding_exception;
+
 class learner_attempt_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_learner_attempt';
@@ -77,6 +79,60 @@ class learner_attempt_base extends db_model_base
         $this->set(learner_attempt::COL_TIMESUBMITTED, time(), true);
 
         return $this;
+    }
+
+    public function save(learner_task_submission_base $task_submission = null): self
+    {
+        if (is_null($task_submission))
+        {
+            $task_submission = learner_task_submission_base::read_or_null($this->learner_task_submissionid);
+        }
+
+        $this->validate($task_submission);
+
+        return $this->update();
+    }
+
+    /**
+     * @param learner_task_submission_base|null $task_submission
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     * @throws coding_exception
+     */
+    public function validate(learner_task_submission_base $task_submission = null): void
+    {
+        if (is_null($task_submission))
+        {
+            $task_submission = learner_task_submission_base::read_or_null($this->learner_task_submissionid);
+        }
+
+        $error_message = null;
+        if (empty($this->get(learner_attempt::COL_TIMESUBMITTED))) // empty(0) = true
+        {
+            $error_message = sprintf(
+                'learner attempt with id "%s" has invalid "%s" value',
+                $this->get_id_or_null(),
+                learner_attempt::COL_TIMESUBMITTED);
+        }
+        else if (empty($this->get(learner_attempt::COL_TEXT)))
+        {
+            $error_message = sprintf(
+                'learner attempt with id "%s" has no text',
+                $this->get_id_or_null());
+        }
+        else if ($task_submission->get(learner_task_submission::COL_STATUS)
+            != learner_task_submission::STATUS_LEARNER_IN_PROGRESS)
+        {
+            $error_message = sprintf(
+                'learner task submission with id "%s" has invalid "%s" value',
+                $this->get_id_or_null(),
+                learner_task_submission::COL_STATUS);
+        }
+        // check and throw (todo: this will only throw the last error message - not ideal)
+        if (!is_null($error_message))
+        {
+            throw new coding_exception($error_message);
+        }
     }
 
     public function get_attempt_number(): int

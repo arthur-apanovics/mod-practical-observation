@@ -1,23 +1,23 @@
-/*[id ^= mod-observation-],
-[id ^= page-mod-observation-],*/
-body.path-mod-observation #page * {
-  box-sizing: border-box;
-}
 body.path-mod-observation .wrapper {
-  border: 2px solid #d3d3d3;
+  border: 1px solid #d3d3d3;
   border-radius: .25em;
   margin-bottom: 3em;
   padding: 1em;
   margin: 1em;
 }
+body.path-mod-observation .wrapper-border {
+  border: 1px solid #d3d3d3;
+  border-radius: .25em;
+  margin-bottom: 3em;
+}
+body.path-mod-observation .wrapper-activity {
+  margin-bottom: 3em;
+}
+body.path-mod-observation .wrapper-submit {
+  margin: 4em 0;
+}
 body.path-mod-observation .title-main {
   padding: 0 0.5em;
-}
-body.path-mod-observation .title-desc {
-  padding: 1em;
-  flex-grow: 1;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
 }
 body.path-mod-observation .title-secondary {
   margin: 1em;
@@ -26,42 +26,17 @@ body.path-mod-observation .flex {
   display: flex;
   flex-wrap: wrap;
 }
-body.path-mod-observation .flex-title {
-  display: flex;
-  /* Standard syntax */
-  display: -webkit-flex;
-  /* Safari */
-  align-items: flex-end;
-  flex-wrap: nowrap;
-}
-body.path-mod-observation .flex-title > span {
-  white-space: nowrap;
-}
-body.path-mod-observation .flex-criteria {
-  display: flex;
-  align-items: flex-end;
-  flex-wrap: wrap;
-}
-body.path-mod-observation .flex-criteria > span.criteria-note {
-  font-size: 10px;
-  margin-left: auto;
-  margin-right: 7px;
-  margin-bottom: 15px;
-  color: #c0c0c0;
-}
-body.path-mod-observation .flex-feedback,
-body.path-mod-observation .flex-attempt {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  flex-basis: 100%;
-}
-body.path-mod-observation .obs-main-title {
-  flex: 3;
-  padding-left: 10px;
-}
 body.path-mod-observation .task-header {
   margin-bottom: 2em;
+}
+body.path-mod-observation .task-title {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: baseline;
+}
+body.path-mod-observation .task-title > .action {
+  margin-right: 3em;
 }
 body.path-mod-observation .task-action {
   flex: 1;
@@ -90,41 +65,26 @@ body.path-mod-observation .task.status-not_complete {
 body.path-mod-observation .task.status-not_complete:hover {
   box-shadow: 15px 0 0 0 #9e0c00;
 }
+body.path-mod-observation .criteria-container {
+  padding: 2em;
+}
+body.path-mod-observation .criteria-list ol li {
+  margin: 2em 1em;
+}
+body.path-mod-observation .criteria-desc {
+  border: 1px solid #d3d3d3;
+  border-radius: .25em;
+  margin-bottom: 3em;
+  padding: 1em;
+}
 body.path-mod-observation .table {
-  border: 2px solid #d3d3d3;
+  border: 1px solid #d3d3d3;
   border-radius: .25em;
   margin-bottom: 3em;
 }
 body.path-mod-observation .table th {
   background-color: #d3d3d3;
   color: black;
-}
-body.path-mod-observation .wrapper-obs-activity {
-  border: 2px solid #d3d3d3;
-  border-radius: .25em;
-  margin-bottom: 3em;
-}
-body.path-mod-observation .wrapper-border {
-  border: 2px solid #d3d3d3;
-  border-radius: .25em;
-  margin-bottom: 3em;
-}
-body.path-mod-observation .criteria-list li {
-  margin: 2em 1em;
-}
-body.path-mod-observation .subtitle-criteria {
-  padding-left: 0;
-}
-body.path-mod-observation .criteria-desc {
-  flex-grow: 1;
-  font-weight: normal;
-  margin: 1em 0;
-  padding: 1em;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  border: 1px solid #d3d3d3;
-  border-radius: .25em;
-  margin-bottom: 3em;
 }
 body.path-mod-observation .editor-container {
   padding: 1em 1em 1em 4em;
@@ -146,37 +106,6 @@ body.path-mod-observation .button-wrapper {
   text-align: center;
   margin: 1em 0;
 }
-body.path-mod-observation .send-button-wrapper {
-  width: auto;
-  margin: auto;
-}
-body.path-mod-observation .button {
-  /*background-color: #FFAA00;*/
-  border: none;
-  color: white;
-  border-radius: 5px;
-  text-decoration: none;
-  cursor: pointer;
-  font-size: 14px;
-  width: auto;
-  padding: 6px 20px;
-}
-body.path-mod-observation .button:hover,
-body.path-mod-observation button:focus,
-body.path-mod-observation button:active {
-  background-color: #ffaa00;
-  color: white;
-  text-decoration: none;
-}
-body.path-mod-observation .wrapper-feedback,
-body.path-mod-observation .wrapper-attempt {
-  display: flex;
-  align-content: space-between;
-  border: 1px solid #d3d3d3;
-  border-radius: .25em;
-  margin-bottom: 3em;
-  margin: 0 5px 6px 69px;
-}
 body.path-mod-observation .feedback-desc {
   margin: 0 0;
   padding: 5px 5px;
@@ -193,42 +122,24 @@ body.path-mod-observation .feedback-email {
   margin-right: 8px;
   align-items: flex-end;
 }
-body.path-mod-observation .timestamp {
-  flex: 0 0 99%;
-  text-align: right;
-  margin-right: 8px;
+body.path-mod-observation .attempt {
+  padding: 2em;
 }
-body.path-mod-observation .observer-note {
-  margin-top: 55px;
-  margin-right: 37px;
-  font-size: 14px;
-  margin-left: auto;
-  color: #c0c0c0;
+body.path-mod-observation .attempt .heading {
+  display: flex;
+  justify-content: space-between;
 }
-body.path-mod-observation .evidence {
-  margin: 0 13px 45px 13px;
-  padding: 0;
+body.path-mod-observation .attempt .heading .title-secondary {
+  margin: 0;
 }
-body.path-mod-observation .attempt-evidence {
-  margin: 1em;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  flex: 0 0 80%;
+body.path-mod-observation .attempt .heading .attributes {
+  font-size: 0.9em;
 }
-body.path-mod-observation .learner-name {
-  text-align: right;
-  margin-right: 8px;
-  margin-top: 5px;
-  flex: 0 0 14%;
-  align-items: flex-end;
+body.path-mod-observation .attempt .heading .attributes .name {
+  font-weight: bold;
 }
-body.path-mod-observation .attempt-attachments {
-  flex: 0 0 50%;
-  margin-left: 5px;
-}
-body.path-mod-observation .attempt-attachments li.attachment {
-  display: inline;
-  margin-left: 0.5em;
+body.path-mod-observation .attempt .entry {
+  margin: 0;
 }
 body.path-mod-observation .timestamp {
   flex: 0 0 99%;
@@ -241,12 +152,9 @@ body.path-mod-observation form .meets-criteria-wrapper {
 body.path-mod-observation .align-center {
   text-align: center;
 }
-body.path-mod-observation .submit-wrapper {
-  margin: 4em 0;
-}
 body.path-mod-observation .confirm-change-wrapper {
   width: 55%;
-  border: 2px solid #d3d3d3;
+  border: 1px solid #d3d3d3;
   border-radius: .25em;
   margin-bottom: 3em;
   margin: 0 auto;
@@ -262,7 +170,7 @@ body.path-mod-observation .confirm-change-wrapper > p {
   line-height: 7px;
 }
 body.path-mod-observation .msg {
-  border: 2px solid #d3d3d3;
+  border: 1px solid #d3d3d3;
   border-radius: .25em;
   margin-bottom: 3em;
   margin: 0 18px 40px;
@@ -317,21 +225,25 @@ body.path-mod-observation .hover-hint-inverted {
   text-decoration-style: dashed;
   text-decoration-color: #535353;
 }
+body.observation-manage #manage-task-list > ol,
+body.observation-manage .manage-criteria-list > ol {
+  counter-reset: li-counter;
+}
 body.observation-manage #manage-task-list > ol > li,
 body.observation-manage .manage-criteria-list > ol > li {
+  counter-increment: li-counter;
   display: flex;
   border: none;
 }
 body.observation-manage #manage-task-list > ol > li::before,
 body.observation-manage .manage-criteria-list > ol > li::before {
-  content: counter(my-awesome-counter);
+  content: counter(li-counter);
 }
 body.observation-manage ol#mainTaskList > li {
   margin-bottom: 2em;
 }
 body.observation-manage ol li.list-group-item .my-handle {
   cursor: move;
-  cursor: -webkit-grabbing;
 }
 body.observation-manage ol li .glyphicon {
   position: relative;
@@ -343,23 +255,9 @@ body.observation-manage ol li .glyphicon {
   line-height: 1;
   -webkit-font-smoothing: antialiased;
 }
-body.observation-manage #page ol,
-body.observation-task #page ol {
-  list-style: none;
-  counter-reset: my-awesome-counter;
-}
-body.observation-manage #page ol li,
-body.observation-task #page ol li {
-  counter-increment: my-awesome-counter;
-  font-weight: bold;
-}
-body.observation-manage #page ol li::before,
-body.observation-task #page ol li::before {
-  content: counter(my-awesome-counter) ". ";
-}
 table.observer-details,
 table.submissions-summary {
-  border: 2px solid #d3d3d3;
+  border: 1px solid #d3d3d3;
   border-radius: .25em;
   margin-bottom: 3em;
   text-align: left;
@@ -369,11 +267,9 @@ table.submissions-summary {
   width: 100%;
   margin-bottom: 1em;
 }
-table.observer-details thead tr:first-child,
-table.submissions-summary thead tr:first-child {
-  color: #fff;
-  background-color: #d3d3d3;
-  border: none;
+table.observer-details th,
+table.submissions-summary th {
+  font-weight: 500;
 }
 table.observer-details th:first-child,
 table.submissions-summary th:first-child,
@@ -381,34 +277,56 @@ table.observer-details td:first-child,
 table.submissions-summary td:first-child {
   padding: 0 15px 0 20px;
 }
-table.observer-details th,
-table.submissions-summary th {
-  font-weight: 500;
+table.observer-details td:last-child,
+table.submissions-summary td:last-child {
+  padding-right: 10px;
+}
+table.observer-details thead tr,
+table.submissions-summary thead tr {
+  color: #fff;
+  background-color: #d3d3d3;
+  border: none;
 }
 table.observer-details thead tr:last-child th,
 table.submissions-summary thead tr:last-child th {
-  border-bottom: 3px solid #d3d3d3;
+  border-bottom: 1px solid #c6c6c6;
 }
+table.observer-details tbody tr:last-child td,
+table.submissions-summary tbody tr:last-child td,
 table.observer-details tbody tr:last-child td,
 table.submissions-summary tbody tr:last-child td {
   border: none;
 }
 table.observer-details tbody td,
-table.submissions-summary tbody td {
+table.submissions-summary tbody td,
+table.observer-details tbody th,
+table.submissions-summary tbody th {
   border-bottom: 1px solid #d3d3d3;
 }
-table.observer-details td:last-child,
-table.submissions-summary td:last-child {
-  padding-right: 10px;
+.submissions-summary tr > th:not(:first-child),
+.submissions-summary tr > td:not(:first-child) {
+  text-align: center;
 }
-table.submissions-summary .submissions-row .completion {
+.submissions-summary .submisisons-header th.attempts-group:nth-child(even) {
+  border-left: 1px solid #c6c6c6;
+}
+.submissions-summary .submisisons-header th.attempts-group:nth-child(odd) {
+  border-right: 1px solid #c6c6c6;
+  border-left: 1px solid #c6c6c6;
+}
+.submissions-summary .submisisons-header th.attempts-group[colspan="2"] {
+  border-right: 1px solid #c6c6c6;
+  border-left: 1px solid #c6c6c6;
+  border-bottom: 1px solid #c6c6c6;
+}
+.submissions-summary .submissions-row .completion {
   font-size: 1.5em;
   color: #bababa;
 }
-table.submissions-summary .submissions-row .completion > .complete {
+.submissions-summary .submissions-row .completion > .complete {
   color: #589e44;
 }
-table.submissions-summary .submissions-row .completion > .not-complete {
+.submissions-summary .submissions-row .completion > .not-complete {
   color: #44639e;
 }
 body.observation-task .observer-details-wrapper,
