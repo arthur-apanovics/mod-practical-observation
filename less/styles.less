@@ -170,6 +170,8 @@ body.path-mod-observation {
   //}
 
   .feedback {
+    padding: 0 2em 2em 2em;
+
     &-desc {
       margin: 0 0;
       padding: 5px 5px;
@@ -206,6 +208,10 @@ body.path-mod-observation {
 
   .attempt {
     padding: 2em;
+  }
+
+  .attempt,
+  .feedback {
 
     .heading {
       display: flex;
@@ -474,6 +480,10 @@ table {
   }
 
   .submissions-row {
+
+    .observation {
+      border-left: 1px solid @table-border-color;
+    }
 
     .completion {
       font-size: 1.5em;

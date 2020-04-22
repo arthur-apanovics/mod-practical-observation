@@ -31,6 +31,17 @@ class observer_feedback extends observer_feedback_base implements templateable
         parent::__construct($id_or_record);
     }
 
+    /**
+     * @return observer_task_submission_base
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     */
+    public function get_observer_task_submission_base()
+    {
+        return observer_task_submission_base::read_or_null($this->observer_submissionid, true);
+    }
+
     public static function create_new_feedback(
         observer_task_submission $observer_submission, criteria_base $criteria, learner_attempt $attempt): self
     {
@@ -51,16 +62,20 @@ class observer_feedback extends observer_feedback_base implements templateable
      */
     public function export_template_data(): array
     {
-        // todo: replace with query
         $attempt = learner_attempt_base::read_or_null($this->attemptid, true);
+        $observer_task_submission = $this->get_observer_task_submission_base();
+        $observer = $observer_task_submission->get_observer_assignment_base()->get_observer();
 
         return [
             self::COL_ID      => $this->id,
-            self::COL_OUTCOME => lib::get_status_string($this->outcome),
+            self::COL_OUTCOME => $this->outcome,
             self::COL_TEXT    => format_text($this->text, FORMAT_HTML),
 
             // extra
-            learner_attempt::COL_ATTEMPT_NUMBER => $attempt->get_attempt_number()
+            observer::COL_FULLNAME => $observer->get_formatted_name(),
+            learner_attempt::COL_ATTEMPT_NUMBER => $attempt->get_attempt_number(),
+            observer_task_submission::COL_TIMESUBMITTED => userdate(
+                $observer_task_submission->get(observer_task_submission::COL_TIMESUBMITTED)),
         ];
     }
 }

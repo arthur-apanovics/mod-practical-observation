@@ -244,17 +244,24 @@ class task extends task_base implements templateable
      * @param int|null $userid
      * @return bool
      * @throws coding_exception
-     * @throws dml_missing_record_exception
      */
     public function has_submission(int $userid = null): bool
     {
-        if (!is_null($userid))
+        if ($this->is_filtered && !is_null($userid))
         {
-            $filtered = new task($this->to_record(), $userid);
-
-            return (bool) count($filtered->learner_task_submissions);
+            return !is_null(parent::get_learner_task_submission_or_null($userid));
+        }
+        else if (!$this->is_filtered && !is_null($userid))
+        {
+            return !is_null(lib::find_in_assoc_array_by_criteria_or_null(
+                $this->learner_task_submissions,
+                [learner_task_submission::COL_USERID => $userid, learner_task_submission::COL_TASKID => $this->id]));
+        }
+        else
+        {
+            // no user id and not filtered, check if any submissions exist
+            return (bool) count($this->learner_task_submissions);
         }
 
-        return (bool) count($this->learner_task_submissions);
     }
 }

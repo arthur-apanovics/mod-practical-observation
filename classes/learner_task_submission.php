@@ -263,25 +263,13 @@ class learner_task_submission extends learner_task_submission_base implements te
                 $assignment = observer_assignment::create_assignment(
                     $this->id, $submitted_observer->get_id_or_null(), $explanation);
             }
-            else
-            {
-                // same observer, nothing changed
-                return $current_assignment;
-            }
+            // else
+            // same observer, nothing changed
         }
         else
         {
             // no assignment yet, create
             $assignment = observer_assignment::create_assignment($this->id, $submitted_observer->get_id_or_null());
-        }
-
-        // attempt will be already submitted if learner
-        // is changing observers after already submitting
-        $attempt = $this->get_latest_attempt_or_null();
-        if (!$attempt->is_submitted())
-        {
-            // "submit" attempt
-            $attempt->submit();
         }
 
         // TODO: EVENT

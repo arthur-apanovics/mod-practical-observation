@@ -192,10 +192,10 @@ class mod_observation_renderer extends plugin_renderer_base
             $out .= $this->render_from_template('part-assessor_table', $template_data);
         }
         // learner view or preview
-        else if ($capabilities['can_submit'] || $capabilities['can_view'])
+        else if ($capabilities['can_submit'])
         {
             // create submission if none exists
-            $observation->get_submission_or_create($USER->id);
+            $submission = $observation->get_submission_or_create($USER->id);
 
             // TODO: MOVE LEARNER STATUS CHECKS TO SUBMISSION CLASS
             if ($observation->all_tasks_observation_pending_or_in_progress($USER->id))
@@ -203,7 +203,7 @@ class mod_observation_renderer extends plugin_renderer_base
                 notification::info(
                     get_string('notification:activity_wait_for_observers', 'observation'));
             }
-            else if ($observation->all_tasks_no_learner_action_required($USER->id))
+            else if ($observation->is_all_tasks_no_learner_action_required($USER->id))
             {
                 notification::info(
                     get_string('notification:activity_wait_for_mixed', 'observation'));
@@ -214,8 +214,12 @@ class mod_observation_renderer extends plugin_renderer_base
                     get_string('notification:activity_complete', 'observation'));
             }
 
-            // submission/preview logic in template
+            // submission/preview logic in template //TODO: move to renderer
             $out .= $this->render_from_template('view-activity', $template_data);
+        }
+        else if ($capabilities['can_view'])
+        {
+            // TODO preview activity
         }
 
         // validation for 'managers'
@@ -707,7 +711,6 @@ class mod_observation_renderer extends plugin_renderer_base
         require_once($CFG->dirroot . '/lib/form/filemanager.php');
 
         $picker_options = new stdClass();
-        $picker_options->mainfile = null;
         $picker_options->maxfiles = $max_files;
         $picker_options->context = $context;
         $picker_options->return_types = FILE_INTERNAL;
@@ -747,13 +750,13 @@ class mod_observation_renderer extends plugin_renderer_base
         {
             // external user, e.g. observer
             lib::file_prepare_anonymous_draft_area(
-                $draftid, $contextid, \OBSERVATION, $file_area, $itemid);
+                $draftid, $contextid, OBSERVATION_MODULE, $file_area, $itemid);
         }
         else
         {
             // regular logged in user
             file_prepare_draft_area(
-                $draftid, $contextid, \OBSERVATION, $file_area, $itemid);
+                $draftid, $contextid, OBSERVATION_MODULE, $file_area, $itemid);
         }
 
         return $draftid;

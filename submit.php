@@ -68,7 +68,6 @@ if ($learner_task_submissionid = optional_param('learner_task_submission_id', nu
     // update attempt
     $attempt->set(learner_attempt::COL_TEXT, $attempt_editor['text']);
     $attempt->set(learner_attempt::COL_TEXT_FORMAT, $attempt_editor['format']);
-    $attempt->set(learner_attempt::COL_TIMESUBMITTED, time());
     $attempt->update();
 
     // save files

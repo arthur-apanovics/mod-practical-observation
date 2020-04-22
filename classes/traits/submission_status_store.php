@@ -124,7 +124,14 @@ abstract class submission_status_store extends db_model_base implements learner_
     public function is_learner_action_required()
     {
         $this->validate_status();
-        return ($this->status === self::STATUS_LEARNER_PENDING || $this->status === self::STATUS_LEARNER_IN_PROGRESS);
+        $yes = [
+            self::STATUS_LEARNER_PENDING,
+            self::STATUS_LEARNER_IN_PROGRESS,
+            self::STATUS_OBSERVATION_INCOMPLETE,
+            self::STATUS_ASSESSMENT_INCOMPLETE,
+        ];
+
+        return in_array($this->status, $yes);
     }
 
     public function set(string $prop, $value, bool $save = false): db_model_base

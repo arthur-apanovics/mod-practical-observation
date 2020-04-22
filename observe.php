@@ -25,6 +25,7 @@
  *
  */
 
+use core\notification;
 use mod_observation\observer_assignment;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -50,6 +51,19 @@ else if (!$observer_assignment->is_active())
 //Check id a user is trying to observe himself somehow or observer has account in lms
 if (isloggedin())
 {
+    if (is_siteadmin($USER->id))
+    {
+        notification::add(
+            sprintf(
+                'Hello %s, please remember that, if you submit this observation, your name will not appear anywhere and learner will think that it was submitted by the observer ',
+                fullname($USER)),
+            notification::WARNING);
+    }
+    else
+    {
+        // TODO: notify admins of logged in user observation
+    }
+
     $learner_task_submission = $observer_assignment->get_learner_task_submission_base();
     if ($learner_task_submission->get_userid() == $USER->id)
     {

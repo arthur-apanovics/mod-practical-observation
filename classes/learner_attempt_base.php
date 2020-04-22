@@ -65,12 +65,16 @@ class learner_attempt_base extends db_model_base
     /**
      * Performs basic validation before marking attempt as submitted
      *
+     * @param learner_task_submission_base $task_submission
      * @return $this
-     * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     * @throws coding_exception
      */
-    public function submit()
+    public function submit(learner_task_submission_base $task_submission)
     {
+        $this->validate($task_submission);
+
         if ($this->is_submitted())
         {
             throw new \coding_exception("Attempt with id '$this->id' is already submitted");
@@ -107,14 +111,7 @@ class learner_attempt_base extends db_model_base
         }
 
         $error_message = null;
-        if (empty($this->get(learner_attempt::COL_TIMESUBMITTED))) // empty(0) = true
-        {
-            $error_message = sprintf(
-                'learner attempt with id "%s" has invalid "%s" value',
-                $this->get_id_or_null(),
-                learner_attempt::COL_TIMESUBMITTED);
-        }
-        else if (empty($this->get(learner_attempt::COL_TEXT)))
+        if (empty($this->get(learner_attempt::COL_TEXT)))
         {
             $error_message = sprintf(
                 'learner attempt with id "%s" has no text',

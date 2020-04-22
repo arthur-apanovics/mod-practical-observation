@@ -123,7 +123,8 @@ $string['assess_task'] = 'Assess';
 $string['view_task'] = 'View';
 
 $string['request_observation'] = 'Request observation';
-$string['attempt_number'] = 'Attempt #{$a}';
+$string['attempt_for'] = 'Attempt #{$a}';
+$string['feedback_for'] = 'Feedback for attempt #{$a}';
 
 // CRITERIA SPECIFIC
 $string['add_criteria'] = 'Add criteria';

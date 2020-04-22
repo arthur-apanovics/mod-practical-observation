@@ -68,11 +68,12 @@ class observer_task_submission_base extends db_model_base
         $task = $learner_task_submission->get_task_base();
         $observation = $task->get_observation_base();
 
-        $status = ($outcome == self::OUTCOME_COMPLETE)
+        $new_task_status = ($outcome == self::OUTCOME_COMPLETE)
             ? learner_task_submission::STATUS_ASSESSMENT_PENDING
             : learner_task_submission::STATUS_OBSERVATION_INCOMPLETE;
-        $learner_task_submission->update_status_and_save($status);
+        $learner_task_submission->update_status_and_save($new_task_status);
 
+        // update activity submission status if needed
         $submission = $learner_task_submission->get_submission();
         if ($observation->is_observed($learner_task_submission->get_userid()))
         {
@@ -84,10 +85,17 @@ class observer_task_submission_base extends db_model_base
             // all observations marked as not complete
             $submission->update_status_and_save(submission::STATUS_OBSERVATION_INCOMPLETE);
         }
+        else if (!$observation->is_all_tasks_no_learner_action_required($submission->get_userid()))
+        {
+            // user input needed for some task(s)
+            $submission->update_status_and_save(submission::STATUS_LEARNER_PENDING);
+        }
         else
         {
+            // not observed, not observed as incomplete, no learner input needed
             if ($submission->get(submission::COL_STATUS) === submission::STATUS_OBSERVATION_PENDING)
             {
+                // observation started, update status to 'in progress'
                 $submission->update_status_and_save(submission::STATUS_OBSERVATION_IN_PROGRESS);
             }
         }

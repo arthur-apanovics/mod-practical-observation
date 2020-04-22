@@ -27,9 +27,10 @@
         <tbody>
         {{#extra.submission_summary_data}}
             <tr class="submissions-row">
-                {{! TODO: link to user profile }}
                 <td class="name">
-                    {{learner}}
+                    <a href="{{{learner_profile_url}}}">
+                        {{learner}}
+                    </a>
                 </td>
                 <td class="attempts-group observation">
                     {{attempt_number_observation}}

@@ -87,6 +87,17 @@ class observer_assignment_base extends db_model_base
         return (bool) $this->observation_accepted;
     }
 
+    /**
+     * @return observer
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     */
+    public function get_observer(): observer
+    {
+        return observer::read_or_null($this->observerid, true);
+    }
+
     public function get_learner_task_submission_base()
     {
         return new learner_task_submission_base($this->learner_task_submissionid);

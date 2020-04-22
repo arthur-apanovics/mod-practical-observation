@@ -43,9 +43,9 @@ require_login($course, true, $cm);
 // TODO: Event
 
 // creating class instances also validates provided id's
-$learner_task_submission = new learner_task_submission($learner_task_submission_id);
+$task_submission = new learner_task_submission($learner_task_submission_id);
 $attempt = new learner_attempt_base($attempt_id);
-$task_id = $learner_task_submission->get($learner_task_submission::COL_TASKID);
+$task_id = $task_submission->get($task_submission::COL_TASKID);
 $task = new task($task_id, $USER->id);
 $name = get_string('assign_observer:page_title', 'observation', $task->get_formatted_name());
 
@@ -63,6 +63,7 @@ $PAGE->add_body_class('observation-request');
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
 
+// is confirming observer change?
 if (optional_param('confirm', 0, PARAM_BOOL))
 {
     // we're replacing existing observer with new one,
@@ -77,9 +78,10 @@ if (optional_param('confirm', 0, PARAM_BOOL))
     $observer = observer::update_or_create($submitted);
 
     $explanation = required_param('user_input', PARAM_TEXT);
-    $learner_task_submission->assign_observer($observer, $message, $explanation);
+    $task_submission->assign_observer($observer, $message, $explanation);
 
-    $learner_task_submission->submit($attempt);
+    $attempt->submit($task_submission);
+    $task_submission->submit($attempt);
 
     redirect(
         $activity_url,
@@ -91,6 +93,7 @@ if (optional_param('confirm', 0, PARAM_BOOL))
 }
 
 $form = new observation_assign_observer_form();
+// is submitting observer form?
 if ($data = $form->get_data())
 {
     // observer object
@@ -101,7 +104,7 @@ if ($data = $form->get_data())
     $submitted->set(observer::COL_POSITION_TITLE, $data->{observer::COL_POSITION_TITLE});
 
     // check if an assignment already exists
-    if ($current_assignment = $learner_task_submission->get_active_observer_assignment_or_null())
+    if ($current_assignment = $task_submission->get_active_observer_assignment_or_null())
     {
         // observer already exists, we need to make some checks.
         // check if submitted observer exists in database OR if submitted observer is NOT same as current one
@@ -132,26 +135,30 @@ if ($data = $form->get_data())
             );
             // dies here
         }
-        else if ($submitted_observer_id == $current->get_id_or_null())
-        {
-            // assignment exists and it's for the same observer, nothing to do here
-            redirect(
-                $activity_url
-                //TODO: notification appeared on a normal second attempt with same assessor
-                // and not when re-assigning an observer. Will this scenario even happen?
-                // get_string(
-                //     'notification:observer_assigned_no_change', 'observation',
-                //     ['task' => $task->get_formatted_name(), 'email' => $submitted->get(observer::COL_EMAIL)]),
-                // null,
-                // notification::NOTIFY_WARNING
-            );
-        }
+        // else if ($submitted_observer_id == $current->get_id_or_null())
+        // {
+        //     // assignment exists and it's for the same observer, nothing to do here
+        //     redirect(
+        //         $activity_url
+        //         //TODO: notification appeared on a normal second attempt with same assessor
+        //         // and not when re-assigning an observer. Will this scenario even happen?
+        //         // get_string(
+        //         //     'notification:observer_assigned_no_change', 'observation',
+        //         //     ['task' => $task->get_formatted_name(), 'email' => $submitted->get(observer::COL_EMAIL)]),
+        //         // null,
+        //         // notification::NOTIFY_WARNING
+        //     );
+        // }
     }
 
     //  no observer assignment OR submitted observer is the same as currently assigned observer
     $observer = observer::update_or_create($submitted);
     // assign observer to this submission
-    $learner_task_submission->assign_observer($observer, $data->message);
+    $task_submission->assign_observer($observer, $data->message);
+
+    // submit task submission and attempt
+    $attempt->submit($task_submission);
+    $task_submission->submit($attempt);
 
     redirect(
         $activity_url,
@@ -162,9 +169,10 @@ if ($data = $form->get_data())
         notification::NOTIFY_SUCCESS);
 }
 
+// not confirming change and not submitting form - display request observation page
 echo $OUTPUT->header();
 
-echo $renderer->view_request_observation($task, $learner_task_submission, $attempt);
+echo $renderer->view_request_observation($task, $task_submission, $attempt);
 
 // Finish the page.
 echo $OUTPUT->footer();

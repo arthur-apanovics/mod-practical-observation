@@ -71,6 +71,17 @@ class submission extends submission_base /*TODO: implements templateable*/
         return $observed;
     }
 
+    /**
+     * @param int $taskid
+     * @return learner_task_submission|null
+     * @throws \coding_exception
+     */
+    public function get_learner_task_submisison_or_null(int $taskid)
+    {
+        return lib::find_in_assoc_array_by_key_value_or_null(
+            $this->task_submissions, learner_task_submission::COL_TASKID, $taskid);
+    }
+
     public function release_assessment(observation_base $observation = null)
     {
         if (is_null($observation))

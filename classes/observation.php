@@ -305,7 +305,7 @@ class observation extends observation_base implements templateable
             [submission::COL_OBSERVATIONID => $this->id, submission::COL_USERID => $learnerid]);
     }
 
-    public function get_submission_or_create(int $learnerid)
+    public function get_submission_or_create(int $learnerid): submission
     {
         if (!$submission = $this->get_submission_or_null($learnerid))
         {
@@ -318,8 +318,10 @@ class observation extends observation_base implements templateable
             $submission->set(submission::COL_TIMESTARTED, time());
             $submission->set(submission::COL_TIMECOMPLETED, 0);
 
-            $submission->create();
+            $submission = new submission($submission->create());
         }
+
+        return $submission;
     }
 
     public function create_task(task_base $task)
@@ -372,7 +374,7 @@ class observation extends observation_base implements templateable
         return true;
     }
 
-    public function all_tasks_no_learner_action_required(int $userid)
+    public function is_all_tasks_no_learner_action_required(int $userid): bool
     {
         foreach ($this->tasks as $task)
         {
@@ -381,12 +383,9 @@ class observation extends observation_base implements templateable
                 // has a submission
                 if ($submission->is_learner_action_required())
                 {
-                    // nothing for learner to do
-                    continue;
+                    return false;
                 }
             }
-
-            return false;
         }
 
         return true;
@@ -421,12 +420,15 @@ class observation extends observation_base implements templateable
         $data = [];
         foreach ($this->get_all_submissions() as $submission)
         {
+            $userid = $submission->get_userid();
             $total = $this->get_task_count();
             $observed = $submission->get_observed_task_count();
 
             $data[] = [
-                'userid'                     => $submission->get_userid(),
-                'learner'                    => fullname(core_user::get_user($submission->get_userid())),
+                'userid'                     => $userid,
+                'learner'                    => fullname(core_user::get_user($userid)),
+                'learner_profile_url'        => (new moodle_url(
+                    '/user/profile.php', ['id' => $userid, 'course' => $this->course]))->out(false),
                 'attempt_number_observation' => $submission->get(submission::COL_ATTEMPTS_OBSERVATION),
                 'attempt_number_assessment'  => $submission->get(submission::COL_ATTEMPTS_ASSESSMENT),
                 'observed_count_formatted'   => sprintf('%d/%d', $observed, $total),
