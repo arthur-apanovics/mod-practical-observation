@@ -63,7 +63,6 @@ class learner_task_submission extends learner_task_submission_base implements te
 
     public function learner_can_attempt_or_create()
     {
-        $submission = $this->get_submission();
         switch ($this->status)
         {
             // this status gets set when no attempts have been made
@@ -129,18 +128,12 @@ class learner_task_submission extends learner_task_submission_base implements te
                 break;
 
             case self::STATUS_OBSERVATION_INCOMPLETE:
-                $this->create_new_attempt(true);
-
-                return true;
-                break;
-
             case self::STATUS_ASSESSMENT_INCOMPLETE:
-                // update attempt number in submission
-                $submission->increment_assessment_attempt_number_and_save();
                 $this->create_new_attempt(true);
 
                 return true;
                 break;
+
 
             default:
                 return false;
@@ -185,7 +178,7 @@ class learner_task_submission extends learner_task_submission_base implements te
 
             // activity submission
             $submission = $this->get_submission();
-            $submission->update_status_and_save(submission::STATUS_LEARNER_IN_PROGRESS);
+            $submission->update_status_and_save(submission::STATUS_LEARNER_IN_PROGRESS, true);
             // update attempt number in submission
             switch ($this->status)
             {
@@ -255,16 +248,14 @@ class learner_task_submission extends learner_task_submission_base implements te
                 {
                     throw new coding_exception('Explanation cannot be NULL when switching observers');
                 }
-
-                // new observer, set current assignment as 'not active'
-                $current_assignment->set(observer_assignment::COL_ACTIVE, false, true);
-
-                // create assignment for new observer
-                $assignment = observer_assignment::create_assignment(
-                    $this->id, $submitted_observer->get_id_or_null(), $explanation);
             }
-            // else
-            // same observer, nothing changed
+
+            // set current assignment as 'not active'
+            $current_assignment->set(observer_assignment::COL_ACTIVE, false, true);
+
+            // create new assignment
+            $assignment = observer_assignment::create_assignment(
+                $this->id, $submitted_observer->get_id_or_null(), $explanation);
         }
         else
         {
@@ -275,9 +266,7 @@ class learner_task_submission extends learner_task_submission_base implements te
         // TODO: EVENT
 
         // TODO: SEND EMAIL AND NOTIFICATION
-        $review_url = new moodle_url(
-            OBSERVATION_MODULE_PATH . 'observe.php',
-            ['token' => $assignment->get(observer_assignment::COL_TOKEN)]);
+        $review_url = $assignment->get_review_url();
         // TODO: REMOVE TEMPORARY OBSERVATION NOTIFICATION
         notification::add(
             'As emails don\'t work at the moment, use this link in incognito mode to "observe" task you\'ve just submitted - <br>' .
@@ -304,6 +293,9 @@ class learner_task_submission extends learner_task_submission_base implements te
             ]);
     }
 
+    /**
+     * @return assessor_feedback[]
+     */
     public function get_all_assessor_feedback(): array
     {
         $feedback = [];
@@ -445,6 +437,8 @@ class learner_task_submission extends learner_task_submission_base implements te
      */
     public function export_template_data(): array
     {
+        global $USER;
+
         $learner_attempts_data = [];
         foreach ($this->learner_attempts as $learner_attempt)
         {
@@ -466,14 +460,28 @@ class learner_task_submission extends learner_task_submission_base implements te
             $assessor_task_submission_data = $this->assessor_task_submission->export_template_data();
         }
 
+        $is_admin = is_siteadmin($USER);
+        $review_url = null;
+        if ($is_admin && $this->is_observation_pending_or_in_progress())
+        {
+            if ($observer_assignment = $this->get_active_observer_assignment_or_null())
+            {
+                $review_url = $observer_assignment->get_review_url();
+            }
+        }
+
         return [
             self::COL_ID            => $this->id,
             self::COL_TIMESTARTED   => userdate($this->timestarted),
             self::COL_TIMECOMPLETED => $this->timecompleted != 0 ? userdate($this->timecompleted) : null,
 
-            'learner_attempts'         => $learner_attempts_data,
-            'observer_assignments'     => $observer_assignments_data,
-            'assessor_task_submission' => $assessor_task_submission_data
+            'learner_attempts'             => $learner_attempts_data,
+            'observer_assignments'         => $observer_assignments_data,
+            'assessor_task_submission'     => $assessor_task_submission_data,
+
+            // extra
+            'is_admin'   => $is_admin,
+            'review_url' => $review_url,
         ];
     }
 }

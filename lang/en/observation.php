@@ -91,8 +91,6 @@ $string['feedback_required'] ='Feedback required';
 $string['feedback_required_help'] ='If checked, observers will have to provide textual feedback for this criteria';
 
 // LEARNER SUBMISSION STATUS STRINGS
-$string['status:not_complete'] = 'Not complete';
-$string['status:complete'] = 'Complete';
 $string['status:not_started'] = 'Not started';
 $string['status:learner_in_progress'] = 'In progress';
 $string['status:observation_pending'] = 'Observation pending';
@@ -120,10 +118,12 @@ $string['preview_task'] = 'Preview';
 $string['review_task'] = 'Review';
 $string['start_task'] = 'Start';
 $string['assess_task'] = 'Assess';
+$string['observe_task'] = 'Observe';
 $string['view_task'] = 'View';
 
 $string['request_observation'] = 'Request observation';
 $string['attempt_for'] = 'Attempt #{$a}';
+$string['feedback_for_no_text'] = '<strong>{$a->fullname}</strong> has marked attempt #{$a->attempt_number} as <span class="outcome-inline">{$a->outcome}</span> {$a->timesubmitted}';
 $string['feedback_for'] = 'Feedback for attempt #{$a}';
 
 // CRITERIA SPECIFIC
@@ -189,6 +189,8 @@ $string['notification:submission_pending_or_in_progress'] = 'Learner has not yet
 $string['notification:activity_wait_for_observers'] = 'You have requested observations for all tasks, please be patient while observers review your submissions';
 $string['notification:activity_wait_for_mixed'] = 'Please pe patient while your submissions are observed and assessed';
 $string['notification:activity_complete'] = 'Congratulations, you have completed this activity!';
+$string['notification:activity_observation_not_complete'] = 'Observation was unsuccessful, please submit new attempt';
+$string['notification:activity_assessment_not_complete'] = 'Assessment was unsuccessful, please submit new attempt';
 
 // ERRORS
 $string['error:invalid_token'] = 'The link you are trying to access is incorrect. Please contact Akatoi support if you think this is a mistake.';

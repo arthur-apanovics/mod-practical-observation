@@ -72,20 +72,21 @@ class observer_task_submission_base extends db_model_base
             ? learner_task_submission::STATUS_ASSESSMENT_PENDING
             : learner_task_submission::STATUS_OBSERVATION_INCOMPLETE;
         $learner_task_submission->update_status_and_save($new_task_status);
+        $learnerid = $learner_task_submission->get_userid();
 
         // update activity submission status if needed
         $submission = $learner_task_submission->get_submission();
-        if ($observation->is_observed($learner_task_submission->get_userid()))
+        if ($submission->is_observed())
         {
             // all tasks observed, assessment needed
             $submission->update_status_and_save(submission::STATUS_ASSESSMENT_PENDING);
         }
-        else if ($observation->is_observed_as_incomplete($learner_task_submission->get_userid()))
+        else if ($submission->is_observed_as_incomplete())
         {
             // all observations marked as not complete
             $submission->update_status_and_save(submission::STATUS_OBSERVATION_INCOMPLETE);
         }
-        else if (!$observation->is_all_tasks_no_learner_action_required($submission->get_userid()))
+        else if (!$submission->is_all_tasks_no_learner_action_required())
         {
             // user input needed for some task(s)
             $submission->update_status_and_save(submission::STATUS_LEARNER_PENDING);

@@ -6,7 +6,7 @@
       autocomplete="off">
 
     {{#extra.observer}}
-        {{> mod_observation/comp-attempt_feedback}}
+        {{> mod_observation/part-observer_details}}
     {{/extra.observer}}
 
     <h5>Information and evidence from the trainee</h5>
@@ -26,12 +26,9 @@
             {{/criteria}}
         </ol>
     </div>
-
     {{#extra.editor_html}}
         <div class="editor-container">
-            <h5>
-                Please provide assessment feedback:
-            </h5>
+            <h5>Please provide assessment feedback:</h5>
             {{{extra.editor_html}}}
             {{{extra.filepicker_html}}}
             <div class="assessment-outcome">
@@ -55,9 +52,9 @@
                     </option>
                     <option value="not_complete"
                         {{! set as not_complete earlier? }}
-                        {{^extra.existing_feedback.is_complete}}
+                        {{#extra.existing_feedback.is_not_complete}}
                             selected
-                        {{/extra.existing_feedback.is_complete}}
+                        {{/extra.existing_feedback.is_not_complete}}
                     >
                         {{#str}}outcome:not_complete, observation{{/str}}
                     </option>
@@ -65,12 +62,10 @@
             </div>
         </div>
     {{/extra.editor_html}}
-
     <div class="wrapper-submit align-center">
         <button type="submit">Save</button>
         <input type="hidden" name="cmid" value="{{extra.cmid}}">
         <input type="hidden" name="assessor_task_submission_id" value="{{extra.assessor_task_submission_id}}">
         <input type="hidden" name="assessor_feedback_id" value="{{extra.assessor_feedback_id}}">
     </div>
-
 </form>

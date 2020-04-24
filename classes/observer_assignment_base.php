@@ -22,6 +22,8 @@
 
 namespace mod_observation;
 
+use moodle_url;
+
 class observer_assignment_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_observer_assignment';
@@ -96,6 +98,11 @@ class observer_assignment_base extends db_model_base
     public function get_observer(): observer
     {
         return observer::read_or_null($this->observerid, true);
+    }
+
+    public function get_review_url()
+    {
+        return new moodle_url(OBSERVATION_MODULE_PATH . 'observe.php', ['token' => $this->token]);
     }
 
     public function get_learner_task_submission_base()

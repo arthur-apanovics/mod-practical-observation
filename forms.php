@@ -162,13 +162,14 @@ class observation_assign_observer_form extends moodleform
         $element = observer::COL_PHONE;
         $mform->addElement('text', $element, get_string($element, OBSERVATION));
         $mform->setType($element, PARAM_TEXT);
-        $mform->addRule($element, null, 'required', null, 'client');
-        $mform->addRule(
-            $element,
-            get_string('assign_observer:phone_validation_message', 'observation'),
-            'regex',
-            '/(0|(\+64(\s|-)?)){1}(21|22|27){1}(\s|-)?\d{3}(\s|-)?\d{4}/',
-            'client');
+        $mform->addRule($element, get_string('required'), 'required', null, 'client');
+//TODO: refine phone regex
+//        $mform->addRule(
+//            $element,
+//            get_string('assign_observer:phone_validation_message', 'observation'),
+//            'regex',
+//            '/(0|(\+64(\s|-)?)){1}(21|22|27){1}(\s|-)?\d{3}(\s|-)?\d{4}/',
+//            'client');
 
         // email
         $element = observer::COL_EMAIL;

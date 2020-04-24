@@ -144,10 +144,7 @@ else if ($observer_submissionid = optional_param('observer_submission_id', null,
     $observer_submission_base->submit($observation_submission_outcome);
 
     $observer_assignment = $observer_submission_base->get_observer_assignment_base();
-    redirect(
-        new moodle_url(
-            OBSERVATION_MODULE_PATH . 'observe.php',
-            ['token' => $observer_assignment->get(observer_assignment::COL_TOKEN)]));
+    redirect($observer_assignment->get_review_url());
 }
 /* ================================================================================================================== */
 else if ($assessor_task_submissionid = optional_param('assessor_task_submission_id', null, PARAM_INT))
@@ -198,8 +195,7 @@ else if ($assessor_task_submissionid = optional_param('assessor_task_submission_
 else if ($submission_id = optional_param('activity_submission_id', null, PARAM_INT))
 {
     // releasing grade
-    $submisison = new submission(
-        new submission_base($submission_id));
+    $submisison = submission::read_or_null($submission_id);
     $submisison->release_assessment();
 
     redirect(

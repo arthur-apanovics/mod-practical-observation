@@ -106,7 +106,7 @@ abstract class submission_status_store extends db_model_base implements learner_
     public function is_observation_incomplete()
     {
         $this->validate_status();
-        return $this->status == self::STATUS_OBSERVATION_IN_PROGRESS;
+        return $this->status == self::STATUS_OBSERVATION_INCOMPLETE;
     }
 
     public function is_observation_pending()

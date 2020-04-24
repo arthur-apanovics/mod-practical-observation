@@ -44,26 +44,19 @@ body.path-mod-observation .task-action {
   margin-top: 20px;
   margin-bottom: 10px;
 }
-body.path-mod-observation .task.status-pending {
-  box-shadow: 5px 0 0 0 #5c809e;
+body.path-mod-observation .task.status-assessing-complete {
+  box-shadow: 4px 0 10px -6px #589e44, -4px 0 10px -6px #589e44;
   transition: box-shadow 0.2s ease-out;
 }
-body.path-mod-observation .task.status-pending:hover {
-  box-shadow: 15px 0 0 0 #5c809e;
+body.path-mod-observation .task.status-assessing-complete:hover {
+  box-shadow: 7px 0 10px -6px #589e44, -7px 0 10px -6px #589e44;
 }
-body.path-mod-observation .task.status-complete {
-  box-shadow: 5px 0 0 0 #589e44;
+body.path-mod-observation .task.status-assessing-not_complete {
+  box-shadow: 4px 0 10px -6px #9e4444, -4px 0 10px -6px #9e4444;
   transition: box-shadow 0.2s ease-out;
 }
-body.path-mod-observation .task.status-complete:hover {
-  box-shadow: 15px 0 0 0 #589e44;
-}
-body.path-mod-observation .task.status-not_complete {
-  box-shadow: 5px 0 0 0 #9e0c00;
-  transition: box-shadow 0.2s ease-out;
-}
-body.path-mod-observation .task.status-not_complete:hover {
-  box-shadow: 15px 0 0 0 #9e0c00;
+body.path-mod-observation .task.status-assessing-not_complete:hover {
+  box-shadow: 7px 0 10px -6px #9e4444, -7px 0 10px -6px #9e4444;
 }
 body.path-mod-observation .criteria-container {
   padding: 2em;
@@ -76,6 +69,9 @@ body.path-mod-observation .criteria-desc {
   border-radius: .25em;
   margin-bottom: 3em;
   padding: 1em;
+}
+body.path-mod-observation .criteria-desc + .feedback.no-text {
+  margin-top: -2em;
 }
 body.path-mod-observation .table {
   border: 1px solid #d3d3d3;
@@ -106,24 +102,18 @@ body.path-mod-observation .button-wrapper {
   text-align: center;
   margin: 1em 0;
 }
-body.path-mod-observation .feedback {
+body.path-mod-observation .feedback.observer.with-text {
   padding: 0 2em 2em 2em;
 }
-body.path-mod-observation .feedback-desc {
-  margin: 0 0;
-  padding: 5px 5px;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  flex: 0 0 50%;
+body.path-mod-observation .feedback.observer.no-text {
+  text-align: right;
 }
-body.path-mod-observation .feedback-attempt-heading {
-  margin-left: 69px;
-  margin-top: 18px;
+body.path-mod-observation .feedback.observer.no-text .outcome-inline {
+  text-transform: lowercase;
+  font-weight: bold;
 }
-body.path-mod-observation .feedback-email {
-  margin-top: 5px;
-  margin-right: 8px;
-  align-items: flex-end;
+body.path-mod-observation .feedback.assessor {
+  margin-bottom: 3em;
 }
 body.path-mod-observation .attempt {
   padding: 2em;
@@ -148,6 +138,9 @@ body.path-mod-observation .feedback .heading .attributes .name {
 body.path-mod-observation .attempt .entry,
 body.path-mod-observation .feedback .entry {
   margin: 0;
+}
+body.path-mod-observation .assessor-feedback-container {
+  padding: 2em;
 }
 body.path-mod-observation .timestamp {
   flex: 0 0 99%;
@@ -329,6 +322,9 @@ table.submissions-summary tbody th {
 }
 .submissions-summary .submissions-row .observation {
   border-left: 1px solid #c6c6c6;
+}
+.submissions-summary .submissions-row .assessment {
+  border-right: 1px solid #c6c6c6;
 }
 .submissions-summary .submissions-row .completion {
   font-size: 1.5em;

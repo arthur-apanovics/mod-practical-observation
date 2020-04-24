@@ -402,13 +402,13 @@ class observation extends observation_base implements templateable
         $submitted = 0;
         foreach ($this->get_learner_task_submissions($learnerid) as $learner_task_submission)
         {
-            $feedback = $learner_task_submission
+            $assessor_feedback = $learner_task_submission
                 ->get_latest_learner_attempt_or_null()
                 ->get_assessor_feedback_or_null();
 
-            if (!is_null($feedback))
+            if (!is_null($assessor_feedback))
             {
-                $submitted += $feedback->is_submitted();
+                $submitted += $assessor_feedback->is_submitted();
             }
         }
 
@@ -433,6 +433,7 @@ class observation extends observation_base implements templateable
                 'attempt_number_assessment'  => $submission->get(submission::COL_ATTEMPTS_ASSESSMENT),
                 'observed_count_formatted'   => sprintf('%d/%d', $observed, $total),
                 'is_complete'                => $submission->is_assessment_complete(),
+                'submission_status'          => lib::get_status_string($submission->get(submission::COL_STATUS))
             ];
         }
 

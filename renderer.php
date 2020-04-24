@@ -33,6 +33,7 @@ use mod_observation\observation_base;
 use mod_observation\observer;
 use mod_observation\observer_assignment;
 use mod_observation\observer_feedback;
+use mod_observation\submission;
 use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -198,17 +199,27 @@ class mod_observation_renderer extends plugin_renderer_base
             $submission = $observation->get_submission_or_create($USER->id);
 
             // TODO: MOVE LEARNER STATUS CHECKS TO SUBMISSION CLASS
-            if ($observation->all_tasks_observation_pending_or_in_progress($USER->id))
+            if ($submission->is_observation_incomplete())
+            {
+                notification::warning(
+                    get_string('notification:activity_observation_not_complete', 'observation'));
+            }
+            else if ($submission->is_assessment_incomplete())
+            {
+                notification::warning(
+                    get_string('notification:activity_assessment_not_complete', 'observation'));
+            }
+            else if ($submission->all_tasks_observation_pending_or_in_progress())
             {
                 notification::info(
                     get_string('notification:activity_wait_for_observers', 'observation'));
             }
-            else if ($observation->is_all_tasks_no_learner_action_required($USER->id))
+            else if ($submission->is_all_tasks_no_learner_action_required())
             {
                 notification::info(
                     get_string('notification:activity_wait_for_mixed', 'observation'));
             }
-            else if ($observation->is_activity_complete($USER->id))
+            else if ($submission->is_assessment_complete())
             {
                 notification::info(
                     get_string('notification:activity_complete', 'observation'));
@@ -323,11 +334,10 @@ class mod_observation_renderer extends plugin_renderer_base
 
         $template_data = $task->export_template_data();
         // lightweight data to render task header
-        $header_data =
-            [
-                task::COL_NAME => $template_data['name'],
-                'intro'        => $template_data['intro_learner']
-            ];
+        $header_data = [
+            task::COL_NAME => $template_data['name'],
+            'intro'        => $template_data['intro_learner']
+        ];
         $capabilities = $observation_base->export_capabilities();
         $out = '';
 
@@ -402,8 +412,6 @@ class mod_observation_renderer extends plugin_renderer_base
                         $observer->get(observer::COL_EMAIL)));
             }
 
-            // TODO: STATUS FAKE BLOCK
-
             $out .= $this->render_from_template('view-task_learner', $template_data);
         }
         else if ($capabilities['can_view'])
@@ -414,8 +422,9 @@ class mod_observation_renderer extends plugin_renderer_base
         else
         {
             print_error('Sorry, you don\'t have permission to view this page');
-            return $out;
         }
+
+        // TODO: STATUS FAKE BLOCK
 
         return $out;
     }
@@ -533,6 +542,8 @@ class mod_observation_renderer extends plugin_renderer_base
                 // we need to pre-populate page based on previously saved feedback
                 $template_data['extra']['existing_feedback']['is_complete'] =
                     $feedback->is_marked_complete();
+                $template_data['extra']['existing_feedback']['is_not_complete'] =
+                    !$feedback->is_marked_complete();
             }
 
             // id's
@@ -543,7 +554,7 @@ class mod_observation_renderer extends plugin_renderer_base
         else if ($learner_task_submission->is_observation_pending_or_in_progress())
         {
             $include_observer_details = true;
-            notification::add('notification:observation_pending_or_in_progress', notification::INFO);
+            notification::add(get_string('notification:observation_pending_or_in_progress', \OBSERVATION), notification::INFO);
         }
         else if ($learner_task_submission->is_learner_action_required())
         {
@@ -559,7 +570,8 @@ class mod_observation_renderer extends plugin_renderer_base
             $observer_template_data['extra']['is_assessing'] = $is_assessing;
 
             if ($is_assessing)
-            { // this is ugly but we need to repeat this data here to populate page based on existing feedback
+            {
+                // this is ugly but we need to repeat this data here to populate page based on existing feedback
                 $observer_template_data['extra']['existing_feedback']['is_complete'] =
                     $feedback->is_marked_complete();
             }

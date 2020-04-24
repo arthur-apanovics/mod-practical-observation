@@ -50,6 +50,31 @@ class assessor_task_submission extends assessor_task_submission_base implements 
     }
 
     /**
+     * Used to determine task outcome when submission has not been released yet
+     *
+     * @return string {@link assessor_feedback::OUTCOME_COMPLETE}, {@link assessor_feedback::OUTCOME_NOT_COMPLETE}
+     * @throws coding_exception
+     */
+    public function get_task_outcome_from_feedback(): string
+    {
+        if (empty($this->feedbacks))
+        {
+            return assessor_feedback::OUTCOME_NOT_COMPLETE;
+        }
+
+        foreach ($this->feedbacks as $feedback)
+        {
+            if ($feedback->get(assessor_feedback::COL_OUTCOME) === assessor_feedback::OUTCOME_NOT_COMPLETE)
+            {
+                // if at least one criteria not complete then whole task is not complete
+                return assessor_feedback::OUTCOME_NOT_COMPLETE;
+            }
+        }
+
+        return assessor_feedback::OUTCOME_COMPLETE;
+    }
+
+    /**
      * @param int $learner_attempt_id
      * @return assessor_feedback
      * @throws \dml_exception
@@ -126,7 +151,7 @@ class assessor_task_submission extends assessor_task_submission_base implements 
     {
         return [
             self::COL_ID      => $this->id,
-            self::COL_OUTCOME => lib::get_status_string($this->outcome),
+            self::COL_OUTCOME => lib::get_outcome_string($this->outcome),
         ];
     }
 }

@@ -67,9 +67,20 @@ class criteria extends criteria_base implements templateable
     public function export_template_data(): array
     {
         $observer_feedback_data = [];
+        $observer_task_submission = null;
         foreach ($this->observer_feedback as $observer_feedback)
         {
-            $observer_feedback_data[] = $observer_feedback->export_template_data();
+            if (is_null($observer_task_submission) ||
+                $observer_feedback->get_id_or_null() != $observer_task_submission->get_id_or_null())
+            {
+                // needed to check if feedback has been submitted
+                $observer_task_submission = $observer_feedback->get_observer_task_submission_base();
+            }
+
+            if ($observer_task_submission->is_submitted() && $observer_feedback->is_submitted())
+            {
+                $observer_feedback_data[] = $observer_feedback->export_template_data();
+            }
         }
 
         return [

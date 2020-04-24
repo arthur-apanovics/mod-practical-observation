@@ -72,8 +72,10 @@ class observer_feedback extends observer_feedback_base implements templateable
             self::COL_TEXT    => format_text($this->text, FORMAT_HTML),
 
             // extra
-            observer::COL_FULLNAME => $observer->get_formatted_name(),
-            learner_attempt::COL_ATTEMPT_NUMBER => $attempt->get_attempt_number(),
+            'feedback_type'                             => 'observer', // feedback css class
+            "outcome_lang"                              => lib::get_outcome_string($this->outcome),
+            observer::COL_FULLNAME                      => $observer->get_formatted_name(),
+            learner_attempt::COL_ATTEMPT_NUMBER         => $attempt->get_attempt_number(),
             observer_task_submission::COL_TIMESUBMITTED => userdate(
                 $observer_task_submission->get(observer_task_submission::COL_TIMESUBMITTED)),
         ];

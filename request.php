@@ -110,6 +110,24 @@ if ($data = $form->get_data())
         // check if submitted observer exists in database OR if submitted observer is NOT same as current one
         $submitted_observer_id = observer::try_get_id_for_observer($submitted);
         $current = $current_assignment->get_observer();
+
+        // is learner attempt submitted?
+        if ($task_submission->is_observation_pending())
+        {
+            // yes, we are re-assigning a new observer - ignore if same
+            if ($current->get_id_or_null() == $submitted_observer_id)
+            {
+                // same observer, notify learner
+                redirect(
+                    $activity_url,
+                    get_string(
+                        'notification:observer_assigned_no_change', 'observation',
+                        ['task' => $task->get_formatted_name(), 'email' => $current->get(observer::COL_EMAIL)]),
+                    null,
+                    notification::NOTIFY_WARNING);
+            }
+        }
+
         if (empty($submitted_observer_id) || ($submitted_observer_id != $current->get_id_or_null()))
         {
             // we have an existing assignment but a different observer
@@ -135,20 +153,6 @@ if ($data = $form->get_data())
             );
             // dies here
         }
-        // else if ($submitted_observer_id == $current->get_id_or_null())
-        // {
-        //     // assignment exists and it's for the same observer, nothing to do here
-        //     redirect(
-        //         $activity_url
-        //         //TODO: notification appeared on a normal second attempt with same assessor
-        //         // and not when re-assigning an observer. Will this scenario even happen?
-        //         // get_string(
-        //         //     'notification:observer_assigned_no_change', 'observation',
-        //         //     ['task' => $task->get_formatted_name(), 'email' => $submitted->get(observer::COL_EMAIL)]),
-        //         // null,
-        //         // notification::NOTIFY_WARNING
-        //     );
-        // }
     }
 
     //  no observer assignment OR submitted observer is the same as currently assigned observer

@@ -202,6 +202,13 @@ class learner_task_submission_base extends submission_status_store
         return $this->userid;
     }
 
+    /**
+     * @param learner_attempt_base $learner_attempt
+     * @return $this
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     * @throws coding_exception
+     */
     public function submit(learner_attempt_base $learner_attempt): self
     {
         $learner_attempt->validate($this);

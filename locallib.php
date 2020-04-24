@@ -58,6 +58,16 @@ class lib
         return get_string(sprintf('status:%s', $status), OBSERVATION);
     }
 
+    public static function get_outcome_string(?string $outcome): ?string
+    {
+        if (!$outcome)
+        {
+            return null;
+        }
+
+        return get_string(sprintf('outcome:%s', $outcome), OBSERVATION);
+    }
+
     /**
      * Find first object in associative array based on single key-value pair
      *

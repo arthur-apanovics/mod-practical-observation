@@ -55,7 +55,7 @@ if (isloggedin())
     {
         notification::add(
             sprintf(
-                'Hello %s, please remember that, if you submit this observation, your name will not appear anywhere and learner will think that it was submitted by the observer ',
+                'Hello %s. Please remember that, if you submit this observation, your name will not appear anywhere and learner will think that it was submitted by the observer ',
                 fullname($USER)),
             notification::WARNING);
     }
@@ -101,7 +101,7 @@ else if (optional_param('submit-decline', 0, PARAM_BOOL))
 // Print the page header.
 $name = 'TODO'; // TODO name name name name name name name name name name name
 $PAGE->set_context(null);
-$PAGE->set_url(OBSERVATION_MODULE_PATH . 'observe.php', array('token' => $token));
+$PAGE->set_url($observer_assignment->get_review_url());
 $PAGE->set_title($name);
 $PAGE->set_heading($name);
 $PAGE->set_pagelayout('popup');

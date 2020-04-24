@@ -64,7 +64,7 @@ class observer_task_submission extends observer_task_submission_base implements 
             self::COL_ID            => $this->id,
             self::COL_TIMESTARTED   => $this->timestarted,
             self::COL_TIMESUBMITTED => $timesubmitted,
-            self::COL_OUTCOME       => !is_null($this->outcome) ? lib::get_status_string($this->outcome) : null,
+            self::COL_OUTCOME       => !is_null($this->outcome) ? lib::get_outcome_string($this->outcome) : null,
         ];
     }
 }

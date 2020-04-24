@@ -365,6 +365,23 @@ class observation_base extends db_model_base
         return ($incomplete == $this->get_task_count());
     }
 
+    public function is_all_tasks_no_learner_action_required(int $userid): bool
+    {
+        foreach ($this->get_tasks() as $task)
+        {
+            if ($submission = $task->get_learner_task_submission_or_null($userid))
+            {
+                // has a submission
+                if ($submission->is_learner_action_required())
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public function all_tasks_observation_pending_or_in_progress(int $userid): bool
     {
         foreach ($this->get_tasks() as $task)
@@ -381,23 +398,6 @@ class observation_base extends db_model_base
             }
 
             return false;
-        }
-
-        return true;
-    }
-
-    public function is_all_tasks_no_learner_action_required(int $userid): bool
-    {
-        foreach ($this->get_tasks() as $task)
-        {
-            if ($submission = $task->get_learner_task_submission_or_null($userid))
-            {
-                // has a submission
-                if ($submission->is_learner_action_required())
-                {
-                    return false;
-                }
-            }
         }
 
         return true;

@@ -6,7 +6,6 @@
         {{#extra.is_observation}}
             {{> mod_observation/comp-observation_outcome_dropdown}}
         {{/extra.is_observation}}
-
     </div>
 
     <div class="criteria-content">
@@ -16,7 +15,14 @@
 
         {{^extra.is_observation}}
             {{#observer_feedback}}
-                {{> mod_observation/comp-attempt_feedback}}
+                {{! has textual feedback }}
+                {{#feedback_required}}
+                    {{> mod_observation/comp-attempt_feedback}}
+                {{/feedback_required}}
+                {{! no text }}
+                {{^feedback_required}}
+                    {{> mod_observation/comp-attempt_feedback_no_text}}
+                {{/feedback_required}}
             {{/observer_feedback}}
         {{/extra.is_observation}}
 

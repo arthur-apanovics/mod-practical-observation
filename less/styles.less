@@ -9,11 +9,13 @@
 }
 
 .task-highlight(@color) {
-  box-shadow: 5px 0 0 0 @color;
+  box-shadow: 4px 0 10px -6px @color,
+  -4px 0 10px -6px @color;
   transition: box-shadow 0.2s ease-out;
 
   &:hover {
-    box-shadow: 15px 0 0 0 @color;
+    box-shadow: 7px 0 10px -6px @color,
+    -7px 0 10px -6px @color;
   }
 }
 
@@ -81,16 +83,20 @@ body.path-mod-observation {
     }
 
     &.status {
-      &-pending {
-        .task-highlight(#5c809e);
+      &-assessing {
+        &-complete {
+          .task-highlight(#589e44)
+        }
+
+        &-not_complete {
+          .task-highlight(#9e4444)
+        }
       }
 
-      &-complete {
-        .task-highlight(#589e44);
-      }
+      &-learner {
+        &- /*TODO!*/ {
 
-      &-not_complete {
-        .task-highlight(#9e0c00);
+        }
       }
     }
   }
@@ -111,6 +117,11 @@ body.path-mod-observation {
     &-desc {
       .border-wrapper();
       padding: 1em;
+
+      + .feedback.no-text {
+        // first feedback element needs to be closer to attempt container
+        margin-top: -2em;
+      }
     }
   }
 
@@ -149,46 +160,34 @@ body.path-mod-observation {
     margin: 1em 0;
   }
 
-  //.button {
-  //  /*background-color: #FFAA00;*/
-  //  border: none;
-  //  color: white;
-  //  border-radius: 5px;
-  //  text-decoration: none;
-  //  cursor: pointer;
-  //  font-size: 14px;
-  //  width: auto;
-  //  padding: 6px 20px;
-  //}
-  //
-  //.button:hover,
-  //button:focus,
-  //button:active {
-  //  background-color: #ffaa00;
-  //  color: white;
-  //  text-decoration: none;
-  //}
 
   .feedback {
-    padding: 0 2em 2em 2em;
 
-    &-desc {
-      margin: 0 0;
-      padding: 5px 5px;
-      overflow-wrap: break-word;
-      word-wrap: break-word;
-      flex: 0 0 50%;
+    &.observer {
+      &.with-text {
+        padding: 0 2em 2em 2em;
+      }
+
+      &.no-text {
+        text-align: right;
+
+        &.complete {
+          // TODO
+        }
+
+        &.not_complete {
+          // TODO
+        }
+
+        .outcome-inline {
+          text-transform: lowercase;
+          font-weight: bold;
+        }
+      }
     }
 
-    &-attempt-heading {
-      margin-left: 69px;
-      margin-top: 18px;
-    }
-
-    &-email {
-      margin-top: 5px;
-      margin-right: 8px;
-      align-items: flex-end;
+    &.assessor {
+      margin-bottom: @wrapper-margin;
     }
 
     &-outcome {
@@ -205,6 +204,7 @@ body.path-mod-observation {
       }
     }
   }
+
 
   .attempt {
     padding: 2em;
@@ -240,6 +240,14 @@ body.path-mod-observation {
       }
     }
   }
+
+
+  .assessor {
+    &-feedback-container {
+      padding: 2em;
+    }
+  }
+
 
   .timestamp {
     flex: 0 0 99%;
@@ -483,6 +491,10 @@ table {
 
     .observation {
       border-left: 1px solid @table-border-color;
+    }
+
+    .assessment {
+      border-right: 1px solid @table-border-color;
     }
 
     .completion {

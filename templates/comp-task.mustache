@@ -1,5 +1,11 @@
 {{! TODO: task status }}
-<div class="task status-{{extra.task_status}} wrapper">
+<div class="task wrapper
+    {{#extra.is_assessing}}
+            status-assessing-{{assessor_submission_status}}
+    {{/extra.is_assessing}}
+    {{^extra.is_assessing}}
+            status-learner-{{learner_submission_status}}
+    {{/extra.is_assessing}}">
     {{! task title }}
     <div class="task-title">
         <h3>{{name}}</h3>
@@ -12,7 +18,7 @@
         {{^capabilities.can_assess}}
             <a class="action" href="{{{module_root}}}/task.php?id={{cmid}}&taskid={{id}}">
         {{/capabilities.can_assess}}
-        {{! set correct text for btn}}
+        {{! set correct text for btn }}
         {{! if empty($submissions) }}
         {{^has_submission}}
         {{! if assessor }}

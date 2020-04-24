@@ -42,7 +42,8 @@ class assessor_feedback extends assessor_feedback_base implements templateable
      */
     public function export_template_data(): array
     {
-        $assessor_task_submission = assessor_task_submission_base::read_or_null($this->assessor_task_submissionid, true);
+        $assessor_task_submission = assessor_task_submission_base::read_or_null(
+            $this->assessor_task_submissionid, true);
         $attempt_number = $assessor_task_submission->get_learner_task_submission()->get_last_attemptnumber();
         $outcome = $assessor_task_submission->get(assessor_task_submission::COL_OUTCOME);
 
@@ -52,8 +53,11 @@ class assessor_feedback extends assessor_feedback_base implements templateable
             self::COL_TIMESUBMITTED               => usertime($this->timesubmitted),
 
             // extra
+            'feedback_type'                       => 'assessor', // feedback css class
             observer_task_submission::COL_OUTCOME => is_null($outcome) ? 'pending' : $outcome,
-            learner_attempt::COL_ATTEMPT_NUMBER   => $attempt_number
+            learner_attempt::COL_ATTEMPT_NUMBER   => $attempt_number,
+            'fullname'                            => fullname(
+                \core_user::get_user($assessor_task_submission->get(assessor_task_submission::COL_ASSESSORID))),
         ];
     }
 }

@@ -194,6 +194,34 @@ class task extends task_base implements templateable
     }
 
     /**
+     * @param int|null $userid
+     * @return bool
+     * @throws coding_exception
+     */
+    public function has_submission(int $userid = null): bool
+    {
+        if ($this->is_filtered && !is_null($userid))
+        {
+            return !is_null(parent::get_learner_task_submission_or_null($userid));
+        }
+        else if (!$this->is_filtered && !is_null($userid))
+        {
+            return !is_null(
+                lib::find_in_assoc_array_by_criteria_or_null(
+                    $this->learner_task_submissions,
+                    [
+                        learner_task_submission::COL_USERID => $userid,
+                        learner_task_submission::COL_TASKID => $this->id
+                    ]));
+        }
+        else
+        {
+            // no user id and not filtered, check if any submissions exist
+            return (bool) count($this->learner_task_submissions);
+        }
+    }
+
+    /**
      * @inheritDoc
      */
     public function export_template_data(): array
@@ -214,7 +242,28 @@ class task extends task_base implements templateable
             $learner_task_submissions_data[] = $learner_task_submission->export_template_data();
             foreach ($learner_task_submission->get_all_assessor_feedback() as $assessor_feedback)
             {
-                $assessor_feedback_data[] = $assessor_feedback->export_template_data();
+                if ($assessor_feedback->is_submitted())
+                {
+                    $assessor_feedback_data[] = $assessor_feedback->export_template_data();
+                }
+            }
+        }
+
+        $learner_submission_status = null;
+        $assessor_submission_status = null;
+        $has_feedback = false;
+        // task contains only ONE submission, we can give the task a status
+        if ($this->is_filtered)
+        {
+            if (isset($learner_task_submission)) // $learner_task_submission set in loop
+            {
+                $learner_submission_status = $learner_task_submission->get(learner_task_submission::COL_STATUS);
+
+                if ($assessor_task_submission = $learner_task_submission->get_assessor_task_submission_or_null())
+                {
+                    $assessor_submission_status = $assessor_task_submission->get_task_outcome_from_feedback();
+                    $has_feedback = (bool) count($assessor_task_submission->get_all_feedback());
+                }
             }
         }
 
@@ -236,32 +285,10 @@ class task extends task_base implements templateable
             'assessor_feedback'        => $assessor_feedback_data,
 
             // other data
-            'has_submission'           => $this->has_submission(),
+            'has_submission'             => $this->has_submission(),
+            'has_feedback'               => $has_feedback,
+            'learner_submission_status'  => $learner_submission_status,
+            'assessor_submission_status' => $assessor_submission_status,
         ];
-    }
-
-    /**
-     * @param int|null $userid
-     * @return bool
-     * @throws coding_exception
-     */
-    public function has_submission(int $userid = null): bool
-    {
-        if ($this->is_filtered && !is_null($userid))
-        {
-            return !is_null(parent::get_learner_task_submission_or_null($userid));
-        }
-        else if (!$this->is_filtered && !is_null($userid))
-        {
-            return !is_null(lib::find_in_assoc_array_by_criteria_or_null(
-                $this->learner_task_submissions,
-                [learner_task_submission::COL_USERID => $userid, learner_task_submission::COL_TASKID => $this->id]));
-        }
-        else
-        {
-            // no user id and not filtered, check if any submissions exist
-            return (bool) count($this->learner_task_submissions);
-        }
-
     }
 }

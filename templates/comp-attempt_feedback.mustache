@@ -1,26 +1,4 @@
-<!--<div class="feedback feedback-outcome-{{outcome}}">-->
-<!--    <h5 class="feedback-attempt-heading">-->
-<!--        Feedback for Attempt {{attempt_number}}-->
-<!--    </h5>-->
-<!--    <div class="wrapper-feedback">-->
-<!--        <div class="flex-feedback">-->
-<!--            <div class="feedback-desc">-->
-<!--                {{{text}}}-->
-<!--            </div>-->
-<!--            <span class="feedback-email">-->
-<!--                {{!todo: feedback from}}-->
-<!--                todo:feedback from-->
-<!--            </span>-->
-<!--            <span class="timestamp">-->
-<!--                {{!todo: timestamp}}-->
-<!--                todo:timestamp-->
-<!--            </span>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
-
-
-<div class="feedback {{outcome}}">
+<div class="feedback {{feedback_type}} with-text {{outcome}}">
     <div class="heading">
         <h5 class="title-secondary">
             {{#str}}feedback_for, observation, {{attempt_number}}{{/str}}

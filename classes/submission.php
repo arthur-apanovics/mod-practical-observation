@@ -22,12 +22,14 @@
 
 namespace mod_observation;
 
+use totara_userdata\local\count;
+
 class submission extends submission_base /*TODO: implements templateable*/
 {
     /**
      * @var learner_task_submission[]
      */
-    private $task_submissions;
+    private $learner_task_submissions;
 
     /**
      * submission constructor.
@@ -39,7 +41,7 @@ class submission extends submission_base /*TODO: implements templateable*/
     {
         parent::__construct($id_or_record);
 
-        $this->task_submissions = learner_task_submission::read_all_by_condition(
+        $this->learner_task_submissions = learner_task_submission::read_all_by_condition(
             [
                 learner_task_submission::COL_SUBMISISONID => $this->id,
                 learner_task_submission::COL_USERID       => $this->userid,
@@ -47,28 +49,23 @@ class submission extends submission_base /*TODO: implements templateable*/
         );
     }
 
-    /**
-     * @return observation|observation_base
-     * @throws \ReflectionException
-     * @throws \coding_exception
-     * @throws \dml_exception
-     * @throws \dml_missing_record_exception
-     */
-    public function get_observation()
-    {
-        return new observation(
-            new observation_base($this->observationid));
-    }
-
     public function get_observed_task_count(): int
     {
         $observed = 0;
-        foreach ($this->task_submissions as $task_submission)
+        foreach ($this->learner_task_submissions as $task_submission)
         {
             $observed += $task_submission->is_observation_complete();
         }
 
         return $observed;
+    }
+
+    /**
+     * @return learner_task_submission[]
+     */
+    public function get_learner_task_submissions(): array
+    {
+        return $this->learner_task_submissions;
     }
 
     /**
@@ -79,17 +76,86 @@ class submission extends submission_base /*TODO: implements templateable*/
     public function get_learner_task_submisison_or_null(int $taskid)
     {
         return lib::find_in_assoc_array_by_key_value_or_null(
-            $this->task_submissions, learner_task_submission::COL_TASKID, $taskid);
+            $this->learner_task_submissions, learner_task_submission::COL_TASKID, $taskid);
+    }
+
+    /**
+     * @return bool
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     */
+    public function is_observed(): bool
+    {
+        if (empty($this->learner_task_submissions))
+        {
+            // no submissions made
+            return false;
+        }
+
+        $task_count = $this->get_observation()->get_task_count();
+        if (count($this->learner_task_submissions) != $task_count)
+        {
+            // not all tasks have submissions
+            return false;
+        }
+
+        // check each submission status
+        foreach ($this->learner_task_submissions as $task_submission)
+        {
+            if (!$task_submission->is_observation_complete())
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function is_all_tasks_no_learner_action_required(): bool
+    {
+        foreach ($this->get_learner_task_submissions() as $task_submission)
+        {
+            if ($task_submission->is_learner_action_required())
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function all_tasks_observation_pending_or_in_progress(): bool
+    {
+        $task_submissions = $this->get_learner_task_submissions();
+        if (count($task_submissions) != $this->get_observation()->get_task_count())
+        {
+            // not all tasks have submissions
+            return false;
+        }
+
+        foreach ($task_submissions as $task_submission)
+        {
+            if ($task_submission->get_active_observer_assignment_or_null() // has observer assigned
+                && $task_submission->is_observation_pending_or_in_progress()) //observation pending or in progress
+            {
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
     public function release_assessment(observation_base $observation = null)
     {
         if (is_null($observation))
         {
-            $observation = parent::get_observation();
+            $observation = $this->get_observation();
         }
 
-        $learner_task_submissions = $this->get_learner_task_submisisons();
+        $learner_task_submissions = $this->get_learner_task_submissions();
 
         $completed_tasks = 0;
         foreach ($learner_task_submissions as $learner_task_submission)
@@ -102,25 +168,16 @@ class submission extends submission_base /*TODO: implements templateable*/
             if (!$feedback->is_submitted())
             {
                 throw new \coding_exception(
-                    sprintf('Cannot release assessment - feedback with id "%d" has not been submitted'),
-                    $feedback->get_id_or_null());
+                    sprintf(
+                        'Cannot release assessment - feedback with id "%d" has not been submitted',
+                        $feedback->get_id_or_null()));
             }
 
-            // update learner task submission status
-            if ($outcome === assessor_feedback::OUTCOME_COMPLETE)
-            {
-                $new_status = learner_task_submission::STATUS_COMPLETE;
-                $completed_tasks += 1;
-            }
-            else
-            {
-                $new_status = learner_task_submission::STATUS_ASSESSMENT_INCOMPLETE;
-            }
-
+            $completed_tasks += ($outcome === assessor_feedback::OUTCOME_COMPLETE);
             // update assessor task submission outcome
-            $assessor_task_submission->set(assessor_task_submission::COL_OUTCOME, $outcome);
-            // update learner task submission status
-            $learner_task_submission->update_status_and_save($new_status);
+            $assessor_task_submission->set(assessor_task_submission::COL_OUTCOME, $outcome, true);
+
+            // learner task submission status is updated later because we need to determine outcome
         }
 
         // update activity submission status
@@ -131,21 +188,19 @@ class submission extends submission_base /*TODO: implements templateable*/
         }
         else
         {
+            // if at least one task not complete we mark all incomplete as per business logic
             $new_status = self::STATUS_ASSESSMENT_INCOMPLETE;
         }
 
+        // update all tasks with outcome
+        foreach ($learner_task_submissions as $task_submission)
+        {
+            $task_submission->update_status_and_save($new_status);
+        }
+
+        // update activity submission status
         $this->update_status_and_save($new_status);
 
         // TODO: notifications
     }
-
-    // /**
-    //  * @inheritDoc
-    //  */
-    // public function export_template_data(): array
-    // {
-    //     return [
-    //         self::COL_ID                          => $this->id,
-    //     ];
-    // }
 }

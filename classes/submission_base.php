@@ -23,7 +23,11 @@
 namespace mod_observation;
 
 
+use coding_exception;
+use dml_exception;
+use dml_missing_record_exception;
 use mod_observation\traits\submission_status_store;
+use ReflectionException;
 
 class submission_base extends submission_status_store
 {
@@ -79,12 +83,35 @@ class submission_base extends submission_status_store
      */
     protected $timecompleted;
 
+    // GETTER FIELDS
+    /**
+     * DO NOT ACCESS DIRECTLY
+     * @var learner_task_submission_base[]|null
+     */
+    private $_learner_task_submissions;
+    /**
+     * DO NOT ACCESS DIRECTLY
+     * @var observation_base|null
+     */
+    private $_observation;
 
-    public function update_status_and_save(string $new_status): self
+
+    /**
+     * @param string $new_status
+     * @param bool   $skip_if_same if submission
+     * @return $this
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public function update_status_and_save(string $new_status, bool $skip_if_same = false): self
     {
         // extra validation to be done here
 
-        $this->set(self::COL_STATUS, $new_status, true);
+        if (!$skip_if_same && $new_status !== $this->status)
+        {
+            $this->set(self::COL_STATUS, $new_status, true);
+        }
+
         return $this;
     }
 
@@ -95,34 +122,106 @@ class submission_base extends submission_status_store
 
     /**
      * @return learner_task_submission_base[]
-     * @throws \ReflectionException
-     * @throws \coding_exception
-     * @throws \dml_exception
+     * @throws ReflectionException
+     * @throws coding_exception
+     * @throws dml_exception
      */
-    public function get_learner_task_submisisons(): array
+    public function get_learner_task_submissions(): array
     {
-        return learner_task_submission_base::read_all_by_condition(
-            [
-                learner_task_submission::COL_SUBMISISONID => $this->id,
-                learner_task_submission::COL_USERID       => $this->userid,
-            ]);
+        if (is_null($this->_learner_task_submissions))
+        {
+            $this->_learner_task_submissions = learner_task_submission_base::read_all_by_condition(
+                [
+                    learner_task_submission::COL_SUBMISISONID => $this->id,
+                    learner_task_submission::COL_USERID => $this->userid,
+                ]);
+        }
+
+        return $this->_learner_task_submissions;
     }
 
     /**
      * @return observation_base
-     * @throws \coding_exception
-     * @throws \dml_exception
-     * @throws \dml_missing_record_exception
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
      */
     public function get_observation()
     {
-        return new observation_base($this->observationid);
+        if (is_null($this->_observation))
+        {
+            $this->_observation = observation_base::read_or_null($this->observationid, true);
+        }
+
+        return $this->_observation;
+    }
+
+    public function is_observed()
+    {
+        $task_submissions = $this->get_learner_task_submissions();
+        if (empty($task_submissions))
+        {
+            // no submissions made
+            return false;
+        }
+
+        $task_count = $this->get_observation()->get_task_count();
+        if (count($task_submissions) != $task_count)
+        {
+            // not all tasks have submissions
+            return false;
+        }
+
+        // check each submission status
+        foreach ($task_submissions as $task_submission)
+        {
+            if (!$task_submission->is_observation_complete())
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check EACH task submission status to determine overall activity submission status.
+     * Use this for updating submission status.
+     *
+     * @return bool
+     * @throws ReflectionException
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public function is_observed_as_incomplete(): bool
+    {
+        foreach ($this->get_learner_task_submissions() as $task_submission)
+        {
+            if (!$task_submission->is_observation_incomplete()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function is_all_tasks_no_learner_action_required(): bool
+    {
+        foreach ($this->get_learner_task_submissions() as $task_submission)
+        {
+            if ($task_submission->is_learner_action_required())
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
      * @return int current observation attempt
-     * @throws \coding_exception
-     * @throws \dml_exception
+     * @throws coding_exception
+     * @throws dml_exception
      */
     public function increment_observation_attempt_number_and_save(): int
     {
@@ -133,8 +232,8 @@ class submission_base extends submission_status_store
 
     /**
      * @return int current assessment attempt
-     * @throws \coding_exception
-     * @throws \dml_exception
+     * @throws coding_exception
+     * @throws dml_exception
      */
     public function increment_assessment_attempt_number_and_save(): int
     {

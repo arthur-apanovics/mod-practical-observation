@@ -1,4 +1,18 @@
-<h5>Completion observations</h5>
+<h5>
+    Completion observations
+    {{! observation link for admins }}
+    {{#learner_task_submissions}}
+        {{#is_admin}}
+            {{#review_url}}
+                {
+                <a href="{{{review_url}}}" target="_blank">
+                    {{#str}} observe_task, observation {{/str}}
+                </a>
+                }
+            {{/review_url}}
+        {{/is_admin}}
+    {{/learner_task_submissions}}
+</h5>
 
 <div class="wrapper-border criteria-container">
     <ol class="criteria-list">
@@ -8,12 +22,14 @@
     </ol>
 </div>
 
-{{#assessor_feedback}}
+{{#has_feedback}}
     <h5>Assessor feedback</h5>
-    <div class="wrapper-border">
-        {{> mod_observation/comp-attempt_entry}}
+    <div class="assessor-feedback-container wrapper-border">
+        {{#assessor_feedback}}
+            {{> mod_observation/comp-attempt_feedback}}
+        {{/assessor_feedback}}
     </div>
-{{/assessor_feedback}}
+{{/has_feedback}}
 
 {{#extra.is_submission}}
     <form action="submit.php"
