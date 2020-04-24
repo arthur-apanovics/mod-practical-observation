@@ -50,7 +50,7 @@ class assessor_feedback extends assessor_feedback_base implements templateable
         return [
             self::COL_ID                          => $this->id,
             self::COL_TEXT                        => format_text($this->text, FORMAT_HTML, ['trusted' => false]),
-            self::COL_TIMESUBMITTED               => usertime($this->timesubmitted),
+            self::COL_TIMESUBMITTED               => userdate($this->timesubmitted),
 
             // extra
             'feedback_type'                       => 'assessor', // feedback css class
