@@ -551,15 +551,20 @@ class mod_observation_renderer extends plugin_renderer_base
             $template_data['extra']['assessor_task_submission_id'] = $assessor_task_submission->get_id_or_null();
             $template_data['extra']['assessor_feedback_id'] = $feedback->get_id_or_null();
         }
-        else if ($learner_task_submission->is_observation_pending_or_in_progress())
+        else if (!is_null($learner_task_submission))
         {
-            $include_observer_details = true;
-            notification::add(get_string('notification:observation_pending_or_in_progress', \OBSERVATION), notification::INFO);
-        }
-        else if ($learner_task_submission->is_learner_action_required())
-        {
-            notification::add(
-                get_string('notification:submission_pending_or_in_progress', OBSERVATION), notification::INFO);
+            // show relevant status notification
+            if ($learner_task_submission->is_observation_pending_or_in_progress())
+            {
+                $include_observer_details = true;
+                notification::add(
+                    get_string('notification:observation_pending_or_in_progress', \OBSERVATION), notification::INFO);
+            }
+            else if ($learner_task_submission->is_learner_action_required())
+            {
+                notification::add(
+                    get_string('notification:submission_pending_or_in_progress', OBSERVATION), notification::INFO);
+            }
         }
 
         if ($include_observer_details)

@@ -28,6 +28,7 @@ use context_module;
 use core_user;
 use dml_exception;
 use dml_missing_record_exception;
+use mod_observation\event\activity_started;
 use mod_observation\interfaces\templateable;
 use moodle_url;
 
@@ -319,6 +320,15 @@ class observation extends observation_base implements templateable
             $submission->set(submission::COL_TIMECOMPLETED, 0);
 
             $submission = new submission($submission->create());
+
+            // trigger event
+            $event = activity_started::create(
+                [
+                    'context'  => \context_module::instance($this->get_cm()->id),
+                    'objectid' => $submission->get_id_or_null(),
+                    'userid'   => $learnerid,
+                ]);
+            $event->trigger();
         }
 
         return $submission;

@@ -47,6 +47,14 @@
                 {{> mod_observation/comp-attempt_entry}}
             {{/learner_attempts}}
         {{/learner_task_submissions}}
+        {{^learner_task_submissions}}
+        {{! assessor viewwing task with no submissions }}
+            {{^extra.is_submission}}
+                <div class="wrapper">
+                    Learner has not made any submissions yet
+                </div>
+            {{/extra.is_submission}}
+        {{/learner_task_submissions}}
 
         {{#extra.is_submission}}
             <div class="new-attempt">

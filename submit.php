@@ -141,6 +141,7 @@ else if ($observer_submissionid = optional_param('observer_submission_id', null,
         ? observer_task_submission::OUTCOME_COMPLETE
         : observer_task_submission::OUTCOME_NOT_COMPLETE;
 
+    // submit observation
     $observer_submission_base->submit($observation_submission_outcome);
 
     $observer_assignment = $observer_submission_base->get_observer_assignment_base();
@@ -172,7 +173,7 @@ else if ($assessor_task_submissionid = optional_param('assessor_task_submission_
     list($feedback_editor_base) = lib::get_editor_attributes_for_class(assessor_feedback::class);
     $editor = required_param_array($feedback_editor_base, PARAM_RAW);
 
-    // update feedback
+    // save feedback until assessor decides to release
     $assessor_feedback->set(assessor_feedback::COL_TIMESUBMITTED, time());
     $assessor_feedback->set(assessor_feedback::COL_TEXT, $editor['text']);
     $assessor_feedback->set(assessor_feedback::COL_TEXT_FORMAT, $editor['format']);
@@ -183,8 +184,6 @@ else if ($assessor_task_submissionid = optional_param('assessor_task_submission_
     $draft_itemid = required_param('attachments_itemid', PARAM_INT);
     lib::save_files(
         $draft_itemid, $context->id, observation::FILE_AREA_ASSESSOR, $assessor_feedback->get_id_or_null());
-
-    $assessor_task_submission->submit($outcome, $assessor_feedback);
 
     $learnerid = $assessor_task_submission->get_learner_task_submission()->get_userid();
     redirect(

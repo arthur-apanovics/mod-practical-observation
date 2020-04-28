@@ -102,48 +102,6 @@ class assessor_task_submission extends assessor_task_submission_base implements 
         return $feedback;
     }
 
-    public function submit(string $outcome, assessor_feedback_base $feedback)
-    {
-        if (!lib::find_in_assoc_array_by_key_value_or_null($this->feedbacks, 'id', $feedback->get_id_or_null()))
-        {
-            throw new coding_exception(
-                sprintf('%s with id "%d" does not exist in %s with id "%d"',
-            assessor_feedback::class, $feedback->get_id_or_null(), self::class, $this->id));
-        }
-        if (empty($feedback->get(assessor_feedback::COL_TIMESUBMITTED))
-            || empty($feedback->get(assessor_feedback::COL_TEXT))
-            || empty($feedback->get(assessor_feedback::COL_TEXT_FORMAT)))
-        {
-            throw new coding_exception('Assessor feedback was not saved correctly');
-        }
-
-        // task submission outcome is set during releasing of grade
-
-        // update activity submission
-        $learner_task_submission = $this->get_learner_task_submission();
-        $submission = $learner_task_submission->get_submission();
-        $observation = $submission->get_observation();
-        if ($observation->is_activity_complete($learner_task_submission->get_userid()))
-        {
-            // all marked as complete - activity complete
-            $submission->update_status_and_save(submission::STATUS_COMPLETE);
-        }
-        else if ($observation->is_assessed_as_incomplete($learner_task_submission->get_userid()))
-        {
-            // all assessments marked as not complete
-            $submission->update_status_and_save(submission::STATUS_ASSESSMENT_INCOMPLETE);
-        }
-        else
-        {
-            if ($submission->get(submission::COL_STATUS) === submission::STATUS_ASSESSMENT_PENDING)
-            {
-                $submission->update_status_and_save(submission::STATUS_ASSESSMENT_IN_PROGRESS);
-            }
-        }
-
-        // TODO notifications
-    }
-
     /**
      * @inheritDoc
      */

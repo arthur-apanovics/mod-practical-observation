@@ -17,6 +17,7 @@
 use mod_observation\criteria;
 use mod_observation\criteria_base;
 use mod_observation\observer;
+use mod_observation\observer_assignment;
 use mod_observation\task;
 use mod_observation\task_base;
 
@@ -135,31 +136,56 @@ class mod_observation_external extends external_api
             ]);
     }
 
-    public static function observer_update_details($observerid, $fullname, $phone, $position_title)
+    public static function observer_update_details($token, $observerid, $fullname, $phone, $position_title)
     {
         $params = self::validate_parameters(
             self::observer_update_details_parameters(),
             [
+                'token'          => $token,
                 'observerid'     => $observerid,
                 'fullname'       => $fullname,
                 'phone'          => $phone,
                 'position_title' => $position_title
             ]);
 
-        $observer = observer::update_from_ajax(
+        // validate token
+        if (!$observer_assignment = observer_assignment::read_by_token_or_null($token))
+        {
+            throw new \coding_exception('Invalid token provided when updating observer details');
+        }
+
+        $observer_before = $observer_assignment->get_observer();
+        $observer_after = observer::update_from_ajax(
+            $params['token'],
             $params['observerid'],
             $params['fullname'],
             $params['phone'],
             $params['position_title']
         );
 
+        // trigger event
+        $observation = $observer_assignment
+            ->get_learner_task_submission_base()
+            ->get_submission()
+            ->get_observation();
+        $event = \mod_observation\event\observer_detailupdate::create(
+            [
+                'context'  => \context_module::instance($observation->get_cm()->id),
+                'objectid' => $observer_after->get_id_or_null(),
+                'other'    => [
+                    'observer_before' => $observer_before,
+                    'observer_after' => $observer_after,
+                ]
+            ]);
+        $event->trigger();
+
         return self::clean_returnvalue(
             self::observer_update_details_returns(),
             [
-                'observerid' => $observer->get_id_or_null(),
-                'fullname' => $observer->get(observer::COL_FULLNAME),
-                'phone' => $observer->get(observer::COL_PHONE),
-                'position_title' => $observer->get(observer::COL_POSITION_TITLE)
+                'observerid' => $observer_after->get_id_or_null(),
+                'fullname' => $observer_after->get(observer::COL_FULLNAME),
+                'phone' => $observer_after->get(observer::COL_PHONE),
+                'position_title' => $observer_after->get(observer::COL_POSITION_TITLE)
             ]);
     }
 
@@ -171,6 +197,7 @@ class mod_observation_external extends external_api
     {
         return new external_function_parameters(
             [
+                'token'          => new external_value(PARAM_TEXT, 'token from observer assignment', true, null, NULL_NOT_ALLOWED),
                 'observerid'     => new external_value(PARAM_INT, 'observer id', true, null, NULL_NOT_ALLOWED),
                 'fullname'       => new external_value(PARAM_TEXT, 'name', true, null, NULL_NOT_ALLOWED),
                 'phone'          => new external_value(PARAM_TEXT, 'phone number', true, null, NULL_NOT_ALLOWED),

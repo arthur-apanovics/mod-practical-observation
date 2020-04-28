@@ -26,6 +26,8 @@ use coding_exception;
 use core\notification;
 use dml_exception;
 use dml_missing_record_exception;
+use mod_observation\event\attempt_started;
+use mod_observation\event\observer_assigned;
 use mod_observation\interfaces\templateable;
 use moodle_exception;
 use moodle_url;
@@ -190,6 +192,22 @@ class learner_task_submission extends learner_task_submission_base implements te
                     $submission->increment_assessment_attempt_number_and_save();
                     break;
             }
+
+            // trigger event
+            $event = attempt_started::create(
+                [
+                    'context'  => \context_module::instance(
+                        $this->get_submission()
+                            ->get_observation()
+                            ->get_cm()
+                            ->id),
+                    'objectid' => $attempt->get_id_or_null(),
+                    'userid' => $this->userid,
+                    'other'    => [
+                        'taskid' => $this->taskid,
+                    ]
+                ]);
+            $event->trigger();
         }
 
         return $attempt;
@@ -263,8 +281,6 @@ class learner_task_submission extends learner_task_submission_base implements te
             $assignment = observer_assignment::create_assignment($this->id, $submitted_observer->get_id_or_null());
         }
 
-        // TODO: EVENT
-
         // TODO: SEND EMAIL AND NOTIFICATION
         $review_url = $assignment->get_review_url();
         // TODO: REMOVE TEMPORARY OBSERVATION NOTIFICATION
@@ -273,6 +289,20 @@ class learner_task_submission extends learner_task_submission_base implements te
         $review_url->out(false), notification::WARNING);
         // send email
         // send notification
+
+        // trigger event
+        $submisison = $this->get_submission();
+        $observation = $submisison->get_observation();
+        $event = observer_assigned::create(
+            [
+                'context'  => \context_module::instance($observation->get_cm()->id),
+                'objectid' => $assignment->get_id_or_null(),
+                'other'    => [
+                    'observerid' => $assignment->get_observer()->get_id_or_null(),
+                    'learner_task_submissionid' => $this->get_id_or_null(),
+                ]
+            ]);
+        $event->trigger();
 
         return $assignment;
     }

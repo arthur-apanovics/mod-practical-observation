@@ -22,6 +22,8 @@
 
 namespace mod_observation;
 
+use mod_observation\event\attempt_observed;
+
 class observer_task_submission_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_observer_task_submission';
@@ -59,20 +61,19 @@ class observer_task_submission_base extends db_model_base
      */
     public function submit(string $outcome): self
     {
-        // setting outcome here also validates that correct value has been passed
+        global $USER;
+
+        // setting outcome early also validates that correct value has been passed
         $this->set(self::COL_OUTCOME, $outcome);
         $this->set(self::COL_TIMESUBMITTED, time());
 
         $observer_assignment = $this->get_observer_assignment_base();
         $learner_task_submission = $observer_assignment->get_learner_task_submission_base();
-        $task = $learner_task_submission->get_task_base();
-        $observation = $task->get_observation_base();
 
         $new_task_status = ($outcome == self::OUTCOME_COMPLETE)
             ? learner_task_submission::STATUS_ASSESSMENT_PENDING
             : learner_task_submission::STATUS_OBSERVATION_INCOMPLETE;
         $learner_task_submission->update_status_and_save($new_task_status);
-        $learnerid = $learner_task_submission->get_userid();
 
         // update activity submission status if needed
         $submission = $learner_task_submission->get_submission();
@@ -103,7 +104,26 @@ class observer_task_submission_base extends db_model_base
 
         //TODO: notifications
 
-        return $this->update();
+        // save
+        $this->update();
+
+        // trigger event
+        $observation = $submission->get_observation();
+        $event = attempt_observed::create(
+            [
+                'context'  => \context_module::instance($observation->get_cm()->id),
+                'objectid' => $learner_task_submission->get_id_or_null(),
+                'userid'   => $learner_task_submission->get_userid(),
+                'other'    => [
+                    'admin_observing'       => is_siteadmin($USER),
+                    'observerid'            => $observer_assignment->get_observer()->get_id_or_null(),
+                    'attemptid'             => $learner_task_submission->get_latest_learner_attempt_or_null()->get_id_or_null(),
+                    'observer_submissionid' => $this->get_id_or_null()
+                ]
+            ]);
+        $event->trigger();
+
+        return $this;
     }
 
     public function set(string $prop, $value, bool $save = false): db_model_base

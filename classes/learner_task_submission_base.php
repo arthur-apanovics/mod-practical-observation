@@ -23,6 +23,7 @@
 namespace mod_observation;
 
 use coding_exception;
+use mod_observation\event\attempt_submitted;
 use mod_observation\traits\submission_status_store;
 
 class learner_task_submission_base extends submission_status_store
@@ -181,7 +182,7 @@ class learner_task_submission_base extends submission_status_store
      */
     public function get_submission(): submission_base
     {
-        return new submission_base($this->submisisonid);
+        return submission_base::read_or_null($this->submisisonid, true);
     }
 
     /**
@@ -227,6 +228,18 @@ class learner_task_submission_base extends submission_status_store
 
         //TODO: NOTIFICATIONS
 
+        // trigger event
+        $event = attempt_submitted::create(
+            [
+                'context'  => \context_module::instance($observation->get_cm()->id),
+                'objectid' => $learner_attempt->get_id_or_null(),
+                'userid' => $this->userid,
+                'other'    => [
+                    'learner_task_submissionid' => $this->get_id_or_null(),
+                ]
+            ]);
+        $event->trigger();
+
         return $this;
     }
 
@@ -241,6 +254,11 @@ class learner_task_submission_base extends submission_status_store
     public function update_status_and_save(string $new_status): self
     {
         // TODO: perform other status validations, e.g. status == assessor_*, new_status = observer_*, which is not permitted
+
+        if ($new_status === self::STATUS_COMPLETE)
+        {
+            $this->set(self::COL_TIMECOMPLETED, time());
+        }
 
         $this->set(self::COL_STATUS, $new_status, true);
 

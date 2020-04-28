@@ -22,6 +22,8 @@
 
 namespace mod_observation;
 
+use coding_exception;
+
 class assessor_task_submission_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_assessor_task_submission';
@@ -56,6 +58,29 @@ class assessor_task_submission_base extends db_model_base
     {
         return learner_task_submission_base::read_by_condition_or_null(
             [learner_task_submission::COL_ID => $this->learner_task_submissionid], true);
+    }
+
+    /**
+     * @param string                 $outcome
+     * @param assessor_feedback_base $feedback
+     * @return self
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function submit(string $outcome, assessor_feedback_base $feedback): self
+    {
+        if (empty($feedback->get(assessor_feedback::COL_TIMESUBMITTED))
+            || empty($feedback->get(assessor_feedback::COL_TEXT))
+            || empty($feedback->get(assessor_feedback::COL_TEXT_FORMAT)))
+        {
+            throw new coding_exception('Assessor feedback was not saved correctly');
+        }
+
+        // activity submission status is updated in assessment release
+
+        $this->set(assessor_task_submission::COL_OUTCOME, $outcome, true);
+
+        return $this;
     }
 
     public function set(string $prop, $value, bool $save = false): db_model_base

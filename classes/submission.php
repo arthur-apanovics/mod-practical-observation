@@ -22,7 +22,7 @@
 
 namespace mod_observation;
 
-use totara_userdata\local\count;
+use mod_observation\event\activity_assessed;
 
 class submission extends submission_base /*TODO: implements templateable*/
 {
@@ -81,9 +81,6 @@ class submission extends submission_base /*TODO: implements templateable*/
 
     /**
      * @return bool
-     * @throws \coding_exception
-     * @throws \dml_exception
-     * @throws \dml_missing_record_exception
      */
     public function is_observed(): bool
     {
@@ -93,8 +90,7 @@ class submission extends submission_base /*TODO: implements templateable*/
             return false;
         }
 
-        $task_count = $this->get_observation()->get_task_count();
-        if (count($this->learner_task_submissions) != $task_count)
+        if (!$this->is_all_tasks_have_submission())
         {
             // not all tasks have submissions
             return false;
@@ -112,8 +108,19 @@ class submission extends submission_base /*TODO: implements templateable*/
         return true;
     }
 
+    public function is_all_tasks_have_submission(): bool
+    {
+        return count($this->get_learner_task_submissions()) === $this->get_observation()->get_task_count();
+    }
+
     public function is_all_tasks_no_learner_action_required(): bool
     {
+        if (!$this->is_all_tasks_have_submission())
+        {
+            // has to submit an attempt for every task
+            return false;
+        }
+
         foreach ($this->get_learner_task_submissions() as $task_submission)
         {
             if ($task_submission->is_learner_action_required())
@@ -127,10 +134,8 @@ class submission extends submission_base /*TODO: implements templateable*/
 
     public function all_tasks_observation_pending_or_in_progress(): bool
     {
-        $task_submissions = $this->get_learner_task_submissions();
-        if (count($task_submissions) != $this->get_observation()->get_task_count())
+        if (!$this->is_all_tasks_have_submission())
         {
-            // not all tasks have submissions
             return false;
         }
 
@@ -148,7 +153,7 @@ class submission extends submission_base /*TODO: implements templateable*/
         return true;
     }
 
-    public function release_assessment(observation_base $observation = null)
+    public function release_assessment(observation_base $observation = null): void
     {
         if (is_null($observation))
         {
@@ -175,7 +180,7 @@ class submission extends submission_base /*TODO: implements templateable*/
 
             $completed_tasks += ($outcome === assessor_feedback::OUTCOME_COMPLETE);
             // update assessor task submission outcome
-            $assessor_task_submission->set(assessor_task_submission::COL_OUTCOME, $outcome, true);
+            $assessor_task_submission->submit($outcome, $feedback);
 
             // learner task submission status is updated later because we need to determine outcome
         }
@@ -202,5 +207,17 @@ class submission extends submission_base /*TODO: implements templateable*/
         $this->update_status_and_save($new_status);
 
         // TODO: notifications
+
+        // trigger event
+        $event = activity_assessed::create(
+            [
+                'context'  => \context_module::instance($observation->get_cm()->id),
+                'objectid' => $this->id,
+                'relateduserid' => $this->userid,
+                'other'    => [
+                    'assessor_submissionid' => $assessor_task_submission->get_id_or_null(),
+                ]
+            ]);
+        $event->trigger();
     }
 }

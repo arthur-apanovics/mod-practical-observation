@@ -50,6 +50,7 @@ define(['jquery', 'core/ajax', 'core/notification'],
 
                     var $row = $(this).find('tr#details-values');
                     var args = {
+                        token: $('input[name="token"]')[0].value,
                         observerid: $row.data('observerid'),
                         fullname: $row.find('[name=fullname]').val(),
                         phone: $row.find('[name=phone]').val(),
@@ -76,7 +77,6 @@ define(['jquery', 'core/ajax', 'core/notification'],
                 };
 
                 $editBtn.on('click', function (ev) {
-                    console.log('clicked!');
 
                     $table.addClass('editing');
 

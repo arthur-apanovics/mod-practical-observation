@@ -40,6 +40,14 @@ $string['accessdenied'] = 'Access denied';
 $string['back_to_activity'] =  'Back to activity';
 $string['observation'] = 'Observation';
 
+// CAPABILITIES
+$string['observation:addinstance'] = 'Add instance';
+$string['observation:view'] = 'View';
+$string['observation:submit'] = 'Submit';
+$string['observation:viewsubmissions'] = 'View submissions';
+$string['observation:assess'] = 'Assess';
+$string['observation:manage'] = 'Manage';
+
 // SETTINGS FORM
 $string['observation:addinstance'] = 'Add instance';
 $string['observation:evaluate'] = 'Evaluate';
@@ -93,6 +101,7 @@ $string['feedback_required_help'] ='If checked, observers will have to provide t
 // LEARNER SUBMISSION STATUS STRINGS
 $string['status:not_started'] = 'Not started';
 $string['status:learner_in_progress'] = 'In progress';
+$string['status:learner_pending'] = 'Learner pending';
 $string['status:observation_pending'] = 'Observation pending';
 $string['status:observation_in_progress'] = 'Observation in progress';
 $string['status:observation_incomplete'] = 'Observation not complete';

@@ -101,7 +101,7 @@ class observer_base extends db_model_base
      * @throws \dml_missing_record_exception
      * @throws dml_exception
      */
-    public static function update_from_ajax(int $id, string $fullname, string $phone, string $position_title)
+    public static function update_from_ajax(string $token, int $id, string $fullname, string $phone, string $position_title)
     {
         foreach (func_get_args() as $value)
         {
