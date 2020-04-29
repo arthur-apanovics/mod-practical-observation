@@ -26,6 +26,7 @@ use coding_exception;
 use core\notification;
 use dml_exception;
 use dml_missing_record_exception;
+use mod_observation\event\activity_assessing;
 use mod_observation\event\attempt_started;
 use mod_observation\event\observer_assigned;
 use mod_observation\interfaces\templateable;
@@ -370,6 +371,20 @@ class learner_task_submission extends learner_task_submission_base implements te
                     $assessor_task_submission->get_id_or_null()
                 ));
         }
+
+        // trigger event
+        $submisison = $this->get_submission();
+        $observation = $submisison->get_observation();
+        $event = activity_assessing::create(
+            [
+                'context'  => \context_module::instance($observation->get_cm()->id),
+                'objectid' => $submisison->get_id_or_null(),
+                'relateduserid' => $this->userid,
+                'other'    => [
+                    'assessor_submissionid' => $assessor_task_submission->get_id_or_null(),
+                ]
+            ]);
+        $event->trigger();
 
         return $assessor_task_submission;
     }

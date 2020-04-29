@@ -22,6 +22,7 @@
 
 namespace mod_observation;
 
+use mod_observation\event\activity_observed;
 use mod_observation\event\attempt_observed;
 
 class observer_task_submission_base extends db_model_base
@@ -77,9 +78,13 @@ class observer_task_submission_base extends db_model_base
 
         // update activity submission status if needed
         $submission = $learner_task_submission->get_submission();
+        $observation = $submission->get_observation();
+
+        $assessment_needed = false;
         if ($submission->is_observed())
         {
             // all tasks observed, assessment needed
+            $assessment_needed = true;
             $submission->update_status_and_save(submission::STATUS_ASSESSMENT_PENDING);
         }
         else if ($submission->is_observed_as_incomplete())
@@ -108,7 +113,6 @@ class observer_task_submission_base extends db_model_base
         $this->update();
 
         // trigger event
-        $observation = $submission->get_observation();
         $event = attempt_observed::create(
             [
                 'context'  => \context_module::instance($observation->get_cm()->id),
@@ -122,6 +126,19 @@ class observer_task_submission_base extends db_model_base
                 ]
             ]);
         $event->trigger();
+
+        // trigger another event if all tasks have been observed and are ready for assessment
+        if ($assessment_needed)
+        {
+            // trigger event
+            $event = activity_observed::create(
+                [
+                    'context'  => \context_module::instance($observation->get_cm()->id),
+                    'objectid' => $submission->get_id_or_null(),
+                    'relateduserid' => $submission->get_userid(),
+                ]);
+            $event->trigger();
+        }
 
         return $this;
     }

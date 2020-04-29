@@ -20,7 +20,7 @@ use mod_observation\submission;
 
 defined('MOODLE_INTERNAL') || die();
 
-class activity_assessed extends \core\event\base {
+class activity_assessing extends \core\event\base {
 
     /**
      * Returns description of what happened.
@@ -29,8 +29,9 @@ class activity_assessed extends \core\event\base {
      */
     public function get_description() {
         return "Assessor with id '$this->userid' 
-        has assessed activity submission with id '$this->objectid'
+        has started assessment for activity submission with id '$this->objectid',
         for learner with id '$this->relateduserid',
+        assessor submission id '{$this->data['other']['assessor_submissionid']}', 
         in observation with course module id '$this->contextinstanceid'.";
     }
 
@@ -40,7 +41,7 @@ class activity_assessed extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return 'Activity assessed';
+        return 'Activity assessing';
     }
 
     /**
@@ -68,14 +69,14 @@ class activity_assessed extends \core\event\base {
             throw new \coding_exception('relateduserid has to be provided');
         }
 
-        // $additional = [''];
-        // foreach ($additional as $key)
-        // {
-        //     if (!isset($this->data['other'][$key]))
-        //     {
-        //         throw new \coding_exception("Event requires '$key' to be set in 'data['other']'");
-        //     }
-        // }
+        $additional = ['assessor_submissionid'];
+        foreach ($additional as $key)
+        {
+            if (!isset($this->data['other'][$key]))
+            {
+                throw new \coding_exception("Event requires '$key' to be set in 'data['other']'");
+            }
+        }
     }
 
     // public static function get_objectid_mapping() {

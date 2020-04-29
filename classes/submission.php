@@ -139,7 +139,7 @@ class submission extends submission_base /*TODO: implements templateable*/
             return false;
         }
 
-        foreach ($task_submissions as $task_submission)
+        foreach ($this->get_learner_task_submissions() as $task_submission)
         {
             if ($task_submission->get_active_observer_assignment_or_null() // has observer assigned
                 && $task_submission->is_observation_pending_or_in_progress()) //observation pending or in progress
@@ -214,9 +214,6 @@ class submission extends submission_base /*TODO: implements templateable*/
                 'context'  => \context_module::instance($observation->get_cm()->id),
                 'objectid' => $this->id,
                 'relateduserid' => $this->userid,
-                'other'    => [
-                    'assessor_submissionid' => $assessor_task_submission->get_id_or_null(),
-                ]
             ]);
         $event->trigger();
     }

@@ -165,8 +165,7 @@ class submission_base extends submission_status_store
             return false;
         }
 
-        $task_count = $this->get_observation()->get_task_count();
-        if (count($task_submissions) != $task_count)
+        if (!$this->is_all_tasks_have_submission())
         {
             // not all tasks have submissions
             return false;
@@ -205,6 +204,11 @@ class submission_base extends submission_status_store
         return true;
     }
 
+    public function is_all_tasks_have_submission(): bool
+    {
+        return count($this->get_learner_task_submissions()) === $this->get_observation()->get_task_count();
+    }
+
     public function is_all_tasks_no_learner_action_required(): bool
     {
         foreach ($this->get_learner_task_submissions() as $task_submission)
@@ -240,5 +244,34 @@ class submission_base extends submission_status_store
         $this->set(self::COL_ATTEMPTS_ASSESSMENT, ($this->attempts_assessment + 1), true);
 
         return $this->attempts_assessment;
+    }
+
+    /**
+     * Submitted time depends on when the submission was last observed, get time of last observation that was submitted.
+     *
+     * @return int|null null if activity not observed
+     */
+    public function get_time_submitted_or_null(): ?int
+    {
+        if (!$this->is_observed())
+        {
+            return null;
+        }
+
+        $last = 0;
+        foreach ($this->get_learner_task_submissions() as $task_submission)
+        {
+            $observer_submission = $task_submission
+                ->get_active_observer_assignment_or_null()
+                ->get_observer_submission_base_or_null();
+            $time_submitted = $observer_submission->get(observer_task_submission::COL_TIMESUBMITTED);
+
+            if ($last < $time_submitted)
+            {
+                $last = $time_submitted;
+            }
+        }
+
+        return $last;
     }
 }

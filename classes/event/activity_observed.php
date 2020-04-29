@@ -20,7 +20,7 @@ use mod_observation\submission;
 
 defined('MOODLE_INTERNAL') || die();
 
-class activity_assessed extends \core\event\base {
+class activity_observed extends \core\event\base {
 
     /**
      * Returns description of what happened.
@@ -28,9 +28,9 @@ class activity_assessed extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "Assessor with id '$this->userid' 
-        has assessed activity submission with id '$this->objectid'
-        for learner with id '$this->relateduserid',
+        return "All tasks have been observed 
+        for learner with id '$this->relateduserid'
+        in activity submission with id '$this->objectid'
         in observation with course module id '$this->contextinstanceid'.";
     }
 
@@ -40,7 +40,7 @@ class activity_assessed extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return 'Activity assessed';
+        return 'Activity observed';
     }
 
     /**
@@ -68,7 +68,7 @@ class activity_assessed extends \core\event\base {
             throw new \coding_exception('relateduserid has to be provided');
         }
 
-        // $additional = [''];
+        // $additional = [];
         // foreach ($additional as $key)
         // {
         //     if (!isset($this->data['other'][$key]))

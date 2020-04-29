@@ -6,6 +6,7 @@ namespace mod_observation\traits;
 // class autoloader cannot find interface on it's own...
 global $CFG;
 require_once($CFG->dirroot . '/mod/observation/classes/interface/learner_submission_statuses.php');
+require_once($CFG->dirroot . '/mod/observation/classes/db_model_base.php');
 
 use coding_exception;
 use mod_observation\db_model_base;
