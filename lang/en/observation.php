@@ -206,3 +206,33 @@ $string['error:invalid_token'] = 'The link you are trying to access is incorrect
 $string['error:not_active_observer'] = 'This link is no longer valid. If you have received a newer observation email, please use the link in that email instead.';
 $string['error:observation_complete'] = 'This observation has already been completed.';
 
+// EMAILS
+$string['email:observer_assigned_subject'] = 'Observation request from {$a->{learner_fullname}}';
+$string['email:observer_assigned_body'] = 'Hello {$a->observer_fullname}.
+{$a->learner_fullname} has requested an observation for task "{$a->task_name}" in "{$a->activity_name}.
+Please follow this link to proceed or decline observation:
+{$a->observe_url}"';
+$string['email:observer_assigned_body_with_user_message'] = 'Hello {$a->observer_fullname}.
+{$a->learner_fullname} has requested an observation for task "{$a->task_name}" in "{$a->activity_name}.
+
+Message from {$a->learner_fullname}:
+<q>{$a->learner_message}</q>
+
+Please follow this link to proceed or decline observation:
+{$a->observe_url}"';
+
+$string['email:observer_observation_declined_subject'] = 'observer_observation_declined_subject';
+$string['email:observer_observation_declined_body'] = 'observer_observation_declined_body';
+
+$string['email:learner_observation_declined_subject'] = 'learner_observation_declined_subject';
+$string['email:learner_observation_declined_body'] = 'learner_observation_declined_body';
+
+$string['email:observer_observation_complete_subject'] = 'observer_observation_complete_subject';
+$string['email:observer_observation_complete_body'] = 'observer_observation_complete_body';
+
+$string['email:learner_observation_complete_subject'] = 'learner_observation_complete_subject';
+$string['email:learner_observation_complete_body'] = 'learner_observation_complete_body';
+
+$string['email:learner_assessment_released_subject'] = 'learner_assessment_released_subject';
+$string['email:learner_assessment_released_body'] = 'learner_assessment_released_body';
+

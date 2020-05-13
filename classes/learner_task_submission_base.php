@@ -226,8 +226,6 @@ class learner_task_submission_base extends submission_status_store
             $submisison->increment_observation_attempt_number_and_save();
         }
 
-        //TODO: NOTIFICATIONS
-
         // trigger event
         $event = attempt_submitted::create(
             [

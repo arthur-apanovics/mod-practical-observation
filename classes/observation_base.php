@@ -25,6 +25,7 @@ namespace mod_observation;
 use cm_info;
 use coding_exception;
 use context_module;
+use stdClass;
 
 class observation_base extends db_model_base
 {
@@ -180,6 +181,39 @@ class observation_base extends db_model_base
      */
     protected $completion_tasks;
 
+
+    /**
+     * @var cm_info
+     */
+    protected $cm;
+
+    public function __construct($id_or_record = null, cm_info $cm = null)
+    {
+        parent::__construct($id_or_record);
+
+        if (!is_null($cm))
+        {
+            $this->cm = $cm;
+        }
+        else
+        {
+            $this->cm = cm_info::create(
+                get_coursemodule_from_instance(
+                    OBSERVATION, $this->id, $this->course, false, MUST_EXIST));
+        }
+    }
+
+    /**
+     * Get moodle url to this activity
+     *
+     * @return \moodle_url
+     * @throws \moodle_exception
+     */
+    public function get_url(): \moodle_url
+    {
+        return new \moodle_url(OBSERVATION_MODULE_PATH . 'view.php', ['id' => $this->get_cm()->id]);
+    }
+    
     public function get_formatted_name()
     {
         return format_string($this->name);
@@ -220,8 +254,20 @@ class observation_base extends db_model_base
             throw new coding_exception('Cannot get course module for uninitialized observation activity class');
         }
 
-        return cm_info::create(
-            get_coursemodule_from_instance(OBSERVATION, $this->id, $this->course, false, MUST_EXIST));
+        return $this->cm;
+    }
+
+    /**
+     * Fetches course record from database
+     *
+     * @return stdClass
+     * @throws \dml_exception
+     */
+    public function get_course(): stdClass
+    {
+        global $DB;
+
+        return $DB->get_record('course', ['id' => $this->course]);
     }
 
     public function get_tasks()

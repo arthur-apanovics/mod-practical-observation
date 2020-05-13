@@ -26,6 +26,7 @@
  */
 
 use core\notification;
+use mod_observation\lib;
 use mod_observation\observer_assignment;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -36,11 +37,11 @@ $observer_assignment = observer_assignment::read_by_token_or_null($token, true);
 
 if (is_null($observer_assignment))
 {
-    print_error(get_string('error:invalid_token', 'observation'));
+    print_error(get_string('error:invalid_token', OBSERVATION));
 }
 else if (!$observer_assignment->is_active())
 {
-    print_error(get_string('error:not_active_observer', 'observation'));
+    print_error(get_string('error:not_active_observer', OBSERVATION));
 }
 // TODO: seems to print error once a second observation has been submitted instead of printing 'complete' view
 // else if ($observer_assignment->is_observation_complete())
@@ -94,9 +95,39 @@ else if (optional_param('submit-decline', 0, PARAM_BOOL))
 {
     // TODO: declined observation
     $observer_assignment->decline();
+
+    // TODO: Event
+
+    // emails
+    $learner_task_submission = $observer_assignment->get_learner_task_submission_base();
+    $task = $learner_task_submission->get_task_base();
+    $observer = $observer_assignment->get_observer();
+    $learner = core_user::get_user($learner_task_submission->get_userid());
+    $lang_data = [
+        'learner_fullname'  => fullname(\core_user::get_user($learner)),
+        'observer_fullname' => $observer->get_formatted_name(),
+        'task_name'         => $task->get_formatted_name(),
+        'activity_name'     => $observation->get_formatted_name(),
+        'activity_url'      => $activity_url,
+        'observe_url'       => $observer_assignment->get_review_url(),
+        'course_fullname'   => $course->fullname,
+        'course_shortname'  => $course->shortname,
+        'course_url'        => new \moodle_url('/course/view.php', ['id' => $course->id]),
+    ];
+
+    // send confirmation email to observer
+    lib::email_external(
+        $observer->get_email(),
+        get_string('email:observer_observation_declined_subject', OBSERVATION, $lang_data),
+        get_string('email:observer_observation_declined_body', OBSERVATION, $lang_data));
+
+    // notify learner of declined observation
+    lib::email_user(
+        $learner,
+        get_string('email:learner_observation_declined_subject', OBSERVATION, $lang_data),
+        get_string('email:learner_observation_declined_body', OBSERVATION, $lang_data));
 }
 
-// TODO: Event
 
 // Print the page header.
 $name = 'TODO'; // TODO name name name name name name name name name name name

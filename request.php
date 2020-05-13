@@ -23,6 +23,7 @@
 use core\output\notification;
 use mod_observation\learner_attempt_base;
 use mod_observation\learner_task_submission;
+use mod_observation\lib;
 use mod_observation\observer;
 use mod_observation\observer_base;
 use mod_observation\task;
@@ -47,21 +48,33 @@ $task_submission = new learner_task_submission($learner_task_submission_id);
 $attempt = new learner_attempt_base($attempt_id);
 $task_id = $task_submission->get($task_submission::COL_TASKID);
 $task = new task($task_id, $USER->id);
-$name = get_string('assign_observer:page_title', 'observation', $task->get_formatted_name());
+$observation = $task->get_observation_base();
 
-$activity_url = new moodle_url(OBSERVATION_MODULE_PATH . 'view.php', ['id' => $cmid]);
+$activity_url = $observation->get_url();
 
 // Print the page header.
 $PAGE->set_url(
     OBSERVATION_MODULE_PATH . 'request.php',
     ['id' => $cm->id, 'learner_task_submission_id' => $learner_task_submission_id, 'attempt_id' => $attempt_id]);
+
+$name = get_string('assign_observer:page_title', 'observation', $task->get_formatted_name());
 $PAGE->set_title($name);
-$PAGE->set_heading('TODO');
+$PAGE->set_heading($name);
 
 $PAGE->add_body_class('observation-request');
 
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
+
+function email_observer(observer_base $observer, array $lang_data): bool
+{
+    return lib::email_external(
+        $observer->get_email(),
+        get_string('email:observer_assigned_subject', OBSERVATION, $lang_data),
+        (!empty($message)
+            ? get_string('email:observer_assigned_body_with_user_message', OBSERVATION, $lang_data)
+            : get_string('email:observer_assigned_body', OBSERVATION, $lang_data)));
+}
 
 // is confirming observer change?
 if (optional_param('confirm', 0, PARAM_BOOL))
@@ -78,15 +91,34 @@ if (optional_param('confirm', 0, PARAM_BOOL))
     $observer = observer::update_or_create($submitted);
 
     $explanation = required_param('user_input', PARAM_TEXT);
-    $task_submission->assign_observer($observer, $message, $explanation);
+    $assignment = $task_submission->assign_observer($observer, $message, $explanation);
 
     $attempt->submit($task_submission);
     $task_submission->submit($attempt);
 
+    // send email to assigned observer
+    $lang_data = [
+        'learner_fullname'  => fullname(\core_user::get_user($task_submission->get_userid())),
+        'learner_message'   => $message,
+        'observer_fullname' => $observer->get_formatted_name(),
+        'task_name'         => $task->get_formatted_name(),
+        'activity_name'     => $observation->get_formatted_name(),
+        'activity_url'      => $activity_url,
+        'observe_url'       => $assignment->get_review_url(),
+        'course_fullname'   => $course->fullname,
+        'course_shortname'  => $course->shortname,
+        'course_url'        => new \moodle_url('/course/view.php', ['id' => $course->id]),
+    ];
+    email_observer($observer, $lang_data);
+
+    // TODO: REMOVE TEMPORARY OBSERVATION NOTIFICATION
+    \core\notification::add(
+        'As emails don\'t work at the moment, use this link in incognito mode to "observe" task you\'ve just submitted - <br>'
+        . $observe_url->out(false), notification::NOTIFY_WARNING);
+
     redirect(
         $activity_url,
-        get_string(
-            'notification:observer_assigned_new', 'observation',
+        get_string('notification:observer_assigned_new', 'observation',
             ['task' => $task->get_formatted_name(), 'email' => $submitted->get(observer::COL_EMAIL)]),
         null,
         notification::NOTIFY_SUCCESS);
@@ -158,11 +190,26 @@ if ($data = $form->get_data())
     //  no observer assignment OR submitted observer is the same as currently assigned observer
     $observer = observer::update_or_create($submitted);
     // assign observer to this submission
-    $task_submission->assign_observer($observer, $data->message);
+    $assignment = $task_submission->assign_observer($observer, $data->message);
 
     // submit task submission and attempt
     $attempt->submit($task_submission);
     $task_submission->submit($attempt);
+
+    // send email to assigned observer
+    $lang_data = [
+        'learner_fullname'  => fullname(\core_user::get_user($task_submission->get_userid())),
+        'learner_message'   => $data->message,
+        'observer_fullname' => $observer->get_formatted_name(),
+        'task_name'         => $task->get_formatted_name(),
+        'activity_name'     => $observation->get_formatted_name(),
+        'activity_url'      => $activity_url,
+        'observe_url'       => $assignment->get_review_url(),
+        'course_fullname'   => $course->fullname,
+        'course_shortname'  => $course->shortname,
+        'course_url'        => new \moodle_url('/course/view.php', ['id' => $course->id]),
+    ];
+    email_observer($observer, $lang_data);
 
     redirect(
         $activity_url,

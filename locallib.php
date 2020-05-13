@@ -607,4 +607,53 @@ class lib
 
         return true;
     }
+
+    /**
+     * @param string $to email
+     * @param string $subject
+     * @param string $message
+     * @return bool
+     */
+    public static function email_external(string $to, string $subject, string $message): bool
+    {
+        // create a fake user to bypass moodle checks
+        $fake_user = new stdClass();
+        $fake_user->id = PHP_INT_MAX; // make sure we don't clash with an existing user
+        $fake_user->email = $to;
+        $fake_user->deleted = false;
+        $fake_user->suspended = false;
+        $fake_user->auth = 'manual';
+        $fake_user->mailformat = FORMAT_HTML;
+
+        $from = \core_user::get_noreply_user();
+        return email_to_user($fake_user, $from, $subject, $message);
+    }
+
+    public static function email_user(stdClass $user, string $subject, string $message)
+    {
+        $from = \core_user::get_noreply_user();
+
+        // send email
+        return email_to_user($user, $from, $subject, $message);
+    }
+
+    /**
+     * @param stdClass[] $users
+     * @param string     $subject
+     * @param string     $message
+     * @return array ['userid' => bool] array with results for each userid
+     */
+    public static function email_users(array $users, string $subject, string $message): array
+    {
+        $from = \core_user::get_noreply_user();
+
+        // send email
+        $results = [];
+        foreach ($users as $user)
+        {
+            $results[$user->id] = email_to_user($user, $from, $subject, $message);
+        }
+
+        return $results;
+    }
 }

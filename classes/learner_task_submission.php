@@ -31,7 +31,6 @@ use mod_observation\event\attempt_started;
 use mod_observation\event\observer_assigned;
 use mod_observation\interfaces\templateable;
 use moodle_exception;
-use moodle_url;
 
 class learner_task_submission extends learner_task_submission_base implements templateable
 {
@@ -154,7 +153,7 @@ class learner_task_submission extends learner_task_submission_base implements te
     }
 
     /**
-     * @param bool   $update_submission_status if true, will set submission and task submission state to {@link STATUS_LEARNER_IN_PROGRESS}
+     * @param bool $update_submission_status if true, will set submission and task submission state to {@link STATUS_LEARNER_IN_PROGRESS}
      * @return learner_attempt_base
      * @throws coding_exception
      * @throws dml_exception
@@ -203,7 +202,7 @@ class learner_task_submission extends learner_task_submission_base implements te
                             ->get_cm()
                             ->id),
                     'objectid' => $attempt->get_id_or_null(),
-                    'userid' => $this->userid,
+                    'userid'   => $this->userid,
                     'other'    => [
                         'taskid' => $this->taskid,
                     ]
@@ -282,15 +281,6 @@ class learner_task_submission extends learner_task_submission_base implements te
             $assignment = observer_assignment::create_assignment($this->id, $submitted_observer->get_id_or_null());
         }
 
-        // TODO: SEND EMAIL AND NOTIFICATION
-        $review_url = $assignment->get_review_url();
-        // TODO: REMOVE TEMPORARY OBSERVATION NOTIFICATION
-        notification::add(
-            'As emails don\'t work at the moment, use this link in incognito mode to "observe" task you\'ve just submitted - <br>' .
-        $review_url->out(false), notification::WARNING);
-        // send email
-        // send notification
-
         // trigger event
         $submisison = $this->get_submission();
         $observation = $submisison->get_observation();
@@ -299,7 +289,7 @@ class learner_task_submission extends learner_task_submission_base implements te
                 'context'  => \context_module::instance($observation->get_cm()->id),
                 'objectid' => $assignment->get_id_or_null(),
                 'other'    => [
-                    'observerid' => $assignment->get_observer()->get_id_or_null(),
+                    'observerid'                => $assignment->get_observer()->get_id_or_null(),
                     'learner_task_submissionid' => $this->get_id_or_null(),
                 ]
             ]);
@@ -325,6 +315,14 @@ class learner_task_submission extends learner_task_submission_base implements te
     }
 
     /**
+     * @return assessor_task_submission|null
+     */
+    public function get_assessor_task_submission_or_null()
+    {
+        return $this->assessor_task_submission;
+    }
+
+    /**
      * @return assessor_feedback[]
      */
     public function get_all_assessor_feedback(): array
@@ -336,14 +334,6 @@ class learner_task_submission extends learner_task_submission_base implements te
         }
 
         return $feedback;
-    }
-
-    /**
-     * @return assessor_task_submission|null
-     */
-    public function get_assessor_task_submission_or_null()
-    {
-        return $this->assessor_task_submission;
     }
 
     public function get_assessor_task_submission_or_create(int $assessorid = null): assessor_task_submission
@@ -361,7 +351,8 @@ class learner_task_submission extends learner_task_submission_base implements te
 
             $assessor_task_submission = new assessor_task_submission($assessor_task_submission->create());
         }
-        else if (!is_null($assessorid) && $assessor_task_submission->get(assessor_task_submission::COL_ASSESSORID) != $assessorid)
+        else if (!is_null($assessorid)
+            && $assessor_task_submission->get(assessor_task_submission::COL_ASSESSORID) != $assessorid)
         {
             debugging(
                 sprintf(
@@ -377,10 +368,10 @@ class learner_task_submission extends learner_task_submission_base implements te
         $observation = $submisison->get_observation();
         $event = activity_assessing::create(
             [
-                'context'  => \context_module::instance($observation->get_cm()->id),
-                'objectid' => $submisison->get_id_or_null(),
+                'context'       => \context_module::instance($observation->get_cm()->id),
+                'objectid'      => $submisison->get_id_or_null(),
                 'relateduserid' => $this->userid,
-                'other'    => [
+                'other'         => [
                     'assessor_submissionid' => $assessor_task_submission->get_id_or_null(),
                 ]
             ]);
@@ -520,13 +511,13 @@ class learner_task_submission extends learner_task_submission_base implements te
             self::COL_TIMESTARTED   => userdate($this->timestarted),
             self::COL_TIMECOMPLETED => $this->timecompleted != 0 ? userdate($this->timecompleted) : null,
 
-            'learner_attempts'             => $learner_attempts_data,
-            'observer_assignments'         => $observer_assignments_data,
-            'assessor_task_submission'     => $assessor_task_submission_data,
+            'learner_attempts'         => $learner_attempts_data,
+            'observer_assignments'     => $observer_assignments_data,
+            'assessor_task_submission' => $assessor_task_submission_data,
 
             // extra
-            'is_admin'   => $is_admin,
-            'review_url' => $review_url,
+            'is_admin'                 => $is_admin,
+            'review_url'               => $review_url,
         ];
     }
 }

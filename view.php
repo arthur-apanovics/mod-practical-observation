@@ -51,7 +51,7 @@ $observation = new observation($cm, $USER->id);
 $name        = $observation->get_formatted_name();
 
 // Print the page header.
-$PAGE->set_url('/mod/observation/view.php', array('id' => $cm->id));
+$PAGE->set_url($observation->get_url());
 $PAGE->set_title($name);
 $PAGE->set_heading(format_string($course->fullname));
 

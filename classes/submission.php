@@ -34,7 +34,9 @@ class submission extends submission_base /*TODO: implements templateable*/
     /**
      * submission constructor.
      * @param $id_or_record
+     * @throws \ReflectionException
      * @throws \coding_exception
+     * @throws \dml_exception
      * @throws \dml_missing_record_exception
      */
     public function __construct($id_or_record)
@@ -153,7 +155,16 @@ class submission extends submission_base /*TODO: implements templateable*/
         return true;
     }
 
-    public function release_assessment(observation_base $observation = null): void
+    /**
+     * Releases final assessor 'grade' after assessor has left feedback for each task in activity.
+     *
+     * @param observation_base|null $observation
+     * @return string assessmnet outcome {@link status}
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     */
+    public function release_assessment(observation_base $observation = null): string
     {
         if (is_null($observation))
         {
@@ -216,5 +227,7 @@ class submission extends submission_base /*TODO: implements templateable*/
                 'relateduserid' => $this->userid,
             ]);
         $event->trigger();
+
+        return $new_status;
     }
 }

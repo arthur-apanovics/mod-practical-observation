@@ -40,10 +40,6 @@ use moodle_url;
 class observation extends observation_base implements templateable
 {
     /**
-     * @var cm_info
-     */
-    private $cm;
-    /**
      * @var submission[]
      */
     private $submisisons;
@@ -79,7 +75,8 @@ class observation extends observation_base implements templateable
         }
 
         $this->cm = $cm_or_cm_info;
-        parent::__construct($this->cm->instance);
+
+        parent::__construct($this->cm->instance, $cm_or_cm_info);
 
         // get submissions
         $args = [submission::COL_OBSERVATIONID => $this->id];

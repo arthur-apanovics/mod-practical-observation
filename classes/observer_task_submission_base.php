@@ -59,6 +59,10 @@ class observer_task_submission_base extends db_model_base
     /**
      * @param string $outcome {@link outcome}
      * @return observer_task_submission_base
+     * @throws \ReflectionException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
      */
     public function submit(string $outcome): self
     {

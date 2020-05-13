@@ -30,12 +30,11 @@ use mod_observation\learner_attempt_base;
 use mod_observation\learner_task_submission_base;
 use mod_observation\lib;
 use mod_observation\observation;
-use mod_observation\observer_assignment;
+use mod_observation\observation_base;
 use mod_observation\observer_feedback;
 use mod_observation\observer_task_submission;
 use mod_observation\observer_task_submission_base;
 use mod_observation\submission;
-use mod_observation\submission_base;
 use mod_observation\task_base;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -46,9 +45,10 @@ require_once($CFG->libdir . '/filelib.php');
 
 $cmid = required_param('cmid', PARAM_INT);
 
+list($course, $cm) = get_course_and_cm_from_cmid($cmid);
 $context = context_module::instance($cmid);
+$observation = new observation_base($cm->instance);
 
-// TODO: Events
 
 if ($learner_task_submissionid = optional_param('learner_task_submission_id', null, PARAM_INT))
 {
@@ -90,6 +90,8 @@ if ($learner_task_submissionid = optional_param('learner_task_submission_id', nu
 /* ================================================================================================================== */
 else if ($observer_submissionid = optional_param('observer_submission_id', null, PARAM_INT))
 {
+    // external observer submitting
+
     // gather data from post request
     $observer_submission_base = new observer_task_submission_base($observer_submissionid);
     $observations = lib::required_param_array('criteria', PARAM_RAW);
@@ -144,12 +146,42 @@ else if ($observer_submissionid = optional_param('observer_submission_id', null,
     // submit observation
     $observer_submission_base->submit($observation_submission_outcome);
 
+    // send emails
     $observer_assignment = $observer_submission_base->get_observer_assignment_base();
+    $observer = $observer_assignment->get_observer();
+    $learner_task_submission = $observer_assignment->get_learner_task_submission_base();
+    $learner = \core_user::get_user($learner_task_submission->get_userid());
+
+    $lang_data = [
+        'learner_fullname'  => fullname($learner),
+        'observer_fullname' => $observer->get_formatted_name(),
+        'task_name'         => $task->get_formatted_name(),
+        'activity_name'     => $observation->get_formatted_name(),
+        'activity_url'     => $observation->get_url(),
+        'observe_url'       => $observer_assignment->get_review_url(),
+        'course_fullname'   => $course->fullname,
+        'course_shortname'  => $course->shortname,
+        'course_url'        => new \moodle_url('/course/view.php', ['id' => $course->id]),
+    ];
+
+    // send confirmation email to observer
+    lib::email_external(
+        $observer->get_email(),
+        get_string('email:observer_observation_complete_subject', OBSERVATION, $lang_data),
+        get_string('email:observer_observation_complete_body', OBSERVATION, $lang_data));
+    
+    // send "observation complete" email to learner
+    lib::email_user(
+        $learner,
+        get_string('email:learner_observation_complete_subject', OBSERVATION, $lang_data),
+        get_string('email:learner_observation_complete_body', OBSERVATION, $lang_data));
+
     redirect($observer_assignment->get_review_url());
 }
 /* ================================================================================================================== */
 else if ($assessor_task_submissionid = optional_param('assessor_task_submission_id', null, PARAM_INT))
 {
+    // assessor saving task feedback
     require_login();
 
     $assessor_task_submission = new assessor_task_submission($assessor_task_submissionid);
@@ -193,16 +225,38 @@ else if ($assessor_task_submissionid = optional_param('assessor_task_submission_
 /* ================================================================================================================== */
 else if ($submission_id = optional_param('activity_submission_id', null, PARAM_INT))
 {
-    // releasing grade
-    $submisison = submission::read_or_null($submission_id);
-    $submisison->release_assessment();
+    // assessor releasing grade
+    $submission = submission::read_or_null($submission_id);
+    $assessment_outcome = $submission->release_assessment($observation);
+
+    // send emails
+    $learner_task_submission = $observer_assignment->get_learner_task_submission_base();
+    $learner = \core_user::get_user($learner_task_submission->get_userid());
+    // send email to assigned observer
+    $observe_url = $assignment->get_review_url();
+
+    $lang_data = [
+        'learner_fullname'   => fullname(\core_user::get_user($task_submission->get_userid())),
+        'assessor_fullname'  => fullname(\core_user::get_user($USER)),
+        'assessment_outcome' => $assessment_outcome,
+        'activity_name'      => $observation->get_formatted_name(),
+        'activity_url'       => $observation->get_url(),
+        'course_fullname'    => $course->fullname,
+        'course_shortname'   => $course->shortname,
+        'course_url'         => new \moodle_url('/course/view.php', ['id' => $course->id]),
+    ];
+
+    lib::email_user(
+        $learner,
+        get_string('email:learner_assessment_released_subject', OBSERVATION, $lang_data),
+        get_string('email:learner_assessment_released_body', OBSERVATION, $lang_data));
 
     redirect(
         new moodle_url(OBSERVATION_MODULE_PATH . 'view.php', ['id' => $cmid]),
         get_string(
             'notification:assessment_released',
             'observation',
-            fullname(core_user::get_user($submisison->get_userid()))),
+            fullname(core_user::get_user($submission->get_userid()))),
         null,
         notification::NOTIFY_SUCCESS
     );
@@ -212,5 +266,3 @@ else
 {
     throw new coding_exception('No submission id provided, cannot proceed with submission!');
 }
-
-// $PAGE->set_url('/mod/observation/submit.php', array('id' => $cm->id));
