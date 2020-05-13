@@ -1,12 +1,9 @@
 <div>
-    <div class="group-container" style="float: right; margin: 1em;">
-        <label for="group-selector">Group selector</label>
-        <select style="display: inline;" name="group-selector" id="group-selector">
-            {{! TODO: group selector}}
-            <option value selected disabled>todo</option>
-        </select>
-    </div>
-
+    {{#extra.group_selector_html}}
+        <div class="group-container" style="float: right; margin: 1em;">
+            {{{extra.group_selector_html}}}
+        </div>
+    {{/extra.group_selector_html}}
     <h5>Learner submissions</h5>
     <table class="submissions-summary">
         <thead class="submisisons-header">

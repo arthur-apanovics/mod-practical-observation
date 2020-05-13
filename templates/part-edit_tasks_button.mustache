@@ -1,4 +1,9 @@
 <div class="wrapper-submit align-center">
+    {{^tasks}}
+        <p>
+            {{#str}}manage:no_tasks, observation{{/str}}
+        </p>
+    {{/tasks}}
     <a href="{{{module_root}}}/manage.php?id={{cmid}}" class="btn btn-secondary">
     {{#str}}manage:edit_tasks, observation{{/str}}
     </a>

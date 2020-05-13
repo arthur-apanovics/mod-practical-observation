@@ -33,7 +33,6 @@ use mod_observation\observation_base;
 use mod_observation\observer;
 use mod_observation\observer_assignment;
 use mod_observation\observer_feedback;
-use mod_observation\submission;
 use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -187,8 +186,27 @@ class mod_observation_renderer extends plugin_renderer_base
         // assessor view
         if ($capabilities['can_assess'] || $capabilities['can_viewsubmissions'])
         {
+            $cm = $observation->get_cm();
+
+            // determine group
+            $userids = null; // this will be used to filter submissions
+            if (groups_get_activity_groupmode($cm))
+            {
+                // Groups are being used, so get the group selector
+                $context = context_module::instance($cm->id);
+                $template_data['extra']['group_selector_html'] = groups_print_activity_menu(
+                    $cm, $observation->get_url(), true, !has_capability('moodle/site:accessallgroups', $context));
+
+                $userids = $this->get_usersids_in_group_or_null($cm, $context);
+                if (is_null($userids))
+                {
+                    notification::add(
+                        get_string('no_learners_in_group', \OBSERVATION), notification::WARNING);
+                }
+            }
+
             $template_data['extra']['submission_summary_data'] =
-                $observation->export_submissions_summary_template_data();
+                $observation->export_submissions_summary_template_data($userids);
 
             $out .= $this->render_from_template('part-assessor_table', $template_data);
         }
@@ -199,7 +217,12 @@ class mod_observation_renderer extends plugin_renderer_base
             $submission = $observation->get_submission_or_create($USER->id);
 
             // TODO: MOVE LEARNER STATUS CHECKS TO SUBMISSION CLASS
-            if ($submission->is_observation_incomplete())
+            if ($submission->is_assessment_complete())
+            {
+                notification::success(
+                    get_string('notification:activity_complete', 'observation'));
+            }
+            else if ($submission->is_observation_incomplete())
             {
                 notification::warning(
                     get_string('notification:activity_observation_not_complete', 'observation'));
@@ -218,11 +241,6 @@ class mod_observation_renderer extends plugin_renderer_base
             {
                 notification::info(
                     get_string('notification:activity_wait_for_mixed', 'observation'));
-            }
-            else if ($submission->is_assessment_complete())
-            {
-                notification::info(
-                    get_string('notification:activity_complete', 'observation'));
             }
 
             // submission/preview logic in template //TODO: move to renderer
@@ -748,6 +766,31 @@ class mod_observation_renderer extends plugin_renderer_base
         ));
 
         return $out;
+    }
+
+    private function get_usersids_in_group_or_null(cm_info $cm, context_module $context)
+    {
+        global $DB;
+
+        $userids = null;
+        $currentgroup = groups_get_activity_group($cm, true);
+        if (!empty($currentgroup))
+        {
+            // We have a currently selected group.
+            $groupstudentsjoins = get_enrolled_with_capabilities_join(
+                $context, '', observation::CAP_SUBMIT, $currentgroup);
+
+            if (!empty($groupstudentsjoins->joins))
+            {
+                $sql = "SELECT DISTINCT u.id
+                        FROM {user} u
+                        $groupstudentsjoins->joins
+                        WHERE $groupstudentsjoins->wheres";
+                $userids = $DB->get_fieldset_sql($sql, $groupstudentsjoins->params);
+            }
+        }
+
+        return !empty($userids) ? $userids : null;
     }
 
     /**

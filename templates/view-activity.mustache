@@ -1,6 +1,9 @@
 {{#tasks}}
     {{> mod_observation/comp-task}}
 {{/tasks}}
+{{^tasks}}
+    {{#str}}no_tasks, observation{{/str}}
+{{/tasks}}
 
 {{#extra.is_assessing}}
     {{#extra.can_release_grade}}
@@ -30,15 +33,3 @@
         </div>
     {{/extra.can_release_grade}}
 {{/extra.is_assessing}}
-
-{{^tasks}}
-{{! apropriate messsage based on role}}
-    <p>
-        {{#capabilities.can_manage}}
-            {{#str}}manage:no_tasks, observation{{/str}}
-        {{/capabilities.can_manage}}
-        {{^capabilities.can_manage}}
-            {{#str}}no_tasks, observation{{/str}}
-        {{/capabilities.can_manage}}
-    </p>
-{{/tasks}}

@@ -114,7 +114,7 @@ if (optional_param('confirm', 0, PARAM_BOOL))
     // TODO: REMOVE TEMPORARY OBSERVATION NOTIFICATION
     \core\notification::add(
         'As emails don\'t work at the moment, use this link in incognito mode to "observe" task you\'ve just submitted - <br>'
-        . $observe_url->out(false), notification::NOTIFY_WARNING);
+        . $assignment->get_review_url()->out(false), notification::NOTIFY_WARNING);
 
     redirect(
         $activity_url,

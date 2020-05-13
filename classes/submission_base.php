@@ -229,7 +229,7 @@ class submission_base extends submission_status_store
      */
     public function increment_observation_attempt_number_and_save(): int
     {
-        $this->set(self::COL_ATTEMPTS_ASSESSMENT, ($this->attempts_observation + 1), true);
+        $this->set(self::COL_ATTEMPTS_OBSERVATION, ($this->attempts_observation + 1), true);
 
         return $this->attempts_observation;
     }

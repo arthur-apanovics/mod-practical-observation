@@ -109,7 +109,6 @@ else if ($observer_submissionid = optional_param('observer_submission_id', null,
     {
         throw new coding_exception('Submitted feedback count does not match total criteria count in task');
     }
-    unset($first_criteria, $task); // no longer needed (we still need criteria_count though)
 
     // needed to extract text and format from editor
     list($feedback_editor_base) = lib::get_editor_attributes_for_class(observer_feedback::class);
@@ -229,12 +228,8 @@ else if ($submission_id = optional_param('activity_submission_id', null, PARAM_I
     $submission = submission::read_or_null($submission_id);
     $assessment_outcome = $submission->release_assessment($observation);
 
-    // send emails
-    $learner_task_submission = $observer_assignment->get_learner_task_submission_base();
-    $learner = \core_user::get_user($learner_task_submission->get_userid());
-    // send email to assigned observer
-    $observe_url = $assignment->get_review_url();
-
+    // send email
+    $learner = \core_user::get_user($submission->get_userid());
     $lang_data = [
         'learner_fullname'   => fullname(\core_user::get_user($task_submission->get_userid())),
         'assessor_fullname'  => fullname(\core_user::get_user($USER)),

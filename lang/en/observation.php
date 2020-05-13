@@ -39,6 +39,7 @@ $string['accessdenied'] = 'Access denied';
 // GENERAL
 $string['back_to_activity'] =  'Back to activity';
 $string['observation'] = 'Observation';
+$string['no_learners_in_group'] = 'There are no learners in this group';
 
 // CAPABILITIES
 $string['observation:addinstance'] = 'Add instance';
@@ -108,6 +109,7 @@ $string['status:observation_incomplete'] = 'Observation not complete';
 $string['status:assessment_pending'] = 'Assessment pending';
 $string['status:assessment_in_progress'] = 'Assessment in progress';
 $string['status:assessment_incomplete'] = 'Assessment not complete';
+$string['status:complete'] = 'Complete';
 
 // MANAGE SPECIFIC
 $string['manage:no_tasks'] = 'This activity does not have any tasks, use button below to add new tasks.';

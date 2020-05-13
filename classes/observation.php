@@ -156,20 +156,32 @@ class observation extends observation_base implements templateable
     }
 
     /**
+     * @param array|null $userids specify user id's to get submissions for
      * @return submission[]
      * @throws \ReflectionException
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function get_all_submissions(): array
+    public function get_all_submissions(array $userids = null): array
     {
-        if ($this->is_filtered)
+        global $DB;
+
+        if (is_null($userids) || empty($userids))
         {
-            return parent::get_all_submissions();
+            // get all submissions
+            if ($this->is_filtered)
+            {
+                return parent::get_all_submissions();
+            }
+            else
+            {
+                return $this->submisisons;
+            }
         }
         else
         {
-            return $this->submisisons;
+            return submission::to_class_instances(
+                $DB->get_records_list(submission::TABLE, submission::COL_USERID, $userids));
         }
     }
 
@@ -177,6 +189,8 @@ class observation extends observation_base implements templateable
      * null NOT included
      *
      * @return learner_task_submission[]
+     * @throws coding_exception
+     * @throws dml_exception
      */
     public function get_all_task_submisisons(): array
     {
@@ -422,10 +436,10 @@ class observation extends observation_base implements templateable
         return ($submitted == $this->get_task_count());
     }
 
-    public function export_submissions_summary_template_data(): array
+    public function export_submissions_summary_template_data(array $userids = null): array
     {
         $data = [];
-        foreach ($this->get_all_submissions() as $submission)
+        foreach ($this->get_all_submissions($userids) as $submission)
         {
             $userid = $submission->get_userid();
             $total = $this->get_task_count();

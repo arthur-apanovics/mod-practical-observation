@@ -195,7 +195,7 @@ class observation_base extends db_model_base
         {
             $this->cm = $cm;
         }
-        else
+        else if (!is_null($id_or_record))
         {
             $this->cm = cm_info::create(
                 get_coursemodule_from_instance(
@@ -252,6 +252,12 @@ class observation_base extends db_model_base
         if (is_null($this->id))
         {
             throw new coding_exception('Cannot get course module for uninitialized observation activity class');
+        }
+        else if (is_null($this->cm))
+        {
+            $this->cm = cm_info::create(
+                get_coursemodule_from_instance(
+                    OBSERVATION, $this->id, $this->course, false, MUST_EXIST));
         }
 
         return $this->cm;
