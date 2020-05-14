@@ -34,6 +34,7 @@
 
 require_once('classes/observation.php');
 
+use mod_observation\lib;
 use mod_observation\observation;
 use mod_observation\observation_base;
 
@@ -61,7 +62,8 @@ function observation_supports($feature)
         case FEATURE_SHOW_DESCRIPTION:
         case FEATURE_COMPLETION_HAS_RULES:
         case FEATURE_GROUPS:
-            // case FEATURE_GRADE_HAS_GRADE:
+        case FEATURE_GRADE_HAS_GRADE:
+            //TODO: case FEATURE_BACKUP_MOODLE2:
             return true;
         default:
             return null;
@@ -138,21 +140,43 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
  * @return boolean Success/Fail
  * @throws dml_exception
  * @throws coding_exception
- * @throws ReflectionException
  */
 function observation_update_instance(stdClass $observation, mod_observation_mod_form $mform = null)
 {
     global $USER;
 
-    // todo: test and implement
-    throw new \coding_exception(__FUNCTION__ . ' not implemented');
+    $data = (array) $observation;
+    $now = time();
 
-    $observation = new  observation($observation);
-    $observation->set(observation_base::COL_TIMEMODIFIED, time());
-    $observation->set(observation_base::COL_LASTMODIFIEDBY, $USER->id);
-    // $observation->id             = $observation->instance; // ?!
+    $observation = new observation_base($observation->instance);
 
-    // You may have to add extra stuff in here.
+    $observation->set(observation::COL_NAME, $data[$observation::COL_NAME]);
+    $observation->set(observation::COL_INTRO, $data[$observation::COL_INTRO]);
+    $observation->set(observation::COL_INTROFORMAT, $data[$observation::COL_INTROFORMAT]);
+
+    $observation->set(observation::COL_TIMEOPEN, $data[$observation::COL_TIMEOPEN]);
+    $observation->set(observation::COL_TIMECLOSE, $data[$observation::COL_TIMECLOSE]);
+
+    $observation->set(observation::COL_TIMEMODIFIED, $now);
+    $observation->set(observation::COL_LASTMODIFIEDBY, $USER->id);
+
+    $intros = [
+        observation::COL_DEF_I_TASK_LEARNER,
+        observation::COL_DEF_I_TASK_OBSERVER,
+        observation::COL_DEF_I_TASK_ASSESSOR,
+        observation::COL_DEF_I_ASS_OBS_LEARNER,
+        observation::COL_DEF_I_ASS_OBS_OBSERVER,
+    ];
+
+    // set the values
+    foreach ($intros as $intro)
+    {
+        $format = "{$intro}_format";
+        $observation->set($intro, $data[$intro]['text']);
+        $observation->set($format, $data[$intro]['format']);
+    }
+
+    $observation->set(observation::COL_COMPLETION_TASKS, $data[$observation::COL_COMPLETION_TASKS]);
 
     $observation->update();
 
@@ -569,3 +593,166 @@ function observation_extend_settings_navigation(
     //     $observationnode->add_node($node);
     // }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                           GRADEBOOK STUFF                                                          //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Create/update grade item for given observation
+ *
+ * @param stdClass   $observation observation instance details
+ * @param array|null $grades
+ * @return int 0 if ok
+ */
+function observation_grade_item_update($observation, $grades = null)
+{
+    global $CFG;
+
+    if (!function_exists('grade_update'))
+    { //workaround for buggy PHP versions
+        require_once($CFG->libdir . '/gradelib.php');
+    }
+
+    $grade_item_params = [
+        'courseid'     => $observation->course,
+        'itemtype'     => 'mod',
+        'itemmodule'   => 'observation',
+        'iteminstance' => $observation->id,
+        'itemnumber'   => 0, // from docs: 'Can be used to distinguish multiple grades for an activity'
+        'gradetype'    => GRADE_TYPE_SCALE,
+        'scaleid'      => lib::get_binary_scaleid_or_create(),
+        'gradepass'    => 2 // 0 = no grade, 1 = not competent, 2 = competent
+    ];
+
+    if (!$grade_item = grade_item::fetch($grade_item_params))
+    {
+
+        // NOTE: moved out of fetched params because name can be changed creating duplicate grade_items, causing errors.
+        $grade_item_params['itemname'] = $observation->name;
+
+        // create grade item manually
+        $grade_item = new grade_item($grade_item_params);
+        $grade_item->insert();
+    }
+
+    $params = [];
+    $params['itemname'] = $observation->name;
+    $params['gradetype'] = $grade_item->gradetype;
+    $params['scaleid'] = $grade_item->scaleid;
+
+    if ($grades === 'reset')
+    {
+        $params['reset'] = true;
+        $grades = null;
+    }
+
+    return grade_update(
+        'mod/observation',
+        $observation->course,
+        'mod',
+        'observation',
+        $observation->id,
+        $grade_item->itemnumber,
+        $grades,
+        $params);
+}
+
+/**
+ * Update activity grades
+ *
+ * @param object  $observation
+ * @param int     $userid specific user only, 0 means all
+ * @param boolean $nullifnone return null if grade does not exist
+ * @return void
+ *
+ * @throws ReflectionException
+ * @throws coding_exception
+ * @throws dml_exception
+ * @throws dml_missing_record_exception
+ * @category grade
+ */
+function observation_update_grades($observation, $userid = 0, $nullifnone = true)
+{
+    global $CFG;
+    require_once($CFG->libdir . '/gradelib.php');
+
+    if ($grades = observation_get_user_grades($observation, $userid))
+    {
+        observation_grade_item_update($observation, $grades);
+    }
+    else if ($userid && $nullifnone)
+    {
+        $grade = new stdClass();
+        $grade->userid = $userid;
+        $grade->rawgrade = null;
+        observation_grade_item_update($observation, $grade);
+    }
+    else
+    {
+        observation_grade_item_update($observation);
+    }
+}
+
+/**
+ * Return grade for given user or all users.
+ *
+ * @param     $observation
+ * @param int $userid optional user id, 0 means all users
+ * @return array array of grades, false if none
+ *
+ * @throws ReflectionException
+ * @throws coding_exception
+ * @throws dml_exception
+ * @throws dml_missing_record_exception
+ * @global object
+ * @global object
+ */
+function observation_get_user_grades($observation, $userid = 0)
+{
+    //get a users grades from our grading table, and feed back to the gradebook
+    $grades = [];
+    $observation = new observation_base($observation);
+    if ($userid === 0)
+    {
+        foreach ($observation->get_all_submissions() as $submission)
+        {
+            $grades[$submission->get_userid()] = $submission->get_gradebook_grade();
+        }
+    }
+    else
+    {
+        if ($submission = $observation->get_submission_or_null($userid))
+        {
+            $greades[$userid] = $submission->get_gradebook_grade();
+        }
+    }
+
+    return $grades;
+}
+
+//TODO? check quiz_reset_userdata() for example
+// /**
+//  * Actual implementation of the reset course functionality, delete all the
+//  * quiz attempts for course $data->courseid, if $data->reset_quiz_attempts is
+//  * set and true.
+//  *
+//  * Also, move the quiz open and close dates, if the course start date is changing.
+//  *
+//  * @param object $data the data submitted from the reset course.
+//  * @return array status array
+//  */
+// function observation_reset_userdata($data) {
+//     return $status;
+// }
+
+//TODO? check quiz_reset_course_form_definition
+// /**
+//  * Implementation of the function for printing the form elements that control
+//  * whether the course reset functionality affects the quiz.
+//  *
+//  * @param $mform the course reset form that is being built.
+//  */
+// function observation_reset_course_form_definition($mform) {
+//
+// }

@@ -352,9 +352,23 @@ class observation_base extends db_model_base
     }
 
     /**
+     * @param int $learnerid
+     * @return submission|null
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     * @throws coding_exception
+     */
+    public function get_submission_or_null(int $learnerid): ?submission
+    {
+        return submission::read_by_condition_or_null(
+            [submission::COL_OBSERVATIONID => $this->id, submission::COL_USERID => $learnerid]);
+    }
+
+    /**
      * Checks if all criteria for completing this observation are complete
      * @param int $userid
      * @return bool complete or not
+     * @throws coding_exception
      */
     public function is_activity_complete(int $userid): bool
     {

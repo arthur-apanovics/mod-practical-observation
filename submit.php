@@ -231,8 +231,8 @@ else if ($submission_id = optional_param('activity_submission_id', null, PARAM_I
     // send email
     $learner = \core_user::get_user($submission->get_userid());
     $lang_data = [
-        'learner_fullname'   => fullname(\core_user::get_user($task_submission->get_userid())),
-        'assessor_fullname'  => fullname(\core_user::get_user($USER)),
+        'learner_fullname'   => fullname(\core_user::get_user($submission->get_userid())),
+        'assessor_fullname'  => fullname($USER),
         'assessment_outcome' => $assessment_outcome,
         'activity_name'      => $observation->get_formatted_name(),
         'activity_url'       => $observation->get_url(),

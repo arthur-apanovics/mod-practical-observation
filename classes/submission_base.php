@@ -250,6 +250,9 @@ class submission_base extends submission_status_store
      * Submitted time depends on when the submission was last observed, get time of last observation that was submitted.
      *
      * @return int|null null if activity not observed
+     * @throws ReflectionException
+     * @throws coding_exception
+     * @throws dml_exception
      */
     public function get_time_submitted_or_null(): ?int
     {
@@ -273,5 +276,45 @@ class submission_base extends submission_status_store
         }
 
         return $last;
+    }
+
+    /**
+     * Returns a grade based on "Binary competence scale"
+     *
+     * @return int 0 = no grade, 1 = not competent, 2 = competent
+     */
+    public function get_gradebook_grade(): int
+    {
+        if ($this->is_assessment_complete())
+        {
+            // activity complete
+            return 2;
+        }
+        else if ($this->is_assessment_incomplete())
+        {
+            // assessment failed - not competent
+            return 1;
+        }
+        else
+        {
+            // we treat every other status as 'not graded'
+            return 0;
+        }
+    }
+
+    public function update_gradebook(\stdClass $observation_record)
+    {
+        global $USER;
+
+        $grade = [];
+        $grade['userid'] = $this->userid;
+        $grade['usermodified'] = $USER->id;
+        $grade['dategraded'] = $this->timecompleted;
+        $grade['datesubmitted'] = $this->timestarted;
+        $grade['feedbackformat'] = FORMAT_PLAIN;
+        $grade['feedback'] = '';
+        $grade['rawgrade'] = $this->get_gradebook_grade();
+
+        observation_grade_item_update($observation_record, $grade);
     }
 }

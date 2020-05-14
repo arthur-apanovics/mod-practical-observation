@@ -107,9 +107,6 @@ class mod_observation_mod_form extends moodleform_mod
             get_string($element, OBSERVATION),
             array('optional' => true));
 
-        // Add standard grading elements.
-        $this->standard_grading_coursemodule_elements();
-
         // Add standard elements, common to all modules.
         $this->standard_coursemodule_elements();
 

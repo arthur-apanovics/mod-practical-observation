@@ -197,11 +197,15 @@ class mod_observation_renderer extends plugin_renderer_base
                 $template_data['extra']['group_selector_html'] = groups_print_activity_menu(
                     $cm, $observation->get_url(), true, !has_capability('moodle/site:accessallgroups', $context));
 
-                $userids = $this->get_usersids_in_group_or_null($cm, $context);
-                if (is_null($userids))
+                $current_group = groups_get_activity_group($cm, true);
+                if ($current_group !== 0) // 0 = all users
                 {
-                    notification::add(
-                        get_string('no_learners_in_group', \OBSERVATION), notification::WARNING);
+                    $userids = $this->get_usersids_in_group_or_null($current_group, $context);
+                    if (is_null($userids))
+                    {
+                        notification::add(
+                            get_string('no_learners_in_group', \OBSERVATION), notification::WARNING);
+                    }
                 }
             }
 
@@ -768,17 +772,16 @@ class mod_observation_renderer extends plugin_renderer_base
         return $out;
     }
 
-    private function get_usersids_in_group_or_null(cm_info $cm, context_module $context)
+    private function get_usersids_in_group_or_null(int $current_group, context_module $context)
     {
         global $DB;
 
         $userids = null;
-        $currentgroup = groups_get_activity_group($cm, true);
-        if (!empty($currentgroup))
+        if (!empty($current_group))
         {
             // We have a currently selected group.
             $groupstudentsjoins = get_enrolled_with_capabilities_join(
-                $context, '', observation::CAP_SUBMIT, $currentgroup);
+                $context, '', observation::CAP_SUBMIT, $current_group);
 
             if (!empty($groupstudentsjoins->joins))
             {

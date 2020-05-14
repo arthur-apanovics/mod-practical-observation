@@ -216,8 +216,8 @@ class submission extends submission_base /*TODO: implements templateable*/
 
         // update activity submission status
         $this->update_status_and_save($new_status);
-
-        // TODO: notifications
+        // update gradebook
+        $this->update_gradebook($observation->to_record());
 
         // trigger event
         $event = activity_assessed::create(

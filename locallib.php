@@ -32,6 +32,7 @@ namespace mod_observation;
 use coding_exception;
 use context_user;
 use file_storage;
+use grade_scale;
 use mod_observation\interfaces\templateable;
 use moodle_url;
 use stdClass;
@@ -41,6 +42,40 @@ defined('MOODLE_INTERNAL') || die();
 // common methods here
 class lib
 {
+    /**
+     * Fetches a binary type scale id or creates one if not found.
+     * Required to ensure gradebook supports our grade type.
+     *
+     * @return int scale id
+     */
+    public static function get_binary_scaleid_or_create()
+    {
+        global $CFG, $USER;
+        require_once($CFG->libdir . '/grade/grade_scale.php');
+        require_once($CFG->libdir . '/grade/constants.php');
+
+        // check for a binary scale
+        $scale = grade_scale::fetch(['scale' => 'Not yet competent,Competent']);
+
+        if (!$scale)
+        {
+            // binary scale absent, create our own
+            $params = [];
+            $params['courseid'] = 0; // not tying scale to a course makes it available globally
+            $params['userid'] = $USER->id;
+            $params['name'] = 'Binary competence scale';
+            $params['scale'] = 'Not yet competent,Competent';
+            $params['description'] = 'A binary rating scale that provides no further information beyond whether someone has demonstrated proficiency or not. Created & required by "Converse" activity';
+            $params['descriptionformat'] = 0;
+            $params['timemodified'] = time();
+
+            $scale = new grade_scale($params);
+            $scale->insert();
+        }
+
+        return $scale->id;
+    }
+
     /**
      * Returns observation activity status string for ANY class
      *
