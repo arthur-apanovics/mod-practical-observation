@@ -303,33 +303,6 @@ body.path-mod-observation {
     flex-basis: 100%;
   }
 
-  .obs-task-list {
-    display: flex;
-    border-bottom: 1px solid teal;
-    padding: 1px 7px 1px 7px;
-  }
-
-  .actions {
-    margin-left: auto;
-  }
-
-  .sub-list-actions {
-    margin-right: -9px;
-  }
-
-  .plus {
-    padding-right: 5px;
-  }
-
-  .edit {
-    padding-right: 5px;
-  }
-
-  .obs-subtask-list {
-    display: flex;
-    /*padding: 1px 7px 1px 7px;  */
-  }
-
   .btn-wrapper {
     text-align: center;
     margin-top: 2em;
@@ -379,6 +352,26 @@ body.observation-manage {
     &#mainTaskList {
       > li {
         margin-bottom: 2em;
+      }
+
+      .actions {
+        margin-left: auto;
+
+        .glyphicon.disabled {
+          color: gray;
+          cursor: not-allowed;
+        }
+      }
+
+      .obs-task-list {
+        display: flex;
+        border-bottom: 1px solid teal;
+        padding: 0 .5em;
+      }
+
+      .obs-subtask-list {
+        display: flex;
+        padding: 0 .5em;
       }
     }
 

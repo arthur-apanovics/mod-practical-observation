@@ -297,6 +297,14 @@ class mod_observation_renderer extends plugin_renderer_base
         $template_data = $observation->export_template_data();
         $out = '';
 
+        if ($observation->has_submissions(true))
+        {
+            // all submissions are preentry state, allow editing with a warning
+            notification::add(get_string('manage:editing_danger', OBSERVATION), notification::WARNING);
+            // override to allow editing
+            $template_data['has_submissions'] = false;
+        }
+
         $out .= $this->render_from_template('view-manage_tasks', $template_data);
 
         return $out;

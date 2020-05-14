@@ -1,70 +1,72 @@
 <h3>Editing observation: {{name}}</h3>
-
 <div class="list-wrapper">
     <div id="manage-task-list">
+        {{! TASK LIST }}
         <ol id="mainTaskList" observationid={{id}}>
             {{#tasks}}
                 <li class="task list-group-item" taskid="{{id}}" order="{{order}}">
                     <div class="page-container">
-
                         <div class="task-wrapper">
                             <span class="glyphicon glyphicon-move my-handle" aria-hidden="true"></span>
                             <div class="obs-task-list">
                                 <h4 style="margin-top: 0;">{{name}}</h4>
-                                <div class="actions">
-                                    <a href="{{{module_root}}}/manage_criteria.php?id={{cmid}}&taskid={{id}}" class="plus">
-                                    <span class="glyphicon glyphicon-plus"
-                                          title="{{#str}}add_criteria, observation{{/str}}"></span>
-                                    </a>
-                                    <a href="{{{module_root}}}/manage_task.php?id={{cmid}}&taskid={{id}}" class="edit">
-                                    <span class="glyphicon glyphicon-pencil"
-                                          title="{{#str}}edit_task, observation{{/str}}"></span>
-                                    </a>
-                                    <a href="{{{module_root}}}/manage_task.php?id={{cmid}}&taskid={{id}}&delete=1">
-                                    <span class="glyphicon glyphicon-trash"
-                                          title="{{#str}}delete_task, observation{{/str}}"></span>
-                                    </a>
-                                </div>
+                                {{#has_submissions}}
+                                    <div class="actions">
+                                        <span class="disabled glyphicon glyphicon-plus" title="{{#str}}manage:editing_disabled, observation{{/str}}"></span>
+                                        <a href="{{{module_root}}}/manage_task.php?id={{cmid}}&taskid={{id}}" class="edit">
+                                            <span class="glyphicon glyphicon-pencil" title="{{#str}}edit_task, observation{{/str}}"></span>
+                                        </a>
+                                        <span class="disabled glyphicon glyphicon-trash" title="{{#str}}manage:editing_disabled, observation{{/str}}"></span>
+                                    </div>
+                                {{/has_submissions}}
+                                {{^has_submissions}}
+                                    <div class="actions">
+                                        <a href="{{{module_root}}}/manage_criteria.php?id={{cmid}}&taskid={{id}}" class="plus">
+                                            <span class="glyphicon glyphicon-plus" title="{{#str}}add_criteria, observation{{/str}}"></span>
+                                        </a>
+                                        <a href="{{{module_root}}}/manage_task.php?id={{cmid}}&taskid={{id}}" class="edit">
+                                            <span class="glyphicon glyphicon-pencil" title="{{#str}}edit_task, observation{{/str}}"></span>
+                                        </a>
+                                        <a href="{{{module_root}}}/manage_task.php?id={{cmid}}&taskid={{id}}&delete=1">
+                                            <span class="glyphicon glyphicon-trash" title="{{#str}}delete_task, observation{{/str}}"></span>
+                                        </a>
+                                    </div>
+                                {{/has_submissions}}
                             </div>
                         </div>
-
+                        {{! CRITERIA LIST }}
                         <div class="manage-criteria-list">
                             <ol class="nested-criteria">
                                 {{#criteria}}
                                     <li class="list-group-item" criteriaid={{id}}>
-
                                         <div class="page-container">
-
                                             <span class="glyphicon glyphicon-move my-handle" aria-hidden="true"></span>
                                             <div class="obs-subtask-list">
-
                                                 <span class="title">{{{name}}}</span>
-
                                                 {{#feedback_required}}
                                                     <span class="glyphicon glyphicon-paperclip"
                                                           title="{{#str}}feedback_required, observation{{/str}}"></span>
                                                 {{/feedback_required}}
-
-                                                <div class="actions sub-list-actions">
-
-                                                    <a href="{{{module_root}}}/manage_criteria.php?id={{cmid}}&taskid={{taskid}}&criteriaid={{id}}"
-                                                    class="edit">
-                                                    <span class="glyphicon glyphicon-pencil"
-                                                          title="{{#str}}edit_criteria, observation{{/str}}"></span>
-                                                    </a>
-
-                                                    <a href="{{{module_root}}}/manage_criteria.php?id={{cmid}}&taskid={{taskid}}&criteriaid={{id}}
-                                                    &delete=1">
-                                                    <span class="glyphicon glyphicon-trash"
-                                                          title="{{#str}}delete_criteria, observation{{/str}}"></span>
-                                                    </a>
-
-                                                </div>
-
+                                                {{#has_submissions}}
+                                                    <div class="disabled actions sub-list-actions">
+                                                        <a href="{{{module_root}}}/manage_criteria.php?id={{cmid}}&taskid={{taskid}}&criteriaid={{id}}" class="edit">
+                                                            <span class="glyphicon glyphicon-pencil" title="{{#str}}edit_criteria, observation{{/str}}"></span>
+                                                        </a>
+                                                        <span class="disabled glyphicon glyphicon-trash" title="{{#str}}manage:editing_disabled, observation{{/str}}"></span>
+                                                    </div>
+                                                {{/has_submissions}}
+                                                {{^has_submissions}}
+                                                    <div class="actions sub-list-actions">
+                                                        <a href="{{{module_root}}}/manage_criteria.php?id={{cmid}}&taskid={{taskid}}&criteriaid={{id}}" class="edit">
+                                                            <span class="glyphicon glyphicon-pencil" title="{{#str}}edit_criteria, observation{{/str}}"></span>
+                                                        </a>
+                                                        <a href="{{{module_root}}}/manage_criteria.php?id={{cmid}}&taskid={{taskid}}&criteriaid={{id}} &delete=1">
+                                                            <span class="glyphicon glyphicon-trash" title="{{#str}}delete_criteria, observation{{/str}}"></span>
+                                                        </a>
+                                                    </div>
+                                                {{/has_submissions}}
                                             </div>
-
                                         </div>
-
                                     </li>
                                 {{/criteria}}
                             </ol>
@@ -74,7 +76,6 @@
                                 </span>
                             {{/criteria}}
                         </div>
-
                     </div>
                 </li>
             {{/tasks}}
@@ -84,11 +85,12 @@
         </ol>
     </div>
 </div>
-
 <div class="btn-wrapper">
-    <a href="{{{module_root}}}/manage_task.php?id={{cmid}}" class="btn btn-primary" id="addButton">
-    {{#str}}add_task, observation{{/str}}
-    </a>
+    {{^has_submissions}}
+        <a href="{{{module_root}}}/manage_task.php?id={{cmid}}" class="btn btn-primary" id="addButton">
+            {{#str}}add_task, observation{{/str}}
+        </a>
+    {{/has_submissions}}
     <a href="{{{module_root}}}/view.php?id={{cmid}}" class="btn btn-secondary">
     {{#str}}back_to_activity, observation{{/str}}
     </a>

@@ -24,8 +24,8 @@ use mod_observation\criteria;
 use mod_observation\criteria_base;
 use mod_observation\observation;
 use mod_observation\observation_base;
-use mod_observation\task;
-use mod_observation\task_base;
+
+global $DB;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('lib.php');
@@ -101,6 +101,20 @@ if ($data = $form->get_data())
     else
     {
         // update
+
+        // make sure there's no mischief
+        if ($observation->has_submissions() && !$observation->has_submissions(true))
+        {
+            // check feedback requirement hasn't changed as it is not allowed to edit this setting after submissions made
+            $current_value = $DB->get_field(
+                criteria::TABLE, criteria::COL_FEEDBACK_REQUIRED, ['id' => $data->criteriaid]);
+            if ($current_value != $criteria->get(criteria::COL_FEEDBACK_REQUIRED))
+            {
+                throw new coding_exception(
+                    sprintf('Not allowed to change "%s" after submissions made', criteria::COL_FEEDBACK_REQUIRED));
+            }
+        }
+
         $criteria->set(criteria::COL_ID, $data->criteriaid);
         $criteria->set($criteria::COL_SEQUENCE, $criteria->get_current_sequence_number());
 

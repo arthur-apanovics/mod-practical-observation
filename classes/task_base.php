@@ -240,6 +240,27 @@ class task_base extends db_model_base
         return false;
     }
 
+    public function has_submissions(int $userid = null): bool
+    {
+        global $DB;
+
+        if (!is_null($userid))
+        {
+            $count = $DB->count_records(learner_task_submission::TABLE, [
+                learner_task_submission::COL_TASKID => $this->id,
+                learner_task_submission::COL_USERID => $this->$userid
+            ]);
+        }
+        else
+        {
+            $count = $DB->count_records(learner_task_submission::TABLE, [
+                learner_task_submission::COL_TASKID => $this->id
+            ]);
+        }
+
+        return ($count !== false && $count > 0);
+    }
+
     public function get_moodle_form_data()
     {
         return [

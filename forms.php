@@ -25,6 +25,7 @@ use mod_observation\external_request;
 use mod_observation\lib;
 use mod_observation\observer;
 use mod_observation\task;
+use mod_observation\task_base;
 use mod_observation\user_external_request;
 
 if (!defined('MOODLE_INTERNAL'))
@@ -115,7 +116,11 @@ class observation_criteria_form extends moodleform
 
         // feedback required
         $element = criteria::COL_FEEDBACK_REQUIRED;
-        $mform->addElement('advcheckbox', $element, get_string($element, 'observation'));
+        $has_submissions = (new task_base($taskid))->has_submissions();
+        $attributes = $has_submissions
+            ? ['disabled' => true, 'title' => get_string('manage:editing_disabled', OBSERVATION)]
+            : null;
+        $mform->addElement('advcheckbox', $element, get_string($element, 'observation'), null, $attributes);
         $mform->addHelpButton($element, $element, OBSERVATION);
         $mform->setDefault($element, false);
 

@@ -489,7 +489,8 @@ class observation extends observation_base implements templateable
             'courseid'    => $this->course,
             'cmid'        => $this->cm->id,
 
-            'capabilities' => $this->export_capabilities()
+            'capabilities'    => $this->export_capabilities(),
+            'has_submissions' => $this->has_submissions()
         ];
     }
 }

@@ -188,27 +188,6 @@ body.path-mod-observation .list-wrapper {
 body.path-mod-observation .page-container {
   flex-basis: 100%;
 }
-body.path-mod-observation .obs-task-list {
-  display: flex;
-  border-bottom: 1px solid teal;
-  padding: 1px 7px 1px 7px;
-}
-body.path-mod-observation .actions {
-  margin-left: auto;
-}
-body.path-mod-observation .sub-list-actions {
-  margin-right: -9px;
-}
-body.path-mod-observation .plus {
-  padding-right: 5px;
-}
-body.path-mod-observation .edit {
-  padding-right: 5px;
-}
-body.path-mod-observation .obs-subtask-list {
-  display: flex;
-  /*padding: 1px 7px 1px 7px;  */
-}
 body.path-mod-observation .btn-wrapper {
   text-align: center;
   margin-top: 2em;
@@ -242,6 +221,22 @@ body.observation-manage .manage-criteria-list > ol > li::before {
 }
 body.observation-manage ol#mainTaskList > li {
   margin-bottom: 2em;
+}
+body.observation-manage ol#mainTaskList .actions {
+  margin-left: auto;
+}
+body.observation-manage ol#mainTaskList .actions .glyphicon.disabled {
+  color: gray;
+  cursor: not-allowed;
+}
+body.observation-manage ol#mainTaskList .obs-task-list {
+  display: flex;
+  border-bottom: 1px solid teal;
+  padding: 0 .5em;
+}
+body.observation-manage ol#mainTaskList .obs-subtask-list {
+  display: flex;
+  padding: 0 .5em;
 }
 body.observation-manage ol li.list-group-item .my-handle {
   cursor: move;

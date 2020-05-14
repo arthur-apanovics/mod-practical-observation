@@ -448,6 +448,41 @@ class observation_base extends db_model_base
         return true;
     }
 
+    /**
+     * @param bool $all_preentry if true, will check if all existing submissions are
+     * in the {@link STATUS_LEARNER_PENDING} state, meaning learners have only viewed the activity but not submitted
+     * @return bool
+     * @throws \dml_exception
+     */
+    public function has_submissions(bool $all_preentry = false): bool
+    {
+        global $DB;
+
+        // counts task submissions
+        // $sql = 'SELECT lts.id
+        //         FROM {' . learner_task_submission::TABLE . '} lts
+        //         JOIN {' . task::TABLE . '} t ON t.id = lts.' . learner_task_submission::COL_TASKID . '
+        //         WHERE t.' . task::COL_OBSERVATIONID . ' = ?';
+        // $count = $DB->count_records_sql($sql, [$this->id]);
+
+        // counts activity submissions
+        $count = $DB->count_records(submission::TABLE, [submission::COL_OBSERVATIONID => $this->id]);
+
+        if ($all_preentry)
+        {
+            $preentry = $DB->count_records(submission::TABLE, [
+                submission::COL_OBSERVATIONID => $this->id,
+                submission::COL_STATUS => submission::STATUS_LEARNER_PENDING
+            ]);
+
+            return $count > 0 && ($preentry === $count);
+        }
+        else
+        {
+            return $count > 0;
+        }
+    }
+
     public function all_tasks_observation_pending_or_in_progress(int $userid): bool
     {
         foreach ($this->get_tasks() as $task)

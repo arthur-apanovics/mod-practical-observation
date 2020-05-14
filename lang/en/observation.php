@@ -116,6 +116,8 @@ $string['manage:no_tasks'] = 'This activity does not have any tasks, use button 
 $string['manage:missing_criteria'] = 'One or more tasks in this activity are missing completion criteria. Please correct this by using the "Edit tasks" section.';
 $string['manage:empty'] = 'No tasks yet';
 $string['manage:edit_tasks'] = 'Edit tasks';
+$string['manage:editing_danger'] = 'Warning:<br>Some learners have viewed this activity but not have attempted to make submissions yet. Once a submission has been made, editing will be disabled.<br>Please proceed with caution.';
+$string['manage:editing_disabled'] = 'Prohibited after submissions have been made';
 
 // TASK SPECIFIC
 $string['add_task'] = 'Add task';

@@ -198,7 +198,7 @@ class task extends task_base implements templateable
      * @return bool
      * @throws coding_exception
      */
-    public function has_submission(int $userid = null): bool
+    public function has_submissions(int $userid = null): bool
     {
         if ($this->is_filtered && !is_null($userid))
         {
@@ -289,7 +289,7 @@ class task extends task_base implements templateable
             'assessor_feedback'        => $assessor_feedback_data,
 
             // other data
-            'has_submission'             => $this->has_submission(),
+            'has_submission'             => $this->has_submissions(),
             'has_feedback'               => $has_feedback,
             'learner_submission_status'  => $learner_submission_status,
             'assessor_submission_status' => $assessor_submission_status,
