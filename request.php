@@ -187,7 +187,7 @@ if ($data = $form->get_data())
         }
     }
 
-    //  no observer assignment OR submitted observer is the same as currently assigned observer
+    // no observer assignment OR submitted observer is the same as currently assigned observer
     $observer = observer::update_or_create($submitted);
     // assign observer to this submission
     $assignment = $task_submission->assign_observer($observer, $data->message);

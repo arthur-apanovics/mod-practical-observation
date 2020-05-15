@@ -181,6 +181,7 @@ class task extends task_base implements templateable
             $task_submission->set(learner_task_submission::COL_USERID, $userid);
             $task_submission->set(learner_task_submission::COL_TIMESTARTED, time());
             $task_submission->set(learner_task_submission::COL_TIMECOMPLETED, 0);
+            $task_submission->set(learner_task_submission::COL_ATTEMPTS_OBSERVATION, 0);
             $task_submission->set(
                 learner_task_submission::COL_STATUS, learner_task_submission::STATUS_LEARNER_PENDING);
 

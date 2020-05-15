@@ -36,7 +36,6 @@ class submission_base extends submission_status_store
     public const COL_OBSERVATIONID        = 'observationid';
     public const COL_USERID               = 'userid';
     public const COL_STATUS               = 'status';
-    public const COL_ATTEMPTS_OBSERVATION = 'attempts_observation';
     public const COL_ATTEMPTS_ASSESSMENT  = 'attempts_assessment';
     public const COL_TIMESTARTED          = 'timestarted';
     public const COL_TIMECOMPLETED        = 'timecompleted';
@@ -71,10 +70,6 @@ class submission_base extends submission_status_store
      */
     protected $timestarted;
     /**
-     * @var int number of observation attempts
-     */
-    protected $attempts_observation;
-    /**
      * @var int number of assessment attempts
      */
     protected $attempts_assessment;
@@ -98,18 +93,35 @@ class submission_base extends submission_status_store
 
     /**
      * @param string $new_status
-     * @param bool   $skip_if_same if submission
+     * @param bool   $allow_same should we freak out if status is alreadt equalt to $new_status. true = do not freak out
      * @return $this
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function update_status_and_save(string $new_status, bool $skip_if_same = false): self
+    public function update_status_and_save(string $new_status, bool $allow_same = false): self
     {
         // extra validation to be done here
 
-        if (!$skip_if_same && $new_status !== $this->status)
+        if ($new_status !== $this->status)
         {
             $this->set(self::COL_STATUS, $new_status, true);
+        }
+        else
+        {
+            if (!$allow_same)
+            {
+                throw new coding_exception(
+                    sprintf(
+                        'Attempted to increment attempt number for submission id "%d" when status is already "%s"',
+                        $this->id, self::STATUS_ASSESSMENT_PENDING));
+            }
+            else
+            {
+                debugging(
+                    sprintf(
+                        'Attempted to set submission with id "%d" status to "%s" but that is already the current status',
+                        $this->id, $new_status), DEBUG_DEVELOPER, debug_backtrace());
+            }
         }
 
         return $this;
@@ -154,6 +166,24 @@ class submission_base extends submission_status_store
         }
 
         return $this->_observation;
+    }
+
+    /**
+     * @return array ['task_id' => 'attempts_number']
+     * @throws ReflectionException
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public function get_task_observation_attempts(): array
+    {
+        $result = [];
+        foreach ($this->get_learner_task_submissions() as $task_submission)
+        {
+            $result[$task_submission->get(learner_task_submission::COL_TASKID)] =
+                $task_submission->get(learner_task_submission::COL_ATTEMPTS_OBSERVATION);
+        }
+
+        return $result;
     }
 
     public function is_observed()
@@ -223,25 +253,14 @@ class submission_base extends submission_status_store
     }
 
     /**
-     * @return int current observation attempt
-     * @throws coding_exception
-     * @throws dml_exception
-     */
-    public function increment_observation_attempt_number_and_save(): int
-    {
-        $this->set(self::COL_ATTEMPTS_OBSERVATION, ($this->attempts_observation + 1), true);
-
-        return $this->attempts_observation;
-    }
-
-    /**
+     * @param bool $save update db record immediately
      * @return int current assessment attempt
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function increment_assessment_attempt_number_and_save(): int
+    public function increment_assessment_attempt_number(bool $save): int
     {
-        $this->set(self::COL_ATTEMPTS_ASSESSMENT, ($this->attempts_assessment + 1), true);
+        $this->set(self::COL_ATTEMPTS_ASSESSMENT, ($this->attempts_assessment + 1), $save);
 
         return $this->attempts_assessment;
     }

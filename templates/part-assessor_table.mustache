@@ -30,8 +30,18 @@
                         {{learner}}
                     </a>
                 </td>
-                <td class="attempts-group observation">
-                    {{attempt_number_observation}}
+                <td class="attempts-group observation"
+                    {{! TODO: clickable attempt summary }}
+                    title="
+                    {{#attempts_observation_summary}}
+                        '{{task}}' - {{attempts}}
+                    {{/attempts_observation_summary}}">
+                    {{#attempts_observation_summary}}
+                        hover
+                    {{/attempts_observation_summary}}
+                    {{^attempts_observation_summary}}
+                        -
+                    {{/attempts_observation_summary}}
                 </td>
                 <td class="attempts-group assessment">
                     {{attempt_number_assessment}}

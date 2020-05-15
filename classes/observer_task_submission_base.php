@@ -89,6 +89,9 @@ class observer_task_submission_base extends db_model_base
         {
             // all tasks observed, assessment needed
             $assessment_needed = true;
+            // increment assessment attempt count
+            $submission->increment_assessment_attempt_number(false);
+            // set new status and update db
             $submission->update_status_and_save(submission::STATUS_ASSESSMENT_PENDING);
         }
         else if ($submission->is_observed_as_incomplete())

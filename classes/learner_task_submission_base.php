@@ -30,12 +30,13 @@ class learner_task_submission_base extends submission_status_store
 {
     public const TABLE = OBSERVATION . '_learner_task_submission';
 
-    public const COL_TASKID        = 'taskid';
-    public const COL_SUBMISISONID  = 'submisisonid';
-    public const COL_USERID        = 'userid';
-    public const COL_STATUS        = 'status';
-    public const COL_TIMESTARTED   = 'timestarted';
-    public const COL_TIMECOMPLETED = 'timecompleted';
+    public const COL_TASKID               = 'taskid';
+    public const COL_SUBMISISONID         = 'submisisonid';
+    public const COL_USERID               = 'userid';
+    public const COL_STATUS               = 'status';
+    public const COL_TIMESTARTED          = 'timestarted';
+    public const COL_TIMECOMPLETED        = 'timecompleted';
+    public const COL_ATTEMPTS_OBSERVATION = 'attempts_observation';
 
     /**
      * @var int
@@ -74,6 +75,10 @@ class learner_task_submission_base extends submission_status_store
      * @var int
      */
     protected $timecompleted;
+    /**
+     * @var int number of observation attempts
+     */
+    protected $attempts_observation;
 
 
     public function has_been_observed()
@@ -99,6 +104,8 @@ class learner_task_submission_base extends submission_status_store
      * Fetches currently active observer assignment or null if one does not exist
      *
      * @return observer_assignment_base|null null if no record found
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
      * @throws coding_exception
      */
     public function get_active_observer_assignment_or_null()
@@ -214,6 +221,9 @@ class learner_task_submission_base extends submission_status_store
     {
         $learner_attempt->validate($this);
 
+        // increment observation attempt count
+        $this->increment_observation_attempt_number(false);
+        // set new status and save
         $this->update_status_and_save(self::STATUS_OBSERVATION_PENDING);
 
         $submisison = $this->get_submission();
@@ -222,8 +232,6 @@ class learner_task_submission_base extends submission_status_store
         {
             // submission for every task has been made, update activity submission status
             $submisison->update_status_and_save(submission::STATUS_OBSERVATION_PENDING);
-            // increment observation attempt count
-            $submisison->increment_observation_attempt_number_and_save();
         }
 
         // trigger event
@@ -242,7 +250,21 @@ class learner_task_submission_base extends submission_status_store
     }
 
     /**
-     * This method should be used when changing submission state as it performs validation to detect possible issues.
+     * @param bool $save save immediately
+     * @return int current observation attempt
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function increment_observation_attempt_number(bool $save): int
+    {
+        $this->set(self::COL_ATTEMPTS_OBSERVATION, ($this->attempts_observation + 1), $save);
+
+        return $this->attempts_observation;
+    }
+
+    /**
+     * This method should be used when changing submission state as it performs validation to detect possible issues
+     * and sets stuff like 'timecompleted', etc.
      *
      * @param string $new_status {@link status}
      * @return self

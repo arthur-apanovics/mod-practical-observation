@@ -181,17 +181,6 @@ class learner_task_submission extends learner_task_submission_base implements te
             // activity submission
             $submission = $this->get_submission();
             $submission->update_status_and_save(submission::STATUS_LEARNER_IN_PROGRESS, true);
-            // update attempt number in submission
-            switch ($this->status)
-            {
-                case self::STATUS_OBSERVATION_INCOMPLETE:
-                    $submission->increment_observation_attempt_number_and_save();
-                    break;
-
-                case self::STATUS_ASSESSMENT_INCOMPLETE:
-                    $submission->increment_assessment_attempt_number_and_save();
-                    break;
-            }
 
             // trigger event
             $event = attempt_started::create(

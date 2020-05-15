@@ -180,8 +180,14 @@ class observation extends observation_base implements templateable
         }
         else
         {
+            list($in_sql, $in_params) = $DB->get_in_or_equal($userids);
+            $sql = "SELECT *
+                    FROM {" . submission::TABLE . "}
+                    WHERE " . submission::COL_USERID . " $in_sql
+                    AND " . submission::COL_OBSERVATIONID . " = ?";
+            $in_params[] = $this->id;
             return submission::to_class_instances(
-                $DB->get_records_list(submission::TABLE, submission::COL_USERID, $userids));
+                $DB->get_records_sql($sql, $in_params));
         }
     }
 
@@ -222,6 +228,7 @@ class observation extends observation_base implements templateable
      * Checks if all criteria for completing this observation are complete
      * @param int $userid
      * @return bool complete or not
+     * @throws coding_exception
      */
     public function is_activity_complete(int $userid): bool
     {
@@ -325,7 +332,6 @@ class observation extends observation_base implements templateable
             $submission->set(submission::COL_OBSERVATIONID, $this->id);
             $submission->set(submission::COL_USERID, $learnerid);
             $submission->set(submission::COL_STATUS, submission::STATUS_LEARNER_PENDING);
-            $submission->set(submission::COL_ATTEMPTS_OBSERVATION, 0);
             $submission->set(submission::COL_ATTEMPTS_ASSESSMENT, 0);
             $submission->set(submission::COL_TIMESTARTED, time());
             $submission->set(submission::COL_TIMECOMPLETED, 0);
@@ -444,17 +450,26 @@ class observation extends observation_base implements templateable
             $userid = $submission->get_userid();
             $total = $this->get_task_count();
             $observed = $submission->get_observed_task_count();
+            $learner_url = (new moodle_url('/user/profile.php', ['id' => $userid, 'course' => $this->course]));
+            $assessment_attempts = $submission->get(submission::COL_ATTEMPTS_ASSESSMENT);
+
+            $observation_attempt_summary = [];
+            foreach ($submission->get_task_observation_attempts() as $task_id => $attempts)
+            {
+                /** @var $task task */
+                $task = lib::find_in_assoc_array_by_key_value_or_null($this->get_tasks(), 'id', $task_id);
+                $observation_attempt_summary[] = ['task' => $task->get_formatted_name(), 'attempts' => $attempts];
+            }
 
             $data[] = [
-                'userid'                     => $userid,
-                'learner'                    => fullname(core_user::get_user($userid)),
-                'learner_profile_url'        => (new moodle_url(
-                    '/user/profile.php', ['id' => $userid, 'course' => $this->course]))->out(false),
-                'attempt_number_observation' => $submission->get(submission::COL_ATTEMPTS_OBSERVATION),
-                'attempt_number_assessment'  => $submission->get(submission::COL_ATTEMPTS_ASSESSMENT),
-                'observed_count_formatted'   => sprintf('%d/%d', $observed, $total),
-                'is_complete'                => $submission->is_assessment_complete(),
-                'submission_status'          => lib::get_status_string($submission->get(submission::COL_STATUS))
+                'userid'                       => $userid,
+                'learner'                      => fullname(core_user::get_user($userid)),
+                'learner_profile_url'          => $learner_url,
+                'attempts_observation_summary' => $observation_attempt_summary,
+                'attempt_number_assessment'    => $assessment_attempts == 0 ? '-' : $assessment_attempts,
+                'observed_count_formatted'     => sprintf('%d/%d', $observed, $total),
+                'is_complete'                  => $submission->is_assessment_complete(),
+                'submission_status'            => lib::get_status_string($submission->get(submission::COL_STATUS))
             ];
         }
 
