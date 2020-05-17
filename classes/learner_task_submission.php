@@ -225,15 +225,14 @@ class learner_task_submission extends learner_task_submission_base implements te
      * Assigns submitted observer to this learner task submission.
      *
      * @param observer_base $submitted_observer
-     * @param string        $message message to include in email for observer
      * @param string|null   $explanation if learner is switching observers, he/she must explain why
      * @return observer_assignment
-     * @throws dml_exception
      * @throws coding_exception
-     * @throws moodle_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
      */
     public function assign_observer(
-        observer_base $submitted_observer, string $message, string $explanation = null): observer_assignment
+        observer_base $submitted_observer, string $explanation = null): observer_assignment
     {
         if (!$submitted_observer->get_id_or_null())
         {
@@ -293,7 +292,7 @@ class learner_task_submission extends learner_task_submission_base implements te
      * @return observer_assignment|null null if no record found
      * @throws coding_exception
      */
-    public function get_active_observer_assignment_or_null()
+    public function get_active_observer_assignment_or_null(): ?observer_assignment_base
     {
         return lib::find_in_assoc_array_by_criteria_or_null(
             $this->observer_assignments,

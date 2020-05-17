@@ -81,23 +81,19 @@ class learner_task_submission_base extends submission_status_store
     protected $attempts_observation;
 
 
-    public function has_been_observed()
+    public function get_latest_observer_assignment_or_null(): ?observer_assignment_base
     {
-        if ($assignment = $this->get_observer_assignment_base_or_null())
-        {
-            if ($observer_submission = $assignment->get_observer_submission_base_or_null())
-            {
-                return $observer_submission->is_submitted();
-            }
-        }
+        global $DB;
 
-        return false;
-    }
+        $result = $DB->get_records(
+            observer_assignment::TABLE,
+            [observer_assignment::COL_LEARNER_TASK_SUBMISSIONID => $this->id],
+            sprintf('%s DESC', observer_assignment::COL_TIMEASSIGNED),
+            '*',
+            0,
+            1);
 
-    public function get_observer_assignment_base_or_null(): ?observer_assignment_base
-    {
-        return observer_assignment_base::read_by_condition_or_null(
-            [observer_assignment::COL_LEARNER_TASK_SUBMISSIONID => $this->id]);
+         return $result !== false ? new observer_assignment_base(reset($result)) : null;
     }
 
     /**
@@ -108,7 +104,7 @@ class learner_task_submission_base extends submission_status_store
      * @throws \dml_missing_record_exception
      * @throws coding_exception
      */
-    public function get_active_observer_assignment_or_null()
+    public function get_active_observer_assignment_or_null(): ?observer_assignment_base
     {
         return observer_assignment_base::read_by_condition_or_null(
             [
@@ -196,10 +192,11 @@ class learner_task_submission_base extends submission_status_store
      * @return task_base
      * @throws \dml_missing_record_exception
      * @throws coding_exception
+     * @throws \dml_exception
      */
     public function get_task_base()
     {
-        return new task_base($this->taskid);
+        return task_base::read_or_null($this->taskid);
     }
 
     /**

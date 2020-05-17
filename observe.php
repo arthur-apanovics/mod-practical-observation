@@ -34,6 +34,22 @@ require_once('lib.php');
 
 $token = required_param('token', PARAM_ALPHANUM);
 $observer_assignment = observer_assignment::read_by_token_or_null($token, true);
+$learner_task_submission = $observer_assignment->get_learner_task_submission_base();
+$learner = core_user::get_user($learner_task_submission->get_userid());
+$observer = $observer_assignment->get_observer();
+$task = $learner_task_submission->get_task_base();
+$observation = $task->get_observation_base();
+
+// Print the page header.
+$name = get_string('observer_page_title', OBSERVATION, fullname($learner));
+$PAGE->set_context(null);
+$PAGE->set_url($observer_assignment->get_review_url());
+$PAGE->set_title($name);
+$PAGE->set_heading($name);
+$PAGE->set_pagelayout('popup');
+
+$PAGE->add_body_class('observation-observe');
+
 
 if (is_null($observer_assignment))
 {
@@ -41,9 +57,12 @@ if (is_null($observer_assignment))
 }
 else if (!$observer_assignment->is_active())
 {
-    print_error(get_string('error:not_active_observer', OBSERVATION));
+    if (!$observer_assignment->is_declined())
+    {
+        print_error(get_string('error:not_active_observer', OBSERVATION));
+    }
 }
-// TODO: seems to print error once a second observation has been submitted instead of printing 'complete' view
+// seems to print error once a second observation has been submitted instead of printing 'complete' view
 // else if ($observer_assignment->is_observation_complete())
 // {
 //     print_error(get_string('error:observation_complete', 'observation'));
@@ -65,14 +84,13 @@ if (isloggedin())
         // TODO: notify admins of logged in user observation
     }
 
-    $learner_task_submission = $observer_assignment->get_learner_task_submission_base();
     if ($learner_task_submission->get_userid() == $USER->id)
     {
         print_error('You cannot observe yourself!');
 
         //TODO notify assessor of self observation attempt
     }
-    else if ($USER->email != $observer_assignment->get_observer()->get_email())
+    else if ($USER->email != $observer->get_email())
     {
         //TODO notify admins
         // has account in lms, is logged in, is not one being observed, is not assigned observer (based on email)
@@ -93,23 +111,21 @@ if (optional_param('submit-accept', 0, PARAM_BOOL))
 }
 else if (optional_param('submit-decline', 0, PARAM_BOOL))
 {
-    // TODO: declined observation
     $observer_assignment->decline();
 
     // TODO: Event
 
     // emails
-    $learner_task_submission = $observer_assignment->get_learner_task_submission_base();
-    $task = $learner_task_submission->get_task_base();
-    $observer = $observer_assignment->get_observer();
-    $learner = core_user::get_user($learner_task_submission->get_userid());
+    $course = $observation->get_course();
+    $review_url = $observer_assignment->get_review_url();
+
     $lang_data = [
-        'learner_fullname'  => fullname(\core_user::get_user($learner)),
+        'learner_fullname'  => fullname($learner),
         'observer_fullname' => $observer->get_formatted_name(),
         'task_name'         => $task->get_formatted_name(),
         'activity_name'     => $observation->get_formatted_name(),
-        'activity_url'      => $activity_url,
-        'observe_url'       => $observer_assignment->get_review_url(),
+        'activity_url'      => $observation->get_url(),
+        'observe_url'       => $review_url,
         'course_fullname'   => $course->fullname,
         'course_shortname'  => $course->shortname,
         'course_url'        => new \moodle_url('/course/view.php', ['id' => $course->id]),
@@ -126,29 +142,26 @@ else if (optional_param('submit-decline', 0, PARAM_BOOL))
         $learner,
         get_string('email:learner_observation_declined_subject', OBSERVATION, $lang_data),
         get_string('email:learner_observation_declined_body', OBSERVATION, $lang_data));
+
+    // simply redirect, we'll show a special page for declined observations
+    redirect($review_url);
 }
 
-
-// Print the page header.
-$name = 'TODO'; // TODO name name name name name name name name name name name
-$PAGE->set_context(null);
-$PAGE->set_url($observer_assignment->get_review_url());
-$PAGE->set_title($name);
-$PAGE->set_heading($name);
-$PAGE->set_pagelayout('popup');
-
-$PAGE->add_body_class('observation-observe');
-
-// Output starts here.
-/* @var $renderer mod_observation_renderer */
+/* @var $renderer mod_observation_renderer get this early as we might need it if observation has been declined */
 $renderer = $PAGE->get_renderer('observation');
 
 echo $OUTPUT->header();
 
-$observer_submission = $observer_assignment->get_observer_submission_or_null();
-if (!is_null($observer_submission) && $observer_submission->is_submitted())
+if ($observer_assignment->is_declined())
 {
-    echo $renderer->view_observer_completed();
+    echo $renderer->view_observer_declined($observer_assignment, $learner_task_submission, $task);
+}
+if ($observer_submission = $observer_assignment->get_observer_submission_or_null())
+{
+    if ($observer_submission->is_submitted())
+    {
+        echo $renderer->view_observer_completed($learner_task_submission, $task);
+    }
 }
 else if (!$observer_assignment->is_accepted())
 {

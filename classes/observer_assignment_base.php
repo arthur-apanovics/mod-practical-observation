@@ -90,6 +90,14 @@ class observer_assignment_base extends db_model_base
     }
 
     /**
+     * @return bool true if accepted, false if declined OR no decision yet
+     */
+    public function is_declined()
+    {
+        return (!is_null($this->observation_accepted) && ((bool) !$this->observation_accepted));
+    }
+
+    /**
      * @return observer
      * @throws \coding_exception
      * @throws \dml_exception

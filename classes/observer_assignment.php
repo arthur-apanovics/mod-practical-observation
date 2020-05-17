@@ -160,9 +160,10 @@ class observer_assignment extends observer_assignment_base implements templateab
 
     public function get_task_base(): task_base
     {
-        $taskid = $this->get_learner_task_submission_base()->get(learner_task_submission::COL_TASKID);
+        $taskid = $this->get_learner_task_submission_base()
+            ->get(learner_task_submission::COL_TASKID);
 
-        return new task_base($taskid);
+        return task_base::read_or_null($taskid);
     }
 
     public function get_learner_task_submission_base(): learner_task_submission_base
@@ -181,10 +182,23 @@ class observer_assignment extends observer_assignment_base implements templateab
         return $this->update();
     }
 
-    public function decline()
+    /**
+     * Observer declined observation
+     *
+     * @return $this
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public function decline(): self
     {
-        // todo: implement method
-        throw new \coding_exception(__METHOD__ . ' not implemented');
+        // set as declined
+        $this->set(self::COL_OBSERVATION_ACCEPTED, false);
+        // make sure observer is not set as active
+        $this->set(self::COL_ACTIVE, false);
+        // set time
+        $this->set(self::COL_TIMEACCEPTED, time());
+
+        return $this->update();
     }
 
     public function get_observer_feedback_or_create(

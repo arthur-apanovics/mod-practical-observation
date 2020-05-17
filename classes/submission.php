@@ -110,6 +110,26 @@ class submission extends submission_base /*TODO: implements templateable*/
         return true;
     }
 
+    /**
+     * @return observer_assignment[] current, declined observer assignments
+     */
+    public function get_declined_observation_assignments(): array
+    {
+        $declined = [];
+        foreach ($this->get_learner_task_submissions() as $task_submission)
+        {
+            if ($observer_assignment = $task_submission->get_latest_observer_assignment_or_null())
+            {
+                if ($observer_assignment->is_declined())
+                {
+                    $declined[] = $observer_assignment;
+                }
+            }
+        }
+
+        return $declined;
+    }
+
     public function is_all_tasks_have_submission(): bool
     {
         return count($this->get_learner_task_submissions()) === $this->get_observation()->get_task_count();

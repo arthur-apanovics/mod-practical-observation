@@ -91,7 +91,7 @@ if (optional_param('confirm', 0, PARAM_BOOL))
     $observer = observer::update_or_create($submitted);
 
     $explanation = required_param('user_input', PARAM_TEXT);
-    $assignment = $task_submission->assign_observer($observer, $message, $explanation);
+    $assignment = $task_submission->assign_observer($observer, $explanation);
 
     $attempt->submit($task_submission);
     $task_submission->submit($attempt);
@@ -186,15 +186,41 @@ if ($data = $form->get_data())
             // dies here
         }
     }
-
     // no observer assignment OR submitted observer is the same as currently assigned observer
+
+    // attempt can be in a submitted state already, check
+    if (!$attempt->is_submitted())
+    {
+        // submit task submission and attempt
+        $attempt->submit($task_submission);
+        $task_submission->submit($attempt);
+    }
+    else
+    {
+        // 'denied observation' scenario where a submission has already been made
+        if ($latest_assignment = $task_submission->get_latest_observer_assignment_or_null())
+        {
+            if (!$latest_assignment->is_declined())
+            {
+                throw new coding_exception(
+                    sprintf(
+                        'Attempt id %d has not been submitted when observation request was made',
+                        $attempt->get_id_or_null()));
+            }
+        }
+        else
+        {
+            throw new coding_exception(
+                sprintf(
+                    'No observer assignment exists for already submitted attempt with id %d',
+                    $attempt->get_id_or_null()));
+        }
+    }
+
+    // create/update observer record
     $observer = observer::update_or_create($submitted);
     // assign observer to this submission
-    $assignment = $task_submission->assign_observer($observer, $data->message);
-
-    // submit task submission and attempt
-    $attempt->submit($task_submission);
-    $task_submission->submit($attempt);
+    $assignment = $task_submission->assign_observer($observer);
 
     // send email to assigned observer
     $lang_data = [

@@ -71,7 +71,7 @@ class learner_attempt_base extends db_model_base
      * @throws \dml_missing_record_exception
      * @throws coding_exception
      */
-    public function submit(learner_task_submission_base $task_submission)
+    public function submit(learner_task_submission_base $task_submission): self
     {
         $this->validate($task_submission);
 
@@ -121,11 +121,12 @@ class learner_attempt_base extends db_model_base
             != learner_task_submission::STATUS_LEARNER_IN_PROGRESS)
         {
             $error_message = sprintf(
-                'learner task submission with id "%s" has invalid "%s" value',
+                'learner task submission with id "%s" has invalid "%s" - "%s"',
                 $this->get_id_or_null(),
-                learner_task_submission::COL_STATUS);
+                learner_task_submission::COL_STATUS,
+                $task_submission->get(learner_task_submission::COL_STATUS));
         }
-        // check and throw (todo: this will only throw the last error message - not ideal)
+        // check and throw
         if (!is_null($error_message))
         {
             throw new coding_exception($error_message);

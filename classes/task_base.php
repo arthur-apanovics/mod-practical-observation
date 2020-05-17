@@ -303,4 +303,10 @@ class task_base extends db_model_base
         $count = $DB->count_records(criteria::TABLE, [criteria::COL_TASKID => $this->id]);
         return $count !== false ? $count : 0;
     }
+
+    public function get_url(): \moodle_url
+    {
+        return new \moodle_url(
+            OBSERVATION_MODULE_PATH . 'task.php', ['id' => $this->observationid, 'taskid' => $this->id]);
+    }
 }

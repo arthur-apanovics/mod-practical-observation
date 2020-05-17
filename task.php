@@ -20,10 +20,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_observation\event\course_module_viewed;
-use mod_observation\observation;
 use mod_observation\observation_base;
-use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('lib.php');
@@ -41,7 +38,7 @@ require_login($course, true, $cm);
 $observation_base = new observation_base($cm->instance);
 
 // Print the page header.
-$PAGE->set_url('/mod/observation/task.php', array('id' => $cm->id));
+$PAGE->set_url(OBSERVATION_MODULE_PATH . 'task.php', array('id' => $cm->id, 'taskid' => $taskid));
 $PAGE->set_title($observation_base->get_formatted_name());
 $PAGE->set_heading(format_string($course->fullname));
 
@@ -55,10 +52,6 @@ $renderer = $PAGE->get_renderer('observation');
 
 // check if learner
 echo $renderer->view_task_learner($observation_base, $taskid);
-
-// todo check if observer
-
-// todo check if assessor
 
 // Finish the page.
 echo $OUTPUT->footer();

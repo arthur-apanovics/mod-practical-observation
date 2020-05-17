@@ -3,8 +3,8 @@
  * @class      mod_observation
  * @package    observer_view
  */
-define(['jquery', 'core/ajax', 'core/notification'],
-    function ($, ajax, notification) {
+define(['jquery', 'core/ajax', 'core/notification', 'core/str'],
+    function ($, ajax, notification, str) {
 
         return {
             init: function () {
@@ -69,14 +69,15 @@ define(['jquery', 'core/ajax', 'core/notification'],
                             // TODO: log the error
                             notification.alert(
                                 'There was a problem',
-                                'Sorry, something went wrong when updating your details.<br>Please contact an administrator regarding this issue'
+                                'Sorry, something went wrong when updating your details.<br>' +
+                                'Please contact an administrator regarding this issue'
                             );
-                            console.error(ex);
+                            window.console.error(ex);
                         }
                     }], true, false);
                 };
 
-                $editBtn.on('click', function (ev) {
+                $editBtn.on('click', function () {
 
                     $table.addClass('editing');
 
@@ -103,18 +104,39 @@ define(['jquery', 'core/ajax', 'core/notification'],
                     $editBtn.hide();
 
                     // wrap in <form>
-                    $form = $('<form id="edit-details-form">').on('submit', submitEditForm);
+                    var $form = $('<form id="edit-details-form">').on('submit', submitEditForm);
                     $container.wrap($form);
                 });
 
                 // init checkbox validation
                 var $checkbox = $('form#requirement-acknowledge #acknowledge_checkbox');
                 var $submitBtn = $('form#requirement-acknowledge #submit-accept');
+                var $declineBtn = $('form#requirement-acknowledge #submit-decline');
+
+                var checkboxTitle = 'Please read and agree to criteria above before accepting this observation';
+                // TODO: figure out how to make button 'onclick' to wait for a promise to resolve before continuing
+                var confirmDeclineStr = 'Are you sure you want to decline this observation?';
+                // fetch proper lang string from moodle (it's an effin' promise)
+                str.get_string('confirm_decline', 'observation')
+                    .then(function (value) {
+                        confirmDeclineStr = value;
+                    });
 
                 $checkbox.attr('disabled', false);
-                $checkbox.on('change', function (ev) {
-                        $submitBtn.attr('disabled', !this.checked);
+                $declineBtn.attr({'disabled': false, 'title': 'Decline this observation'});
+                $submitBtn.attr({'title': checkboxTitle});
+
+                $checkbox.on('change', function () {
+                    $submitBtn.attr({
+                        'disabled': !this.checked,
+                        'title': !this.checked ? checkboxTitle : null
                     });
+                });
+                $declineBtn.on('click', function () {
+                    if (!window.confirm(confirmDeclineStr)) {
+                        return false;
+                    }
+                });
             }
         };
     });

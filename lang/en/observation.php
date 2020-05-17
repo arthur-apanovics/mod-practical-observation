@@ -173,8 +173,11 @@ $string['email'] = 'Email';
 $string['position_title'] = 'Position title';
 $string['message'] = 'Message';
 $string['message_placeholder'] = 'Optional message to appear in observer email';
+// observation page
 $string['accept'] = 'Accept';
 $string['decline'] = 'Decline';
+$string['confirm_decline'] = 'Are you sure you want to decline this observation?';
+$string['observer_page_title'] = 'Observation for {$a}\'s attempt';
 
 $string['send'] = 'Send';
 $string['edit_lowercase'] = 'edit';
@@ -196,6 +199,7 @@ $string['notification:observation_request_sent'] = 'Observation request sent to 
 $string['notification:observer_assigned_no_change'] = '<strong>{$a->email}</strong> is already the assigned observer for task <i>{$a->task}</i>';
 $string['notification:observer_assigned_same'] = 'Observation request for <i>{$a->task}</i> sent to <strong>{$a->email}</strong>';
 $string['notification:observer_assigned_new'] = 'Observer successfully changed and observation request sent to <strong>{$a->email}</strong> for <i>{$a->task}</i>';
+$string['notification:observer_declined_observation'] = '{$a->observer} has declined your request to observe "{$a->task_name}".<br>Please assign a different observer by clicking {$a->assign_url_with_text}';
 $string['notification:observation_pending_or_in_progress'] = 'Observation for this task is not yet complete';
 $string['notification:assessment_released'] = 'Assessment for <i>{$a}</i>\'s submission succsesfully released';
 $string['notification:submission_pending_or_in_progress'] = 'Learner has not yet submitted an attempt for this task';
@@ -208,6 +212,7 @@ $string['notification:activity_assessment_not_complete'] = 'Assessment was unsuc
 // ERRORS
 $string['error:invalid_token'] = 'The link you are trying to access is incorrect. Please contact Akatoi support if you think this is a mistake.';
 $string['error:not_active_observer'] = 'This link is no longer valid. If you have received a newer observation email, please use the link in that email instead.';
+// $string['error:observation_declined'] = 'This link is no longer valid because you have declined to observe {$a}\'s submission. Please get in touch with Careerfoce for further support.';
 $string['error:observation_complete'] = 'This observation has already been completed.';
 
 // EMAILS

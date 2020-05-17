@@ -27,6 +27,7 @@ use mod_observation\assessor_feedback;
 use mod_observation\learner_attempt;
 use mod_observation\learner_attempt_base;
 use mod_observation\learner_task_submission;
+use mod_observation\learner_task_submission_base;
 use mod_observation\lib;
 use mod_observation\observation;
 use mod_observation\observation_base;
@@ -34,6 +35,7 @@ use mod_observation\observer;
 use mod_observation\observer_assignment;
 use mod_observation\observer_feedback;
 use mod_observation\task;
+use mod_observation\task_base;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('forms.php');
@@ -220,7 +222,6 @@ class mod_observation_renderer extends plugin_renderer_base
             // create submission if none exists
             $submission = $observation->get_submission_or_create($USER->id);
 
-            // TODO: MOVE LEARNER STATUS CHECKS TO SUBMISSION CLASS
             if ($submission->is_assessment_complete())
             {
                 notification::success(
@@ -235,6 +236,30 @@ class mod_observation_renderer extends plugin_renderer_base
             {
                 notification::warning(
                     get_string('notification:activity_assessment_not_complete', 'observation'));
+            }
+            else if ($declined = $submission->get_declined_observation_assignments())
+            {
+                // we have at least one declined observation request
+                foreach ($declined as $observer_assignment)
+                {
+                    $task_submission = $observer_assignment->get_learner_task_submission_base();
+                    $attempt = $task_submission->get_latest_learner_attempt_or_null();
+                    $task = $task_submission->get_task_base();
+                    $link = new moodle_url(
+                        OBSERVATION_MODULE_PATH . 'request.php', [
+                            'id'                         => $observation->get_id_or_null(),
+                            'learner_task_submission_id' => $task_submission->get_id_or_null(),
+                            'attempt_id'                 => $attempt->get_id_or_null(),
+                        ]);
+                    // request.php?id=16&learner_task_submission_id=5&attempt_id=9
+                    $lang_data = [
+                        'observer' => $observer_assignment->get_observer()->get_formatted_name(),
+                        'task_name' => $task->get_formatted_name(),
+                        'assign_url_with_text' => html_writer::link($link, 'here')
+                    ];
+                    notification::error(
+                        get_string('notification:observer_declined_observation', 'observation', $lang_data));
+                }
             }
             else if ($submission->all_tasks_observation_pending_or_in_progress())
             {
@@ -620,9 +645,33 @@ class mod_observation_renderer extends plugin_renderer_base
         return $out;
     }
 
-    public function view_observer_completed(): string
+    public function view_observer_completed(
+        learner_task_submission_base $learner_task_submission, task_base $task): string
     {
-        return $this->render_from_template('view-observer_completed', null);
+        // page is very basic, no need to export all data
+        $learner = core_user::get_user($learner_task_submission->get_userid());
+        $template_data = [
+            'learner_name' => fullname($learner),
+            'task_name' => $task->get_formatted_name(),
+        ];
+
+        return $this->render_from_template('view-observer_completed', $template_data);
+    }
+
+    public function view_observer_declined(
+        observer_assignment $observer_assignment,
+        learner_task_submission_base $learner_task_submission,
+        task_base $task): string
+    {
+        // page is very basic, no need to export all data
+        $learner = core_user::get_user($learner_task_submission->get_userid());
+        $template_data = [
+            'learner_name' => fullname($learner),
+            'task_name' => $task->get_formatted_name(),
+        ];
+
+        echo $this->render_from_template('view-observer_declined', $template_data);
+        die();
     }
 
     /**
