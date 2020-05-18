@@ -1,11 +1,24 @@
-{{! TODO: task status }}
-<div class="task wrapper
+<div class="task wrapper status
+    {{! status calss for assessors }}
     {{#extra.is_assessing}}
-            status-assessing-{{assessor_submission_status}}
+            assessing-{{assessor_submission_status}}
     {{/extra.is_assessing}}
+    {{! status calss for learners }}
     {{^extra.is_assessing}}
-            status-learner-{{learner_submission_status}}
+            learner-{{learner_submission_status}}
     {{/extra.is_assessing}}">
+    {{! status indicator in corner }}
+    <div class="corner"
+         {{! add title for status indicator }}
+        {{#extra.is_assessing}}
+         title="{{assessor_submission_status_description}}"
+        {{/extra.is_assessing}}
+        {{! status calss for learners }}
+        {{^extra.is_assessing}}
+         title="{{learner_submission_status_description}}"
+        {{/extra.is_assessing}}
+    >
+    </div>
     {{! task title }}
     <div class="task-title">
         <h3>{{name}}</h3>

@@ -709,4 +709,27 @@ class lib
             throw new coding_exception('Requested timing error string when activity is fully available');
         }
     }
+
+    // /**
+    //  * Gets learner and assessor status description string for tasks
+    //  *
+    //  * @param string $status
+    //  * @return string|null
+    //  * @throws coding_exception
+    //  */
+    // public static function get_status_description_string(string $status): ?string
+    // {
+    //    switch ($status)
+    //    {
+    //        // learner
+    //        case learner_task_submission::STATUS_OBSERVATION_PENDING:
+    //        case learner_task_submission::STATUS_OBSERVATION_INCOMPLETE:
+    //        // assessor
+    //        case assessor_task_submission::OUTCOME_COMPLETE:
+    //        case assessor_task_submission::OUTCOME_NOT_COMPLETE:
+    //            return get_string("{$status}-description", OBSERVATION);
+    //        default:
+    //            return null;
+    //    }
+    // }
 }

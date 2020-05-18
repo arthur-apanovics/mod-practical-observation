@@ -8,17 +8,6 @@
   margin-bottom: @wrapper-margin;
 }
 
-.task-highlight(@color) {
-  box-shadow: 4px 0 10px -6px @color,
-  -4px 0 10px -6px @color;
-  transition: box-shadow 0.2s ease-out;
-
-  &:hover {
-    box-shadow: 7px 0 10px -6px @color,
-    -7px 0 10px -6px @color;
-  }
-}
-
 // ====================================================================================================================
 // ====================================================================================================================
 
@@ -58,6 +47,14 @@ body.path-mod-observation {
   }
 
   .task {
+    // relative position is needed for status indicator in corner
+    position: relative;
+
+    .corner {
+      // do not display without a status class
+      display: none;
+    }
+
     &-header {
       //.border-wrapper();
       margin-bottom: 2em;
@@ -82,25 +79,68 @@ body.path-mod-observation {
       margin-bottom: 10px;
     }
 
+    // task statuses (actual string from object)
     &.status {
-      &-assessing {
-        &-complete {
-          .task-highlight(#589e44)
-        }
-
-        &-not_complete {
-          .task-highlight(#9e4444)
+      // convenience function
+      .task-highlight(@color) {
+        .corner {
+          border-top-color: @color;
         }
       }
 
-      &-learner {
-        &- /*TODO!*/ {
+      @status-color-pending: #c6d3e6;
+      @status-color-success: #589e44;
+      @status-color-fail: #9e4444;
 
+      .corner {
+        display: block;
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-top: 40px solid; // border-top-color controls color which depends on status
+        border-bottom: 40px solid transparent;
+        border-left: 40px solid transparent;
+        right: 0;
+        top: 0;
+
+        cursor: help;
+        transition: border 1s;
+      }
+
+      // learner
+      &.learner {
+        &-observation_pending,
+        &-assessment_pending {
+          .task-highlight(@status-color-pending)
+        }
+
+        &-observation_incomplete,
+        &-assessment_incomplete {
+          .task-highlight(@status-color-fail);
+        }
+
+        &-complete {
+          .task-highlight(@status-color-success);
+        }
+      }
+
+      // assessor
+      &.assessing {
+        &-complete {
+          .task-highlight(@status-color-success)
+        }
+
+        &-not_complete {
+          .task-highlight(@status-color-fail)
         }
       }
     }
   }
 
+  // todo: criteria highlight
+  //.with-text.not_complete .entry.wrapper {
+  //  box-shadow: -5px 0px 0px 0px red;
+  //}
   .criteria {
     &-container {
       padding: 2em;
@@ -317,11 +357,13 @@ body.path-mod-observation {
     text-decoration-line: underline;
     text-decoration-style: dashed;
     text-decoration-color: @wrapper-border-color;
+    cursor: help;
 
     &-inverted {
       text-decoration-line: underline;
       text-decoration-style: dashed;
       text-decoration-color: darken(@wrapper-border-color, 50%);
+      cursor: help;
     }
   }
 }

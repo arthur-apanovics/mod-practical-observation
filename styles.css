@@ -26,6 +26,12 @@ body.path-mod-observation .flex {
   display: flex;
   flex-wrap: wrap;
 }
+body.path-mod-observation .task {
+  position: relative;
+}
+body.path-mod-observation .task .corner {
+  display: none;
+}
 body.path-mod-observation .task-header {
   margin-bottom: 2em;
 }
@@ -44,19 +50,35 @@ body.path-mod-observation .task-action {
   margin-top: 20px;
   margin-bottom: 10px;
 }
-body.path-mod-observation .task.status-assessing-complete {
-  box-shadow: 4px 0 10px -6px #589e44, -4px 0 10px -6px #589e44;
-  transition: box-shadow 0.2s ease-out;
+body.path-mod-observation .task.status .corner {
+  display: block;
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-top: 40px solid;
+  border-bottom: 40px solid transparent;
+  border-left: 40px solid transparent;
+  right: 0;
+  top: 0;
+  cursor: help;
+  transition: border 1s;
 }
-body.path-mod-observation .task.status-assessing-complete:hover {
-  box-shadow: 7px 0 10px -6px #589e44, -7px 0 10px -6px #589e44;
+body.path-mod-observation .task.status.learner-observation_pending .corner,
+body.path-mod-observation .task.status.learner-assessment_pending .corner {
+  border-top-color: #c6d3e6;
 }
-body.path-mod-observation .task.status-assessing-not_complete {
-  box-shadow: 4px 0 10px -6px #9e4444, -4px 0 10px -6px #9e4444;
-  transition: box-shadow 0.2s ease-out;
+body.path-mod-observation .task.status.learner-observation_incomplete .corner,
+body.path-mod-observation .task.status.learner-assessment_incomplete .corner {
+  border-top-color: #9e4444;
 }
-body.path-mod-observation .task.status-assessing-not_complete:hover {
-  box-shadow: 7px 0 10px -6px #9e4444, -7px 0 10px -6px #9e4444;
+body.path-mod-observation .task.status.learner-complete .corner {
+  border-top-color: #589e44;
+}
+body.path-mod-observation .task.status.assessing-complete .corner {
+  border-top-color: #589e44;
+}
+body.path-mod-observation .task.status.assessing-not_complete .corner {
+  border-top-color: #9e4444;
 }
 body.path-mod-observation .criteria-container {
   padding: 2em;
@@ -199,11 +221,13 @@ body.path-mod-observation .hover-hint {
   text-decoration-line: underline;
   text-decoration-style: dashed;
   text-decoration-color: #d3d3d3;
+  cursor: help;
 }
 body.path-mod-observation .hover-hint-inverted {
   text-decoration-line: underline;
   text-decoration-style: dashed;
   text-decoration-color: #535353;
+  cursor: help;
 }
 body.observation-manage #manage-task-list > ol,
 body.observation-manage .manage-criteria-list > ol {

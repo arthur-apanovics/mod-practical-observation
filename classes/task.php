@@ -255,6 +255,8 @@ class task extends task_base implements templateable
 
         $learner_submission_status = null;
         $assessor_submission_status = null;
+        $learner_submission_status_description = null;
+        $assessor_submission_status_description = null;
         $has_feedback = false;
         // task contains only ONE submission, we can give the task a status
         if ($this->is_filtered)
@@ -262,10 +264,12 @@ class task extends task_base implements templateable
             if (isset($learner_task_submission)) // $learner_task_submission set in loop
             {
                 $learner_submission_status = $learner_task_submission->get(learner_task_submission::COL_STATUS);
+                $learner_submission_status_description = lib::get_status_string($learner_submission_status);
 
                 if ($assessor_task_submission = $learner_task_submission->get_assessor_task_submission_or_null())
                 {
                     $assessor_submission_status = $assessor_task_submission->get_task_outcome_from_feedback();
+                    $assessor_submission_status_description = lib::get_outcome_string($assessor_submission_status);
                     $has_feedback = (bool) count($assessor_task_submission->get_all_feedback());
                 }
             }
@@ -289,10 +293,12 @@ class task extends task_base implements templateable
             'assessor_feedback'        => $assessor_feedback_data,
 
             // other data
-            'has_submission'             => $this->has_submissions(),
-            'has_feedback'               => $has_feedback,
-            'learner_submission_status'  => $learner_submission_status,
-            'assessor_submission_status' => $assessor_submission_status,
+            'has_submission'                         => $this->has_submissions(),
+            'has_feedback'                           => $has_feedback,
+            'learner_submission_status'              => $learner_submission_status,
+            'assessor_submission_status'             => $assessor_submission_status,
+            'learner_submission_status_description'  => $learner_submission_status_description,
+            'assessor_submission_status_description' => $assessor_submission_status_description,
         ];
     }
 }
