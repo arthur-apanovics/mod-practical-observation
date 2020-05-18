@@ -20,10 +20,12 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_observation\lib;
 use mod_observation\observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('lib.php');
+require_once('locallib.php');
 
 $cmid = required_param('id', PARAM_INT);
 $learnerid = required_param('learnerid', PARAM_INT);
@@ -52,6 +54,13 @@ echo $OUTPUT->header();
 
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
+
+if (!$observation->is_activity_available())
+{
+    // remind assessor that activity is unavailable
+    \core\notification::warning(lib::get_activity_timing_error_string($observation));
+}
+
 echo $renderer->view_activity_assess($observation, $learnerid);
 
 // Finish the page.

@@ -217,7 +217,7 @@ class mod_observation_renderer extends plugin_renderer_base
             $out .= $this->render_from_template('part-assessor_table', $template_data);
         }
         // learner view or preview
-        else if ($capabilities['can_submit'])
+        else if ($capabilities['can_submit'] && $observation->is_activity_available())
         {
             // create submission if none exists
             $submission = $observation->get_submission_or_create($USER->id);
@@ -272,12 +272,14 @@ class mod_observation_renderer extends plugin_renderer_base
                     get_string('notification:activity_wait_for_mixed', 'observation'));
             }
 
-            // submission/preview logic in template //TODO: move to renderer
             $out .= $this->render_from_template('view-activity', $template_data);
         }
         else if ($capabilities['can_view'])
         {
-            // TODO preview activity
+            // notify of preview mode
+            notification::INFO(get_string('notification:previewing_activity', \OBSERVATION));
+
+            $out .= $this->render_from_template('view-activity', $template_data);
         }
 
         // validation for 'managers'
@@ -299,6 +301,9 @@ class mod_observation_renderer extends plugin_renderer_base
      * @param observation $observation filtered by learner
      * @param int         $learnerid
      * @return string
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
      */
     public function view_activity_assess(observation $observation, int $learnerid): string
     {
@@ -364,7 +369,8 @@ class mod_observation_renderer extends plugin_renderer_base
         return $out;
     }
 
-    public function view_observer_landing(observer_assignment $observer_assignment): string
+    public function view_observer_landing(
+        observation_base $observation, observer_assignment $observer_assignment): string
     {
         $task = $observer_assignment->get_task_base();
         $template_data = $observer_assignment->get_observer()->export_template_data();
@@ -396,7 +402,7 @@ class mod_observation_renderer extends plugin_renderer_base
         $capabilities = $observation_base->export_capabilities();
         $out = '';
 
-        if ($capabilities['can_submit'])
+        if ($capabilities['can_submit'] && $observation_base->is_activity_available())
         {
             // learner task submission
             $task_submission = $task->get_learner_task_submission_or_create($USER->id);
@@ -471,8 +477,22 @@ class mod_observation_renderer extends plugin_renderer_base
         }
         else if ($capabilities['can_view'])
         {
-            // preview
-            $out .= $this->render_from_template('task_view_preview', $template_data);
+            // task preview
+            $context = context_module::instance($cm->id);
+
+            $text = null; // will default to lang string
+            if ($capabilities['can_submit'] && !$observation_base->is_activity_available())
+            {
+                // learner locked out of submitting, display message in editor as reminder
+                $text = lib::get_activity_timing_error_string($observation_base);
+            }
+
+            // preview text editor
+            $template_data['extra']['editor_html'] = $this->text_editor_preview($context, $text);
+            // preview file manager
+            $template_data['extra']['filemanager_html'] = $this->files_input_preview($context);
+
+            $out .= $this->render_from_template('view-task_preview', $template_data);
         }
         else
         {
@@ -484,14 +504,15 @@ class mod_observation_renderer extends plugin_renderer_base
         return $out;
     }
 
-    public function view_task_observer(observer_assignment $observer_assignment): string
+    public function view_task_observer(
+        observation_base $observation, observer_assignment $observer_assignment): string
     {
         $learner_task_submission = new learner_task_submission($observer_assignment->get_learner_task_submission_base());
         $observer_submission = $observer_assignment->get_observer_submission_or_create();
         $userid = $learner_task_submission->get_userid();
         $task = new task($learner_task_submission->get_task_base(), $userid);
-        $observation_base = $task->get_observation_base();
-        $cm = $observation_base->get_cm();
+
+        $cm = $observation->get_cm();
         $context = context_module::instance($cm->id);
 
         $template_data = $task->export_template_data();
@@ -546,6 +567,9 @@ class mod_observation_renderer extends plugin_renderer_base
      * @param             $learnerid
      * @param             $taskid
      * @return string
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
      */
     public function view_task_assessor(observation $observation, $learnerid, $taskid): string
     {
@@ -723,7 +747,7 @@ class mod_observation_renderer extends plugin_renderer_base
 
         $output = '';
         $text = $text ?: '';
-        $format = $format ?: 1;
+        $format = $format ?: FORMAT_HTML;
 
         // get input field names
         list($input_base, $input_name, $input_name_format) = lib::get_editor_attributes_for_class($class_name);
@@ -792,6 +816,38 @@ class mod_observation_renderer extends plugin_renderer_base
         return $output;
     }
 
+    private function text_editor_preview(context $context, string $text = null)
+    {
+        global $CFG;
+        require_once($CFG->dirroot . '/repository/lib.php');
+
+        $text = !is_null($text) ? $text : get_string('preview_editor_text', \OBSERVATION);
+        $id = 'preview_editor';
+        $output = '';
+
+        $editor = editors_get_preferred_editor(FORMAT_HTML);
+        $editor->set_text($text);
+        $editor->use_editor($id, ['context' => $context, 'autosave' => false]);
+
+        // editor wrapper
+        $output .= html_writer::start_tag('div', ['class' => 'preview-editor']);
+        // editor textarea
+        $output .= html_writer::tag(
+            'div',
+            html_writer::tag(
+                'textarea', s($text), [
+                'id'    => $id,
+                'name'  => "{$id}_text",
+                'rows'  => 10,
+                'style' => 'width: 100%;'
+            ]));
+
+        // /editor wrapper
+        $output .= html_writer::end_tag('div');
+
+        return $output;
+    }
+
     /**
      * @param int     $itemid for learner - attempt id, for observer & assessor - feedback id
      * @param string  $file_area
@@ -827,6 +883,24 @@ class mod_observation_renderer extends plugin_renderer_base
         ));
 
         return $out;
+    }
+
+    private function files_input_preview(context $context)
+    {
+        global $CFG;
+        require_once($CFG->dirroot . '/lib/form/filemanager.php');
+
+        $picker_options = new stdClass();
+        $picker_options->maxfiles = 0;
+        $picker_options->context = $context;
+        $picker_options->return_types = FILE_INTERNAL;
+        $picker_options->itemid = -1;
+
+        // render
+        $files_renderer = $this->page->get_renderer('core', 'files');
+        $fm = new form_filemanager($picker_options);
+
+        return $files_renderer->render($fm);
     }
 
     private function get_usersids_in_group_or_null(int $current_group, context_module $context)

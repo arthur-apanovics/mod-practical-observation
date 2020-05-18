@@ -66,6 +66,12 @@ $PAGE->add_body_class('observation-request');
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
 
+if (!$observation->is_activity_available())
+{
+    // should not have gotten here in the first place
+    throw new moodle_exception(lib::get_activity_timing_error_string($observation), \OBSERVATION);
+}
+
 function email_observer(observer_base $observer, array $lang_data): bool
 {
     return lib::email_external(

@@ -54,6 +54,11 @@ if ($learner_task_submissionid = optional_param('learner_task_submission_id', nu
 {
     require_login();
 
+    if (!$observation->is_activity_available())
+    {
+        throw new moodle_exception(lib::get_activity_timing_error_string($observation), \OBSERVATION);
+    }
+
     $attempt_id = required_param('attempt_id', PARAM_INT);
 
     // check id's are correct
@@ -90,7 +95,11 @@ if ($learner_task_submissionid = optional_param('learner_task_submission_id', nu
 /* ================================================================================================================== */
 else if ($observer_submissionid = optional_param('observer_submission_id', null, PARAM_INT))
 {
-    // external observer submitting
+    // external observer submitting, check dates
+    if (!$observation->is_activity_available())
+    {
+        throw new moodle_exception(lib::get_activity_timing_error_string($observation), \OBSERVATION);
+    }
 
     // gather data from post request
     $observer_submission_base = new observer_task_submission_base($observer_submissionid);

@@ -25,11 +25,12 @@
  *
  */
 
-use mod_observation\event\course_module_viewed;
+use mod_observation\lib;
 use mod_observation\observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('lib.php');
+require_once('locallib.php');
 
 $cmid = required_param('id', PARAM_INT);
 
@@ -48,7 +49,7 @@ require_login($course, true, $cm);
 // $event->trigger();
 
 $observation = new observation($cm, $USER->id);
-$name        = $observation->get_formatted_name();
+$name = $observation->get_formatted_name();
 
 // Print the page header.
 $PAGE->set_url($observation->get_url());
@@ -62,6 +63,17 @@ echo $OUTPUT->header();
 
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
+
+if (!$observation->is_activity_available())
+{
+    // whoever's viewing needs to know that activity is not available
+    \core\notification::warning(lib::get_activity_timing_error_string($observation));
+}
+else if ($enddate_msg = $observation->get_activity_end_date_or_null())
+{
+    // activity has an end date - display message
+    \core\notification::info($enddate_msg);
+}
 
 echo $renderer->view_activity($observation);
 

@@ -20,10 +20,12 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_observation\lib;
 use mod_observation\observation_base;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('lib.php');
+require_once('locallib.php');
 
 $cmid = required_param('id', PARAM_INT);
 $taskid = required_param('taskid', PARAM_INT);
@@ -50,7 +52,12 @@ echo $OUTPUT->header();
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
 
-// check if learner
+if (!$observation_base->is_activity_available())
+{
+    // activity closed, let learner know
+    \core\notification::error(lib::get_activity_timing_error_string($observation_base));
+}
+
 echo $renderer->view_task_learner($observation_base, $taskid);
 
 // Finish the page.

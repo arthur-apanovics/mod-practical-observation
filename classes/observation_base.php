@@ -323,6 +323,7 @@ class observation_base extends db_model_base
      * @return learner_task_submission_base[]
      * @throws \dml_exception
      * @throws coding_exception
+     * @throws \ReflectionException
      * TODO: use submision class instead of looping over tasks
      */
     public function get_all_task_submisisons(): array
@@ -362,6 +363,43 @@ class observation_base extends db_model_base
     {
         return submission::read_by_condition_or_null(
             [submission::COL_OBSERVATIONID => $this->id, submission::COL_USERID => $learnerid]);
+    }
+
+    public function is_activity_available()
+    {
+        $now = time();
+        $available = true;
+
+        if (!empty($this->timeopen))
+        {
+            $available = $now > $this->timeopen;
+        }
+        if (!empty($this->timeclose) && $available)
+        {
+            $available = $now < $this->timeclose;
+        }
+
+        return $available;
+    }
+
+    public function is_activity_open()
+    {
+        return empty($this->timeopen) || time() > $this->timeopen;
+    }
+
+    public function is_activity_closed()
+    {
+        return !empty($this->timeclose) && time() > $this->timeclose;
+    }
+
+    public function get_activity_end_date_or_null()
+    {
+        if (!empty($this->timeclose))
+        {
+            return get_string('timing:available_until', OBSERVATION, userdate($this->timeclose));
+        }
+
+        return null;
     }
 
     /**

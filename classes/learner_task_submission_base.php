@@ -93,7 +93,7 @@ class learner_task_submission_base extends submission_status_store
             0,
             1);
 
-         return $result !== false ? new observer_assignment_base(reset($result)) : null;
+         return !empty($result) ? new observer_assignment_base(reset($result)) : null;
     }
 
     /**

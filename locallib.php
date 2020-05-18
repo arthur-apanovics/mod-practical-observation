@@ -691,4 +691,22 @@ class lib
 
         return $results;
     }
+
+    public static function get_activity_timing_error_string(observation_base $observation)
+    {
+        if (!$observation->is_activity_open())
+        {
+            $date = userdate($observation->get(observation::COL_TIMEOPEN));
+            return get_string('timing:notopen', \OBSERVATION, $date);
+        }
+        else if ($observation->is_activity_closed())
+        {
+            $date = userdate($observation->get(observation::COL_TIMECLOSE));
+            return get_string('timing:closed', \OBSERVATION, $date);
+        }
+        else
+        {
+            throw new coding_exception('Requested timing error string when activity is fully available');
+        }
+    }
 }

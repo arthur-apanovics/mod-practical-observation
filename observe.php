@@ -156,17 +156,25 @@ if ($observer_assignment->is_declined())
 {
     echo $renderer->view_observer_declined($observer_assignment, $learner_task_submission, $task);
 }
-if ($observer_submission = $observer_assignment->get_observer_submission_or_null())
+else if ($observer_submission = $observer_assignment->get_observer_submission_or_null())
 {
     if ($observer_submission->is_submitted())
     {
         echo $renderer->view_observer_completed($learner_task_submission, $task);
     }
 }
+else if (!$observation->is_activity_available())
+{
+    // not yet open or already closed
+    echo $renderer->render_from_template(
+        'view-observer_not_available', [
+        'error_message' => lib::get_activity_timing_error_string($observation)
+    ]);
+}
 else if (!$observer_assignment->is_accepted())
 {
     // show observation EULA page
-    echo $renderer->view_observer_landing($observer_assignment);
+    echo $renderer->view_observer_landing($observation, $observer_assignment);
 }
 else
 {
@@ -175,7 +183,7 @@ else
     $SESSION->observation_usertoken = $token;
 
     // show observation page
-    echo $renderer->view_task_observer($observer_assignment);
+    echo $renderer->view_task_observer($observation, $observer_assignment);
 }
 
 // Finish the page.

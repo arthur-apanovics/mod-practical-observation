@@ -124,6 +124,8 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
     $base->set($base::COL_DELETED, 0);
 
     $base->create();
+    
+    observation_set_events($observation);
 
     return $base->get_id_or_null();
 }
@@ -148,17 +150,17 @@ function observation_update_instance(stdClass $observation, mod_observation_mod_
     $data = (array) $observation;
     $now = time();
 
-    $observation = new observation_base($observation->instance);
+    $base = new observation_base($observation->instance);
 
-    $observation->set(observation::COL_NAME, $data[$observation::COL_NAME]);
-    $observation->set(observation::COL_INTRO, $data[$observation::COL_INTRO]);
-    $observation->set(observation::COL_INTROFORMAT, $data[$observation::COL_INTROFORMAT]);
+    $base->set(observation::COL_NAME, $data[$base::COL_NAME]);
+    $base->set(observation::COL_INTRO, $data[$base::COL_INTRO]);
+    $base->set(observation::COL_INTROFORMAT, $data[$base::COL_INTROFORMAT]);
 
-    $observation->set(observation::COL_TIMEOPEN, $data[$observation::COL_TIMEOPEN]);
-    $observation->set(observation::COL_TIMECLOSE, $data[$observation::COL_TIMECLOSE]);
+    $base->set(observation::COL_TIMEOPEN, $data[$base::COL_TIMEOPEN]);
+    $base->set(observation::COL_TIMECLOSE, $data[$base::COL_TIMECLOSE]);
 
-    $observation->set(observation::COL_TIMEMODIFIED, $now);
-    $observation->set(observation::COL_LASTMODIFIEDBY, $USER->id);
+    $base->set(observation::COL_TIMEMODIFIED, $now);
+    $base->set(observation::COL_LASTMODIFIEDBY, $USER->id);
 
     $intros = [
         observation::COL_DEF_I_TASK_LEARNER,
@@ -172,13 +174,15 @@ function observation_update_instance(stdClass $observation, mod_observation_mod_
     foreach ($intros as $intro)
     {
         $format = "{$intro}_format";
-        $observation->set($intro, $data[$intro]['text']);
-        $observation->set($format, $data[$intro]['format']);
+        $base->set($intro, $data[$intro]['text']);
+        $base->set($format, $data[$intro]['format']);
     }
 
-    $observation->set(observation::COL_COMPLETION_TASKS, $data[$observation::COL_COMPLETION_TASKS]);
+    $base->set(observation::COL_COMPLETION_TASKS, $data[$base::COL_COMPLETION_TASKS]);
 
-    $observation->update();
+    $base->update();
+
+    observation_set_events($observation);
 
     return true;
 }
@@ -617,7 +621,7 @@ function observation_grade_item_update($observation, $grades = null)
     $grade_item_params = [
         'courseid'     => $observation->course,
         'itemtype'     => 'mod',
-        'itemmodule'   => 'observation',
+        'itemmodule'   => OBSERVATION,
         'iteminstance' => $observation->id,
         'itemnumber'   => 0, // from docs: 'Can be used to distinguish multiple grades for an activity'
         'gradetype'    => GRADE_TYPE_SCALE,
@@ -651,7 +655,7 @@ function observation_grade_item_update($observation, $grades = null)
         'mod/observation',
         $observation->course,
         'mod',
-        'observation',
+        OBSERVATION,
         $observation->id,
         $grade_item->itemnumber,
         $grades,
@@ -729,6 +733,161 @@ function observation_get_user_grades($observation, $userid = 0)
     }
 
     return $grades;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                           DATE OPEN/CLOSED STUFF                                                   //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/**
+ * This creates new calendar events given as timeopen and timeclose by $observation.
+ *
+ * @param stdClass $observation
+ * @return void
+ * @throws coding_exception
+ * @throws dml_exception
+ */
+function observation_set_events($observation)
+{
+    global $DB, $CFG;
+
+    require_once($CFG->dirroot . '/calendar/lib.php');
+
+    // Get CMID if not sent as part of $observation.
+    if (!isset($observation->coursemodule))
+    {
+        $cm = get_coursemodule_from_instance(OBSERVATION, $observation->instance, $observation->course);
+        $observation->coursemodule = $cm->id;
+    }
+
+    // Observation start calendar events.
+    $event = new stdClass();
+    if ($event->id = $DB->get_field(
+        'event',
+        'id',
+        array('modulename' => OBSERVATION, 'instance' => $observation->instance, 'eventtype' => 'open')))
+    {
+        if ((!empty($observation->timeopen)) && ($observation->timeopen > 0))
+        {
+            // Calendar event exists so update it.
+            $event->name = get_string('calendarstart', OBSERVATION, $observation->name);
+            $event->description = format_module_intro(OBSERVATION, $observation, $observation->coursemodule);
+            $event->timestart = $observation->timeopen;
+            $event->visible = instance_is_visible(OBSERVATION, $observation);
+            $event->timeduration = 0;
+            $calendarevent = calendar_event::load($event->id);
+            $calendarevent->update($event);
+        }
+        else
+        {
+            // Calendar event is no longer needed.
+            $calendarevent = calendar_event::load($event->id);
+            $calendarevent->delete();
+        }
+    }
+    else
+    {
+        // Event doesn't exist so create one.
+        if ((!empty($observation->timeopen)) && ($observation->timeopen > 0))
+        {
+            $event->name = get_string('calendarstart', OBSERVATION, $observation->name);
+            $event->description = format_module_intro(OBSERVATION, $observation, $observation->coursemodule);
+            $event->courseid = $observation->course;
+            $event->groupid = 0;
+            $event->userid = 0;
+            $event->modulename = OBSERVATION;
+            $event->instance = $observation->instance;
+            $event->eventtype = 'open';
+            $event->timestart = $observation->timeopen;
+            $event->visible = instance_is_visible(OBSERVATION, $observation);
+            $event->timeduration = 0;
+            calendar_event::create($event);
+        }
+    }
+
+    // Observation end calendar events.
+    $event = new stdClass();
+    if ($event->id = $DB->get_field(
+        'event', 'id',
+        array('modulename' => OBSERVATION, 'instance' => $observation->instance, 'eventtype' => 'close')))
+    {
+        if ((!empty($observation->timeclose)) && ($observation->timeclose > 0))
+        {
+            // Calendar event exists so update it.
+            $event->name = get_string('calendarend', OBSERVATION, $observation->name);
+            $event->description = format_module_intro(OBSERVATION, $observation, $observation->coursemodule);
+            $event->timestart = $observation->timeclose;
+            $event->visible = instance_is_visible(OBSERVATION, $observation);
+            $event->timeduration = 0;
+            $calendarevent = calendar_event::load($event->id);
+            $calendarevent->update($event);
+        }
+        else
+        {
+            // Calendar event is on longer needed.
+            $calendarevent = calendar_event::load($event->id);
+            $calendarevent->delete();
+        }
+    }
+    else
+    {
+        // Event doesn't exist so create one.
+        if ((!empty($observation->timeclose)) && ($observation->timeclose > 0))
+        {
+            $event = new stdClass();
+            $event->name = get_string('calendarend', OBSERVATION, $observation->name);
+            $event->description = format_module_intro(OBSERVATION, $observation, $observation->coursemodule);
+            $event->courseid = $observation->course;
+            $event->groupid = 0;
+            $event->userid = 0;
+            $event->modulename = OBSERVATION;
+            $event->instance = $observation->instance;
+            $event->eventtype = 'close';
+            $event->timestart = $observation->timeclose;
+            $event->visible = instance_is_visible(OBSERVATION, $observation);
+            $event->timeduration = 0;
+            calendar_event::create($event);
+        }
+    }
+}
+
+/**
+ * This standard function will check all instances of this module
+ * and make sure there are up-to-date events created for each of them.
+ * If courseid = 0, then every chat event in the site is checked, else
+ * only chat events belonging to the course specified are checked.
+ * This function is used, in its new format, by restore_refresh_events()
+ *
+ * @param int $courseid
+ * @return bool
+ * @throws dml_exception|coding_exception
+ */
+function observation_refresh_events($courseid = 0)
+{
+    global $DB;
+
+    if ($courseid)
+    {
+        if (!$observations = $DB->get_records(observation::TABLE, array("course" => $courseid)))
+        {
+            return true;
+        }
+    }
+    else
+    {
+        if (!$observations = $DB->get_records(observation::TABLE))
+        {
+            return true;
+        }
+    }
+
+    foreach ($observations as $observation)
+    {
+        observation_set_events($observation);
+    }
+
+    return true;
 }
 
 //TODO? check quiz_reset_userdata() for example

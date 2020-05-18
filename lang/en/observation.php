@@ -35,6 +35,11 @@ $string['pluginadministration'] = 'Observation administration';
 $string['pluginname'] = 'Observation';
 $string['observation'] = 'Observation';
 $string['accessdenied'] = 'Access denied';
+$string['calendarstart'] = '{$a} (Observation opens)';
+$string['calendarend'] = '{$a} (Observation closes)';
+$string['timing:notopen'] = 'This observation activity will not be available until {$a}';
+$string['timing:closed'] = 'This observation activity closed on {$a}';
+$string['timing:available_until'] = 'This observation activity is available until {$a}';
 
 // GENERAL
 $string['back_to_activity'] =  'Back to activity';
@@ -136,8 +141,10 @@ $string['view_task'] = 'View';
 
 $string['request_observation'] = 'Request observation';
 $string['attempt_for'] = 'Attempt #{$a}';
+$string['attempt_for_preview'] = 'Example attempt';
 $string['feedback_for_no_text'] = '<strong>{$a->fullname}</strong> has marked attempt #{$a->attempt_number} as <span class="outcome-inline">{$a->outcome}</span> {$a->timesubmitted}';
 $string['feedback_for'] = 'Feedback for attempt #{$a}';
+$string['preview_editor_text'] = 'Example learner attempt text';
 
 // CRITERIA SPECIFIC
 $string['add_criteria'] = 'Add criteria';
@@ -208,6 +215,7 @@ $string['notification:activity_wait_for_mixed'] = 'Please pe patient while your 
 $string['notification:activity_complete'] = 'Congratulations, you have completed this activity!';
 $string['notification:activity_observation_not_complete'] = 'Observation was unsuccessful, please submit new attempt';
 $string['notification:activity_assessment_not_complete'] = 'Assessment was unsuccessful, please submit new attempt';
+$string['notification:previewing_activity'] = 'You are in preview mode - you can view each task in this activity but you will not be able to make submissions.';
 
 // ERRORS
 $string['error:invalid_token'] = 'The link you are trying to access is incorrect. Please contact Akatoi support if you think this is a mistake.';
