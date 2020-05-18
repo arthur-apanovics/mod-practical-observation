@@ -242,10 +242,7 @@ class task extends task_base implements templateable
         $assessor_feedback_data = [];
         foreach ($this->learner_task_submissions as $learner_task_submission)
         {
-            if (!$learner_task_submission->is_learner_in_progress())
-            {
-                $learner_task_submissions_data[] = $learner_task_submission->export_template_data();
-            }
+            $learner_task_submissions_data[] = $learner_task_submission->export_template_data();
 
             foreach ($learner_task_submission->get_all_assessor_feedback() as $assessor_feedback)
             {
