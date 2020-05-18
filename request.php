@@ -117,11 +117,6 @@ if (optional_param('confirm', 0, PARAM_BOOL))
     ];
     email_observer($observer, $lang_data);
 
-    // TODO: REMOVE TEMPORARY OBSERVATION NOTIFICATION
-    \core\notification::add(
-        'As emails don\'t work at the moment, use this link in incognito mode to "observe" task you\'ve just submitted - <br>'
-        . $assignment->get_review_url()->out(false), notification::NOTIFY_WARNING);
-
     redirect(
         $activity_url,
         get_string('notification:observer_assigned_new', 'observation',

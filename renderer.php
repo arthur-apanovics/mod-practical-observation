@@ -394,6 +394,17 @@ class mod_observation_renderer extends plugin_renderer_base
         $task = new task($taskid, $USER->id);
 
         $template_data = $task->export_template_data();
+
+        // learners can only see feedback from last observation - remove all feedback except for last one
+        foreach ($template_data['criteria'] as &$criteria)
+        {
+            // we could check the learner task submission object for multiple observations but this is more reliable
+            if (count($criteria['observer_feedback']) > 1)
+            {
+                $criteria['observer_feedback'] = end($criteria['observer_feedback']);
+            }
+        }
+
         // lightweight data to render task header
         $header_data = [
             task::COL_NAME => $template_data['name'],

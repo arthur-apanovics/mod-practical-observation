@@ -152,16 +152,15 @@ $renderer = $PAGE->get_renderer('observation');
 
 echo $OUTPUT->header();
 
+$observer_submission = $observer_assignment->get_observer_submission_or_null();
+
 if ($observer_assignment->is_declined())
 {
     echo $renderer->view_observer_declined($observer_assignment, $learner_task_submission, $task);
 }
-else if ($observer_submission = $observer_assignment->get_observer_submission_or_null())
+else if (!is_null($observer_submission) && $observer_submission->is_submitted())
 {
-    if ($observer_submission->is_submitted())
-    {
-        echo $renderer->view_observer_completed($learner_task_submission, $task);
-    }
+    echo $renderer->view_observer_completed($learner_task_submission, $task);
 }
 else if (!$observation->is_activity_available())
 {

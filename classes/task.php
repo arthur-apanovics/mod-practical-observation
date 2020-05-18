@@ -96,6 +96,8 @@ class task extends task_base implements templateable
      * @param int $userid
      * @return mixed
      * @throws coding_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
      */
     public function get_learner_task_submission_or_null(int $userid): ?learner_task_submission
     {
