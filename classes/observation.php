@@ -465,6 +465,7 @@ class observation extends observation_base implements templateable
                 'userid'                       => $userid,
                 'learner'                      => fullname(core_user::get_user($userid)),
                 'learner_profile_url'          => $learner_url,
+                'has_attempts_summary'         => !empty($observation_attempt_summary),
                 'attempts_observation_summary' => $observation_attempt_summary,
                 'attempt_number_assessment'    => $assessment_attempts == 0 ? '-' : $assessment_attempts,
                 'observed_count_formatted'     => sprintf('%d/%d', $observed, $total),

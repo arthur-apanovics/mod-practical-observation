@@ -30,18 +30,25 @@
                         {{learner}}
                     </a>
                 </td>
-                <td class="attempts-group observation"
-                    {{! TODO: clickable attempt summary }}
-                    title="
-                    {{#attempts_observation_summary}}
-                        '{{task}}' - {{attempts}}
-                    {{/attempts_observation_summary}}">
-                    {{#attempts_observation_summary}}
-                        hover
-                    {{/attempts_observation_summary}}
-                    {{^attempts_observation_summary}}
+                <td class="attempts-group observation">
+                    {{! has attempts }}
+                    {{#has_attempts_summary}}
+                        <div class="hover-hint tooltip">
+                            Show
+                            <div class="content-top">
+                                <ul>
+                                    {{#attempts_observation_summary}}
+                                        <li>{{task}}: {{attempts}}</li>
+                                    {{/attempts_observation_summary}}
+                                </ul>
+                                <i></i> {{! tooltip arrow }}
+                            </div>
+                        </div>
+                    {{/has_attempts_summary}}
+                    {{! no observation attempts }}
+                    {{^has_attempts_summary}}
                         -
-                    {{/attempts_observation_summary}}
+                    {{/has_attempts_summary}}
                 </td>
                 <td class="attempts-group assessment">
                     {{attempt_number_assessment}}
