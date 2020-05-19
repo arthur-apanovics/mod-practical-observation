@@ -44,14 +44,10 @@ body.path-mod-observation .task-title {
 body.path-mod-observation .task-title > .action {
   margin-right: 3em;
 }
-body.path-mod-observation .task-action {
-  flex: 1;
-  font-size: 15px;
-  margin-top: 20px;
-  margin-bottom: 10px;
+body.path-mod-observation .task-title > .action.btn {
+  border-color: #b6bcc2;
 }
 body.path-mod-observation .task.status .corner {
-  display: block;
   position: absolute;
   width: 0;
   height: 0;
@@ -63,28 +59,121 @@ body.path-mod-observation .task.status .corner {
   cursor: help;
   transition: border 1s;
 }
-body.path-mod-observation .task.status.learner-observation_pending .corner,
-body.path-mod-observation .task.status.learner-assessment_pending .corner {
-  border-top-color: #c6d3e6;
+body.path-mod-observation .task.status .corner::before {
+  position: absolute;
+  top: -35px;
+  left: -20px;
+  transition: color 1s;
 }
-body.path-mod-observation .task.status.learner-observation_incomplete .corner,
-body.path-mod-observation .task.status.learner-assessment_incomplete .corner {
+body.path-mod-observation .task.status.learner-observation_pending .corner {
+  display: block;
+  border-top-color: #76A4D6;
+}
+body.path-mod-observation .task.status.learner-observation_pending .corner::before {
+  content: "\f1d8";
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-observation_pending .corner:hover {
+  border-top-color: #1d3f63;
+}
+body.path-mod-observation .task.status.learner-observation_pending .corner::before {
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-observation_in_progress .corner,
+body.path-mod-observation .task.status.learner-assessment_in_progress .corner {
+  display: block;
+  border-top-color: #76A4D6;
+}
+body.path-mod-observation .task.status.learner-observation_in_progress .corner::before,
+body.path-mod-observation .task.status.learner-assessment_in_progress .corner::before {
+  content: "\f002";
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-observation_in_progress .corner:hover,
+body.path-mod-observation .task.status.learner-assessment_in_progress .corner:hover {
+  border-top-color: #1d3f63;
+}
+body.path-mod-observation .task.status.learner-observation_in_progress .corner::before,
+body.path-mod-observation .task.status.learner-assessment_in_progress .corner::before {
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-observation_incomplete .corner {
+  display: block;
   border-top-color: #9e4444;
+}
+body.path-mod-observation .task.status.learner-observation_incomplete .corner::before {
+  content: "\f00d";
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-observation_incomplete .corner:hover {
+  border-top-color: #0f0707;
+}
+body.path-mod-observation .task.status.learner-observation_incomplete .corner::before {
+  color: #ffffff;
 }
 body.path-mod-observation .task.status.learner-complete .corner {
-  border-top-color: #589e44;
+  display: block;
+  border-top-color: #01A850;
+}
+body.path-mod-observation .task.status.learner-complete .corner::before {
+  content: "\f00c";
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-complete .corner:hover {
+  border-top-color: #000000;
+}
+body.path-mod-observation .task.status.learner-complete .corner::before {
+  color: #ffffff;
 }
 body.path-mod-observation .task.status.assessing-complete .corner {
-  border-top-color: #589e44;
+  display: block;
+  border-top-color: #01A850;
+}
+body.path-mod-observation .task.status.assessing-complete .corner::before {
+  content: "\f00c";
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.assessing-complete .corner:hover {
+  border-top-color: #000000;
+}
+body.path-mod-observation .task.status.assessing-complete .corner::before {
+  color: #ffffff;
 }
 body.path-mod-observation .task.status.assessing-not_complete .corner {
+  display: block;
   border-top-color: #9e4444;
+}
+body.path-mod-observation .task.status.assessing-not_complete .corner::before {
+  content: "\f00d";
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.assessing-not_complete .corner:hover {
+  border-top-color: #0f0707;
+}
+body.path-mod-observation .task.status.assessing-not_complete .corner::before {
+  color: #ffffff;
 }
 body.path-mod-observation .criteria-container {
   padding: 2em;
 }
 body.path-mod-observation .criteria-list ol li {
   margin: 2em 1em;
+}
+body.path-mod-observation .criteria .outcome-icon {
+  font-size: 1.2em;
+  margin: 0 0.5em;
+}
+body.path-mod-observation .criteria.not_complete .outcome-icon::before {
+  color: #9e4444;
+  content: "\f05c";
+}
+body.path-mod-observation .criteria.complete .outcome-icon::before {
+  color: #01A850;
+  content: "\f05d";
+}
+body.path-mod-observation .criteria-header {
+  display: flex;
+  align-items: baseline;
 }
 body.path-mod-observation .criteria-desc {
   border: 1px solid #d3d3d3;
@@ -94,6 +183,66 @@ body.path-mod-observation .criteria-desc {
 }
 body.path-mod-observation .criteria-desc + .feedback.no-text {
   margin-top: -2em;
+}
+body.path-mod-observation .feedback.observer .entry {
+  transition: box-shadow 1s;
+}
+body.path-mod-observation .feedback.observer.with-text {
+  padding: 0 0 3em 2em;
+  margin-top: -1em;
+}
+body.path-mod-observation .feedback.observer.with-text.complete .entry:hover {
+  box-shadow: -5px 0 0 0 #01A850;
+}
+body.path-mod-observation .feedback.observer.with-text.not_complete .entry:hover {
+  box-shadow: -5px 0 0 0 #9e4444;
+}
+body.path-mod-observation .feedback.observer.no-text {
+  text-align: right;
+}
+body.path-mod-observation .feedback.observer.no-text.complete .outcome-inline {
+  border-bottom: 2px solid #01A850;
+}
+body.path-mod-observation .feedback.observer.no-text.not_complete .outcome-inline {
+  border-bottom: 2px solid #9e4444;
+}
+body.path-mod-observation .feedback.observer.no-text .outcome-inline {
+  text-transform: lowercase;
+  font-weight: bold;
+  display: inline-block;
+  line-height: 1.2;
+  text-shadow: 2px 2px white;
+}
+body.path-mod-observation .feedback.assessor {
+  margin-bottom: 3em;
+}
+body.path-mod-observation .attempt {
+  padding: 2em;
+}
+body.path-mod-observation .attempt .heading,
+body.path-mod-observation .feedback .heading {
+  display: flex;
+  justify-content: space-between;
+}
+body.path-mod-observation .attempt .heading .title-secondary,
+body.path-mod-observation .feedback .heading .title-secondary {
+  margin: 0;
+}
+body.path-mod-observation .attempt .heading .attributes,
+body.path-mod-observation .feedback .heading .attributes {
+  font-size: 0.9em;
+}
+body.path-mod-observation .attempt .heading .attributes .name,
+body.path-mod-observation .feedback .heading .attributes .name {
+  font-weight: bold;
+}
+body.path-mod-observation .attempt .entry,
+body.path-mod-observation .feedback .entry {
+  margin: 0;
+}
+body.path-mod-observation .attempt .entry.attachments::before,
+body.path-mod-observation .feedback .entry.attachments::before {
+  content: "\f019";
 }
 body.path-mod-observation .table {
   border: 1px solid #d3d3d3;
@@ -124,84 +273,18 @@ body.path-mod-observation .button-wrapper {
   text-align: center;
   margin: 1em 0;
 }
-body.path-mod-observation .feedback.observer.with-text {
-  padding: 0 2em 2em 2em;
-}
-body.path-mod-observation .feedback.observer.no-text {
-  text-align: right;
-}
-body.path-mod-observation .feedback.observer.no-text .outcome-inline {
-  text-transform: lowercase;
-  font-weight: bold;
-}
-body.path-mod-observation .feedback.assessor {
-  margin-bottom: 3em;
-}
-body.path-mod-observation .attempt {
-  padding: 2em;
-}
-body.path-mod-observation .attempt .heading,
-body.path-mod-observation .feedback .heading {
-  display: flex;
-  justify-content: space-between;
-}
-body.path-mod-observation .attempt .heading .title-secondary,
-body.path-mod-observation .feedback .heading .title-secondary {
-  margin: 0;
-}
-body.path-mod-observation .attempt .heading .attributes,
-body.path-mod-observation .feedback .heading .attributes {
-  font-size: 0.9em;
-}
-body.path-mod-observation .attempt .heading .attributes .name,
-body.path-mod-observation .feedback .heading .attributes .name {
-  font-weight: bold;
-}
-body.path-mod-observation .attempt .entry,
-body.path-mod-observation .feedback .entry {
-  margin: 0;
-}
 body.path-mod-observation .assessor-feedback-container {
   padding: 2em;
 }
 body.path-mod-observation .timestamp {
-  flex: 0 0 99%;
   text-align: right;
-  margin-right: 8px;
+  margin-right: 0.5em;
 }
 body.path-mod-observation form .meets-criteria-wrapper {
   text-align: right;
 }
 body.path-mod-observation .align-center {
   text-align: center;
-}
-body.path-mod-observation .confirm-change-wrapper {
-  width: 55%;
-  border: 1px solid #d3d3d3;
-  border-radius: .25em;
-  margin-bottom: 3em;
-  margin: 0 auto;
-}
-body.path-mod-observation .confirm-change-wrapper > h4,
-body.path-mod-observation .confirm-change-wrapper > h5 {
-  padding-left: 18px;
-  padding-top: 15px;
-  /*padding-bottom: 15px;*/
-}
-body.path-mod-observation .confirm-change-wrapper > p {
-  padding-left: 18px;
-  line-height: 7px;
-}
-body.path-mod-observation .msg {
-  border: 1px solid #d3d3d3;
-  border-radius: .25em;
-  margin-bottom: 3em;
-  margin: 0 18px 40px;
-}
-body.path-mod-observation .confirm-change-wrapper > div > p {
-  padding-left: 4px;
-  padding-top: 4px;
-  padding-bottom: 50px;
 }
 body.path-mod-observation .list-wrapper {
   width: 100%;

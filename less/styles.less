@@ -1,3 +1,14 @@
+// font awesome icons. grunt task will resolve path just fine
+@import "base\less\fa\variables.less";
+
+// ====================================================================================================================
+// Variables and functions
+// ====================================================================================================================
+
+@status-color-pending: #76A4D6; // cf brand secondary
+@status-color-success: #01A850; // cf success
+@status-color-fail: #9e4444; // cf danger
+
 @wrapper-border-color: #d3d3d3;
 @wrapper-margin: 3em;
 
@@ -9,6 +20,7 @@
 }
 
 // ====================================================================================================================
+// Applies to all observation pages
 // ====================================================================================================================
 
 body.path-mod-observation {
@@ -69,78 +81,99 @@ body.path-mod-observation {
 
       > .action {
         margin-right: @wrapper-margin;
-      }
-    }
 
-    &-action {
-      flex: 1;
-      font-size: 15px;
-      margin-top: 20px;
-      margin-bottom: 10px;
+        &.btn {
+          border-color: #b6bcc2;
+        }
+      }
     }
 
     // task statuses (actual string from object)
     &.status {
       // convenience function
-      .task-highlight(@color) {
+      .task-corner(@color, @fa-icon) {
         .corner {
+          // only show the status corner when we specifically want to
+          display: block;
           border-top-color: @color;
+
+          &::before {
+            content: @fa-icon;
+            color: contrast(@color);
+          }
+
+          &:hover {
+            border-top-color: darken(@color, 40%);
+          }
+
+          &::before {
+            color: lighten(contrast(@color), 10%);
+          }
         }
       }
 
-      @status-color-pending: #c6d3e6;
-      @status-color-success: #589e44;
-      @status-color-fail: #9e4444;
+      @border-size: 40px; // needed to calculate icon placement
 
       .corner {
-        display: block;
         position: absolute;
         width: 0;
         height: 0;
-        border-top: 40px solid; // border-top-color controls color which depends on status
-        border-bottom: 40px solid transparent;
-        border-left: 40px solid transparent;
+        border-top: @border-size solid; // border-top-color controls color which depends on status
+        border-bottom: @border-size solid transparent;
+        border-left: @border-size solid transparent;
         right: 0;
         top: 0;
 
         cursor: help;
         transition: border 1s;
+
+        // position font-awesome icon
+        &::before {
+          position: absolute;
+          top: (@border-size - 5px) * -1;
+          left: (@border-size / 2) * -1;
+
+          transition: color 1s;
+        }
       }
 
       // learner
       &.learner {
-        &-observation_pending,
-        &-assessment_pending {
-          .task-highlight(@status-color-pending)
+        &-observation_pending {
+          .task-corner(@status-color-pending, @fa-var-paper-plane);
         }
 
-        &-observation_incomplete,
-        &-assessment_incomplete {
-          .task-highlight(@status-color-fail);
+        //&-assessment_pending // - all tasks have same status when assessmnet pending - don't clutter page.
+
+        &-observation_in_progress,
+        &-assessment_in_progress {
+          .task-corner(@status-color-pending, @fa-var-search);
         }
+
+        &-observation_incomplete {
+          .task-corner(@status-color-fail, @fa-var-times);
+        }
+
+        //&-assessment_incomplete // - all tasks have same status when assessment failed, don't clutter page.
 
         &-complete {
-          .task-highlight(@status-color-success);
+          .task-corner(@status-color-success, @fa-var-check);
         }
       }
 
       // assessor
       &.assessing {
         &-complete {
-          .task-highlight(@status-color-success)
+          .task-corner(@status-color-success, @fa-var-check);
         }
 
         &-not_complete {
-          .task-highlight(@status-color-fail)
+          .task-corner(@status-color-fail, @fa-var-times);
         }
       }
     }
   }
 
-  // todo: criteria highlight
-  //.with-text.not_complete .entry.wrapper {
-  //  box-shadow: -5px 0px 0px 0px red;
-  //}
   .criteria {
     &-container {
       padding: 2em;
@@ -154,6 +187,31 @@ body.path-mod-observation {
       }
     }
 
+    // status icons
+    .outcome-icon {
+      font-size: 1.2em;
+      margin: 0 0.5em;
+    }
+
+    &.not_complete {
+      .outcome-icon::before {
+        color: @status-color-fail;
+        content: @fa-var-times-circle-o;
+      }
+    }
+
+    &.complete {
+      .outcome-icon::before {
+        color: @status-color-success;
+        content: @fa-var-check-circle-o;
+      }
+    }
+
+    &-header {
+      display: flex;
+      align-items: baseline;
+    }
+
     &-desc {
       .border-wrapper();
       padding: 1em;
@@ -165,63 +223,63 @@ body.path-mod-observation {
     }
   }
 
-  .table {
-    .border-wrapper();
-
-    th {
-      background-color: #d3d3d3;
-      color: black;
-    }
-  }
-
-  .editor-container {
-    padding: 0 1em 1em 4em;
-
-    > .assessment-outcome {
-      margin: 1em 0;
-
-      > label {
-        font-weight: bold;
-      }
-
-      > select {
-        float: right;
-        min-width: 15em;
-      }
-    }
-  }
-
-  .new-attempt {
-    padding: 1em;
-  }
-
-  .button-wrapper {
-    text-align: center;
-    margin: 1em 0;
-  }
-
 
   .feedback {
+    // helper function
+    .feedback-highlight(@color) {
+      .entry {
+        //box-shadow: -2px 0 0 0 @color;
 
+        &:hover {
+          box-shadow: -5px 0 0 0 @color;
+        }
+      }
+    }
+
+    // feedback from observer
     &.observer {
+
+      .entry {
+        transition: box-shadow 1s;
+      }
+
       &.with-text {
-        padding: 0 2em 2em 2em;
+        padding: 0 0 3em 2em;
+        // move feedback closer to criteria
+        margin-top: -1em;
+
+        &.complete {
+          .feedback-highlight(@status-color-success);
+        }
+
+        &.not_complete {
+          .feedback-highlight(@status-color-fail);
+        }
       }
 
       &.no-text {
         text-align: right;
 
         &.complete {
-          // TODO
+          .outcome-inline {
+            border-bottom: 2px solid @status-color-success;
+          }
         }
 
         &.not_complete {
-          // TODO
+          .outcome-inline {
+            border-bottom: 2px solid @status-color-fail;
+          }
         }
 
         .outcome-inline {
           text-transform: lowercase;
           font-weight: bold;
+
+          // underline
+          display: inline-block;
+          line-height: 1.2;
+          text-shadow: 2px 2px white;
         }
       }
     }
@@ -276,11 +334,49 @@ body.path-mod-observation {
     .entry {
       margin: 0;
 
-      &attachments {
+      &.attachments {
+        &::before {
+          content: @fa-var-download;
+        }
       }
     }
   }
 
+
+  .table {
+    .border-wrapper();
+
+    th {
+      background-color: #d3d3d3;
+      color: black;
+    }
+  }
+
+  .editor-container {
+    padding: 0 1em 1em 4em;
+
+    > .assessment-outcome {
+      margin: 1em 0;
+
+      > label {
+        font-weight: bold;
+      }
+
+      > select {
+        float: right;
+        min-width: 15em;
+      }
+    }
+  }
+
+  .new-attempt {
+    padding: 1em;
+  }
+
+  .button-wrapper {
+    text-align: center;
+    margin: 1em 0;
+  }
 
   .assessor {
     &-feedback-container {
@@ -288,11 +384,9 @@ body.path-mod-observation {
     }
   }
 
-
   .timestamp {
-    flex: 0 0 99%;
     text-align: right;
-    margin-right: 8px;
+    margin-right: 0.5em;
   }
 
   form {
@@ -303,35 +397,6 @@ body.path-mod-observation {
 
   .align-center {
     text-align: center;
-  }
-
-  .confirm-change-wrapper {
-    width: 55%;
-    .border-wrapper();
-    margin: 0 auto;
-  }
-
-  .confirm-change-wrapper > h4,
-  .confirm-change-wrapper > h5 {
-    padding-left: 18px;
-    padding-top: 15px;
-    /*padding-bottom: 15px;*/
-  }
-
-  .confirm-change-wrapper > p {
-    padding-left: 18px;
-    line-height: 7px;
-  }
-
-  .msg {
-    .border-wrapper();
-    margin: 0 18px 40px;
-  }
-
-  .confirm-change-wrapper > div > p {
-    padding-left: 4px;
-    padding-top: 4px;
-    padding-bottom: 50px;
   }
 
   .list-wrapper {
@@ -369,9 +434,9 @@ body.path-mod-observation {
 }
 
 // ====================================================================================================================
+// "MANAGE" PAGE
 // ====================================================================================================================
 
-// "manage" page
 body.observation-manage {
   #manage-task-list,
   .manage-criteria-list {
@@ -622,6 +687,7 @@ body.observation-observe {
   }
 
   .criteria {
+    // even spacing for outcome dropdown
     &-header {
       display: flex;
       flex-direction: row;
