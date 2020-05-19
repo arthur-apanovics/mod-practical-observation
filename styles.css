@@ -240,9 +240,16 @@ body.path-mod-observation .attempt .entry,
 body.path-mod-observation .feedback .entry {
   margin: 0;
 }
-body.path-mod-observation .attempt .entry.attachments::before,
-body.path-mod-observation .feedback .entry.attachments::before {
+body.path-mod-observation .attempt .entry .attachments,
+body.path-mod-observation .feedback .entry .attachments {
+  list-style: none;
+  margin-left: 0;
+}
+body.path-mod-observation .attempt .entry .attachments .file a::before,
+body.path-mod-observation .feedback .entry .attachments .file a::before {
+  font-family: 'FontAwesome';
   content: "\f019";
+  margin-right: 0.5em;
 }
 body.path-mod-observation .table {
   border: 1px solid #d3d3d3;

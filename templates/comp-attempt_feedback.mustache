@@ -12,10 +12,10 @@
         <div class="text">
             {{{text}}}
         </div>
-        <ul class="attachments ft"> {{! "ft" class enables font-awesome }}
+        <ul class="attachments">
             {{#files}}
-                <li>
-                    <a href="{{{url}}}">{{filename}}</a>
+                <li class="file">
+                    <a title="Download {{filename}}" href="{{{url}}}">{{filename}}</a>
                 </li>
             {{/files}}
         </ul>

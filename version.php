@@ -30,9 +30,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component    = 'mod_observation';
-$plugin->version      = 2020042400;
-$plugin->release      = 'v0.1';
+$plugin->version      = 2020051900;
+$plugin->release      = 'v0.8';
 $plugin->requires     = 2015111606.00;
-$plugin->maturity     = MATURITY_ALPHA;
+$plugin->maturity     = MATURITY_BETA;
 $plugin->cron         = 900;
 $plugin->dependencies = array();

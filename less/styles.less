@@ -334,9 +334,16 @@ body.path-mod-observation {
     .entry {
       margin: 0;
 
-      &.attachments {
-        &::before {
-          content: @fa-var-download;
+      .attachments {
+        list-style: none;
+        margin-left: 0;
+
+        .file {
+          a::before {
+            font-family: 'FontAwesome';
+            content: @fa-var-download;
+            margin-right: 0.5em;
+          }
         }
       }
     }
