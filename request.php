@@ -166,9 +166,11 @@ if ($data = $form->get_data())
             // we have an existing assignment but a different observer
             // is being assigned (new or existing), confirm change
             $lang_params = [
-                'current' => $current->get_formatted_name(),
-                'new'     => $submitted->get_formatted_name(),
-                'task'    => $task->get_formatted_name()
+                'current'       => $current->get_formatted_name(),
+                'current_email' => $current->get_email(),
+                'new'           => $submitted->get_formatted_name(),
+                'new_email'     => $submitted->get_email(),
+                'task'          => $task->get_formatted_name()
             ];
 
             $renderer->echo_confirmation_page_and_die(

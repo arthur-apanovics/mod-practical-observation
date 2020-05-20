@@ -107,9 +107,12 @@ class assessor_task_submission_base extends db_model_base
     {
         if ($prop == self::COL_OUTCOME)
         {
-            // validate status is correctly set
+            // just make sure string is correct, validation is performed during submission
             $allowed = [self::OUTCOME_NOT_COMPLETE, self::OUTCOME_COMPLETE];
-            lib::validate_prop(self::COL_OUTCOME, $this->outcome, $value, $allowed, false);
+            if (!in_array($value, $allowed))
+            {
+                throw new coding_exception(sprintf('Invalid outcome value "%s"', $value));
+            }
         }
 
         return parent::set($prop, $value, $save);

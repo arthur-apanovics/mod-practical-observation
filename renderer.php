@@ -425,6 +425,7 @@ class mod_observation_renderer extends plugin_renderer_base
                 if ($status === assessor_task_submission::OUTCOME_NOT_COMPLETE)
                 {
                     // remove all previous observation records when assessment failed
+                    // TODO: also remove when waiting for observer review
                     foreach ($template_data['criteria'] as &$criteria)
                     {
                         $criteria['observer_feedback'] = [];

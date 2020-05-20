@@ -167,7 +167,7 @@ $string['assign_observer:table_title_help'] = 'You can assign any observer you\'
 $string['assign_observer:header'] = 'Assign observer';
 $string['assign_observer:phone_validation_message'] = 'Please enter a valid NZ phone number';
 $string['assign_observer:email_validation_message'] = 'Please enter a valid email address';
-$string['assign_observer:confirm_change'] = 'Current observer for this task is <strong>{$a->current}</strong>.<br>Are you sure you want to assign <strong>{$a->new}</strong> as the observer for task "{$a->task}"?';
+$string['assign_observer:confirm_change'] = 'Current observer for this task is <strong>{$a->current} ({$a->current_email})</strong>.<br>Are you sure you want to assign <strong>{$a->new} ({$a->new_email})</strong> as the observer for task "{$a->task}"?';
 $string['assign_observer:input_prompt'] = 'Briefly explain this change';
 
 $string['assign_observer:assigned_observer'] = 'Assigned observer';
