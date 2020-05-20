@@ -24,6 +24,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use core\notification;
 use mod_observation\assessor_feedback;
+use mod_observation\assessor_task_submission;
 use mod_observation\learner_attempt;
 use mod_observation\learner_attempt_base;
 use mod_observation\learner_task_submission;
@@ -417,6 +418,20 @@ class mod_observation_renderer extends plugin_renderer_base
         {
             // learner task submission
             $task_submission = $task->get_learner_task_submission_or_create($USER->id);
+
+            if ($assessor_task_submission = $task_submission->get_assessor_task_submission_or_null())
+            {
+                $status = $assessor_task_submission->get(assessor_task_submission::COL_OUTCOME);
+                if ($status === assessor_task_submission::OUTCOME_NOT_COMPLETE)
+                {
+                    // remove all previous observation records when assessment failed
+                    foreach ($template_data['criteria'] as &$criteria)
+                    {
+                        $criteria['observer_feedback'] = [];
+                        $criteria['outcome'] = null;
+                    }
+                }
+            }
 
             if ($task_submission->learner_can_attempt_or_create())
             {
