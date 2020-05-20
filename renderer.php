@@ -702,11 +702,17 @@ class mod_observation_renderer extends plugin_renderer_base
                 // this is ugly but we need to repeat this data here to populate page based on existing feedback
                 $observer_template_data['extra']['existing_feedback']['is_complete'] =
                     $feedback->is_marked_complete();
-            }
 
-            $template_data['extra']['observer'] = $observer_template_data;
+                $template_data['extra']['observer'] = $observer_template_data;
+            }
+            else
+            {
+                // learner task template will be used so we need to render observer table ourselves
+                $out .= $this->render_from_template('part-observer_details', $observer_template_data);
+            }
         }
 
+        // choose template to display based on action
         $template_name = $is_assessing ? 'view-task_assessor' : 'view-task_learner';
         $out .= $this->render_from_template($template_name, $template_data);
 
