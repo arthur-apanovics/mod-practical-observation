@@ -690,10 +690,12 @@ class mod_observation_renderer extends plugin_renderer_base
 
         if ($include_observer_details)
         {
-            $observer = $learner_task_submission->get_active_observer_assignment_or_null()->get_observer(); // has to exist
+            $observer_assignment = $learner_task_submission->get_latest_observer_assignment_or_null();
+            $observer = $observer_assignment->get_observer(); // has to exist
             $observer_template_data = $observer->export_template_data();
             $observer_template_data['extra']['is_assessor'] = true;
             $observer_template_data['extra']['is_assessing'] = $is_assessing;
+            $observer_template_data['extra']['is_declined'] = $observer_assignment->is_declined();
 
             if ($is_assessing)
             {
