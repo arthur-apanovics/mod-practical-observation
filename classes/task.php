@@ -258,7 +258,7 @@ class task extends task_base implements templateable
         $learner_submission_status_description = null;
         $assessor_submission_status_description = null;
         $has_feedback = false;
-        // task contains only ONE submission, we can give the task a status
+        // task contains only ONE submission in this task, we can give the task a status
         if ($this->is_filtered)
         {
             if (isset($learner_task_submission)) // $learner_task_submission set in loop
@@ -268,7 +268,10 @@ class task extends task_base implements templateable
 
                 if ($assessor_task_submission = $learner_task_submission->get_assessor_task_submission_or_null())
                 {
-                    $assessor_submission_status = $assessor_task_submission->get_task_outcome_from_feedback();
+                    $attempt = $learner_task_submission->get_latest_attempt_or_null();
+                    // assessor status comes from feedback as task submission retains status from previous assessment
+                    $assessor_submission_status =
+                        $assessor_task_submission->get_task_outcome_from_feedback_or_null($attempt->get_id_or_null());
                     $assessor_submission_status_description = lib::get_outcome_string($assessor_submission_status);
                     $has_feedback = (bool) count($assessor_task_submission->get_all_feedback());
                 }

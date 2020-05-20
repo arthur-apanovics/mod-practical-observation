@@ -52,26 +52,20 @@ class assessor_task_submission extends assessor_task_submission_base implements 
     /**
      * Used to determine task outcome when submission has not been released yet
      *
-     * @return string {@link assessor_feedback::OUTCOME_COMPLETE}, {@link assessor_feedback::OUTCOME_NOT_COMPLETE}
+     * @return string|null
+     * null if no outcome because feedback does not exist yet;
+     * {@link assessor_feedback::OUTCOME_COMPLETE};
+     * {@link assessor_feedback::OUTCOME_NOT_COMPLETE}
      * @throws coding_exception
      */
-    public function get_task_outcome_from_feedback(): string
+    public function get_task_outcome_from_feedback_or_null(int $learner_attempt_id): ?string
     {
-        if (empty($this->feedbacks))
+        if ($feedback = $this->get_feedback_or_null($learner_attempt_id))
         {
-            return assessor_feedback::OUTCOME_NOT_COMPLETE;
+            return $feedback->get(assessor_feedback::COL_OUTCOME);
         }
 
-        foreach ($this->feedbacks as $feedback)
-        {
-            if ($feedback->get(assessor_feedback::COL_OUTCOME) === assessor_feedback::OUTCOME_NOT_COMPLETE)
-            {
-                // if at least one criteria not complete then whole task is not complete
-                return assessor_feedback::OUTCOME_NOT_COMPLETE;
-            }
-        }
-
-        return assessor_feedback::OUTCOME_COMPLETE;
+        return null;
     }
 
     /**
@@ -83,10 +77,7 @@ class assessor_task_submission extends assessor_task_submission_base implements 
      */
     public function get_feedback_or_create(int $learner_attempt_id): assessor_feedback
     {
-        $feedback = lib::find_in_assoc_array_by_key_value_or_null(
-            $this->feedbacks, assessor_feedback::COL_ATTEMPTID, $learner_attempt_id);
-
-        if (is_null($feedback))
+        if (!$feedback = $this->get_feedback_or_null($learner_attempt_id))
         {
             $feedback = new assessor_feedback_base();
             $feedback->set(assessor_feedback::COL_ASSESSOR_TASK_SUBMISSIONID, $this->id);
@@ -100,6 +91,17 @@ class assessor_task_submission extends assessor_task_submission_base implements 
         }
 
         return $feedback;
+    }
+
+    /**
+     * @param int $learner_attempt_id
+     * @return assessor_feedback|null
+     * @throws coding_exception
+     */
+    private function get_feedback_or_null(int $learner_attempt_id): ?assessor_feedback
+    {
+        return lib::find_in_assoc_array_by_key_value_or_null(
+            $this->feedbacks, assessor_feedback::COL_ATTEMPTID, $learner_attempt_id);
     }
 
     /**

@@ -62,7 +62,7 @@ body.path-mod-observation .task.status .corner {
 body.path-mod-observation .task.status .corner::before {
   position: absolute;
   top: -35px;
-  left: -18px;
+  left: -20px;
   transition: color 1s;
 }
 body.path-mod-observation .task.status.learner-learner_in_progress .corner {
@@ -95,14 +95,14 @@ body.path-mod-observation .task.status.learner-observation_pending .corner:hover
 }
 body.path-mod-observation .task.status.learner-assessment_pending .corner {
   display: block;
-  border-top-color: #01A850;
+  border-top-color: #76A4D6;
 }
 body.path-mod-observation .task.status.learner-assessment_pending .corner::before {
   content: "\f017";
   color: #ffffff;
 }
 body.path-mod-observation .task.status.learner-assessment_pending .corner:hover {
-  border-top-color: #017538;
+  border-top-color: #4f8aca;
 }
 body.path-mod-observation .task.status.learner-assessment_pending .corner:hover::before {
   color: #ffffff;

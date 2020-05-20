@@ -110,10 +110,10 @@ $string['status:learner_in_progress'] = 'In progress';
 $string['status:learner_pending'] = 'Learner pending';
 $string['status:observation_pending'] = 'Observation pending';
 $string['status:observation_in_progress'] = 'Observation in progress';
-$string['status:observation_incomplete'] = 'Observation not complete';
+$string['status:observation_incomplete'] = 'Observation failed';
 $string['status:assessment_pending'] = 'Assessment pending';
 $string['status:assessment_in_progress'] = 'Assessment in progress';
-$string['status:assessment_incomplete'] = 'Assessment not complete';
+$string['status:assessment_incomplete'] = 'Assessment failed';
 $string['status:complete'] = 'Complete';
 
 // MANAGE SPECIFIC

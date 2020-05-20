@@ -115,7 +115,7 @@ class lib
      */
     public static function find_in_assoc_array_by_key_value_or_null($input, $key, $value)
     {
-        if (is_array($input))
+        if (is_array($input) && !empty($input))
         {
             foreach ($input as $entry)
             {

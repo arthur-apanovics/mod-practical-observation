@@ -69,11 +69,23 @@ class assessor_task_submission_base extends db_model_base
      */
     public function submit(string $outcome, assessor_feedback_base $feedback): self
     {
-        if (empty($feedback->get(assessor_feedback::COL_TIMESUBMITTED))
-            || empty($feedback->get(assessor_feedback::COL_TEXT))
-            || empty($feedback->get(assessor_feedback::COL_TEXT_FORMAT)))
+        $errors = [];
+        if (empty($feedback->get(assessor_feedback::COL_TIMESUBMITTED)))
         {
-            throw new coding_exception('Assessor feedback was not saved correctly');
+            $errors[] = '"timesubmitted" not set';
+        }
+        if (empty($feedback->get(assessor_feedback::COL_TEXT)))
+        {
+            $errors[] = 'feedback text is empty';
+        }
+        if (empty($feedback->get(assessor_feedback::COL_TEXT_FORMAT)))
+        {
+            $errors[] = 'feedback text format not set';
+        }
+
+        if (!empty($errors))
+        {
+            throw new coding_exception('Assessor feedback was not saved correctly - ' . implode(';', $errors));
         }
 
         // activity submission status is updated in assessment release

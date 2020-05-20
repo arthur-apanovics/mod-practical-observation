@@ -131,7 +131,7 @@ body.path-mod-observation {
         &::before {
           position: absolute;
           top: (@border-size - 5px) * -1;
-          left: ((@border-size / 2) - 2) * -1;
+          left: (@border-size / 2) * -1;
 
           transition: color 1s;
         }
@@ -148,7 +148,7 @@ body.path-mod-observation {
         }
 
         &-assessment_pending {
-          .task-corner(@status-color-success, @fa-var-clock-o);
+          .task-corner(@status-color-pending, @fa-var-clock-o);
         }
 
         &-observation_in_progress,
