@@ -149,6 +149,18 @@ class learner_task_submission_base extends submission_status_store
         return $attempts;
     }
 
+    /**
+     * @param int $attempt_id
+     * @return learner_attempt_base|null
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     * @throws coding_exception
+     */
+    public function get_learner_attempt_or_null(int $attempt_id): ?learner_attempt_base
+    {
+        return learner_attempt_base::read_or_null($attempt_id);
+    }
+
     public function get_latest_learner_attempt_or_null(): ?learner_attempt_base
     {
         global $DB;

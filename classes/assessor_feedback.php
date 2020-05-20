@@ -44,7 +44,8 @@ class assessor_feedback extends assessor_feedback_base implements templateable
     {
         $assessor_task_submission = assessor_task_submission_base::read_or_null(
             $this->assessor_task_submissionid, true);
-        $attempt_number = $assessor_task_submission->get_learner_task_submission()->get_last_attemptnumber();
+        $learner_task_submisison = $assessor_task_submission->get_learner_task_submission();
+        $learner_attempt = $learner_task_submisison->get_learner_attempt_or_null($this->attemptid);
         $outcome = $assessor_task_submission->get(assessor_task_submission::COL_OUTCOME);
 
         return [
@@ -55,7 +56,7 @@ class assessor_feedback extends assessor_feedback_base implements templateable
             // extra
             'feedback_type'                       => 'assessor', // feedback css class
             observer_task_submission::COL_OUTCOME => is_null($outcome) ? 'pending' : $outcome,
-            learner_attempt::COL_ATTEMPT_NUMBER   => $attempt_number,
+            learner_attempt::COL_ATTEMPT_NUMBER   => $learner_attempt->get_attempt_number(),
             'fullname'                            => fullname(
                 \core_user::get_user($assessor_task_submission->get(assessor_task_submission::COL_ASSESSORID))),
         ];

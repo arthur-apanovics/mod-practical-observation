@@ -54,7 +54,15 @@ class assessor_task_submission_base extends db_model_base
      */
     protected $outcome;
 
-    public function get_learner_task_submission()
+    /**
+     * Will throw if not found!
+     *
+     * @return learner_task_submission_base
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
+     * @throws coding_exception
+     */
+    public function get_learner_task_submission(): learner_task_submission_base
     {
         return learner_task_submission_base::read_by_condition_or_null(
             [learner_task_submission::COL_ID => $this->learner_task_submissionid], true);
