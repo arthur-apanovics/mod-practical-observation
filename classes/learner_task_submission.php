@@ -371,6 +371,8 @@ class learner_task_submission extends learner_task_submission_base implements te
     /**
      * Used for 'assign observer from history table' to display all observers assigned by user in activity
      *
+     * TODO: convert to php as query is crazy complex and doesn't always return current observer
+     *
      * @return observer_assignment[]
      * @throws dml_exception
      */

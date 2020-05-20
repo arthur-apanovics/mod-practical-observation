@@ -108,19 +108,17 @@ class submission_base extends submission_status_store
         }
         else
         {
+            $msg = sprintf(
+                'Attempted to set submission with id "%d" status to "%s" but that is already the current status',
+                $this->id, $new_status);
+
             if (!$allow_same)
             {
-                throw new coding_exception(
-                    sprintf(
-                        'Attempted to increment attempt number for submission id "%d" when status is already "%s"',
-                        $this->id, self::STATUS_ASSESSMENT_PENDING));
+                throw new coding_exception($msg);
             }
             else
             {
-                debugging(
-                    sprintf(
-                        'Attempted to set submission with id "%d" status to "%s" but that is already the current status',
-                        $this->id, $new_status), DEBUG_DEVELOPER, debug_backtrace());
+                debugging($msg, DEBUG_DEVELOPER, debug_backtrace());
             }
         }
 

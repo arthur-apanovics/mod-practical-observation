@@ -33,7 +33,7 @@
                 <td class="attempts-group observation">
                     {{! has attempts }}
                     {{#has_attempts_summary}}
-                        <div class="hover-hint tooltip">
+                        <div class="hover-hint obs-tooltip">
                             Show
                             <div class="content-top">
                                 <ul>
@@ -60,6 +60,7 @@
                     {{submission_status}}
                 </td>
                 <td class="completion">
+                    {{! TODO: TLMS12 - new way of assigning 'alt', etc. https://help.totaralearning.com/display/DEV/Flexible+Icons+API }}
                     {{#is_complete}}
                         {{#flex_icon}}check-circle-o, {"alt":"Activity complete", "classes":"complete"}{{/flex_icon}}
                     {{/is_complete}}

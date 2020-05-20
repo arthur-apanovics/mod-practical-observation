@@ -193,6 +193,7 @@ else if ($assessor_task_submissionid = optional_param('assessor_task_submission_
     require_login();
 
     $assessor_task_submission = new assessor_task_submission($assessor_task_submissionid);
+    $learner_task_submission = $assessor_task_submission->get_learner_task_submission();
     $assessor_feedback = new assessor_feedback(
         required_param('assessor_feedback_id', PARAM_INT));
 
@@ -225,7 +226,25 @@ else if ($assessor_task_submissionid = optional_param('assessor_task_submission_
     lib::save_files(
         $draft_itemid, $context->id, observation::FILE_AREA_ASSESSOR, $assessor_feedback->get_id_or_null());
 
-    $learnerid = $assessor_task_submission->get_learner_task_submission()->get_userid();
+    // set activity submission status to 'grading'
+    $submission = $learner_task_submission->get_submission();
+    $status = $submission->get(submission::COL_STATUS);
+    if ($status !== submission::STATUS_ASSESSMENT_IN_PROGRESS)
+    {
+        // extra debugging just in case
+        if ($status !== submission::STATUS_ASSESSMENT_PENDING)
+        {
+            debugging(
+                sprintf(
+                    'Submission with id "%d" status was expected to be %s, got %s instead',
+                    $submission->get_id_or_null(), submission::STATUS_ASSESSMENT_PENDING, $status), DEBUG_DEVELOPER,
+                debug_backtrace());
+        }
+
+        $submission->update_status_and_save(submission::STATUS_ASSESSMENT_IN_PROGRESS);
+    }
+
+    $learnerid = $learner_task_submission->get_userid();
     redirect(
         new moodle_url(
             OBSERVATION_MODULE_PATH . 'activity_assess.php', ['id' => $cmid, 'learnerid' => $learnerid]));

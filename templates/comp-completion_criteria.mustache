@@ -1,12 +1,7 @@
 {{! this is butt-ugly but we need outcome class at this level... }}
 {{! LIST ITEM }}
 {{^extra.is_observation}}
-    {{#observer_feedback}}
-        <li class="criteria {{outcome}}">
-    {{/observer_feedback}}
-    {{^observer_feedback}}
-        <li class="criteria">
-    {{/observer_feedback}}
+    <li class="criteria {{outcome}}">
 {{/extra.is_observation}}
 {{#extra.is_observation}}
     <li class="criteria observation">

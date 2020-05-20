@@ -62,8 +62,22 @@ body.path-mod-observation .task.status .corner {
 body.path-mod-observation .task.status .corner::before {
   position: absolute;
   top: -35px;
-  left: -20px;
+  left: -18px;
   transition: color 1s;
+}
+body.path-mod-observation .task.status.learner-learner_in_progress .corner {
+  display: block;
+  border-top-color: #ededed;
+}
+body.path-mod-observation .task.status.learner-learner_in_progress .corner::before {
+  content: "\f040";
+  color: #000000;
+}
+body.path-mod-observation .task.status.learner-learner_in_progress .corner:hover {
+  border-top-color: #d4d4d4;
+}
+body.path-mod-observation .task.status.learner-learner_in_progress .corner:hover::before {
+  color: #1a1a1a;
 }
 body.path-mod-observation .task.status.learner-observation_pending .corner {
   display: block;
@@ -74,9 +88,23 @@ body.path-mod-observation .task.status.learner-observation_pending .corner::befo
   color: #ffffff;
 }
 body.path-mod-observation .task.status.learner-observation_pending .corner:hover {
-  border-top-color: #1d3f63;
+  border-top-color: #4f8aca;
 }
-body.path-mod-observation .task.status.learner-observation_pending .corner::before {
+body.path-mod-observation .task.status.learner-observation_pending .corner:hover::before {
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-assessment_pending .corner {
+  display: block;
+  border-top-color: #01A850;
+}
+body.path-mod-observation .task.status.learner-assessment_pending .corner::before {
+  content: "\f017";
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-assessment_pending .corner:hover {
+  border-top-color: #017538;
+}
+body.path-mod-observation .task.status.learner-assessment_pending .corner:hover::before {
   color: #ffffff;
 }
 body.path-mod-observation .task.status.learner-observation_in_progress .corner,
@@ -91,24 +119,28 @@ body.path-mod-observation .task.status.learner-assessment_in_progress .corner::b
 }
 body.path-mod-observation .task.status.learner-observation_in_progress .corner:hover,
 body.path-mod-observation .task.status.learner-assessment_in_progress .corner:hover {
-  border-top-color: #1d3f63;
+  border-top-color: #4f8aca;
 }
-body.path-mod-observation .task.status.learner-observation_in_progress .corner::before,
-body.path-mod-observation .task.status.learner-assessment_in_progress .corner::before {
+body.path-mod-observation .task.status.learner-observation_in_progress .corner:hover::before,
+body.path-mod-observation .task.status.learner-assessment_in_progress .corner:hover::before {
   color: #ffffff;
 }
-body.path-mod-observation .task.status.learner-observation_incomplete .corner {
+body.path-mod-observation .task.status.learner-observation_incomplete .corner,
+body.path-mod-observation .task.status.learner-assessment_incomplete .corner {
   display: block;
   border-top-color: #9e4444;
 }
-body.path-mod-observation .task.status.learner-observation_incomplete .corner::before {
+body.path-mod-observation .task.status.learner-observation_incomplete .corner::before,
+body.path-mod-observation .task.status.learner-assessment_incomplete .corner::before {
   content: "\f00d";
   color: #ffffff;
 }
-body.path-mod-observation .task.status.learner-observation_incomplete .corner:hover {
-  border-top-color: #0f0707;
+body.path-mod-observation .task.status.learner-observation_incomplete .corner:hover,
+body.path-mod-observation .task.status.learner-assessment_incomplete .corner:hover {
+  border-top-color: #7a3535;
 }
-body.path-mod-observation .task.status.learner-observation_incomplete .corner::before {
+body.path-mod-observation .task.status.learner-observation_incomplete .corner:hover::before,
+body.path-mod-observation .task.status.learner-assessment_incomplete .corner:hover::before {
   color: #ffffff;
 }
 body.path-mod-observation .task.status.learner-complete .corner {
@@ -120,9 +152,9 @@ body.path-mod-observation .task.status.learner-complete .corner::before {
   color: #ffffff;
 }
 body.path-mod-observation .task.status.learner-complete .corner:hover {
-  border-top-color: #000000;
+  border-top-color: #017538;
 }
-body.path-mod-observation .task.status.learner-complete .corner::before {
+body.path-mod-observation .task.status.learner-complete .corner:hover::before {
   color: #ffffff;
 }
 body.path-mod-observation .task.status.assessing-complete .corner {
@@ -134,9 +166,9 @@ body.path-mod-observation .task.status.assessing-complete .corner::before {
   color: #ffffff;
 }
 body.path-mod-observation .task.status.assessing-complete .corner:hover {
-  border-top-color: #000000;
+  border-top-color: #017538;
 }
-body.path-mod-observation .task.status.assessing-complete .corner::before {
+body.path-mod-observation .task.status.assessing-complete .corner:hover::before {
   color: #ffffff;
 }
 body.path-mod-observation .task.status.assessing-not_complete .corner {
@@ -148,9 +180,9 @@ body.path-mod-observation .task.status.assessing-not_complete .corner::before {
   color: #ffffff;
 }
 body.path-mod-observation .task.status.assessing-not_complete .corner:hover {
-  border-top-color: #0f0707;
+  border-top-color: #7a3535;
 }
-body.path-mod-observation .task.status.assessing-not_complete .corner::before {
+body.path-mod-observation .task.status.assessing-not_complete .corner:hover::before {
   color: #ffffff;
 }
 body.path-mod-observation .criteria-container {
@@ -158,18 +190,6 @@ body.path-mod-observation .criteria-container {
 }
 body.path-mod-observation .criteria-list ol li {
   margin: 2em 1em;
-}
-body.path-mod-observation .criteria .outcome-icon {
-  font-size: 1.2em;
-  margin: 0 0.5em;
-}
-body.path-mod-observation .criteria.not_complete .outcome-icon::before {
-  color: #9e4444;
-  content: "\f05c";
-}
-body.path-mod-observation .criteria.complete .outcome-icon::before {
-  color: #01A850;
-  content: "\f05d";
 }
 body.path-mod-observation .criteria-header {
   display: flex;
@@ -184,18 +204,33 @@ body.path-mod-observation .criteria-desc {
 body.path-mod-observation .criteria-desc + .feedback.no-text {
   margin-top: -2em;
 }
-body.path-mod-observation .feedback.observer .entry {
+body.path-mod-observation .criteria .outcome-icon {
+  font-size: 1.2em;
+  margin: 0 0.5em;
+}
+body.path-mod-observation .criteria.not_complete .outcome-icon::before {
+  color: #9e4444;
+  content: "\f05c";
+}
+body.path-mod-observation .criteria.complete .outcome-icon::before {
+  color: #01A850;
+  content: "\f05d";
+}
+body.path-mod-observation .feedback.observer .entry,
+body.path-mod-observation .feedback.assessor .entry {
   transition: box-shadow 1s;
+}
+body.path-mod-observation .feedback.observer.with-text.complete .entry:hover,
+body.path-mod-observation .feedback.assessor.with-text.complete .entry:hover {
+  box-shadow: -5px 0 0 0 #01A850;
+}
+body.path-mod-observation .feedback.observer.with-text.not_complete .entry:hover,
+body.path-mod-observation .feedback.assessor.with-text.not_complete .entry:hover {
+  box-shadow: -5px 0 0 0 #9e4444;
 }
 body.path-mod-observation .feedback.observer.with-text {
   padding: 0 0 3em 2em;
   margin-top: -1em;
-}
-body.path-mod-observation .feedback.observer.with-text.complete .entry:hover {
-  box-shadow: -5px 0 0 0 #01A850;
-}
-body.path-mod-observation .feedback.observer.with-text.not_complete .entry:hover {
-  box-shadow: -5px 0 0 0 #9e4444;
 }
 body.path-mod-observation .feedback.observer.no-text {
   text-align: right;
@@ -213,7 +248,7 @@ body.path-mod-observation .feedback.observer.no-text .outcome-inline {
   line-height: 1.2;
   text-shadow: 2px 2px white;
 }
-body.path-mod-observation .feedback.assessor {
+body.path-mod-observation .feedback.assessor:not(:last-child) {
   margin-bottom: 3em;
 }
 body.path-mod-observation .attempt {
@@ -226,7 +261,7 @@ body.path-mod-observation .feedback .heading {
 }
 body.path-mod-observation .attempt .heading .title-secondary,
 body.path-mod-observation .feedback .heading .title-secondary {
-  margin: 0;
+  margin: 0 0 0.5em 0;
 }
 body.path-mod-observation .attempt .heading .attributes,
 body.path-mod-observation .feedback .heading .attributes {
@@ -445,12 +480,12 @@ table.submissions-summary tbody th {
 .submissions-summary .submissions-row .completion > .not-complete {
   color: #44639e;
 }
-.submissions-summary .tooltip {
+.submissions-summary .obs-tooltip {
   display: inline-block;
   position: relative;
   text-align: left;
 }
-.submissions-summary .tooltip .content-top {
+.submissions-summary .obs-tooltip .content-top {
   min-width: 250px;
   top: -20px;
   left: 50%;
@@ -468,7 +503,7 @@ table.submissions-summary tbody th {
   opacity: 0;
   transition: opacity 0.8s;
 }
-.submissions-summary .tooltip .content-top i {
+.submissions-summary .obs-tooltip .content-top i {
   position: absolute;
   top: 100%;
   left: 50%;
@@ -477,7 +512,7 @@ table.submissions-summary tbody th {
   height: 12px;
   overflow: hidden;
 }
-.submissions-summary .tooltip .content-top i::after {
+.submissions-summary .obs-tooltip .content-top i::after {
   content: '';
   position: absolute;
   width: 12px;
@@ -487,7 +522,7 @@ table.submissions-summary tbody th {
   background-color: #EEEEEE;
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
 }
-.submissions-summary .tooltip:hover .content-top {
+.submissions-summary .obs-tooltip:hover .content-top {
   visibility: visible;
   opacity: 1;
 }

@@ -214,7 +214,7 @@ $string['notification:activity_wait_for_observers'] = 'You have requested observ
 $string['notification:activity_wait_for_mixed'] = 'Please pe patient while your submissions are observed and assessed';
 $string['notification:activity_complete'] = 'Congratulations, you have completed this activity!';
 $string['notification:activity_observation_not_complete'] = 'Observation was unsuccessful, please submit new attempt';
-$string['notification:activity_assessment_not_complete'] = 'Assessment was unsuccessful, please submit new attempt';
+$string['notification:activity_assessment_not_complete'] = 'Assessment was unsuccessful, please submit new attempt for each task';
 $string['notification:previewing_activity'] = 'You are in preview mode - you can view each task in this activity but you will not be able to make submissions.';
 
 // ERRORS

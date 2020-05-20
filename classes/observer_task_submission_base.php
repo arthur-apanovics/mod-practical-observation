@@ -102,7 +102,7 @@ class observer_task_submission_base extends db_model_base
         else if (!$submission->is_all_tasks_no_learner_action_required())
         {
             // user input needed for some task(s)
-            $submission->update_status_and_save(submission::STATUS_LEARNER_PENDING);
+            $submission->update_status_and_save(submission::STATUS_LEARNER_PENDING, true);
         }
         else
         {

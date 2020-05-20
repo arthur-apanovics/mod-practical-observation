@@ -31,6 +31,12 @@ class criteria extends criteria_base implements templateable
      */
     private $observer_feedback;
 
+
+    /**
+     * @var bool
+     */
+    private $is_filtered;
+
     public function __construct($id_or_record, int $userid = null, int $observer_submissionid = null)
     {
         parent::__construct($id_or_record);
@@ -46,12 +52,16 @@ class criteria extends criteria_base implements templateable
                         join {'.learner_task_submission::TABLE.'} ls on ls.id = oa.'.observer_assignment::COL_LEARNER_TASK_SUBMISSIONID.'
                     where c.id = ? and ls.userid = ?';
             $this->observer_feedback = observer_feedback::read_all_by_sql($sql, [$this->id, $userid]);
+
+            $this->is_filtered = true;
         }
         else if (!is_null($observer_submissionid))
         {
             // filter feedback by observer submission (this automatically includes user)
             $this->observer_feedback =  observer_feedback::read_all_by_condition(
                 [observer_feedback::COL_OBSERVER_SUBMISSIONID => $observer_submissionid]);
+
+            $this->is_filtered = true;
         }
         else
         {
@@ -82,6 +92,15 @@ class criteria extends criteria_base implements templateable
                 $observer_feedback_data[] = $observer_feedback->export_template_data();
             }
         }
+        
+        $outcome = null;
+        // set ouctome for this criteria if only single user data present
+        if ($this->is_filtered && isset($observer_feedback))
+        {
+            // use last iteration of observer feedback to determine final outcome for criteria
+            $outcome = $observer_feedback->get(observer_feedback::COL_OUTCOME);
+        }
+
 
         return [
             self::COL_ID                => $this->id,
@@ -91,6 +110,7 @@ class criteria extends criteria_base implements templateable
             self::COL_FEEDBACK_REQUIRED => $this->feedback_required,
             self::COL_SEQUENCE          => $this->sequence,
 
+            'outcome'           => $outcome,
             'observer_feedback' => $observer_feedback_data
         ];
     }
