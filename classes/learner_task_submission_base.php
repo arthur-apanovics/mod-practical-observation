@@ -220,6 +220,14 @@ class learner_task_submission_base extends submission_status_store
     }
 
     /**
+     * @return string
+     */
+    public function get_status(): string
+    {
+        return $this->status;
+    }
+
+    /**
      * @param learner_attempt_base $learner_attempt
      * @return $this
      * @throws \dml_exception

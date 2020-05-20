@@ -162,7 +162,7 @@ else if ($observer_submissionid = optional_param('observer_submission_id', null,
 
     $lang_data = [
         'learner_fullname'  => fullname($learner),
-        'observer_fullname' => $observer->get_formatted_name(),
+        'observer_fullname' => $observer->get_formatted_name_or_null(),
         'task_name'         => $task->get_formatted_name(),
         'activity_name'     => $observation->get_formatted_name(),
         'activity_url'     => $observation->get_url(),
@@ -174,7 +174,7 @@ else if ($observer_submissionid = optional_param('observer_submission_id', null,
 
     // send confirmation email to observer
     lib::email_external(
-        $observer->get_email(),
+        $observer->get_email_or_null(),
         get_string('email:observer_observation_complete_subject', OBSERVATION, $lang_data),
         get_string('email:observer_observation_complete_body', OBSERVATION, $lang_data));
     

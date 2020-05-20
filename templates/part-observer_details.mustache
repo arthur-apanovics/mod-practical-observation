@@ -1,7 +1,6 @@
 <div class="observer-details-wrapper">
     <div class="header">
         <h5>{{#str}}assign_observer:assigned_observer, observation{{/str}}</h5>
-
         {{#extra.is_learner}}
             {{#extra.change_observer_url}}
                 (
@@ -19,10 +18,9 @@
             )
         {{/extra.is_assessor}}
     </div>
-
     {{! print the actual table with observer details }}
     {{> mod_observation/comp-observer_details_table}}
-
+    {{! extra stuff for assessors }}
     {{#extra.is_assessor}}
         {{#extra.is_assessing}}
             <div class="meets-criteria-wrapper">
@@ -30,7 +28,7 @@
                        for="meets-criteria">
                     {{#str}}assess:observer_meets_criteria, observation{{/str}}
                 </label>
-                {{TODO: disable submit button if unchecked}}
+                {{!TODO: disable submit button if unchecked}}
                 <input name="meets-criteria"
                        id="meets-criteria"
                        type="checkbox"

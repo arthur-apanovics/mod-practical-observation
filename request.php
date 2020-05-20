@@ -75,7 +75,7 @@ if (!$observation->is_activity_available())
 function email_observer(observer_base $observer, array $lang_data): bool
 {
     return lib::email_external(
-        $observer->get_email(),
+        $observer->get_email_or_null(),
         get_string('email:observer_assigned_subject', OBSERVATION, $lang_data),
         (!empty($message)
             ? get_string('email:observer_assigned_body_with_user_message', OBSERVATION, $lang_data)
@@ -99,6 +99,7 @@ if (optional_param('confirm', 0, PARAM_BOOL))
     $explanation = required_param('user_input', PARAM_TEXT);
     $assignment = $task_submission->assign_observer($observer, $explanation);
 
+    // submit task submission and attempt
     $attempt->submit($task_submission);
     $task_submission->submit($attempt);
 
@@ -106,7 +107,7 @@ if (optional_param('confirm', 0, PARAM_BOOL))
     $lang_data = [
         'learner_fullname'  => fullname(\core_user::get_user($task_submission->get_userid())),
         'learner_message'   => $message,
-        'observer_fullname' => $observer->get_formatted_name(),
+        'observer_fullname' => $observer->get_formatted_name_or_null(),
         'task_name'         => $task->get_formatted_name(),
         'activity_name'     => $observation->get_formatted_name(),
         'activity_url'      => $activity_url,
@@ -166,10 +167,10 @@ if ($data = $form->get_data())
             // we have an existing assignment but a different observer
             // is being assigned (new or existing), confirm change
             $lang_params = [
-                'current'       => $current->get_formatted_name(),
-                'current_email' => $current->get_email(),
-                'new'           => $submitted->get_formatted_name(),
-                'new_email'     => $submitted->get_email(),
+                'current'       => $current->get_formatted_name_or_null(),
+                'current_email' => $current->get_email_or_null(),
+                'new'           => $submitted->get_formatted_name_or_null(),
+                'new_email'     => $submitted->get_email_or_null(),
                 'task'          => $task->get_formatted_name()
             ];
 
@@ -229,7 +230,7 @@ if ($data = $form->get_data())
     $lang_data = [
         'learner_fullname'  => fullname(\core_user::get_user($task_submission->get_userid())),
         'learner_message'   => $data->message,
-        'observer_fullname' => $observer->get_formatted_name(),
+        'observer_fullname' => $observer->get_formatted_name_or_null(),
         'task_name'         => $task->get_formatted_name(),
         'activity_name'     => $observation->get_formatted_name(),
         'activity_url'      => $activity_url,

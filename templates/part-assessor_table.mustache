@@ -34,7 +34,7 @@
                     {{! has attempts }}
                     {{#has_attempts_summary}}
                         <div class="hover-hint obs-tooltip">
-                            Show
+                            {{#flex_icon}} question-circle, {"alt":"Observation attempts per task"}{{/flex_icon}}
                             <div class="content-top">
                                 <ul>
                                     {{#attempts_observation_summary}}

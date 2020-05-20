@@ -90,7 +90,7 @@ if (isloggedin())
 
         //TODO notify assessor of self observation attempt
     }
-    else if ($USER->email != $observer->get_email())
+    else if ($USER->email != $observer->get_email_or_null())
     {
         //TODO notify admins
         // has account in lms, is logged in, is not one being observed, is not assigned observer (based on email)
@@ -121,7 +121,7 @@ else if (optional_param('submit-decline', 0, PARAM_BOOL))
 
     $lang_data = [
         'learner_fullname'  => fullname($learner),
-        'observer_fullname' => $observer->get_formatted_name(),
+        'observer_fullname' => $observer->get_formatted_name_or_null(),
         'task_name'         => $task->get_formatted_name(),
         'activity_name'     => $observation->get_formatted_name(),
         'activity_url'      => $observation->get_url(),
@@ -133,7 +133,7 @@ else if (optional_param('submit-decline', 0, PARAM_BOOL))
 
     // send confirmation email to observer
     lib::email_external(
-        $observer->get_email(),
+        $observer->get_email_or_null(),
         get_string('email:observer_observation_declined_subject', OBSERVATION, $lang_data),
         get_string('email:observer_observation_declined_body', OBSERVATION, $lang_data));
 

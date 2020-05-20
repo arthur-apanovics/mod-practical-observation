@@ -583,6 +583,13 @@ table {
   }
 }
 
+// Assigned observer details table
+table.observer-details {
+  tr.declined {
+    text-decoration: line-through;
+  }
+}
+
 // assessor subission summary table
 .submissions-summary {
   tr > th:not(:first-child),
@@ -610,9 +617,13 @@ table {
   }
 
   .submissions-row {
-
     .observation {
       border-left: 1px solid @table-border-color;
+
+      .flex-icon {
+        font-size: 1.3em;
+        color: #287b7c; // link color
+      }
     }
 
     .assessment {
@@ -620,7 +631,7 @@ table {
     }
 
     .completion {
-      font-size: 1.5em;
+      font-size: 1.4em;
       color: darken(@wrapper-border-color, 10%);
 
       > .complete {
@@ -629,6 +640,12 @@ table {
 
       > .not-complete {
         color: #44639e;
+      }
+    }
+
+    .actions {
+      .flex-icon {
+        font-size: 1.2em;
       }
     }
   }

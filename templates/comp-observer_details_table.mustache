@@ -10,7 +10,13 @@
     </tr>
     </thead>
     <tbody>
-    <tr id="details-values" data-observerid="{{id}}">
+    <tr id="details-values"
+        class="{{#extra.is_declined}}declined{{/extra.is_declined}}"
+        data-observerid="{{id}}"
+        {{#extra.is_declined}}
+            title="{{fullname}} has declined this observation request"
+        {{/extra.is_declined}}
+    >
         <td id="fullname">{{fullname}}</td>
         <td id="phone">{{phone}}</td>
         <td id="email">{{email}}</td>

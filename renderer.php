@@ -252,9 +252,9 @@ class mod_observation_renderer extends plugin_renderer_base
                             'learner_task_submission_id' => $task_submission->get_id_or_null(),
                             'attempt_id'                 => $attempt->get_id_or_null(),
                         ]);
-                    // request.php?id=16&learner_task_submission_id=5&attempt_id=9
+
                     $lang_data = [
-                        'observer' => $observer_assignment->get_observer()->get_formatted_name(),
+                        'observer' => $observer_assignment->get_observer()->get_formatted_name_or_null(),
                         'task_name' => $task->get_formatted_name(),
                         'assign_url_with_text' => html_writer::link($link, 'here')
                     ];
@@ -473,10 +473,13 @@ class mod_observation_renderer extends plugin_renderer_base
                 $out .= $this->render_from_template('part-task_header', $header_data);
 
                 // render observer details
-                $observer = $task_submission->get_active_observer_assignment_or_null()->get_observer();
+                $observer_assignment = $task_submission->get_latest_observer_assignment_or_null();
+                $observer = $observer_assignment->get_observer();
                 $observer_template_data = $observer->export_template_data();
                 // enables 'change observer' link
                 $observer_template_data['extra']['is_learner'] = true;
+                // check if declined observation request
+                $observer_template_data['extra']['is_declined'] = $observer_assignment->is_declined();
 
                 // allow to change observer if previous observer hasn't accepted yet
                 if ($task_submission->is_observation_pending())
@@ -494,10 +497,22 @@ class mod_observation_renderer extends plugin_renderer_base
 
                 $out .= $this->render_from_template('part-observer_details', $observer_template_data);
 
-                notification::info(
-                    get_string(
-                        'notification:observation_request_sent', 'observation',
-                        $observer->get(observer::COL_EMAIL)));
+                if ($observer_assignment->is_declined())
+                {
+                    $lang_data = [
+                        'observer'  => $observer->get_formatted_name_or_null(),
+                        'task_name' => $task->get_formatted_name(),
+                    ];
+                    notification::error(
+                        get_string('notification:observer_declined_observation_in_task', 'observation', $lang_data));
+                }
+                else
+                {
+                    notification::info(
+                        get_string(
+                            'notification:observation_request_sent', 'observation',
+                            $observer->get(observer::COL_EMAIL)));
+                }
             }
 
             $out .= $this->render_from_template('view-task_learner', $template_data);
@@ -778,10 +793,8 @@ class mod_observation_renderer extends plugin_renderer_base
 
         // get input field names
         list($input_base, $input_name, $input_name_format) = lib::get_editor_attributes_for_class($class_name);
-        $id = sprintf(
-            '%s_id_%d',
-            $input_base,
-            floor(time() / rand(1, 100))); // needs to be unique for editor js init
+        // needs to be unique for editor js init
+        $id = sprintf('%s_id_%d', $input_base, floor(time() / rand(1, 100)));
 
         // get available formats
         $response_format = $format;
@@ -839,6 +852,9 @@ class mod_observation_renderer extends plugin_renderer_base
         $output .= html_writer::end_tag('div');
         // /format wrapper
         $output .= html_writer::end_tag('div');
+
+        $this->page->requires->js_call_amd(
+            OBSERVATION_MODULE . '/submission_validation', 'init', ['editorid' => $id]);
 
         return $output;
     }

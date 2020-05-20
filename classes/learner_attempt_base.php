@@ -75,8 +75,10 @@ class learner_attempt_base extends db_model_base
     {
         $this->validate($task_submission);
 
-        if ($this->is_submitted())
+        if ($this->is_submitted()
+            && $task_submission->get_status() !== learner_task_submission::STATUS_OBSERVATION_PENDING)
         {
+            // only allow re-submission when observation pending, meaning new observer is being assigned
             throw new \coding_exception("Attempt with id '$this->id' is already submitted");
         }
 
@@ -117,14 +119,18 @@ class learner_attempt_base extends db_model_base
                 'learner attempt with id "%s" has no text',
                 $this->get_id_or_null());
         }
-        else if ($task_submission->get(learner_task_submission::COL_STATUS)
-            != learner_task_submission::STATUS_LEARNER_IN_PROGRESS)
+        // pending observations are allowed as learner might be assigning a new observer
+        else if (!in_array(
+            $task_submission->get_status(), [
+            learner_task_submission::STATUS_LEARNER_IN_PROGRESS,
+            learner_task_submission::STATUS_OBSERVATION_PENDING
+        ]))
         {
             $error_message = sprintf(
                 'learner task submission with id "%s" has invalid "%s" - "%s"',
                 $this->get_id_or_null(),
                 learner_task_submission::COL_STATUS,
-                $task_submission->get(learner_task_submission::COL_STATUS));
+                $task_submission->get_status());
         }
         // check and throw
         if (!is_null($error_message))

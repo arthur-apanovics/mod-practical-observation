@@ -74,24 +74,30 @@ class observer_base extends db_model_base
      */
     protected $timemodified;
 
-    public function get_formatted_name()
+    /**
+     * Does not check if objecct initialized, hence the possibility to return null;
+     *
+     * @return string|null
+     */
+    public function get_formatted_name_or_null(): ?string
     {
         return format_string($this->fullname);
     }
 
-    public function get_email()
+    /**
+     * Does not check if objecct initialized, hence the possibility to return null;
+     *
+     * @return string|null
+     */
+    public function get_email_or_null(): ?string
     {
-        if (is_null($this->id))
-        {
-            throw new \coding_exception('observer object not initialised');
-        }
-
         return $this->email;
     }
 
     /**
      * Used when an observer updates their details
      *
+     * @param string $token
      * @param int    $id
      * @param string $fullname
      * @param string $phone

@@ -448,6 +448,9 @@ table.observer-details tbody th,
 table.submissions-summary tbody th {
   border-bottom: 1px solid #d3d3d3;
 }
+table.observer-details tr.declined {
+  text-decoration: line-through;
+}
 .submissions-summary tr > th:not(:first-child),
 .submissions-summary tr > td:not(:first-child) {
   text-align: center;
@@ -467,11 +470,15 @@ table.submissions-summary tbody th {
 .submissions-summary .submissions-row .observation {
   border-left: 1px solid #c6c6c6;
 }
+.submissions-summary .submissions-row .observation .flex-icon {
+  font-size: 1.3em;
+  color: #287b7c;
+}
 .submissions-summary .submissions-row .assessment {
   border-right: 1px solid #c6c6c6;
 }
 .submissions-summary .submissions-row .completion {
-  font-size: 1.5em;
+  font-size: 1.4em;
   color: #bababa;
 }
 .submissions-summary .submissions-row .completion > .complete {
@@ -479,6 +486,9 @@ table.submissions-summary tbody th {
 }
 .submissions-summary .submissions-row .completion > .not-complete {
   color: #44639e;
+}
+.submissions-summary .submissions-row .actions .flex-icon {
+  font-size: 1.2em;
 }
 .submissions-summary .obs-tooltip {
   display: inline-block;

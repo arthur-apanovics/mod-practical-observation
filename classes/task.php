@@ -263,7 +263,7 @@ class task extends task_base implements templateable
         {
             if (isset($learner_task_submission)) // $learner_task_submission set in loop
             {
-                $learner_submission_status = $learner_task_submission->get(learner_task_submission::COL_STATUS);
+                $learner_submission_status = $learner_task_submission->get_status();
                 $learner_submission_status_description = lib::get_status_string($learner_submission_status);
 
                 if ($assessor_task_submission = $learner_task_submission->get_assessor_task_submission_or_null())

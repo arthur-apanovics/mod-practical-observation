@@ -207,6 +207,7 @@ $string['notification:observer_assigned_no_change'] = '<strong>{$a->email}</stro
 $string['notification:observer_assigned_same'] = 'Observation request for <i>{$a->task}</i> sent to <strong>{$a->email}</strong>';
 $string['notification:observer_assigned_new'] = 'Observer successfully changed and observation request sent to <strong>{$a->email}</strong> for <i>{$a->task}</i>';
 $string['notification:observer_declined_observation'] = '{$a->observer} has declined your request to observe "{$a->task_name}".<br>Please assign a different observer by clicking {$a->assign_url_with_text}';
+$string['notification:observer_declined_observation_in_task'] = '{$a->observer} has declined your request to observe "{$a->task_name}".<br>Please assign a different observer by clicking "change observer" link below';
 $string['notification:observation_pending_or_in_progress'] = 'Observation for this task is not yet complete';
 $string['notification:assessment_released'] = 'Assessment for <i>{$a}</i>\'s submission succsesfully released';
 $string['notification:submission_pending_or_in_progress'] = 'Learner has not yet submitted an attempt for this task';
@@ -224,19 +225,20 @@ $string['error:not_active_observer'] = 'This link is no longer valid. If you hav
 $string['error:observation_complete'] = 'This observation has already been completed.';
 
 // EMAILS
-$string['email:observer_assigned_subject'] = 'Observation request from {$a->{learner_fullname}}';
+$string['email:observer_assigned_subject'] = 'Observation request from {$a->learner_fullname}';
 $string['email:observer_assigned_body'] = 'Hello {$a->observer_fullname}.
-{$a->learner_fullname} has requested an observation for task "{$a->task_name}" in "{$a->activity_name}.
+{$a->learner_fullname} has requested an observation for task "{$a->task_name}" in "{$a->activity_name}".
+
 Please follow this link to proceed or decline observation:
-{$a->observe_url}"';
+{$a->observe_url}';
 $string['email:observer_assigned_body_with_user_message'] = 'Hello {$a->observer_fullname}.
-{$a->learner_fullname} has requested an observation for task "{$a->task_name}" in "{$a->activity_name}.
+{$a->learner_fullname} has requested an observation for task "{$a->task_name}" in "{$a->activity_name}".
 
 Message from {$a->learner_fullname}:
 <q>{$a->learner_message}</q>
 
 Please follow this link to proceed or decline observation:
-{$a->observe_url}"';
+{$a->observe_url}';
 
 $string['email:observer_observation_declined_subject'] = 'observer_observation_declined_subject';
 $string['email:observer_observation_declined_body'] = 'observer_observation_declined_body';
