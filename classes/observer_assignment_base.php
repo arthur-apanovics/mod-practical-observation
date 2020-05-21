@@ -108,9 +108,16 @@ class observer_assignment_base extends db_model_base
         return observer::read_or_null($this->observerid, true);
     }
 
-    public function get_review_url()
+    /**
+     * @param bool $as_string
+     * @return moodle_url|string
+     * @throws \moodle_exception
+     */
+    public function get_review_url(bool $as_string = false)
     {
-        return new moodle_url(OBSERVATION_MODULE_PATH . 'observe.php', ['token' => $this->token]);
+        $url = new moodle_url(OBSERVATION_MODULE_PATH . 'observe.php', ['token' => $this->token]);
+
+        return $as_string ? $url->out(false) : $url;
     }
 
     public function get_learner_task_submission_base()

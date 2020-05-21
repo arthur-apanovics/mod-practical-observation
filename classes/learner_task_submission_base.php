@@ -243,12 +243,14 @@ class learner_task_submission_base extends submission_status_store
         // set new status and save
         $this->update_status_and_save(self::STATUS_OBSERVATION_PENDING);
 
-        $submisison = $this->get_submission();
-        $observation = $submisison->get_observation();
-        if ($observation->all_tasks_observation_pending_or_in_progress($this->get_userid()))
+        $submission = $this->get_submission();
+        $observation = $submission->get_observation();
+
+        if ($observation->all_tasks_observation_pending_or_in_progress($this->get_userid())
+            && $submission->get(submission::COL_STATUS) !== submission::STATUS_OBSERVATION_PENDING)
         {
             // submission for every task has been made, update activity submission status
-            $submisison->update_status_and_save(submission::STATUS_OBSERVATION_PENDING);
+            $submission->update_status_and_save(submission::STATUS_OBSERVATION_PENDING);
         }
 
         // trigger event

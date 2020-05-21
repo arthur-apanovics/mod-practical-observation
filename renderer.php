@@ -861,8 +861,8 @@ class mod_observation_renderer extends plugin_renderer_base
         // /format wrapper
         $output .= html_writer::end_tag('div');
 
-        $this->page->requires->js_call_amd(
-            OBSERVATION_MODULE . '/submission_validation', 'init', ['editorid' => $id]);
+        // $this->page->requires->js_call_amd(
+        //     OBSERVATION_MODULE . '/submission_validation', 'initLearner', ['editorid' => $id]);
 
         return $output;
     }
