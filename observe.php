@@ -107,7 +107,12 @@ if (optional_param('submit-accept', 0, PARAM_BOOL))
         print_error('You haven\'t acknowledged meeting the criteria, please go back and try again');
     }
 
-    $observer_assignment->accept();
+    // if user refreshes page they will post form again
+    if (!$observer_assignment->is_accepted())
+    {
+        $observer_assignment->accept();
+    }
+
 }
 else if (optional_param('submit-decline', 0, PARAM_BOOL))
 {

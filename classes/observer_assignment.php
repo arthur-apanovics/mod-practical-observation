@@ -173,11 +173,13 @@ class observer_assignment extends observer_assignment_base implements templateab
 
     public function accept()
     {
-        $this->set(self::COL_OBSERVATION_ACCEPTED, true);
-        $this->set(self::COL_TIMEACCEPTED, time());
-
+        // update task submission
         $task_submission = $this->get_learner_task_submission_base();
         $task_submission->update_status_and_save(learner_task_submission::STATUS_OBSERVATION_IN_PROGRESS);
+
+        // update observer assignment
+        $this->set(self::COL_OBSERVATION_ACCEPTED, true);
+        $this->set(self::COL_TIMEACCEPTED, time());
 
         return $this->update();
     }

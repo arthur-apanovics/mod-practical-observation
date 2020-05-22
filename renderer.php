@@ -445,7 +445,6 @@ class mod_observation_renderer extends plugin_renderer_base
                 // since we're not looping over submitted attempts we need to manually provide attempt number
                 $template_data['extra']['attempt_number'] = $attempt->get(learner_attempt::COL_ATTEMPT_NUMBER);
 
-                // TODO: DISABLE 'request observation' WHEN NO INPUT
                 // text editor
                 $template_data['extra']['editor_html'] = $this->text_editor(
                     learner_attempt::class,
@@ -453,6 +452,11 @@ class mod_observation_renderer extends plugin_renderer_base
                     $attempt->get(learner_attempt::COL_TEXT),
                     $attempt->get(learner_attempt::COL_TEXT_FORMAT)
                 );
+                // JS validation
+                $this->page->requires->js_call_amd(
+                    OBSERVATION_MODULE . '/submission_validation',
+                    'init',
+                    ['submissionType' => 'learner']);
 
                 // file manager
                 $template_data['extra']['filemanager_html'] =
@@ -587,6 +591,11 @@ class mod_observation_renderer extends plugin_renderer_base
                 );
                 $criteria_data['extra']['filepicker_html'] =
                     $this->files_input($feedback->get_id_or_null(), observation::FILE_AREA_OBSERVER, $context);
+                // JS validation
+                $this->page->requires->js_call_amd(
+                    OBSERVATION_MODULE . '/submission_validation',
+                    'init',
+                    ['submissionType' => 'observer']);
             }
 
             $template_data['criteria'][] = $criteria_data;
@@ -646,6 +655,12 @@ class mod_observation_renderer extends plugin_renderer_base
                 $context,
                 $feedback->get(assessor_feedback::COL_TEXT),
                 $feedback->get(assessor_feedback::COL_TEXT_FORMAT));
+            // JS validation
+            $this->page->requires->js_call_amd(
+                OBSERVATION_MODULE . '/submission_validation',
+                'init',
+                ['submissionType' => 'assessor']);
+
             // add fielpicker
             // TODO: files do not appear on feedback edit
             $template_data['extra']['filepicker_html'] = $this->files_input(
@@ -860,9 +875,6 @@ class mod_observation_renderer extends plugin_renderer_base
         $output .= html_writer::end_tag('div');
         // /format wrapper
         $output .= html_writer::end_tag('div');
-
-        // $this->page->requires->js_call_amd(
-        //     OBSERVATION_MODULE . '/submission_validation', 'initLearner', ['editorid' => $id]);
 
         return $output;
     }

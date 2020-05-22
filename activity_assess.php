@@ -34,8 +34,8 @@ list($course, $cm) = get_course_and_cm_from_cmid($cmid);
 $context = context_module::instance($cmid);
 
 // TODO: should cap_view_submisisons be allowed here & task view?
-require_capability(observation::CAP_ASSESS, $context);
 require_login($course, false, $cm);
+require_capability(observation::CAP_ASSESS, $context);
 
 // TODO: Event
 
