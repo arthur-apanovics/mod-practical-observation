@@ -123,11 +123,15 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
     $base->set($base::COL_COMPLETION_TASKS, $data[$base::COL_COMPLETION_TASKS]);
     $base->set($base::COL_DELETED, 0);
 
+    // create db entry
     $base->create();
+    $observation->instance = $base->get_id_or_null();
     
     observation_set_events($observation);
 
-    return $base->get_id_or_null();
+    observation_grade_item_update($observation);
+
+    return $observation->instance;
 }
 
 /**
@@ -184,6 +188,8 @@ function observation_update_instance(stdClass $observation, mod_observation_mod_
 
     observation_set_events($observation);
 
+    observation_grade_item_update($observation);
+
     return true;
 }
 
@@ -212,7 +218,7 @@ function observation_delete_instance($id)
 
     // $transaction = $DB->start_delegated_transaction();
 
-    // Normally, this is where all data related to activity instance is deleted,
+    //TODO: Normally, this is where all data related to activity instance is deleted,
     // however, we will simply mark the instance as deleted instead.
     $observation->delete();
 
@@ -617,12 +623,16 @@ function observation_grade_item_update($observation, $grades = null)
     { //workaround for buggy PHP versions
         require_once($CFG->libdir . '/gradelib.php');
     }
+    if (!isset($observation->instance))
+    {
+        throw new coding_exception('Cannot update grade item without instance id');
+    }
 
     $grade_item_params = [
         'courseid'     => $observation->course,
         'itemtype'     => 'mod',
         'itemmodule'   => OBSERVATION,
-        'iteminstance' => $observation->id,
+        'iteminstance' => $observation->instance,
         'itemnumber'   => 0, // from docs: 'Can be used to distinguish multiple grades for an activity'
         'gradetype'    => GRADE_TYPE_SCALE,
         'scaleid'      => lib::get_binary_scaleid_or_create(),
@@ -631,7 +641,6 @@ function observation_grade_item_update($observation, $grades = null)
 
     if (!$grade_item = grade_item::fetch($grade_item_params))
     {
-
         // NOTE: moved out of fetched params because name can be changed creating duplicate grade_items, causing errors.
         $grade_item_params['itemname'] = $observation->name;
 
@@ -656,7 +665,7 @@ function observation_grade_item_update($observation, $grades = null)
         $observation->course,
         'mod',
         OBSERVATION,
-        $observation->id,
+        $observation->instance,
         $grade_item->itemnumber,
         $grades,
         $params);
