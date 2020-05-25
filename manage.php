@@ -37,14 +37,17 @@ require_capability(observation::CAP_MANAGE, $context);
 
 // do not filter observation by userid as we need to check if submissions exist
 $observation = new observation($cm);
-$name        = $observation->get_formatted_name();
+
+$title = $title = get_string('title:manage', \OBSERVATION, $observation->get_formatted_name());
 
 // Print the page header.
 $PAGE->set_url(OBSERVATION_MODULE_PATH . 'manage.php', array('id' => $cm->id));
-$PAGE->set_title($name);
+$PAGE->set_title($title);
 $PAGE->set_heading(format_string($course->fullname));
 
 $PAGE->add_body_class('observation-manage');
+
+$PAGE->navbar->add(get_string('breadcrumb:manage', \OBSERVATION));
 
 $PAGE->requires->js_call_amd(OBSERVATION_MODULE . '/developer_view', 'init');
 

@@ -40,14 +40,27 @@ require_capability(observation::CAP_ASSESS, $context);
 // TODO: Event
 
 $observation = new observation($cm, $learnerid, $taskid);
-$name = $observation->get_formatted_name();
+$task = $observation->get_task($taskid);
+$learner = core_user::get_user($learnerid);
+
+$title = get_string(
+    'title:task_assess', \OBSERVATION, [
+    'learner_fullname' => fullname($learner),
+    'task_name'        => $task->get_formatted_name(),
+    'observation_name' => $observation->get_formatted_name()
+]);
 
 // Print the page header.
 $PAGE->set_url('/mod/observation/assess_task.php', array('id' => $cm->id));
-$PAGE->set_title($name);
+$PAGE->set_title($title);
 $PAGE->set_heading(format_string($course->fullname));
 
 $PAGE->add_body_class('observation-task-assess');
+
+$PAGE->navbar->add(
+    get_string('breadcrumb:assessing_activity', \OBSERVATION, fullname($learner)),
+    new moodle_url(OBSERVATION_MODULE_PATH . 'activity_assess.php', ['id' => $cmid, 'learnerid' => $learnerid]));
+$PAGE->navbar->add(get_string('breadcrumb:assessing_task', \OBSERVATION, $task->get_formatted_name()));
 
 // Output starts here.
 echo $OUTPUT->header();
@@ -61,7 +74,7 @@ if (!$observation->is_activity_available())
     \core\notification::warning(lib::get_activity_timing_error_string($observation));
 }
 
-echo $renderer->view_task_assessor($observation, $learnerid, $taskid);
+echo $renderer->view_task_assessor($observation, $learnerid, $task);
 
 // Finish the page.
 echo $OUTPUT->footer();

@@ -241,6 +241,7 @@ class observer_assignment extends observer_assignment_base implements templateab
         // get attempt column string
         if (is_null($attempt_number_or_action))
         {
+            // todo: emojis to font awesome icons
             if ($this->is_declined())
             {
                 $attempt_number_or_action = '✖';

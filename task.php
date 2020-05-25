@@ -22,6 +22,7 @@
 
 use mod_observation\lib;
 use mod_observation\observation_base;
+use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('lib.php');
@@ -38,13 +39,22 @@ require_login($course, true, $cm);
 // TODO: Event
 
 $observation_base = new observation_base($cm->instance);
+$task = new task($taskid, $USER->id);
+
+$title = get_string(
+    'title:task', \OBSERVATION, [
+    'task_name'        => $task->get_formatted_name(),
+    'observation_name' => $observation_base->get_formatted_name()
+]);
 
 // Print the page header.
 $PAGE->set_url(OBSERVATION_MODULE_PATH . 'task.php', array('id' => $cm->id, 'taskid' => $taskid));
-$PAGE->set_title($observation_base->get_formatted_name());
+$PAGE->set_title($title);
 $PAGE->set_heading(format_string($course->fullname));
 
 $PAGE->add_body_class('observation-task');
+
+$PAGE->navbar->add(get_string('breadcrumb:task', \OBSERVATION, $task->get_formatted_name()));
 
 // Output starts here.
 echo $OUTPUT->header();
@@ -58,7 +68,7 @@ if (!$observation_base->is_activity_available())
     \core\notification::error(lib::get_activity_timing_error_string($observation_base));
 }
 
-echo $renderer->view_task_learner($observation_base, $taskid);
+echo $renderer->view_task_learner($observation_base, $task);
 
 // Finish the page.
 echo $OUTPUT->footer();

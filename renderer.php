@@ -277,6 +277,12 @@ class mod_observation_renderer extends plugin_renderer_base
         return $out;
     }
 
+    /**
+     * @param observation_base    $observation
+     * @param observer_assignment $observer_assignment
+     * @return string
+     * @throws coding_exception
+     */
     public function view_observer_landing(
         observation_base $observation, observer_assignment $observer_assignment): string
     {
@@ -293,13 +299,20 @@ class mod_observation_renderer extends plugin_renderer_base
         return $out;
     }
 
-    public function view_task_learner(observation_base $observation_base, int $taskid): string
+    /**
+     * @param observation_base $observation_base
+     * @param task             $task
+     * @return string
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
+     * @throws moodle_exception
+     */
+    public function view_task_learner(observation_base $observation_base, task $task): string
     {
         global $USER;
 
         $cm = $observation_base->get_cm();
-        // only include data relevant to this user
-        $task = new task($taskid, $USER->id);
 
         $template_data = $task->export_template_data();
 
@@ -522,16 +535,15 @@ class mod_observation_renderer extends plugin_renderer_base
 
     /**
      * @param observation $observation pre-filtered by userid and taskid
-     * @param             $learnerid
-     * @param             $taskid
+     * @param int         $learnerid
+     * @param task        $task
      * @return string
      * @throws coding_exception
      * @throws dml_exception
      * @throws dml_missing_record_exception
      */
-    public function view_task_assessor(observation $observation, $learnerid, $taskid): string
+    public function view_task_assessor(observation $observation, int $learnerid, task $task): string
     {
-        $task = $observation->get_task($taskid);
         $learner_task_submission = $task->get_learner_task_submission_or_null($learnerid); // can be null at this point!
         $context = context_module::instance($observation->get_cm()->id);
         $out = '';

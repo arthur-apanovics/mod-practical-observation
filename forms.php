@@ -153,8 +153,8 @@ class observation_assign_observer_form extends moodleform
         $learner_task_submission_id = $this->_customdata['learner_task_submission_id'];
         $attempt_id = $this->_customdata['attempt_id'];
 
-        $element = 'assign_observer:header';
-        $mform->addElement('header', $element, get_string('assign_observer:header', OBSERVATION));
+        $element = 'assign_observer:form_header';
+        $mform->addElement('header', $element, get_string('assign_observer:form_header', OBSERVATION));
         $mform->setExpanded($element);
 
         // name

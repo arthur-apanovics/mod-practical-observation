@@ -57,11 +57,19 @@ $PAGE->set_url(
     OBSERVATION_MODULE_PATH . 'request.php',
     ['id' => $cm->id, 'learner_task_submission_id' => $learner_task_submission_id, 'attempt_id' => $attempt_id]);
 
-$name = get_string('assign_observer:page_title', 'observation', $task->get_formatted_name());
-$PAGE->set_title($name);
-$PAGE->set_heading($name);
+$title = get_string(
+    'title:request', \OBSERVATION, [
+    'task_name'        => $task->get_formatted_name(),
+    'observation_name' => $observation->get_formatted_name()
+]);
+
+$PAGE->set_title($title);
+$PAGE->set_heading(format_string($course->fullname));
 
 $PAGE->add_body_class('observation-request');
+
+$PAGE->navbar->add(get_string('breadcrumb:task', \OBSERVATION, $task->get_formatted_name()), $task->get_url());
+$PAGE->navbar->add(get_string('breadcrumb:request', \OBSERVATION));
 
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
@@ -120,7 +128,8 @@ if (optional_param('confirm', 0, PARAM_BOOL))
 
     redirect(
         $activity_url,
-        get_string('notification:observer_assigned_new', 'observation',
+        get_string(
+            'notification:observer_assigned_new', 'observation',
             ['task' => $task->get_formatted_name(), 'email' => $submitted->get(observer::COL_EMAIL)]),
         null,
         notification::NOTIFY_SUCCESS);

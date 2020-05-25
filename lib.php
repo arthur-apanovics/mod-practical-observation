@@ -553,7 +553,9 @@ function observation_pluginfile(
     }
 }
 
-/* Navigation API */
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                           NAVIGATION API                                                           //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Extends the global navigation tree by adding observation nodes if there is a relevant content
@@ -567,6 +569,8 @@ function observation_pluginfile(
  */
 function observation_extend_navigation(navigation_node $navref, stdClass $course, stdClass $module, cm_info $cm)
 {
+    // add items to navigation block
+
     // $context = context_module::instance($cm->id);
     // if (has_capability(observation::CAP_ASSESS, $context))
     // {
@@ -588,6 +592,7 @@ function observation_extend_navigation(navigation_node $navref, stdClass $course
 function observation_extend_settings_navigation(
     settings_navigation $settingsnav, navigation_node $observationnode = null)
 {
+    // add items to settings section of administration block
     // global $PAGE;
     //
     // if (has_capability('', $PAGE->cm->context))
@@ -604,6 +609,20 @@ function observation_extend_settings_navigation(
     // }
 }
 
+/**
+ * This function extends the course navigation
+ * https://docs.moodle.org/dev/Tutorial#Adding_your_plugin_into_Moodle.27s_navigation
+ *
+ * @param navigation_node $navigation The navigation node to extend
+ * @param stdClass $course The course to object for the tool
+ * @param context $coursecontext The context of the course
+ */
+function observation_extend_navigation_course($navigation, $course, $coursecontext) {
+    // $url = new moodle_url('/admin/tool/devcourse/index.php');
+    // $devcoursenode = navigation_node::create('Development course', $url, navigation_node::TYPE_CUSTOM, 'Dev course', 'devcourse');
+    // $navigation->add_node($devcoursenode);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                           GRADEBOOK STUFF                                                          //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -614,6 +633,7 @@ function observation_extend_settings_navigation(
  * @param stdClass   $observation observation instance details
  * @param array|null $grades
  * @return int 0 if ok
+ * @throws coding_exception
  */
 function observation_grade_item_update($observation, $grades = null)
 {

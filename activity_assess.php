@@ -33,21 +33,28 @@ $learnerid = required_param('learnerid', PARAM_INT);
 list($course, $cm) = get_course_and_cm_from_cmid($cmid);
 $context = context_module::instance($cmid);
 
-// TODO: should cap_view_submisisons be allowed here & task view?
 require_login($course, false, $cm);
 require_capability(observation::CAP_ASSESS, $context);
 
 // TODO: Event
 
 $observation = new observation($cm, $learnerid);
-$name = $observation->get_formatted_name();
+$learner = core_user::get_user($learnerid);
+
+$title = get_string(
+    'title:activity_assess', \OBSERVATION, [
+    'learner_fullname' => fullname($learner),
+    'observation_name' => $observation->get_formatted_name()
+]);
 
 // Print the page header.
 $PAGE->set_url('/mod/observation/activity_assess.php', array('id' => $cm->id, 'learnerid' => $learnerid));
-$PAGE->set_title($name);
+$PAGE->set_title($title);
 $PAGE->set_heading(format_string($course->fullname));
 
 $PAGE->add_body_class('observation-view-assess');
+
+$PAGE->navbar->add(get_string('breadcrumb:assessing_activity', \OBSERVATION, fullname($learner)));
 
 // Output starts here.
 echo $OUTPUT->header();
