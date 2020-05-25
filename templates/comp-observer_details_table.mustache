@@ -1,25 +1,62 @@
 {{! TODO: Make table repsonsive}}
-<table class="observer-details">
-    <thead>
-    <tr>
-        <th>{{#str}}fullname, observation{{/str}}</th>
-        <th>{{#str}}phone, observation{{/str}}</th>
-        <th>{{#str}}email, observation{{/str}}</th>
-        <th>{{#str}}position_title, observation{{/str}}</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr id="details-values"
-        class="{{#extra.is_declined}}declined{{/extra.is_declined}}"
-        data-observerid="{{id}}"
-        {{#extra.is_declined}}
+{{! LEARNER TABLE }}
+{{^extra.is_assessor}}
+    <table class="observer-details">
+        <thead>
+        <tr>
+            <th>{{#str}}fullname, observation{{/str}}</th>
+            <th>{{#str}}phone, observation{{/str}}</th>
+            <th>{{#str}}email, observation{{/str}}</th>
+            <th>{{#str}}position_title, observation{{/str}}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr id="details-values"
+            class="{{#extra.is_declined}}declined{{/extra.is_declined}}"
+            data-observerid="{{id}}"
+            {{#extra.is_declined}}
             title="{{fullname}} has declined this observation request"
-        {{/extra.is_declined}}
-    >
-        <td id="fullname">{{fullname}}</td>
-        <td id="phone">{{phone}}</td>
-        <td id="email">{{email}}</td>
-        <td id="position_title">{{position_title}}</td>
-    </tr>
-    </tbody>
-</table>
+            {{/extra.is_declined}}
+        >
+            <td id="fullname">{{fullname}}</td>
+            <td id="phone">{{phone}}</td>
+            <td id="email">{{email}}</td>
+            <td id="position_title">{{position_title}}</td>
+        </tr>
+        </tbody>
+    </table>
+{{/extra.is_assessor}}
+{{! ASSESSOR/ADMIN TABLE }}
+{{#extra.is_assessor}}
+    <table class="observer-details">
+        <thead>
+        <tr>
+            <th>Attempt</th>
+            <th>{{#str}}fullname, observation{{/str}}</th>
+            <th>{{#str}}phone, observation{{/str}}</th>
+            <th>{{#str}}email, observation{{/str}}</th>
+            <th>{{#str}}position_title, observation{{/str}}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#extra.observer_assigments}}
+            <tr id="details-values"
+                class="{{#is_declined}}declined{{/is_declined}}"
+                data-observerid="{{id}}"
+                {{#is_declined}}
+                title="{{observer.fullname}} has declined this observation request"
+                {{/is_declined}}
+                {{#change_explain}}
+                title="{{change_explain}}"
+                {{/change_explain}}
+            >
+                <td id="attempt_num">{{attempt_number_or_action}}</td>
+                <td id="fullname">{{observer.fullname}}</td>
+                <td id="phone">{{observer.phone}}</td>
+                <td id="email">{{observer.email}}</td>
+                <td id="position_title">{{observer.position_title}}</td>
+            </tr>
+        {{/extra.observer_assigments}}
+        </tbody>
+    </table>
+{{/extra.is_assessor}}

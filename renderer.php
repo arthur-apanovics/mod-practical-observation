@@ -76,99 +76,6 @@ class mod_observation_renderer extends plugin_renderer_base
     //     return $completionicon;
     // }
 
-    // /**
-    //  * @param string $observation_name
-    //  * @param string $username
-    //  * @return string
-    //  * @throws coding_exception
-    //  */
-    // function get_print_button(string $observation_name, string $username)
-    // {
-    //     global $OUTPUT;
-    //
-    //     $out = '';
-    //
-    //     $out .= html_writer::start_tag('a', array('href' => 'javascript:window.print()', 'class' => 'evalprint'));
-    //     $out .= html_writer::empty_tag('img',
-    //         array(
-    //             'src'   => $OUTPUT->pix_url('t/print'),
-    //             'alt'   => get_string('printthisobservation', 'observation'),
-    //             'class' => 'icon'));
-    //     $out .= get_string('printthisobservation', 'observation');
-    //     $out .= html_writer::end_tag('a');
-    //     $out .= $OUTPUT->heading(get_string('observationxforx', 'observation',
-    //         (object) array(
-    //             'observation'  => format_string($observation_name),
-    //             'user' => $username)));
-    //
-    //     return $out;
-    // }
-
-    // protected function list_topic_item_files($contextid, $userid, $topicitemid)
-    // {
-    //     $out = array();
-    //
-    //     $fs = get_file_storage();
-    //     $files = $fs->get_area_files($contextid, 'mod_observation', 'topicitemfiles' . $topicitemid, $userid,
-    //         'itemid, filepath, filename', false);
-    //
-    //     foreach ($files as $file)
-    //     {
-    //         $filename = $file->get_filename();
-    //         $url =
-    //             moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
-    //                 $file->get_itemid(), $file->get_filepath(), $file->get_filename());
-    //         $out[] = html_writer::link($url, $filename);
-    //     }
-    //     $br = html_writer::empty_tag('br');
-    //
-    //     return implode($br, $out);
-    // }
-
-    // /**
-    //  * @param int         $observationid
-    //  * @param int         $userid
-    //  * @param string|null $token email assignment token for external evaluations
-    //  * @return array [args[], jsmodule[]]
-    //  */
-    // public function get_evaluation_js_args(int $observationid, int $userid, string $token = null)
-    // {
-    //     $args     = array(
-    //         'args' =>
-    //             '{ "observationid":' . $observationid .
-    //             ', "userid":' . $userid .
-    //             ', "token":"' . $token . '"' .
-    //             ', "Observation_COMPLETE":' . completion::STATUS_COMPLETE .
-    //             ', "Observation_REQUIREDCOMPLETE":' . completion::STATUS_REQUIREDCOMPLETE .
-    //             ', "Observation_INCOMPLETE":' . completion::STATUS_INCOMPLETE .
-    //             '}');
-    //     $jsmodule = array(
-    //         'name'     => 'mod_observation_evaluate',
-    //         'fullpath' => '/mod/observation/js/evaluate.js',
-    //         'requires' => array('json')
-    //     );
-    //
-    //     return array($args, $jsmodule);
-    // }
-
-    // private function get_topic_submission_status_icon(user_topic $topic)
-    // {
-    //     $date_str = get_string('nosubmissiondate', 'mod_observation');
-    //     $icon_id = 'square-o';
-    //
-    //     if (!is_null($topic->external_request))
-    //     {
-    //         $date = $topic->external_request->get_first_email_assign_date();
-    //         if ($date > 0)
-    //         {
-    //             $date_str = get_string('submissiondate', 'mod_observation', userdate($date));
-    //             $icon_id = 'check-square-o';
-    //         }
-    //     }
-    //
-    //     return $this->output->flex_icon($icon_id, ['alt' => $date_str]);
-    // }
-
     /**
      * Render main activity view
      *
@@ -698,6 +605,11 @@ class mod_observation_renderer extends plugin_renderer_base
             }
             else if ($learner_task_submission->is_learner_action_required())
             {
+                if (!empty($learner_task_submission->get_observer_assignments()))
+                {
+                    $include_observer_details = true;
+                }
+
                 notification::add(
                     get_string('notification:submission_pending_or_in_progress', OBSERVATION), notification::INFO);
             }
@@ -705,12 +617,10 @@ class mod_observation_renderer extends plugin_renderer_base
 
         if ($include_observer_details)
         {
-            $observer_assignment = $learner_task_submission->get_latest_observer_assignment_or_null();
-            $observer = $observer_assignment->get_observer(); // has to exist
-            $observer_template_data = $observer->export_template_data();
+            $observer_template_data['extra']['observer_assigments'] =
+                $template_data['learner_task_submissions'][0]['observer_assignments']; // janky, but works because task is filtered
             $observer_template_data['extra']['is_assessor'] = true;
             $observer_template_data['extra']['is_assessing'] = $is_assessing;
-            $observer_template_data['extra']['is_declined'] = $observer_assignment->is_declined();
 
             if ($is_assessing)
             {

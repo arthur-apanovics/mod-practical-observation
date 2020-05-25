@@ -74,6 +74,12 @@ class observer_feedback_base extends db_model_base
      */
     protected $text_format;
 
+
+    public function get_learner_attempt(): learner_attempt_base
+    {
+        return learner_attempt_base::read_or_null($this->attemptid, true);
+    }
+
     public function is_submitted()
     {
         return !is_null($this->outcome);

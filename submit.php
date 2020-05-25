@@ -102,7 +102,7 @@ else if ($observer_submissionid = optional_param('observer_submission_id', null,
     }
 
     // gather data from post request
-    $observer_submission_base = new observer_task_submission_base($observer_submissionid);
+    $observer_submission_base = observer_task_submission_base::read_or_null($observer_submissionid, true);
     $observations = lib::required_param_array('criteria', PARAM_RAW);
 
     if ($observer_submission_base->is_complete())

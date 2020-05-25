@@ -249,10 +249,19 @@ body.path-mod-observation .feedback.observer.no-text .outcome-inline {
   text-shadow: 2px 2px white;
 }
 body.path-mod-observation .feedback.assessor:not(:last-child) {
-  margin-bottom: 3em;
+  margin-bottom: 2em;
 }
 body.path-mod-observation .attempt {
+  padding: 1em 2em;
+}
+body.path-mod-observation .attempt:only-child {
   padding: 2em;
+}
+body.path-mod-observation .attempt:first-child {
+  padding-top: 2em;
+}
+body.path-mod-observation .attempt:last-child {
+  padding-bottom: 2em;
 }
 body.path-mod-observation .attempt .heading,
 body.path-mod-observation .feedback .heading {

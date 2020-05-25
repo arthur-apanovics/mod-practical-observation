@@ -302,6 +302,17 @@ class learner_task_submission extends learner_task_submission_base implements te
             ]);
     }
 
+
+    /**
+     * Returns all existing observer assignments for this task
+     *
+     * @return observer_assignment[]
+     */
+    public function get_observer_assignments(): array
+    {
+        return $this->observer_assignments;
+    }
+
     /**
      * @return assessor_task_submission|null
      */

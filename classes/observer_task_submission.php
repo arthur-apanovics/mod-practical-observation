@@ -35,8 +35,9 @@ class observer_task_submission extends observer_task_submission_base implements 
     {
         parent::__construct($id_or_record);
 
-        $this->observer_feedback = observer_feedback::read_all_by_condition(
-            [observer_feedback::COL_OBSERVER_SUBMISSIONID => $this->id]);
+        $this->observer_feedback = array_values(
+            observer_feedback::read_all_by_condition(
+                [observer_feedback::COL_OBSERVER_SUBMISSIONID => $this->id]));
     }
 
     /**

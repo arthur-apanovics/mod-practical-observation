@@ -226,9 +226,34 @@ class observer_assignment extends observer_assignment_base implements templateab
      */
     public function export_template_data(): array
     {
-        $observer_submission = !is_null($this->observer_task_submission)
+        $observer_submission_data = !is_null($this->observer_task_submission)
             ? $this->observer_task_submission->export_template_data()
             : null;
+
+        $attempt_number_or_action = null;
+        if ($observer_task_submission = $this->observer_task_submission)
+        {
+            if ($observer_feedbacks = $observer_task_submission->get_observer_feedback())
+            {
+                $attempt_number_or_action = $observer_feedbacks[0]->get_learner_attempt()->get_attempt_number();
+            }
+        }
+        // get attempt column string
+        if (is_null($attempt_number_or_action))
+        {
+            if ($this->is_declined())
+            {
+                $attempt_number_or_action = '✖';
+            }
+            else if (!$this->is_active() && !$this->is_accepted())
+            {
+                $attempt_number_or_action = '⤵';
+            }
+            else if ($this->is_active() && !$this->is_accepted())
+            {
+                $attempt_number_or_action = '⌚';
+            }
+        }
 
         return [
             self::COL_ID                   => $this->id,
@@ -239,7 +264,11 @@ class observer_assignment extends observer_assignment_base implements templateab
             self::COL_ACTIVE               => $this->active,
 
             'observer'            => $this->observer->export_template_data(),
-            'observer_submission' => $observer_submission
+            'observer_submission' => $observer_submission_data,
+
+            'attempt_number_or_action' => $attempt_number_or_action,
+            'is_declined'              => $this->is_declined(),
+            'is_accepted'              => $this->is_accepted(),
         ];
     }
 }
