@@ -332,7 +332,12 @@ body.path-mod-observation .timestamp {
   margin-right: 0.5em;
 }
 body.path-mod-observation form .meets-criteria-wrapper {
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 1em;
+}
+body.path-mod-observation form .meets-criteria-wrapper #criteria-modal {
+  cursor: pointer;
 }
 body.path-mod-observation .align-center {
   text-align: center;
@@ -459,6 +464,9 @@ table.submissions-summary tbody th {
 }
 table.observer-details tr.declined {
   text-decoration: line-through;
+}
+table.observer-details tr.active {
+  font-weight: 600;
 }
 .submissions-summary tr > th:not(:first-child),
 .submissions-summary tr > td:not(:first-child) {
@@ -592,4 +600,7 @@ body.observation-observe .criteria-header {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+}
+body.observation-observe .criteria:not(:first-child) {
+  margin-top: 3em;
 }

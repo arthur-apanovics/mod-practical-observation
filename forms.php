@@ -153,8 +153,8 @@ class observation_assign_observer_form extends moodleform
         $learner_task_submission_id = $this->_customdata['learner_task_submission_id'];
         $attempt_id = $this->_customdata['attempt_id'];
 
-        $element = 'assign_observer:form_header';
-        $mform->addElement('header', $element, get_string('assign_observer:form_header', OBSERVATION));
+        $element = 'request:form_header';
+        $mform->addElement('header', $element, get_string('request:form_header', OBSERVATION));
         $mform->setExpanded($element);
 
         // name
@@ -171,7 +171,7 @@ class observation_assign_observer_form extends moodleform
 //TODO: refine phone regex
 //        $mform->addRule(
 //            $element,
-//            get_string('assign_observer:phone_validation_message', 'observation'),
+//            get_string('request:phone_validation_message', 'observation'),
 //            'regex',
 //            '/(0|(\+64(\s|-)?)){1}(21|22|27){1}(\s|-)?\d{3}(\s|-)?\d{4}/',
 //            'client');
@@ -183,7 +183,7 @@ class observation_assign_observer_form extends moodleform
         $mform->addRule($element, null, 'required', null, 'client');
         $mform->addRule(
             $element,
-            get_string('assign_observer:email_validation_message', 'observation'),
+            get_string('request:email_validation_message', 'observation'),
             'regex',
             '/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i',
             'client');

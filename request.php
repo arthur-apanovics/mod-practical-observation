@@ -184,7 +184,7 @@ if ($data = $form->get_data())
             ];
 
             $renderer->echo_confirmation_page_and_die(
-                get_string('assign_observer:confirm_change', 'observation', $lang_params),
+                get_string('request:confirm_change', 'observation', $lang_params),
                 [
                     'confirm'                    => 1,
                     observer::COL_FULLNAME       => $submitted->get(observer::COL_FULLNAME),
@@ -194,7 +194,7 @@ if ($data = $form->get_data())
                     'message'                    => $data->message
                 ],
                 true,
-                get_string('assign_observer:input_prompt', 'observation')
+                get_string('request:input_prompt', 'observation')
             );
             // dies here
         }

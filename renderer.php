@@ -509,8 +509,9 @@ class mod_observation_renderer extends plugin_renderer_base
                     $feedback->get(observer_feedback::COL_TEXT_FORMAT),
                     sprintf('criteria[%d][%s]', $criteria->get_id_or_null(), $base)
                 );
-                $criteria_data['extra']['filepicker_html'] =
-                    $this->files_input($feedback->get_id_or_null(), observation::FILE_AREA_OBSERVER, $context);
+                // todo: file upload for external users
+                // $criteria_data['extra']['filepicker_html'] =
+                //     $this->files_input($feedback->get_id_or_null(), observation::FILE_AREA_OBSERVER, $context);
                 // JS validation
                 $this->page->requires->js_call_amd(
                     OBSERVATION_MODULE . '/submission_validation',
@@ -581,7 +582,6 @@ class mod_observation_renderer extends plugin_renderer_base
                 ['submissionType' => 'assessor']);
 
             // add fielpicker
-            // TODO: files do not appear on feedback edit
             $template_data['extra']['filepicker_html'] = $this->files_input(
                 $feedback->get_id_or_null(),
                 observation::FILE_AREA_ASSESSOR,
@@ -641,6 +641,12 @@ class mod_observation_renderer extends plugin_renderer_base
                     $feedback->is_marked_complete();
 
                 $template_data['extra']['observer'] = $observer_template_data;
+
+                // observer requirements modal
+                $this->page->requires->js_call_amd(
+                    OBSERVATION_MODULE . '/assessor_view',
+                    'init',
+                    ['observerRequirements' => $template_data[task::COL_INT_ASSIGN_OBS_OBSERVER]]);
             }
             else
             {

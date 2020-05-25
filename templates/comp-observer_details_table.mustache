@@ -41,11 +41,14 @@
         <tbody>
         {{#extra.observer_assigments}}
             <tr id="details-values"
-                class="{{#is_declined}}declined{{/is_declined}}"
+                class="{{#is_declined}}declined{{/is_declined}}{{#active}}active{{/active}}"
                 data-observerid="{{id}}"
                 {{#is_declined}}
                 title="{{observer.fullname}} has declined this observation request"
                 {{/is_declined}}
+                {{#active}}
+                title="Current observer for this task"
+                {{/active}}
                 {{#change_explain}}
                 title="{{change_explain}}"
                 {{/change_explain}}

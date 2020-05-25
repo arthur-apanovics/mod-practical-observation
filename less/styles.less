@@ -425,7 +425,13 @@ body.path-mod-observation {
 
   form {
     .meets-criteria-wrapper {
-      text-align: right;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 1em;
+
+      #criteria-modal{
+        cursor: pointer;
+      }
     }
   }
 
@@ -597,8 +603,13 @@ table {
 
 // Assigned observer details table
 table.observer-details {
-  tr.declined {
-    text-decoration: line-through;
+  tr {
+    &.declined {
+      text-decoration: line-through;
+    }
+    &.active {
+      font-weight: 600;
+    }
   }
 }
 
@@ -736,6 +747,7 @@ body.observation-task-assess {
 }
 
 // ====================================================================================================================
+// OBSERVATION PAGE
 // ====================================================================================================================
 
 body.observation-observe {
@@ -786,7 +798,6 @@ body.observation-observe {
     }
   }
 
-  // OBSERVATION PAGE
   .spacer {
     margin-bottom: 5em;
   }
@@ -798,6 +809,10 @@ body.observation-observe {
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
+    }
+
+    &:not(:first-child) {
+      margin-top: @wrapper-margin;
     }
   }
 }

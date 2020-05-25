@@ -161,17 +161,18 @@ $string['no_tasks'] = 'There are currently no tasks in this activity.';
 $string['report'] = 'Report';
 
 // ASSIGN OBSERVER
-$string['assign_observer:page_header'] = 'Assign observer for "{$a}"';
-$string['assign_observer:table_title'] = 'Assign from history';
-$string['assign_observer:table_title_help'] = 'You can assign any observer you\'ve used in this module or a new observer';
-$string['assign_observer:form_header'] = 'Assign observer';
-$string['assign_observer:phone_validation_message'] = 'Please enter a valid NZ phone number';
-$string['assign_observer:email_validation_message'] = 'Please enter a valid email address';
-$string['assign_observer:confirm_change'] = 'Current observer for this task is <strong>{$a->current} ({$a->current_email})</strong>.<br>Are you sure you want to assign <strong>{$a->new} ({$a->new_email})</strong> as the observer for task "{$a->task}"?';
-$string['assign_observer:input_prompt'] = 'Briefly explain this change';
+$string['request:page_header'] = 'Assign observer for "{$a}"';
+$string['request:table_title'] = 'Assign from history';
+$string['request:table_title_help'] = 'You can assign any observer you\'ve used in this module or a new observer';
+$string['request:form_header'] = 'Assign observer';
+$string['request:phone_validation_message'] = 'Please enter a valid NZ phone number';
+$string['request:email_validation_message'] = 'Please enter a valid email address';
+$string['request:confirm_change'] = 'Current observer for this task is <strong>{$a->current} ({$a->current_email})</strong>.<br>Are you sure you want to assign <strong>{$a->new} ({$a->new_email})</strong> as the observer for task "{$a->task}"?';
+$string['request:input_prompt'] = 'Briefly explain this change';
 
-$string['assign_observer:assigned_observer'] = 'Assigned observer';
-$string['assign_observer:change_observer'] = 'change observer';
+$string['request:assigned_observer'] = 'Assigned observer';
+$string['request:assigned_observer'] = 'Observer assignment records';
+$string['request:change_observer'] = 'change observer';
 
 // OBSERVER
 $string['fullname'] = 'Full name';
@@ -197,7 +198,6 @@ $string['outcome:not_complete'] = 'Not complete';
 
 // ASSESSOR
 $string['assess:observer_meets_criteria'] = 'Observer meets required criteria';
-$string['assess:last_assigned'] = 'last assigned';
 $string['assess:release_grade'] = 'Release';
 $string['assess:release_grade_title'] = 'All tasks have to be assessed before releasing';
 

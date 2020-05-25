@@ -40,7 +40,7 @@ class task_base extends db_model_base
     public const COL_INT_ASSIGN_OBS_LEARNER = 'int_assign_obs_learner';
     /** @var string column - intro, assign observation - learner_format */
     public const COL_INT_ASSIGN_OBS_LEARNER_FORMAT = 'int_assign_obs_learner_format';
-    /** @var string column - intro, assign observation - observer */
+    /** @var string column - intro, assign observation - observer aka observer requirements */
     public const COL_INT_ASSIGN_OBS_OBSERVER = 'int_assign_obs_observer';
     /** @var string column - intro, assign observation - observer_format */
     public const COL_INT_ASSIGN_OBS_OBSERVER_FORMAT = 'int_assign_obs_observer_format';
