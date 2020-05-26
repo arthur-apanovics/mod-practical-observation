@@ -438,6 +438,10 @@ class mod_observation_renderer extends plugin_renderer_base
                             $observer->get(observer::COL_EMAIL)));
                 }
             }
+            else if ($task_submission->is_assessment_pending() || $task_submission->is_assessment_in_progress())
+            {
+                notification::info(get_string('notification:activity_wait_for_assess', \OBSERVATION));
+            }
 
             $out .= $this->render_from_template('view-task_learner', $template_data);
         }
