@@ -332,6 +332,7 @@ class submission_base extends submission_status_store
         $grade['feedback'] = '';
         $grade['rawgrade'] = $this->get_gradebook_grade();
 
+        $observation_record->instance = $observation_record->id;
         observation_grade_item_update($observation_record, $grade);
     }
 }
