@@ -25,8 +25,7 @@
         {{! task action link }}
         {{! get link based on capability }}
         {{#capabilities.can_assess}}
-            <a class="action btn" href="{{{module_root}}}/task_assess.php?id={{cmid}}&taskid={{id}}
-            &learnerid={{extra.learnerid}}">
+            <a class="action btn" href="{{{module_root}}}/task_assess.php?id={{cmid}}&taskid={{id}}&learnerid={{extra.learnerid}}">
         {{/capabilities.can_assess}}
         {{^capabilities.can_assess}}
             <a class="action btn" href="{{{module_root}}}/task.php?id={{cmid}}&taskid={{id}}">
