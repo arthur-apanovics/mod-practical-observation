@@ -633,8 +633,13 @@ class mod_observation_renderer extends plugin_renderer_base
                 notification::add(
                     get_string('notification:submission_pending_or_in_progress', OBSERVATION), notification::INFO);
             }
+            else
+            {
+                $include_observer_details = true;
+            }
         }
 
+        // render observer table
         if ($include_observer_details)
         {
             $observer_template_data['extra']['observer_assigments'] =

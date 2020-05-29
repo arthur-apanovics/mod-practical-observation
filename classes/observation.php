@@ -450,7 +450,7 @@ class observation extends observation_base implements templateable
             $userid = $submission->get_userid();
             $total = $this->get_task_count();
             $observed = $submission->get_observed_task_count();
-            $learner_url = (new moodle_url('/user/profile.php', ['id' => $userid, 'course' => $this->course]));
+            $learner_url = (new moodle_url('/user/view.php', ['id' => $userid, 'course' => $this->course]));
             $assessment_attempts = $submission->get(submission::COL_ATTEMPTS_ASSESSMENT);
 
             $observation_attempt_summary = [];
