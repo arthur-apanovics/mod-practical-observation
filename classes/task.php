@@ -272,7 +272,7 @@ class task extends task_base implements templateable
                     // assessor status comes from feedback as task submission retains status from previous assessment
                     $assessor_submission_status =
                         $assessor_task_submission->get_task_outcome_from_feedback_or_null($attempt->get_id_or_null());
-                    $assessor_submission_status_description = lib::get_outcome_string($assessor_submission_status);
+                    $assessor_submission_status_description = lib::get_outcome_string('assessor', $assessor_submission_status);
                     $has_feedback = (bool) count($assessor_task_submission->get_all_feedback());
                 }
             }

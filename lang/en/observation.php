@@ -193,8 +193,10 @@ $string['observer_requirements'] = 'External observer requirements';
 $string['observer_requirements_acknowledge'] = 'I acknowledge that I meet the required criteria to observe this learner';
 
 $string['outcome:choose'] = 'Choose...';
-$string['outcome:complete'] = 'Complete';
-$string['outcome:not_complete'] = 'Not complete';
+$string['outcome:observer_complete'] = 'Complete';
+$string['outcome:observer_not_complete'] = 'Not complete';
+$string['outcome:assessor_complete'] = 'Competent';
+$string['outcome:assessor_not_complete'] = 'Not yet competent';
 
 // ASSESSOR
 $string['assess:observer_meets_criteria'] = 'Observer meets required criteria';

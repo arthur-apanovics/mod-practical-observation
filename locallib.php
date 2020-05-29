@@ -93,14 +93,24 @@ class lib
         return get_string(sprintf('status:%s', $status), OBSERVATION);
     }
 
-    public static function get_outcome_string(?string $outcome): ?string
+    /**
+     * @param string      $type observer|assessor
+     * @param string|null $outcome
+     * @return string|null
+     * @throws coding_exception
+     */
+    public static function get_outcome_string(string $type, ?string $outcome): ?string
     {
         if (!$outcome)
         {
             return null;
         }
+        else if (!in_array($type, ['observer','assessor']))
+        {
+            throw new coding_exception(sprintf('Invalid "type" argument - "%s"', $type));
+        }
 
-        return get_string(sprintf('outcome:%s', $outcome), OBSERVATION);
+        return get_string(sprintf('outcome:%s_%s', $type, $outcome), OBSERVATION);
     }
 
     /**

@@ -111,7 +111,7 @@ class assessor_task_submission extends assessor_task_submission_base implements 
     {
         return [
             self::COL_ID      => $this->id,
-            self::COL_OUTCOME => lib::get_outcome_string($this->outcome),
+            self::COL_OUTCOME => lib::get_outcome_string('assessor', $this->outcome),
         ];
     }
 }
