@@ -375,6 +375,25 @@ class mod_observation_renderer extends plugin_renderer_base
                 $template_data['extra']['is_submission'] = true;
                 // save time later by including cmid while whe have it easily available
                 $template_data['extra']['cmid'] = $cm->id;
+
+                // display notification
+                if ($observer_assignment = $task_submission->get_active_observer_assignment_or_null())
+                {
+                    $observer_submission =  $observer_assignment->get_observer_submission_base_or_null();
+                    if (!$observer_submission->is_complete())
+                    {
+                        notification::error(get_string('notification:task_observation_not_complete', \OBSERVATION));
+                    }
+                }
+                if ($assessor_submission = $task_submission->get_assessor_task_submission_or_null())
+                {
+                    if ($assessor_submission->get(assessor_task_submission::COL_OUTCOME)
+                        === assessor_task_submission::OUTCOME_NOT_COMPLETE)
+                    {
+                        notification::error(
+                            get_string('notification:task_assessment_not_complete', \OBSERVATION));
+                    }
+                }
             }
             else if ($task_submission->is_observation_pending_or_in_progress())
             {
