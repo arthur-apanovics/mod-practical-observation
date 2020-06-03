@@ -161,18 +161,34 @@ class submission extends submission_base /*TODO: implements templateable*/
             return false;
         }
 
+        $complete = 0;
         foreach ($this->get_learner_task_submissions() as $task_submission)
         {
-            if ($task_submission->get_active_observer_assignment_or_null() // has observer assigned
-                && $task_submission->is_observation_pending_or_in_progress()) //observation pending or in progress
-            {
-                continue;
-            }
+                if ($task_submission->get_active_observer_assignment_or_null()
+                    && ($task_submission->is_observation_pending_or_in_progress()
+                        || $task_submission->is_assessment_complete()))
+                {
+                    // keep track of completed tasks
+                    $complete += $task_submission->is_assessment_complete();
+                    // has observer assigned and observation pending/in progress
+                    continue;
+                }
 
             return false;
         }
 
-        return true;
+        // we're counting task submissions instead of tasks but at this stage we know that all tasks have a submission
+        // so it's safe to assume task count out of this
+        if ($complete == count($this->get_learner_task_submissions()))
+        {
+            // all tasks are complete - nothing to observe
+            return false;
+        }
+        else
+        {
+            // some tasks are complete but rest are awaiting observation
+            return true;
+        }
     }
 
     /**
@@ -194,10 +210,19 @@ class submission extends submission_base /*TODO: implements templateable*/
         $learner_task_submissions = $this->get_learner_task_submissions();
 
         $completed_tasks = 0;
+        $fail_all_tasks = $observation->get(observation::COL_FAIL_ALL_TASKS);
         foreach ($learner_task_submissions as $learner_task_submission)
         {
             $feedback = $learner_task_submission->get_latest_learner_attempt_or_null()->get_assessor_feedback_or_null();
             $assessor_task_submission = $feedback->get_assessor_task_submission();
+
+            if (!$fail_all_tasks && $assessor_task_submission->is_submitted())
+            {
+                // this task has been assessed previously and 'fail all tasks' is disabled - nothing to do here
+                $completed_tasks++;
+                continue;
+            }
+
             $outcome = $feedback->get(assessor_feedback::COL_OUTCOME);
 
             // validate is graded
@@ -213,7 +238,13 @@ class submission extends submission_base /*TODO: implements templateable*/
             // update assessor task submission outcome
             $assessor_task_submission->submit($outcome, $feedback);
 
-            // learner task submission status is updated later because we need to determine outcome
+            if (!$fail_all_tasks)
+            {
+                $status = ($outcome === assessor_feedback::OUTCOME_COMPLETE
+                    ? learner_task_submission::STATUS_COMPLETE
+                    : $learner_task_submission::STATUS_ASSESSMENT_INCOMPLETE);
+                $learner_task_submission->update_status_and_save($status);
+            }
         }
 
         // update activity submission status
@@ -228,10 +259,14 @@ class submission extends submission_base /*TODO: implements templateable*/
             $new_status = self::STATUS_ASSESSMENT_INCOMPLETE;
         }
 
-        // update all tasks with outcome
-        foreach ($learner_task_submissions as $task_submission)
+        // check if we need to fail all tasks if at least one is not complete
+        if ($fail_all_tasks && $new_status === self::STATUS_ASSESSMENT_INCOMPLETE)
         {
-            $task_submission->update_status_and_save($new_status);
+            // all tasks are set to fail in config and at least one task has been failed
+            foreach ($learner_task_submissions as $task_submission)
+            {
+                $task_submission->update_status_and_save($new_status);
+            }
         }
 
         // update activity submission status
@@ -242,8 +277,8 @@ class submission extends submission_base /*TODO: implements templateable*/
         // trigger event
         $event = activity_assessed::create(
             [
-                'context'  => \context_module::instance($observation->get_cm()->id),
-                'objectid' => $this->id,
+                'context'       => \context_module::instance($observation->get_cm()->id),
+                'objectid'      => $this->id,
                 'relateduserid' => $this->userid,
             ]);
         $event->trigger();

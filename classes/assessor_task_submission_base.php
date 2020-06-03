@@ -103,6 +103,11 @@ class assessor_task_submission_base extends db_model_base
         return $this;
     }
 
+    public function is_submitted()
+    {
+        return !is_null($this->outcome);
+    }
+
     public function set(string $prop, $value, bool $save = false): db_model_base
     {
         if ($prop == self::COL_OUTCOME)

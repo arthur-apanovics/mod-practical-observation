@@ -121,6 +121,7 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
     }
 
     $base->set($base::COL_COMPLETION_TASKS, $data[$base::COL_COMPLETION_TASKS]);
+    $base->set($base::COL_FAIL_ALL_TASKS, $data[$base::COL_FAIL_ALL_TASKS]);
     $base->set($base::COL_DELETED, 0);
 
     // create db entry
@@ -183,6 +184,7 @@ function observation_update_instance(stdClass $observation, mod_observation_mod_
     }
 
     $base->set(observation::COL_COMPLETION_TASKS, $data[$base::COL_COMPLETION_TASKS]);
+    $base->set($base::COL_FAIL_ALL_TASKS, $data[$base::COL_FAIL_ALL_TASKS]);
 
     $base->update();
 

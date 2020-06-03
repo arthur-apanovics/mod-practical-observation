@@ -200,15 +200,71 @@ class submission_base extends submission_status_store
         }
 
         // check each submission status
+        $complete = 0;
         foreach ($task_submissions as $task_submission)
         {
-            if (!$task_submission->is_observation_complete())
+            if ($task_submission->is_assessment_complete())
+            {
+                $complete++;
+            }
+            else if (!$task_submission->is_observation_complete())
             {
                 return false;
+
             }
         }
 
-        return true;
+        if ($complete == count($task_submissions))
+        {
+            // all complete
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    // TODO: generic function to check status of all tasks
+    public function is_all_tasks_observation_in_progress()
+    {
+        $task_submissions = $this->get_learner_task_submissions();
+        if (empty($task_submissions))
+        {
+            // no submissions made
+            return false;
+        }
+
+        if (!$this->is_all_tasks_have_submission())
+        {
+            // not all tasks have submissions
+            return false;
+        }
+
+        // check each submission status
+        $complete = 0;
+        foreach ($task_submissions as $task_submission)
+        {
+            if ($task_submission->is_assessment_complete())
+            {
+                $complete++;
+            }
+            else if (!$task_submission->is_observation_in_progress())
+            {
+                return false;
+
+            }
+        }
+
+        if ($complete == count($task_submissions))
+        {
+            // all complete
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 
     /**
@@ -222,14 +278,33 @@ class submission_base extends submission_status_store
      */
     public function is_observed_as_incomplete(): bool
     {
-        foreach ($this->get_learner_task_submissions() as $task_submission)
+        if (!$this->is_all_tasks_have_submission())
         {
-            if (!$task_submission->is_observation_incomplete()) {
+            return false;
+        }
+
+        $task_submissions = $this->get_learner_task_submissions();
+        $complete = 0;
+        foreach ($task_submissions as $task_submission)
+        {
+            if ($task_submission->is_assessment_complete())
+            {
+                $complete++;
+            }
+            else if (!$task_submission->is_observation_incomplete())
+            {
                 return false;
             }
         }
 
-        return true;
+        if ($complete == count($task_submissions))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 
     public function is_all_tasks_have_submission(): bool

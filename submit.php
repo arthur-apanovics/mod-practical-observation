@@ -231,7 +231,7 @@ else if ($assessor_task_submissionid = optional_param('assessor_task_submission_
     $status = $submission->get(submission::COL_STATUS);
     if ($status !== submission::STATUS_ASSESSMENT_IN_PROGRESS)
     {
-        // extra debugging just in case
+        // extra debugging, just in case
         if ($status !== submission::STATUS_ASSESSMENT_PENDING)
         {
             debugging(

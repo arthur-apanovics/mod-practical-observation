@@ -38,8 +38,29 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @param int $oldversion
  * @return bool
+ * @throws ddl_exception
+ * @throws ddl_table_missing_exception
  */
 function xmldb_observation_upgrade($oldversion)
 {
+    global $DB;
+
+    $dbman = $DB->get_manager();
+
+    if ($oldversion < 2020060300)
+    {
+        // Define field fail_all_tasks to be added to observation.
+        $table = new xmldb_table('observation');
+        $field = new xmldb_field('fail_all_tasks', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'completion_tasks');
+
+        // Conditionally launch add field fail_all_tasks.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Observation savepoint reached.
+        upgrade_mod_savepoint(true, 2020060300, 'observation');
+    }
+
     return true;
 }

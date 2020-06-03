@@ -142,8 +142,16 @@ class mod_observation_renderer extends plugin_renderer_base
             }
             else if ($submission->is_assessment_incomplete())
             {
-                notification::warning(
-                    get_string('notification:activity_assessment_not_complete', 'observation'));
+                if ($observation->get(observation::COL_FAIL_ALL_TASKS))
+                {
+                    notification::error(
+                        get_string('notification:activity_assessment_not_complete_all', 'observation'));
+                }
+                else
+                {
+                    notification::error(
+                        get_string('notification:activity_assessment_not_complete_partial', 'observation'));
+                }
             }
             else if ($declined = $submission->get_declined_observation_assignments())
             {
@@ -155,7 +163,7 @@ class mod_observation_renderer extends plugin_renderer_base
                     $task = $task_submission->get_task_base();
                     $link = new moodle_url(
                         OBSERVATION_MODULE_PATH . 'request.php', [
-                            'id'                         => $observation->get_id_or_null(),
+                            'id'                         => $observation->get_cm()->id,
                             'learner_task_submission_id' => $task_submission->get_id_or_null(),
                             'attempt_id'                 => $attempt->get_id_or_null(),
                         ]);
@@ -219,9 +227,31 @@ class mod_observation_renderer extends plugin_renderer_base
 
         if ($observation->can_assess($learnerid))
         {
+            // only tasks that failed assessment previously have to be assessed when fail_all_tasks is off
+            if (!$observation->get(observation::COL_FAIL_ALL_TASKS))
+            {
+                foreach ($observation->get_tasks() as $task)
+                {
+                    if (!$task->can_assess($learnerid, $observation))
+                    {
+                        // keys are not indexed by id, we have to loop over every task to find correct one...
+                        $template_data['tasks'] = array_map(
+                            function ($task_template) use ($task)
+                            {
+                                if ($task_template['id'] == $task->get_id_or_null())
+                                {
+                                    $task_template['task_extra']['do_not_assess'] = true;
+                                }
+                                return $task_template;
+                            }, $template_data['tasks']);
+                    }
+                }
+            }
+
             $template_data['extra']['is_assessing'] = true;
             $template_data['extra']['cmid'] = $observation->get_cm()->id;
-            $template_data['extra']['activity_submission_id'] = $observation->get_submission_or_null($learnerid)->get_id_or_null();
+            $template_data['extra']['activity_submission_id'] =
+                $observation->get_submission_or_null($learnerid)->get_id_or_null();
             $template_data['extra']['can_release_grade'] = $observation->can_release_grade($learnerid);
         }
 
@@ -387,11 +417,15 @@ class mod_observation_renderer extends plugin_renderer_base
                 }
                 if ($assessor_submission = $task_submission->get_assessor_task_submission_or_null())
                 {
-                    if ($assessor_submission->get(assessor_task_submission::COL_OUTCOME)
-                        === assessor_task_submission::OUTCOME_NOT_COMPLETE)
+                    if ($feedback = $attempt->get_assessor_feedback_or_null())
                     {
-                        notification::error(
-                            get_string('notification:task_assessment_not_complete', \OBSERVATION));
+                        // this attempt has feedback from assessor
+                        if ($feedback->get(assessor_feedback::COL_OUTCOME) === assessor_feedback::OUTCOME_NOT_COMPLETE)
+                        {
+                            // attempt was marked as 'failed' by assessor
+                            notification::error(
+                                get_string('notification:task_assessment_not_complete', \OBSERVATION));
+                        }
                     }
                 }
             }
@@ -410,7 +444,7 @@ class mod_observation_renderer extends plugin_renderer_base
                 $observer_template_data['extra']['is_declined'] = $observer_assignment->is_declined();
 
                 // allow to change observer if previous observer hasn't accepted yet
-                if ($task_submission->is_observation_pending())
+                if ($task_submission->is_observation_pending() || $observer_assignment->is_declined())
                 {
                     // it is easier to generate this link here rather than the template
                     $attempt = $task_submission->get_latest_attempt_or_null();
@@ -445,6 +479,10 @@ class mod_observation_renderer extends plugin_renderer_base
             else if ($task_submission->is_assessment_pending() || $task_submission->is_assessment_in_progress())
             {
                 notification::info(get_string('notification:activity_wait_for_assess', \OBSERVATION));
+            }
+            else if ($task_submission->is_assessment_complete())
+            {
+                notification::success(get_string('notification:task_complete', OBSERVATION));
             }
 
             $out .= $this->render_from_template('view-task_learner', $template_data);
@@ -567,7 +605,8 @@ class mod_observation_renderer extends plugin_renderer_base
 
         $include_observer_details = false;
         $is_assessing = false;
-        if ($observation->can_assess($learnerid))
+        // if ($observation->can_assess($learnerid))
+        if ($task->can_assess($learnerid, $observation))
         {
             // assessing is good to go
             $include_observer_details = true;
@@ -589,7 +628,7 @@ class mod_observation_renderer extends plugin_renderer_base
                 'init',
                 ['submissionType' => 'assessor']);
 
-            // add fielpicker
+            // add filepicker
             $template_data['extra']['filepicker_html'] = $this->files_input(
                 $feedback->get_id_or_null(),
                 observation::FILE_AREA_ASSESSOR,

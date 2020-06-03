@@ -66,6 +66,11 @@ class mod_observation_mod_form extends moodleform_mod
         // Adding the standard "intro" and "introformat" fields.
         $this->standard_intro_elements();
 
+        $element = \mod_observation\observation::COL_FAIL_ALL_TASKS;
+        $mform->addElement('advcheckbox', $element, get_string($element, OBSERVATION));
+        $mform->setDefault($element, false);
+        $mform->addHelpButton($element, $element, OBSERVATION);
+
         $mform->addElement('header', 'intro_defaults', get_string('intro_defaults', OBSERVATION));
         $mform->setExpanded('intro_defaults', true);
 

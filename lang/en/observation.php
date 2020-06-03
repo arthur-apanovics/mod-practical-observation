@@ -78,6 +78,8 @@ $string['def_i_ass_obs_learner_help'] = 'If set, this will be the default conten
 $string['def_i_ass_obs_observer'] = 'Default observer requirements - Observer (optional)';
 $string['def_i_ass_obs_observer_help'] = 'If set, this will be the default criteria that an observer has to confirm they meet before they\'re able to observe a task. <br>Note: the default instruction can still be fully edited for each task.';
 $string['completion_tasks'] = 'All Tasks are observed and complete';
+$string['fail_all_tasks'] = 'Re-attempt all tasks';
+$string['fail_all_tasks_help'] = 'Should learner re-attempt every task in activity if at least one task was marked as "not yet competent" during assessment';
 $string['timeopen'] = 'Date open';
 $string['timeclose'] = 'Date closed';
 
@@ -135,7 +137,6 @@ $string['no_criteria'] = 'Task has no criteria';
 $string['preview_task'] = 'Preview';
 $string['review_task'] = 'Review';
 $string['start_task'] = 'Start';
-$string['assess_task'] = 'Assess';
 $string['observe_task'] = 'Observe';
 $string['view_task'] = 'View';
 
@@ -202,6 +203,10 @@ $string['outcome:assessor_not_complete'] = 'Not yet competent';
 $string['assess:observer_meets_criteria'] = 'Observer meets required criteria';
 $string['assess:release_grade'] = 'Release';
 $string['assess:release_grade_title'] = 'All tasks have to be assessed before releasing';
+$string['assess:has_attempts_alt'] = 'Observation attempts per task';
+$string['assess:activity_complete'] = 'Activity complete';
+$string['assess:activity_not_complete'] = 'Activity not complete';
+$string['assess:assess_task'] = 'Assess';
 
 // PAGE TITLES
 $string['title:manage'] = 'Edit tasks - {$a}';
@@ -231,9 +236,11 @@ $string['notification:activity_wait_for_observers'] = 'You have requested observ
 $string['notification:activity_wait_for_mixed'] = 'Please be patient while your submissions are observed and assessed';
 $string['notification:activity_wait_for_assess'] = 'This task is in the process of being assessed, please be patient';
 $string['notification:activity_complete'] = 'Congratulations, you have completed this activity!';
+$string['notification:task_complete'] = 'You have completed this task';
 $string['notification:task_observation_not_complete'] = 'Observation for this task was unsuccessful, please submit new attempt';
 $string['notification:activity_observation_not_complete'] = 'Observation was unsuccessful, please submit new attempt';
-$string['notification:activity_assessment_not_complete'] = 'Assessment was unsuccessful, please submit new attempt for each task';
+$string['notification:activity_assessment_not_complete_all'] = 'Assessment was unsuccessful, please submit new attempt for each task';
+$string['notification:activity_assessment_not_complete_partial'] = 'Assessment was unsuccessful, please submit new attempt for failed tasks';
 $string['notification:task_assessment_not_complete'] = 'Assessment for this task was unsuccessful, please submit new attempt';
 $string['notification:previewing_activity'] = 'You are in preview mode - you can view each task in this activity but you will not be able to make submissions.';
 

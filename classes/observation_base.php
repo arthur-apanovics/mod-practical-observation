@@ -44,6 +44,7 @@ class observation_base extends db_model_base
     public const COL_LASTMODIFIEDBY   = 'lastmodifiedby';
     public const COL_DELETED          = 'deleted';
     public const COL_COMPLETION_TASKS = 'completion_tasks';
+    public const COL_FAIL_ALL_TASKS   = 'fail_all_tasks';
     // default intro's:
     public const COL_DEF_I_TASK_LEARNER     = 'def_i_task_learner';
     public const COL_DEF_I_TASK_OBSERVER    = 'def_i_task_observer';
@@ -180,6 +181,10 @@ class observation_base extends db_model_base
      * @var bool
      */
     protected $completion_tasks;
+    /**
+     * @var bool
+     */
+    protected $fail_all_tasks;
 
 
     /**
@@ -276,6 +281,12 @@ class observation_base extends db_model_base
         return $DB->get_record('course', ['id' => $this->course]);
     }
 
+    /**
+     * @return task_base[]
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
     public function get_tasks()
     {
         return task_base::read_all_by_condition([task::COL_OBSERVATIONID => $this->id]);
@@ -523,15 +534,20 @@ class observation_base extends db_model_base
 
     public function all_tasks_observation_pending_or_in_progress(int $userid): bool
     {
-        foreach ($this->get_tasks() as $task)
+        $tasks = $this->get_tasks();
+        $complete = 0;
+        foreach ($tasks as $task)
         {
             if ($task_submission = $task->get_learner_task_submission_or_null($userid))
             {
                 // has a task_submission
                 if ($task_submission->get_active_observer_assignment_or_null()
-                    && $task_submission->is_observation_pending_or_in_progress())
+                    && ($task_submission->is_observation_pending_or_in_progress()
+                        || $task_submission->is_assessment_complete()))
                 {
-                    // has observer assigned and observation pending/in progress
+                    // keep track of completed tasks
+                    $complete += $task_submission->is_assessment_complete();
+                    // task complete or has observer assigned and status is observation pending/in progress
                     continue;
                 }
             }
@@ -539,7 +555,16 @@ class observation_base extends db_model_base
             return false;
         }
 
-        return true;
+        if ($complete == count($tasks))
+        {
+            // all tasks are complete - nothing to observe
+            return false;
+        }
+        else
+        {
+            // some tasks are complete but rest are awaiting observation
+            return true;
+        }
     }
 
     /**

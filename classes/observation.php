@@ -134,6 +134,9 @@ class observation extends observation_base implements templateable
         return $this->update();
     }
 
+    /**
+     * @return task[]
+     */
     public function get_tasks()
     {
         return $this->tasks;
@@ -281,14 +284,18 @@ class observation extends observation_base implements templateable
 
     public function all_tasks_observation_pending_or_in_progress(int $userid): bool
     {
+        $complete = 0;
         foreach ($this->tasks as $task)
         {
-            if ($submission = $task->get_learner_task_submission_or_null($userid))
+            if ($task_submission = $task->get_learner_task_submission_or_null($userid))
             {
                 // has a submission
-                if ($submission->get_active_observer_assignment_or_null()
-                    && $submission->is_observation_pending_or_in_progress())
+                if ($task_submission->get_active_observer_assignment_or_null()
+                    && ($task_submission->is_observation_pending_or_in_progress()
+                        || $task_submission->is_assessment_complete()))
                 {
+                    // keep track of completed tasks
+                    $complete += $task_submission->is_assessment_complete();
                     // has observer assigned and observation pending/in progress
                     continue;
                 }
@@ -297,7 +304,16 @@ class observation extends observation_base implements templateable
             return false;
         }
 
-        return true;
+        if ($complete == count($this->tasks))
+        {
+            // all tasks are complete - nothing to observe
+            return false;
+        }
+        else
+        {
+            // some tasks are complete but rest are awaiting observation
+            return true;
+        }
     }
 
     /**

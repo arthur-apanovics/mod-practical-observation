@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/observation/db" VERSION="20200129" COMMENT="XMLDB file for Moodle mod/observation"
+<XMLDB PATH="mod/observation/db" VERSION="20200603" COMMENT="XMLDB file for Moodle mod/observation"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -28,6 +28,7 @@
         <FIELD NAME="def_i_ass_obs_observer" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Default intro for observer requirements"/>
         <FIELD NAME="def_i_ass_obs_observer_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Default intro format"/>
         <FIELD NAME="completion_tasks" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If set, learner has to complete all tasks for activity to count as complete"/>
+        <FIELD NAME="fail_all_tasks" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="if set, a single failed task during assessment will fail all other tasks in activity as well"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

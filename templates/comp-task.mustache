@@ -9,7 +9,7 @@
     {{/extra.is_assessing}}">
     {{! status indicator in corner }}
     <div class="corner ft" {{! "ft" class enables font-awesome }}
-         {{! add title for status indicator }}
+        {{! add title for status indicator }}
         {{#extra.is_assessing}}
          title="{{assessor_submission_status_description}}"
         {{/extra.is_assessing}}
@@ -22,11 +22,13 @@
     {{! task title }}
     <div class="task-title">
         <h3>{{name}}</h3>
-        {{! task action link }}
-        {{! get link based on capability }}
+        {{! task action link - get link based on capability }}
+        {{! ASSESSOR }}
         {{#capabilities.can_assess}}
-            <a class="action btn" href="{{{module_root}}}/task_assess.php?id={{cmid}}&taskid={{id}}&learnerid={{extra.learnerid}}">
+            <a class="action btn"
+               href="{{{module_root}}}/task_assess.php?id={{cmid}}&taskid={{id}}&learnerid={{extra.learnerid}}">
         {{/capabilities.can_assess}}
+        {{! LEARNER }}
         {{^capabilities.can_assess}}
             <a class="action btn" href="{{{module_root}}}/task.php?id={{cmid}}&taskid={{id}}">
         {{/capabilities.can_assess}}
@@ -39,7 +41,7 @@
             {{/capabilities.can_assess}}
             {{! if learner }}
             {{#capabilities.can_submit}}
-                {{! TODO: admins see both View and Start in link text }}
+            {{! TODO: admins see both View and Start in link text }}
                 {{#str}}start_task, observation{{/str}}
             {{/capabilities.can_submit}}
             {{! else }}
@@ -56,7 +58,12 @@
             {{#capabilities.can_assess}}
             {{! if assessing }}
                 {{#extra.is_assessing}}
-                    {{#str}}assess_task, observation{{/str}}
+                    {{#task_extra.do_not_assess}}
+                        {{#str}}review_task, observation{{/str}}
+                    {{/task_extra.do_not_assess}}
+                    {{^task_extra.do_not_assess}}
+                        {{#str}}assess:assess_task, observation{{/str}}
+                    {{/task_extra.do_not_assess}}
                 {{/extra.is_assessing}}
                 {{! else }}
                 {{^extra.is_assessing}}

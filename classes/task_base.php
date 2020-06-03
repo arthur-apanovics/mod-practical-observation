@@ -176,12 +176,13 @@ class task_base extends db_model_base
 
     /**
      * @return observation_base
-     * @throws \coding_exception
+     * @throws \dml_exception
      * @throws \dml_missing_record_exception
+     * @throws coding_exception
      */
     public function get_observation_base(): observation_base
     {
-        return new observation_base($this->observationid);
+        return observation_base::read_or_null($this->observationid, true);
     }
 
     public function delete()
@@ -302,11 +303,5 @@ class task_base extends db_model_base
 
         $count = $DB->count_records(criteria::TABLE, [criteria::COL_TASKID => $this->id]);
         return $count !== false ? $count : 0;
-    }
-
-    public function get_url(): \moodle_url
-    {
-        return new \moodle_url(
-            OBSERVATION_MODULE_PATH . 'task.php', ['id' => $this->observationid, 'taskid' => $this->id]);
     }
 }

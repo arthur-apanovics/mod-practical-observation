@@ -28,6 +28,7 @@
 use core\notification;
 use mod_observation\lib;
 use mod_observation\observer_assignment;
+use mod_observation\submission;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once('lib.php');
@@ -113,10 +114,19 @@ if (optional_param('submit-accept', 0, PARAM_BOOL))
         $observer_assignment->accept();
     }
 
+    // check if we need to update activity submission status
+    $submission = $learner_task_submission->get_submission();
+    if ($submission->is_all_tasks_observation_in_progress())
+    {
+        // all tasks are currently being observed
+        $submission->update_status_and_save(submission::STATUS_OBSERVATION_IN_PROGRESS);
+    }
+
 }
 else if (optional_param('submit-decline', 0, PARAM_BOOL))
 {
     $observer_assignment->decline();
+    // todo: set submission status to 'in progress"?
 
     // TODO: Event
 

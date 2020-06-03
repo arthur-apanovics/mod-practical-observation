@@ -34,7 +34,7 @@
                     {{! has attempts }}
                     {{#has_attempts_summary}}
                         <div class="hover-hint obs-tooltip">
-                            {{#flex_icon}} question-circle, {"alt":"Observation attempts per task"}{{/flex_icon}}
+                            {{#flex_icon}} question-circle, assess:has_attempts_alt, observation{{/flex_icon}}
                             <div class="content-top">
                                 <ul>
                                     {{#attempts_observation_summary}}
@@ -62,16 +62,16 @@
                 <td class="completion">
                     {{! TODO: TLMS12 - new way of assigning 'alt', etc. https://help.totaralearning.com/display/DEV/Flexible+Icons+API }}
                     {{#is_complete}}
-                        {{#flex_icon}}check-circle-o, {"alt":"Activity complete", "classes":"complete"}{{/flex_icon}}
+                        {{#flex_icon}}check-circle-o, assess:activity_complete, observation, complete}{{/flex_icon}}
                     {{/is_complete}}
                     {{^is_complete}}
                         {{#flex_icon}}
-                            times-circle-o, {"alt":"Activity not complete", "classes":"not-complete"}{{/flex_icon}}
+                            times-circle-o, assess:activity_not_complete, observation, not-complete}{{/flex_icon}}
                     {{/is_complete}}
                 </td>
                 <td class="actions">
                     <a href="{{{module_root}}}/activity_assess.php?id={{cmid}}&learnerid={{userid}}">
-                    {{#flex_icon}}edit, {"alt": "{{#str}} assess_task, observation {{/str}}" }{{/flex_icon}}
+                    {{#flex_icon}}edit, assess:assess_task, observation{{/flex_icon}}
                     </a>
                 </td>
             </tr>

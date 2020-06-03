@@ -68,7 +68,9 @@ $PAGE->set_heading(format_string($course->fullname));
 
 $PAGE->add_body_class('observation-request');
 
-$PAGE->navbar->add(get_string('breadcrumb:task', \OBSERVATION, $task->get_formatted_name()), $task->get_url());
+$task_url = new \moodle_url(
+    OBSERVATION_MODULE_PATH . 'task.php', ['id' => $observation->get_cm()->id, 'taskid' => $task->get_id_or_null()]);
+$PAGE->navbar->add(get_string('breadcrumb:task', \OBSERVATION, $task->get_formatted_name()), $task_url);
 $PAGE->navbar->add(get_string('breadcrumb:request', \OBSERVATION));
 
 /* @var $renderer mod_observation_renderer */

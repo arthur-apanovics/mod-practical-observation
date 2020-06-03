@@ -70,6 +70,43 @@ class task extends task_base implements templateable
         $this->learner_task_submissions = learner_task_submission::read_all_by_condition($params);
     }
 
+    public function can_assess(int $learnerid, observation_base $observation = null)
+    {
+        if ($learner_task_submission = $this->get_learner_task_submission_or_null($learnerid))
+        {
+            $observation = is_null($observation) ? $this->get_observation_base() : $observation;
+            $is_assessable_status = ($learner_task_submission->is_assessment_pending()
+                || $learner_task_submission->is_assessment_in_progress());
+
+            if ($is_assessable_status && !$observation->get(observation::COL_FAIL_ALL_TASKS))
+            {
+                if ($assessor_task_submission = $learner_task_submission->get_assessor_task_submission_or_null())
+                {
+                    $assessor_task_status = $assessor_task_submission->get(assessor_task_submission::COL_OUTCOME);
+                    if ($assessor_task_submission->is_submitted()
+                        && $assessor_task_status === assessor_task_submission::OUTCOME_COMPLETE)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                // all tasks have to be re-assessed if status is correct
+                return $is_assessable_status;
+            }
+        }
+        else
+        {
+            // no submission to assess
+            return false;
+        }
+    }
+
     /**
      * Checks if task has been observed for given userid
      *
@@ -258,7 +295,7 @@ class task extends task_base implements templateable
         $learner_submission_status_description = null;
         $assessor_submission_status_description = null;
         $has_feedback = false;
-        // task contains only ONE submission in this task, we can give the task a status
+        // task contains only ONE submission, we can give the task a status
         if ($this->is_filtered)
         {
             if (isset($learner_task_submission)) // $learner_task_submission set in loop
