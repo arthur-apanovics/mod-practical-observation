@@ -86,13 +86,14 @@ class task extends task_base implements templateable
                     if ($assessor_task_submission->is_submitted()
                         && $assessor_task_status === assessor_task_submission::OUTCOME_COMPLETE)
                     {
+                        // previous assessment exists, has been marked as complete
+                        // and 'fail all tasks' is off - assessment not required
                         return false;
                     }
-                    else
-                    {
-                        return true;
-                    }
                 }
+
+                // no assessor submission yet
+                return true;
             }
             else
             {

@@ -429,7 +429,8 @@ class mod_observation_renderer extends plugin_renderer_base
                     }
                 }
             }
-            else if ($task_submission->is_observation_pending_or_in_progress())
+            else if ($task_submission->is_observation_pending_or_in_progress()
+                || $task_submission->is_observation_declined())
             {
                 // render task header
                 $out .= $this->render_from_template('part-task_header', $header_data);

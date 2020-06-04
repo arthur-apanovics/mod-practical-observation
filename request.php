@@ -148,7 +148,7 @@ if ($data = $form->get_data())
     $submitted->set(observer::COL_EMAIL, $data->{observer::COL_EMAIL});
     $submitted->set(observer::COL_POSITION_TITLE, $data->{observer::COL_POSITION_TITLE});
 
-    // check if an assignment already exists
+    // check if an ACTIVE assignment already exists
     if ($current_assignment = $task_submission->get_active_observer_assignment_or_null())
     {
         // observer already exists, we need to make some checks.
@@ -221,6 +221,11 @@ if ($data = $form->get_data())
                     sprintf(
                         'Attempt id %d has not been submitted when observation request was made',
                         $attempt->get_id_or_null()));
+            }
+            else
+            {
+                // task submission status was set to 'in progress' when observation was declined, update to correct status
+                $task_submission->update_status_and_save(learner_task_submission::STATUS_OBSERVATION_PENDING);
             }
         }
         else

@@ -116,7 +116,8 @@ class learner_task_submission extends learner_task_submission_base implements te
                 break;
 
             case self::STATUS_LEARNER_IN_PROGRESS:
-                if (!$this->get_latest_attempt_or_null())
+                $attempt = $this->get_latest_attempt_or_null();
+                if (!$attempt)
                 {
                     // NOT OK
                     debugging(
@@ -124,6 +125,12 @@ class learner_task_submission extends learner_task_submission_base implements te
                         DEBUG_DEVELOPER, debug_backtrace());
 
                     $this->create_new_attempt(false);
+                }
+
+                if ($attempt->is_submitted())
+                {
+                    // can happen when observation request has been declined (we set status to 'in progress' in that case)
+                    return false;
                 }
 
                 return true;
@@ -180,7 +187,10 @@ class learner_task_submission extends learner_task_submission_base implements te
 
             // activity submission
             $submission = $this->get_submission();
-            $submission->update_status_and_save(submission::STATUS_LEARNER_IN_PROGRESS, true);
+            if ($submission->get(submission::COL_STATUS) !== submission::STATUS_LEARNER_IN_PROGRESS)
+            {
+                $submission->update_status_and_save(submission::STATUS_LEARNER_IN_PROGRESS, true);
+            }
 
             // trigger event
             $event = attempt_started::create(
@@ -284,6 +294,24 @@ class learner_task_submission extends learner_task_submission_base implements te
         $event->trigger();
 
         return $assignment;
+    }
+
+    /**
+     * Check if the latest observation request has been declined.
+     *
+     * @return bool false if no assignments exist
+     */
+    public function is_observation_declined()
+    {
+        if ($assignment = $this->get_latest_observer_assignment_or_null())
+        {
+            if ($assignment->is_declined())
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
