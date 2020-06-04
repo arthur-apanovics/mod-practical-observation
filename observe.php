@@ -128,7 +128,7 @@ else if (optional_param('submit-decline', 0, PARAM_BOOL))
 {
     $observer_assignment->decline();
     // update task submission status
-    $learner_task_submission->update_status_and_save(learner_task_submission::STATUS_LEARNER_PENDING);
+    $learner_task_submission->update_status_and_save(learner_task_submission::STATUS_LEARNER_IN_PROGRESS);
 
     // TODO: Event
 
