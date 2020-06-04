@@ -598,14 +598,14 @@ class mod_observation_renderer extends plugin_renderer_base
         $template_data = $task->export_template_data();
         // header specific
         $header_data = [
-                observation::COL_NAME  => $observation->get(observation::COL_NAME),
-                observation::COL_INTRO => $observation->get(observation::COL_INTRO)
+                task::COL_NAME  => $task->get_formatted_name(),
+                'intro' => $task->get(task::COL_INTRO_ASSESSOR)
             ];
-        $out .= $this->activity_header($header_data);
+        $out .= $this->render_from_template('part-task_header', $header_data);
 
         $include_observer_details = false;
         $is_assessing = false;
-        // if ($observation->can_assess($learnerid))
+
         if ($task->can_assess($learnerid, $observation))
         {
             // assessing is good to go
