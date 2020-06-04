@@ -26,6 +26,7 @@
  */
 
 use core\notification;
+use mod_observation\learner_task_submission;
 use mod_observation\lib;
 use mod_observation\observer_assignment;
 use mod_observation\submission;
@@ -126,7 +127,8 @@ if (optional_param('submit-accept', 0, PARAM_BOOL))
 else if (optional_param('submit-decline', 0, PARAM_BOOL))
 {
     $observer_assignment->decline();
-    // todo: set submission status to 'in progress"?
+    // update task submission status
+    $learner_task_submission->update_status_and_save(learner_task_submission::STATUS_LEARNER_PENDING);
 
     // TODO: Event
 
