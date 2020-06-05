@@ -218,9 +218,14 @@ class submission extends submission_base /*TODO: implements templateable*/
 
             if (!$fail_all_tasks && $assessor_task_submission->is_submitted())
             {
-                // this task has been assessed previously and 'fail all tasks' is disabled - nothing to do here
-                $completed_tasks++;
-                continue;
+                $assessment_outcome = $assessor_task_submission->get(assessor_task_submission::COL_OUTCOME);
+                if ($assessment_outcome === assessor_feedback::OUTCOME_COMPLETE)
+                {
+                    // this task has been assessed previously as complete
+                    // and 'fail all tasks' is disabled - nothing to do here
+                    $completed_tasks++;
+                    continue;
+                }
             }
 
             $outcome = $feedback->get(assessor_feedback::COL_OUTCOME);
@@ -240,9 +245,10 @@ class submission extends submission_base /*TODO: implements templateable*/
 
             if (!$fail_all_tasks)
             {
+                // update task submission status now so we don't have to loop over again later
                 $status = ($outcome === assessor_feedback::OUTCOME_COMPLETE
                     ? learner_task_submission::STATUS_COMPLETE
-                    : $learner_task_submission::STATUS_ASSESSMENT_INCOMPLETE);
+                    : learner_task_submission::STATUS_ASSESSMENT_INCOMPLETE);
                 $learner_task_submission->update_status_and_save($status);
             }
         }
@@ -251,26 +257,26 @@ class submission extends submission_base /*TODO: implements templateable*/
         if ($completed_tasks == $observation->get_task_count())
         {
             // all tasks marked as complete - activity complete
-            $new_status = self::STATUS_COMPLETE;
+            $submission_status = self::STATUS_COMPLETE;
         }
         else
         {
             // if at least one task not complete we mark all incomplete as per business logic
-            $new_status = self::STATUS_ASSESSMENT_INCOMPLETE;
+            $submission_status = self::STATUS_ASSESSMENT_INCOMPLETE;
         }
 
         // check if we need to fail all tasks if at least one is not complete
-        if ($fail_all_tasks && $new_status === self::STATUS_ASSESSMENT_INCOMPLETE)
+        if ($fail_all_tasks && $submission_status === self::STATUS_ASSESSMENT_INCOMPLETE)
         {
             // all tasks are set to fail in config and at least one task has been failed
             foreach ($learner_task_submissions as $task_submission)
             {
-                $task_submission->update_status_and_save($new_status);
+                $task_submission->update_status_and_save($submission_status);
             }
         }
 
         // update activity submission status
-        $this->update_status_and_save($new_status);
+        $this->update_status_and_save($submission_status);
         // update gradebook
         $this->update_gradebook($observation->to_record());
 
@@ -283,6 +289,6 @@ class submission extends submission_base /*TODO: implements templateable*/
             ]);
         $event->trigger();
 
-        return $new_status;
+        return $submission_status;
     }
 }
