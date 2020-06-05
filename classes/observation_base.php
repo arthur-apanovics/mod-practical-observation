@@ -417,27 +417,18 @@ class observation_base extends db_model_base
      * Checks if all criteria for completing this observation are complete
      * @param int $userid
      * @return bool complete or not
+     * @throws \dml_exception
+     * @throws \dml_missing_record_exception
      * @throws coding_exception
      */
     public function is_activity_complete(int $userid): bool
     {
-        $tasks = $this->get_tasks();
-        if (empty($tasks))
+        if ($submission = $this->get_submission_or_null($userid))
         {
-            // no tasks = not complete
-            return false;
+            return $submission->is_assessment_complete();
         }
 
-        foreach ($tasks as $task)
-        {
-            if (!$task->is_complete($userid))
-            {
-                // return early as all tasks have to be complete
-                return false;
-            }
-        }
-
-        return true;
+        return false;
     }
 
     /**

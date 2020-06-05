@@ -119,12 +119,15 @@ class mod_observation_mod_form extends moodleform_mod
         $this->add_action_buttons();
     }
 
+
+
     function add_completion_rules()
     {
         $mform =& $this->_form;
 
         $element = mod_observation\observation::COL_COMPLETION_TASKS;
         $mform->addElement('advcheckbox', $element, '', get_string($element, OBSERVATION));
+        $mform->disabledIf('completion_tasks', 'completionusegrade', 'notchecked');
         $mform->setDefault('completion_tasks', true);
         return array('completion_tasks');
     }
@@ -133,5 +136,4 @@ class mod_observation_mod_form extends moodleform_mod
     {
         return !empty($data['completion_tasks']);
     }
-
 }
