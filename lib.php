@@ -306,7 +306,7 @@ function observation_get_completion_progress($cm, $userid)
 
     if ($observation->get(observation_base::COL_COMPLETION_TASKS))
     {
-        if ($observation->is_activity_complete())
+        if ($observation->is_activity_complete($userid))
         {
             $result[] = get_string('completion_tasks', 'observation');
         }
@@ -335,13 +335,12 @@ function observation_get_completion_state($course, $cm, $userid, $type)
     $observation = new  observation_base($cm->instance);
 
     // This means that if only view is required we don't end up with a false state.
-    if (empty($observation->get(observation_base::COL_COMPLETION_TASKS)))
+    if (!$observation->get(observation::COL_COMPLETION_TASKS))
     {
         return $type;
     }
 
     return $observation->is_activity_complete($userid);
-
 }
 
 /**

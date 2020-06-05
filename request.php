@@ -169,7 +169,7 @@ if ($data = $form->get_data())
                         'notification:observer_assigned_no_change', 'observation',
                         ['task' => $task->get_formatted_name(), 'email' => $current->get(observer::COL_EMAIL)]),
                     null,
-                    notification::NOTIFY_WARNING);
+                    notification::NOTIFY_ERROR);
             }
         }
 
@@ -206,6 +206,11 @@ if ($data = $form->get_data())
     // attempt can be in a submitted state already, check
     if (!$attempt->is_submitted())
     {
+        // create/update observer record
+        $observer = observer::update_or_create($submitted);
+        // assign observer to this submission
+        $assignment = $task_submission->assign_observer($observer);
+
         // submit task submission and attempt
         $attempt->submit($task_submission);
         $task_submission->submit($attempt);
@@ -235,12 +240,12 @@ if ($data = $form->get_data())
                     'No observer assignment exists for already submitted attempt with id %d',
                     $attempt->get_id_or_null()));
         }
-    }
 
-    // create/update observer record
-    $observer = observer::update_or_create($submitted);
-    // assign observer to this submission
-    $assignment = $task_submission->assign_observer($observer);
+        // create/update observer record
+        $observer = observer::update_or_create($submitted);
+        // assign observer to this submission
+        $assignment = $task_submission->assign_observer($observer);
+    }
 
     // send email to assigned observer
     $lang_data = [

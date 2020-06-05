@@ -23,14 +23,12 @@
 namespace mod_observation;
 
 use coding_exception;
-use core\notification;
 use dml_exception;
 use dml_missing_record_exception;
 use mod_observation\event\activity_assessing;
 use mod_observation\event\attempt_started;
 use mod_observation\event\observer_assigned;
 use mod_observation\interfaces\templateable;
-use moodle_exception;
 
 class learner_task_submission extends learner_task_submission_base implements templateable
 {
@@ -408,9 +406,8 @@ class learner_task_submission extends learner_task_submission_base implements te
     }
 
     /**
-     * Used for 'assign observer from history table' to display all observers assigned by user in activity
-     *
-     * TODO: convert to php as query is crazy complex and doesn't always return current observer
+     * Used for 'assign observer from history table' to display all observers assigned by user in course for
+     * this activity type
      *
      * @return observer_assignment[]
      * @throws dml_exception
@@ -443,34 +440,37 @@ class learner_task_submission extends learner_task_submission_base implements te
         //   AND o.course = ?
 
         $sql =
-            'SELECT oa.id
-            , oa.' . observer_assignment::COL_LEARNER_TASK_SUBMISSIONID . '
-            , oa.' . observer_assignment::COL_OBSERVERID . '
-            , oa.' . observer_assignment::COL_CHANGE_EXPLAIN . '
-            , oa.' . observer_assignment::COL_OBSERVATION_ACCEPTED . '
-            , oa.' . observer_assignment::COL_TIMEASSIGNED . '
-            , oa.' . observer_assignment::COL_TOKEN . '
-            , if(oa.' . observer_assignment::COL_LEARNER_TASK_SUBMISSIONID . ' != ?, 0, oa.'
-            . observer_assignment::COL_ACTIVE . ') active
-            FROM {' . observer_assignment::TABLE . '} oa
-                 INNER JOIN (SELECT x.' . observer_assignment::COL_TOKEN . '
-                      , x.' . observer_assignment::COL_ACTIVE . '
-                 FROM mdl_observation_observer_assignment x
-                 WHERE x.' . observer_assignment::COL_ACTIVE . ' = (SELECT max(' . observer_assignment::COL_ACTIVE . ')
-                                   FROM {' . observer_assignment::TABLE . '}
-                                   WHERE x.' . observer_assignment::COL_OBSERVERID . ' = '
-            . observer_assignment::COL_OBSERVERID . ')
-                     GROUP BY x.' . observer_assignment::COL_OBSERVERID . ') g
-                    ON g.' . observer_assignment::COL_TOKEN . ' = oa.' . observer_assignment::COL_TOKEN
-            . ' AND g.' . observer_assignment::COL_ACTIVE . ' = oa.' . observer_assignment::COL_ACTIVE . '
-                    JOIN {' . learner_task_submission::TABLE . '} ls
-                        ON ls.id = oa.' . observer_assignment::COL_LEARNER_TASK_SUBMISSIONID . '
-                    JOIN {' . task::TABLE . '} t ON t.id = ls.' . learner_task_submission::COL_TASKID . '
-                    JOIN {' . observation::TABLE . '} o ON o.id = t.' . task::COL_OBSERVATIONID . '
-                WHERE ls.' . learner_task_submission::COL_USERID . ' = ?
-                AND o.' . observation::COL_COURSE . ' = ?';
+            'SELECT oa.*
+             FROM mdl_observation_observer_assignment oa
+                 JOIN {' . learner_task_submission::TABLE . '} lts 
+                    ON lts.id = oa. ' . observer_assignment::COL_LEARNER_TASK_SUBMISSIONID . '
+                 JOIN {' . task::TABLE . '} t ON t.id = lts.taskid
+                 JOIN {' . observation::TABLE . '} o ON o.id = t.' . task::COL_OBSERVATIONID . '
+             WHERE o.' . observation::COL_COURSE . ' = ?
+             AND lts.' . learner_task_submission::COL_USERID . ' = ?
+             ORDER BY ' . observer_assignment::COL_ACTIVE . ' DESC';
+        $assignments = observer_assignment::read_all_by_sql($sql, [$this->get_course_id(), $this->userid]);
 
-        return observer_assignment::read_all_by_sql($sql, [$this->id, $this->userid, $this->get_course_id()]);
+        $unique_assignments = [];
+        foreach ($assignments as $assignment)
+        {
+            $observer_id = $assignment->get(observer_assignment::COL_OBSERVERID);
+            if (!array_key_exists($observer_id, $unique_assignments))
+            {
+                if ($assignment->is_active())
+                {
+                    if ($this->id !== $assignment->get(observer_assignment::COL_LEARNER_TASK_SUBMISSIONID))
+                    {
+                        // active assignment for a different task - set as non active to display properly in table
+                        $assignment->set(observer_assignment::COL_ACTIVE, false, false);
+                    }
+                }
+
+                $unique_assignments[$observer_id] = $assignment;
+            }
+        }
+
+        return $unique_assignments;
     }
 
     /**
