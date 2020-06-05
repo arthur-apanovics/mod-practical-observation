@@ -262,8 +262,8 @@ class lib
             {
                 debugging(
                     sprintf(
-                        'Identical values detected when sorting by "%s" <pre>%s</pre> ID\'s [%b, %b]',
-                        $field_to_sort_by, print_r(array_keys($a), true), $a['id'], $b['id']), DEBUG_DEVELOPER);
+                        'Identical values detected when sorting by "%s"', $field_to_sort_by),
+                    DEBUG_DEVELOPER, debug_backtrace());
             }
 
             return $sort_direction == 'asc'

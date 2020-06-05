@@ -410,35 +410,11 @@ class learner_task_submission extends learner_task_submission_base implements te
      * this activity type
      *
      * @return observer_assignment[]
+     * @throws coding_exception
      * @throws dml_exception
      */
     public function get_course_level_observer_assignments(): array
     {
-        // get all assignments in course for user:
-        // SELECT oa.id
-        // , oa.learner_task_submissionid
-        // , oa.observerid
-        // , oa.change_explain
-        // , oa.observation_accepted
-        // , oa.timeassigned
-        // , oa.token
-        // , if(oa.learner_task_submissionid != ?, 0, oa.active) active
-        // FROM mdl_observation_observer_assignment oa
-        //          INNER JOIN (SELECT x.token
-        //                           , x.active
-        //                      FROM mdl_observation_observer_assignment x
-        //                      WHERE x.active = (SELECT max(active)
-        //                                        FROM mdl_observation_observer_assignment
-        //                                        WHERE x.observerid = observerid)
-        //                      GROUP BY x.observerid) g
-        //                     ON g.token = oa.token AND g.active = oa.active
-        //          JOIN mdl_observation_learner_task_submission ls
-        //               ON ls.id = oa.learner_task_submissionid
-        //          JOIN mdl_observation_task t ON t.id = ls.taskid
-        //          JOIN mdl_observation o ON o.id = t.observationid
-        // WHERE ls.userid = ?
-        //   AND o.course = ?
-
         $sql =
             'SELECT oa.*
              FROM mdl_observation_observer_assignment oa
@@ -450,6 +426,29 @@ class learner_task_submission extends learner_task_submission_base implements te
              AND lts.' . learner_task_submission::COL_USERID . ' = ?
              ORDER BY ' . observer_assignment::COL_ACTIVE . ' DESC';
         $assignments = observer_assignment::read_all_by_sql($sql, [$this->get_course_id(), $this->userid]);
+
+        // get_records_sql returns assoc array indexed by db id's so we need to sort again...
+        usort($assignments, function ($item1, $item2) {
+            return $item2->get('active') <=> $item1->get('active');
+        });
+
+        // filter out assignments for this task submission
+        $current_submission_assignments = array_filter(
+            $assignments, function ($assignment, $key) use (&$assignments)
+        {
+            if ($assignment->get(observer_assignment::COL_LEARNER_TASK_SUBMISSIONID) === $this->id)
+            {
+                /** @var $key int */
+                unset($assignments[$key]);
+
+                return true;
+            }
+
+            return false;
+        }, ARRAY_FILTER_USE_BOTH);
+
+        // combine arrays with current task submission assignments on top
+        $assignments = array_merge($current_submission_assignments, $assignments);
 
         $unique_assignments = [];
         foreach ($assignments as $assignment)
