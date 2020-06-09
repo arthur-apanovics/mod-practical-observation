@@ -9,19 +9,16 @@ define(['jquery', 'core/notification'],
             var len = 0;
 
             try {
-                var text = $($element).html();
-                var regex = /\s+/gi;
-                var regex2 = /<\/?[\w\s="/.':;#-\/\?]+>/gi;
+                var str = $($element).text();
+                str = str.replace(/(^\s*)|(\s*$)/gi, "");
+                str = str.replace(/[ ]{2,}/gi, " ");
+                str = str.replace(/\n /, "\n");
 
-                var temp = text.trim().replace(regex, ' ');
-                temp = temp.replace(regex2, ' ').trim()
-                    .replace(regex, ' ').trim();
-
-                if (temp.length == 0) {
+                if (str == '') {
                     return 0;
+                } else {
+                    return str.split(' ').length;
                 }
-
-                len = temp.split(' ').length;
             } catch (e) {
                 // ignore
             }
@@ -58,8 +55,8 @@ define(['jquery', 'core/notification'],
                  * @param containerState [string, Object]
                  * @returns {boolean}
                  */
-                var isContainerValid = function (containerState) {
-                    return containerState[1].valid;
+                var isContainerValid = function (containerKey) {
+                    return document.observationContainerStates[containerKey].valid;
                 };
                 // does all the work
                 var clickHandlerAssigned = false; // no clue how to check if event handler assigned otherwise
@@ -85,7 +82,7 @@ define(['jquery', 'core/notification'],
 
                             document.observationContainerStates[containerId].valid =
                                 Boolean(countWordsInElement($attoContentWrap));
-                            var allValid = Object.entries(document.observationContainerStates).every(isContainerValid);
+                            var allValid = Object.keys(document.observationContainerStates).every(isContainerValid); // IE11 does not support Object.values...
 
                             if (submissionType === 'assessor') {
                                 // also check for observer criteria checkbox
