@@ -66,6 +66,14 @@ class observer_feedback extends observer_feedback_base implements templateable
         $observer_task_submission = $this->get_observer_task_submission_base();
         $observer = $observer_task_submission->get_observer_assignment_base()->get_observer();
 
+        $timesubmitted = userdate($observer_task_submission->get(observer_task_submission::COL_TIMESUBMITTED));
+        $formatted_outcome = get_string('feedback_summary', OBSERVATION, [
+            "observer_fullname" => $observer->get_formatted_name_or_null(),
+            "attempt_number"    => $attempt->get_attempt_number(),
+            "outcome"           => lib::get_outcome_string('observer', $this->outcome),
+            "timesubmitted"     => $timesubmitted
+        ]);
+
         return [
             self::COL_ID      => $this->id,
             self::COL_OUTCOME => $this->outcome,
@@ -73,11 +81,11 @@ class observer_feedback extends observer_feedback_base implements templateable
 
             // extra
             'feedback_type'                             => 'observer', // feedback css class
-            "outcome_lang"                              => lib::get_outcome_string('observer', $this->outcome),
             observer::COL_FULLNAME                      => $observer->get_formatted_name_or_null(),
             learner_attempt::COL_ATTEMPT_NUMBER         => $attempt->get_attempt_number(),
-            observer_task_submission::COL_TIMESUBMITTED => userdate(
-                $observer_task_submission->get(observer_task_submission::COL_TIMESUBMITTED)),
+            observer_task_submission::COL_TIMESUBMITTED => $timesubmitted,
+            // Totara 12 removed support for json formatted language strings from within templates - build string here instead
+            'formatted_outcome'                         => $formatted_outcome
         ];
     }
 }

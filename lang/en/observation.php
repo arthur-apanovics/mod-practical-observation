@@ -143,7 +143,7 @@ $string['view_task'] = 'View';
 $string['request_observation'] = 'Request observation';
 $string['attempt_for'] = 'Attempt #{$a}';
 $string['attempt_for_preview'] = 'Example attempt';
-$string['feedback_for_no_text'] = '<strong>{$a->fullname}</strong> has marked attempt #{$a->attempt_number} as <span class="outcome-inline">{$a->outcome}</span> {$a->timesubmitted}';
+$string['feedback_summary'] = '<strong>{$a->observer_fullname}</strong> has marked attempt #{$a->attempt_number} as <span class="outcome-inline">{$a->outcome}</span> {$a->timesubmitted}';
 $string['feedback_for'] = 'Feedback for attempt #{$a}';
 $string['preview_editor_text'] = 'Example learner attempt text';
 
