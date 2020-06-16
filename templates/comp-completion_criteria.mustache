@@ -1,0 +1,54 @@
+{{! this is butt-ugly but we need outcome class at this level... }}
+{{! LIST ITEM }}
+{{^extra.is_observation}}
+    <li class="criteria {{outcome}}">
+{{/extra.is_observation}}
+{{#extra.is_observation}}
+    <li class="criteria observation">
+{{/extra.is_observation}}
+{{! HEADER }}
+    <div class="criteria-header">
+        <h5>{{name}}</h5>
+        {{! holds outcome icon, set in css }}
+        <span class="outcome-icon ft"></span> {{! "ft" class enables font-awesome }}
+        {{! outcome dropdown for observer }}
+        {{#extra.is_observation}}
+            {{> mod_observation/comp-observation_outcome_dropdown}}
+        {{/extra.is_observation}}
+    </div>
+{{! CONTENT }}
+    <div class="criteria-content">
+        <div class="criteria-desc">
+            {{{description}}}
+        </div>
+        {{! LEARNER VIEW }}
+        {{^extra.is_observation}}
+            {{#observer_feedback}}
+            {{! has textual feedback }}
+                {{#feedback_required}}
+                    {{> mod_observation/comp-attempt_feedback}}
+                {{/feedback_required}}
+                {{! no text }}
+                {{^feedback_required}}
+                    {{> mod_observation/comp-attempt_feedback_no_text}}
+                {{/feedback_required}}
+            {{/observer_feedback}}
+        {{/extra.is_observation}}
+        {{! OBSERVER VIEW }}
+        {{#extra.is_observation}}
+            {{#extra.editor_html}}
+                <div class="editor-container">
+                    <h5>
+                        Observation for Attempt #{{extra.attempt_number}}
+                    </h5>
+                    {{{extra.editor_html}}}
+                    {{{extra.filepicker_html}}}
+                </div>
+            {{/extra.editor_html}}
+        {{/extra.is_observation}}
+    </div>
+{{! feedback id for observation }}
+{{#extra.is_observation}}
+        <input type="hidden" name="criteria[{{id}}][feedback_id]" value="{{extra.feedback_id}}">
+{{/extra.is_observation}}
+</li>

@@ -1,145 +1,606 @@
-[id^=mod-observation-],
-[id^=page-mod-observation-] {
-  padding-bottom: 2em;
+body.path-mod-observation .wrapper {
+  border: 1px solid #d3d3d3;
+  border-radius: .25em;
+  margin-bottom: 3em;
+  padding: 1em;
+  margin: 1em;
 }
-[id^=mod-observation-] .config-mod-observation-topic-item,
-[id^=page-mod-observation-] .config-mod-observation-topic-item,
-[id^=mod-observation-] .mod-observation-topic-item,
-[id^=page-mod-observation-] .mod-observation-topic-item {
-  padding: 0.3em;
+body.path-mod-observation .wrapper-border {
+  border: 1px solid #d3d3d3;
+  border-radius: .25em;
+  margin-bottom: 3em;
 }
-[id^=mod-observation-] .mod-observation-topic-items,
-[id^=page-mod-observation-] .mod-observation-topic-items {
-  font-size: 1.2em;
-  display: table;
+body.path-mod-observation .wrapper-activity {
+  margin-bottom: 3em;
 }
-[id^=mod-observation-] .observation-eval-actions,
-[id^=page-mod-observation-] .observation-eval-actions {
-  margin-top: 2em;
+body.path-mod-observation .wrapper-submit {
+  margin: 4em 0;
 }
-[id^=mod-observation-] .mod-observation-modifiedstr,
-[id^=page-mod-observation-] .mod-observation-modifiedstr,
-[id^=mod-observation-] .mod-observation-witnessedstr,
-[id^=page-mod-observation-] .mod-observation-witnessedstr,
-[id^=mod-observation-] .mod-observation-topic-modifiedstr,
-[id^=page-mod-observation-] .mod-observation-topic-modifiedstr {
-  font-size: 0.8em;
-  font-style: italic;
-  color: grey;
+body.path-mod-observation .title-main {
+  padding: 0 0.5em;
 }
-[id^=mod-observation-] .mod-observation-topic-signoff,
-[id^=page-mod-observation-] .mod-observation-topic-signoff {
-  font-size: 1.2em;
-  padding-right: 1em;
-  text-align: right;
+body.path-mod-observation .title-secondary {
+  margin: 1em 0;
 }
-[id^=mod-observation-] .mod-observation-topic-signoff img,
-[id^=page-mod-observation-] .mod-observation-topic-signoff img {
-  padding-left: 0.4em;
+body.path-mod-observation .flex {
+  display: flex;
+  flex-wrap: wrap;
 }
-[id^=mod-observation-] textarea.observation-completion-comment,
-[id^=page-mod-observation-] textarea.observation-completion-comment,
-[id^=mod-observation-] textarea.observation-completion-submission,
-[id^=page-mod-observation-] textarea.observation-completion-submission {
-  margin-left: 0.4em;
-  width: 90%;
+body.path-mod-observation .task {
+  position: relative;
 }
-[id^=mod-observation-] .mod-observation-topic table td.c0,
-[id^=page-mod-observation-] .mod-observation-topic table td.c0 {
-  width: 40%;
-}
-[id^=mod-observation-] .mod-observation-topic table td.c1,
-[id^=page-mod-observation-] .mod-observation-topic table td.c1 {
-  width: 60%;
-}
-[id^=mod-observation-] .observation-submit,
-[id^=page-mod-observation-] .observation-submit {
-  text-align: center;
-}
-[id^=mod-observation-] .evalprint,
-[id^=page-mod-observation-] .evalprint,
-[id^=mod-observation-] .observation-save,
-[id^=page-mod-observation-] .observation-save {
-  float: right;
-}
-#page-mod-observation-evaluate .mod-observation-topic-signoff .flex-icon,
-#page-mod-observation-observe .mod-observation-topic-signoff .flex-icon,
-#page-mod-observation-evaluate .observation-item-witness .flex-icon,
-#page-mod-observation-observe .observation-item-witness .flex-icon {
-  cursor: pointer;
-}
-.config-mod-observation-topic-heading,
-.mod-observation-topic-heading {
-  font-size: 1.4em;
-  font-weight: bold;
-  margin-top: 0.5em;
-  margin-bottom: 0.2em;
-}
-.mod-observation-topic-heading {
-  padding-left: 0.8em;
-}
-.mod-observation-topic-addbtn {
-  float: right;
-}
-#config-mod-observation-topics {
-  padding-bottom: 2em;
-}
-.config-mod-observation-topic-items {
-  margin-left: 1em;
-  font-size: 1.2em;
-}
-img.observation-topic-completion-status {
-  vertical-align: baseline;
-}
-#observation-eval-icon-templates,
-.user-observation-comments-warning,
-.observation-completion-comment-print,
-.observation-completion-submission-print {
+body.path-mod-observation .task .corner {
   display: none;
 }
-.mod-observation-evalstudents-btn,
-.mod-observation-evalself-btn,
-.mod-observation-manage-btn {
+body.path-mod-observation .task-header {
+  margin-bottom: 2em;
+}
+body.path-mod-observation .task-title {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: baseline;
+}
+body.path-mod-observation .task-title > .action {
+  margin-right: 3em;
+}
+body.path-mod-observation .task-title > .action.btn {
+  border-color: #b6bcc2;
+}
+body.path-mod-observation .task.status .corner {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-top: 40px solid;
+  border-bottom: 40px solid transparent;
+  border-left: 40px solid transparent;
+  right: 0;
+  top: 0;
+  cursor: help;
+  transition: border 1s;
+}
+body.path-mod-observation .task.status .corner::before {
+  position: absolute;
+  top: -35px;
+  left: -20px;
+  transition: color 1s;
+}
+body.path-mod-observation .task.status.learner-learner_in_progress .corner {
+  display: block;
+  border-top-color: #ededed;
+}
+body.path-mod-observation .task.status.learner-learner_in_progress .corner::before {
+  content: "\f040";
+  color: #000000;
+}
+body.path-mod-observation .task.status.learner-learner_in_progress .corner:hover {
+  border-top-color: #d4d4d4;
+}
+body.path-mod-observation .task.status.learner-learner_in_progress .corner:hover::before {
+  color: #1a1a1a;
+}
+body.path-mod-observation .task.status.learner-observation_pending .corner {
+  display: block;
+  border-top-color: #76A4D6;
+}
+body.path-mod-observation .task.status.learner-observation_pending .corner::before {
+  content: "\f1d8";
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-observation_pending .corner:hover {
+  border-top-color: #4f8aca;
+}
+body.path-mod-observation .task.status.learner-observation_pending .corner:hover::before {
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-assessment_pending .corner {
+  display: block;
+  border-top-color: #76A4D6;
+}
+body.path-mod-observation .task.status.learner-assessment_pending .corner::before {
+  content: "\f017";
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-assessment_pending .corner:hover {
+  border-top-color: #4f8aca;
+}
+body.path-mod-observation .task.status.learner-assessment_pending .corner:hover::before {
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-observation_in_progress .corner,
+body.path-mod-observation .task.status.learner-assessment_in_progress .corner {
+  display: block;
+  border-top-color: #76A4D6;
+}
+body.path-mod-observation .task.status.learner-observation_in_progress .corner::before,
+body.path-mod-observation .task.status.learner-assessment_in_progress .corner::before {
+  content: "\f002";
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-observation_in_progress .corner:hover,
+body.path-mod-observation .task.status.learner-assessment_in_progress .corner:hover {
+  border-top-color: #4f8aca;
+}
+body.path-mod-observation .task.status.learner-observation_in_progress .corner:hover::before,
+body.path-mod-observation .task.status.learner-assessment_in_progress .corner:hover::before {
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-observation_incomplete .corner,
+body.path-mod-observation .task.status.learner-assessment_incomplete .corner {
+  display: block;
+  border-top-color: #9e4444;
+}
+body.path-mod-observation .task.status.learner-observation_incomplete .corner::before,
+body.path-mod-observation .task.status.learner-assessment_incomplete .corner::before {
+  content: "\f00d";
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-observation_incomplete .corner:hover,
+body.path-mod-observation .task.status.learner-assessment_incomplete .corner:hover {
+  border-top-color: #7a3535;
+}
+body.path-mod-observation .task.status.learner-observation_incomplete .corner:hover::before,
+body.path-mod-observation .task.status.learner-assessment_incomplete .corner:hover::before {
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-complete .corner {
+  display: block;
+  border-top-color: #01A850;
+}
+body.path-mod-observation .task.status.learner-complete .corner::before {
+  content: "\f00c";
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.learner-complete .corner:hover {
+  border-top-color: #017538;
+}
+body.path-mod-observation .task.status.learner-complete .corner:hover::before {
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.assessing-complete .corner {
+  display: block;
+  border-top-color: #01A850;
+}
+body.path-mod-observation .task.status.assessing-complete .corner::before {
+  content: "\f00c";
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.assessing-complete .corner:hover {
+  border-top-color: #017538;
+}
+body.path-mod-observation .task.status.assessing-complete .corner:hover::before {
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.assessing-not_complete .corner {
+  display: block;
+  border-top-color: #9e4444;
+}
+body.path-mod-observation .task.status.assessing-not_complete .corner::before {
+  content: "\f00d";
+  color: #ffffff;
+}
+body.path-mod-observation .task.status.assessing-not_complete .corner:hover {
+  border-top-color: #7a3535;
+}
+body.path-mod-observation .task.status.assessing-not_complete .corner:hover::before {
+  color: #ffffff;
+}
+body.path-mod-observation .criteria-container {
+  padding: 2em;
+}
+body.path-mod-observation .criteria-list ol li {
+  margin: 2em 1em;
+}
+body.path-mod-observation .criteria-header {
+  display: flex;
+  align-items: baseline;
+}
+body.path-mod-observation .criteria-desc {
+  border: 1px solid #d3d3d3;
+  border-radius: .25em;
+  margin-bottom: 3em;
+  padding: 1em;
+}
+body.path-mod-observation .criteria-desc + .feedback.no-text {
+  margin-top: -2em;
+}
+body.path-mod-observation .criteria .outcome-icon {
+  font-size: 1.2em;
+  margin: 0 0.5em;
+}
+body.path-mod-observation .criteria.not_complete .outcome-icon::before {
+  color: #9e4444;
+  content: "\f05c";
+}
+body.path-mod-observation .criteria.complete .outcome-icon::before {
+  color: #01A850;
+  content: "\f05d";
+}
+body.path-mod-observation .feedback.observer .entry,
+body.path-mod-observation .feedback.assessor .entry {
+  transition: box-shadow 1s;
+}
+body.path-mod-observation .feedback.observer.with-text.complete .entry:hover,
+body.path-mod-observation .feedback.assessor.with-text.complete .entry:hover {
+  box-shadow: -5px 0 0 0 #01A850;
+}
+body.path-mod-observation .feedback.observer.with-text.not_complete .entry:hover,
+body.path-mod-observation .feedback.assessor.with-text.not_complete .entry:hover {
+  box-shadow: -5px 0 0 0 #9e4444;
+}
+body.path-mod-observation .feedback.observer.with-text {
+  padding: 0 0 3em 2em;
+  margin-top: -1em;
+}
+body.path-mod-observation .feedback.observer.no-text {
+  text-align: right;
+}
+body.path-mod-observation .feedback.observer.no-text.complete .outcome-inline {
+  border-bottom: 2px solid #01A850;
+}
+body.path-mod-observation .feedback.observer.no-text.not_complete .outcome-inline {
+  border-bottom: 2px solid #9e4444;
+}
+body.path-mod-observation .feedback.observer.no-text .outcome-inline {
+  text-transform: lowercase;
+  font-weight: bold;
+  display: inline-block;
+  line-height: 1.2;
+  text-shadow: 2px 2px white;
+}
+body.path-mod-observation .feedback.assessor:not(:last-child) {
+  margin-bottom: 2em;
+}
+body.path-mod-observation .attempt {
+  padding: 1em 2em;
+}
+body.path-mod-observation .attempt:only-child {
+  padding: 2em;
+}
+body.path-mod-observation .attempt:first-child {
+  padding-top: 2em;
+}
+body.path-mod-observation .attempt:last-child {
+  padding-bottom: 2em;
+}
+body.path-mod-observation .attempt .heading,
+body.path-mod-observation .feedback .heading {
+  display: flex;
+  justify-content: space-between;
+}
+body.path-mod-observation .attempt .heading .title-secondary,
+body.path-mod-observation .feedback .heading .title-secondary {
+  margin: 0 0 0.5em 0;
+}
+body.path-mod-observation .attempt .heading .attributes,
+body.path-mod-observation .feedback .heading .attributes {
+  font-size: 0.9em;
+}
+body.path-mod-observation .attempt .heading .attributes .name,
+body.path-mod-observation .feedback .heading .attributes .name {
+  font-weight: bold;
+}
+body.path-mod-observation .attempt .entry,
+body.path-mod-observation .feedback .entry {
+  margin: 0;
+}
+body.path-mod-observation .attempt .entry .attachments,
+body.path-mod-observation .feedback .entry .attachments {
+  list-style: none;
+  margin-left: 0;
+}
+body.path-mod-observation .attempt .entry .attachments .file a::before,
+body.path-mod-observation .feedback .entry .attachments .file a::before {
+  font-family: 'FontAwesome';
+  content: "\f019";
+  margin-right: 0.5em;
+}
+body.path-mod-observation .table {
+  border: 1px solid #d3d3d3;
+  border-radius: .25em;
+  margin-bottom: 3em;
+}
+body.path-mod-observation .table th {
+  background-color: #d3d3d3;
+  color: black;
+}
+body.path-mod-observation .editor-container {
+  padding: 0 1em 1em 4em;
+}
+body.path-mod-observation .editor-container > .assessment-outcome {
+  margin: 1em 0;
+}
+body.path-mod-observation .editor-container > .assessment-outcome > label {
+  font-weight: bold;
+}
+body.path-mod-observation .editor-container > .assessment-outcome > select {
   float: right;
+  min-width: 15em;
 }
-.mod-observation-topicitem-files {
-  font-size: 0.8em;
+body.path-mod-observation .new-attempt {
+  padding: 1em;
 }
-/**
- * printing styles
- */
-@media print {
-  @page {
-    margin: 25mm !important;
+body.path-mod-observation .button-wrapper {
+  text-align: center;
+  margin: 1em 0;
+}
+body.path-mod-observation .assessor-feedback-container {
+  padding: 2em;
+}
+body.path-mod-observation .timestamp {
+  text-align: right;
+  margin-right: 0.5em;
+}
+body.path-mod-observation form .meets-criteria-wrapper {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 1em;
+}
+body.path-mod-observation form .meets-criteria-wrapper #criteria-modal {
+  cursor: pointer;
+}
+body.path-mod-observation .align-center {
+  text-align: center;
+}
+body.path-mod-observation .list-wrapper {
+  width: 100%;
+  margin-top: 3em;
+}
+body.path-mod-observation .page-container {
+  flex-basis: 100%;
+}
+body.path-mod-observation .btn-wrapper {
+  text-align: center;
+  margin-top: 2em;
+}
+body.path-mod-observation .btn-wrapper > button {
+  margin-right: 1em;
+}
+body.path-mod-observation .hover-hint {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: #d3d3d3;
+  cursor: help;
+}
+body.path-mod-observation .hover-hint-inverted {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: #535353;
+  cursor: help;
+}
+body.observation-manage #manage-task-list > ol,
+body.observation-manage .manage-criteria-list > ol {
+  counter-reset: li-counter;
+}
+body.observation-manage #manage-task-list > ol > li,
+body.observation-manage .manage-criteria-list > ol > li {
+  counter-increment: li-counter;
+  display: flex;
+  border: none;
+}
+body.observation-manage #manage-task-list > ol > li::before,
+body.observation-manage .manage-criteria-list > ol > li::before {
+  content: counter(li-counter);
+}
+body.observation-manage ol#mainTaskList > li {
+  margin-bottom: 2em;
+}
+body.observation-manage ol#mainTaskList .actions {
+  margin-left: auto;
+}
+body.observation-manage ol#mainTaskList .actions .glyphicon.disabled {
+  color: gray;
+  cursor: not-allowed;
+}
+body.observation-manage ol#mainTaskList .obs-task-list {
+  display: flex;
+  border-bottom: 1px solid teal;
+  padding: 0 .5em;
+}
+body.observation-manage ol#mainTaskList .obs-subtask-list {
+  display: flex;
+  padding: 0 .5em;
+}
+body.observation-manage ol li.list-group-item .my-handle {
+  cursor: move;
+}
+body.observation-manage ol li .glyphicon {
+  position: relative;
+  float: left;
+  padding: 1px 7px;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+}
+table.observer-details,
+table.submissions-summary {
+  border: 1px solid #d3d3d3;
+  border-radius: .25em;
+  margin-bottom: 3em;
+  text-align: left;
+  line-height: 40px;
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  margin-bottom: 1em;
+}
+table.observer-details th,
+table.submissions-summary th {
+  font-weight: 500;
+}
+table.observer-details th:first-child,
+table.submissions-summary th:first-child,
+table.observer-details td:first-child,
+table.submissions-summary td:first-child {
+  padding: 0 15px 0 20px;
+}
+table.observer-details td:last-child,
+table.submissions-summary td:last-child {
+  padding-right: 10px;
+}
+table.observer-details thead tr,
+table.submissions-summary thead tr {
+  color: #fff;
+  background-color: #d3d3d3;
+  border: none;
+}
+table.observer-details thead tr:last-child th,
+table.submissions-summary thead tr:last-child th {
+  border-bottom: 1px solid #c6c6c6;
+}
+table.observer-details tbody tr:last-child td,
+table.submissions-summary tbody tr:last-child td,
+table.observer-details tbody tr:last-child td,
+table.submissions-summary tbody tr:last-child td {
+  border: none;
+}
+table.observer-details tbody td,
+table.submissions-summary tbody td,
+table.observer-details tbody th,
+table.submissions-summary tbody th {
+  border-bottom: 1px solid #d3d3d3;
+}
+table.observer-details tr.declined {
+  text-decoration: line-through;
+}
+table.observer-details tr.active {
+  font-weight: 600;
+}
+.submissions-summary tr > th:not(:first-child),
+.submissions-summary tr > td:not(:first-child) {
+  text-align: center;
+}
+.submissions-summary .submisisons-header th.attempts-group:nth-child(even) {
+  border-left: 1px solid #c6c6c6;
+}
+.submissions-summary .submisisons-header th.attempts-group:nth-child(odd) {
+  border-right: 1px solid #c6c6c6;
+  border-left: 1px solid #c6c6c6;
+}
+.submissions-summary .submisisons-header th.attempts-group[colspan="2"] {
+  border-right: 1px solid #c6c6c6;
+  border-left: 1px solid #c6c6c6;
+  border-bottom: 1px solid #c6c6c6;
+}
+.submissions-summary .submissions-row .observation {
+  border-left: 1px solid #c6c6c6;
+}
+.submissions-summary .submissions-row .observation .flex-icon {
+  font-size: 1.3em;
+  color: #287b7c;
+}
+.submissions-summary .submissions-row .assessment {
+  border-right: 1px solid #c6c6c6;
+}
+.submissions-summary .submissions-row .completion {
+  font-size: 1.4em;
+  color: #bababa;
+}
+.submissions-summary .submissions-row .completion > .complete {
+  color: #589e44;
+}
+.submissions-summary .submissions-row .completion > .not-complete {
+  color: #44639e;
+}
+.submissions-summary .submissions-row .actions .flex-icon {
+  font-size: 1.2em;
+}
+.submissions-summary .obs-tooltip {
+  display: inline-block;
+  position: relative;
+  text-align: left;
+}
+.submissions-summary .obs-tooltip .content-top {
+  min-width: 250px;
+  top: -20px;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  padding: 0.5em 0;
+  background-color: #ffffff;
+  font-weight: normal;
+  font-size: 1em;
+  border-radius: 8px;
+  position: absolute;
+  z-index: 100;
+  box-sizing: border-box;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.8s;
+}
+.submissions-summary .obs-tooltip .content-top i {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -12px;
+  width: 24px;
+  height: 12px;
+  overflow: hidden;
+}
+.submissions-summary .obs-tooltip .content-top i::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background-color: #EEEEEE;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+.submissions-summary .obs-tooltip:hover .content-top {
+  visibility: visible;
+  opacity: 1;
+}
+body.observation-task .observer-details-wrapper,
+body.observation-task-assess .observer-details-wrapper {
+  margin-bottom: 3em;
+}
+body.observation-task .observer-details-wrapper > .header h5,
+body.observation-task-assess .observer-details-wrapper > .header h5,
+body.observation-task .observer-details-wrapper > .header #change-observer,
+body.observation-task-assess .observer-details-wrapper > .header #change-observer,
+body.observation-task .observer-details-wrapper > .header #last-assigned,
+body.observation-task-assess .observer-details-wrapper > .header #last-assigned {
+  display: inline-block;
+}
+body.observation-observe {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+body.observation-observe .personal-details table.editing td > input[type=text] {
+  height: 2em;
+  padding: 0.2em;
+}
+body.observation-observe .personal-details h5 > .edit-details {
+  font-style: italic;
+}
+body.observation-observe .observer-requirements form#requirement-acknowledge {
+  margin: 5em 0 0 0;
+}
+@media (min-width: 768px) {
+  body.observation-observe .observer-requirements form#requirement-acknowledge input[type=checkbox] {
+    margin-left: 10em;
   }
-  #block-region-side-pre,
-  #block-region-side-post,
-  #page-header,
-  #page-footer,
-  .evalprint,
-  .logininfo,
-  .navbar,
-  textarea.observation-completion-comment,
-  textarea.observation-completion-submission,
-  .user-observation-comments-warning,
-  #totaramenu {
-    display: none !important;
-  }
-  #region-main {
-    width: 100% !important;
-    padding: 0;
-  }
-  #mod-observation-user-observation .observation-completion-comment-print,
-  #mod-observation-user-observation .observation-completion-submission-print {
-    display: block;
-  }
-  #mod-observation-user-observation .mod-observation-topic-heading {
-    padding-left: 0;
-  }
-  #mod-observation-user-observation .mod-observation-topic-items {
-    display: table;
-  }
-  #mod-observation-user-observation .mod-observation-topic {
-    page-break-inside: avoid;
-  }
+}
+body.observation-observe .observer-requirements .button-wrapper button {
+  margin: 0 1em;
+}
+body.observation-observe .observer-requirements .requirement-text {
+  margin: 0 0 2em 0;
+}
+body.observation-observe .spacer {
+  margin-bottom: 5em;
+}
+body.observation-observe .criteria-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+body.observation-observe .criteria:not(:first-child) {
+  margin-top: 3em;
 }

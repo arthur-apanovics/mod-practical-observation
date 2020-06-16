@@ -1,0 +1,35 @@
+{{#tasks}}
+    {{> mod_observation/comp-task}}
+{{/tasks}}
+{{^tasks}}
+    {{#str}}no_tasks, observation{{/str}}
+{{/tasks}}
+
+{{#extra.is_assessing}}
+    {{#extra.can_release_grade}}
+        <form action="submit.php"
+              id="activity-assessment-form"
+              method="post"
+              enctype="multipart/form-data"
+              accept-charset="utf-8"
+              autocomplete="off">
+            <div class="wrapper-submit align-center">
+                <button type="submit">
+                    {{#str}}assess:release_grade, observation{{/str}}
+                </button>
+                <input type="hidden" name="cmid" value="{{extra.cmid}}">
+                <input type="hidden" name="activity_submission_id" value={{extra.activity_submission_id}}>
+            </div>
+        </form>
+    {{/extra.can_release_grade}}
+    {{^extra.can_release_grade}}
+        <div class="wrapper-submit align-center">
+            <button class="hover-hint-inverted"
+                    title="{{#str}}assess:release_grade_title, observation{{/str}}"
+                    type="button"
+                    disabled>
+                {{#str}}assess:release_grade, observation{{/str}}
+            </button>
+        </div>
+    {{/extra.can_release_grade}}
+{{/extra.is_assessing}}

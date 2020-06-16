@@ -1,8 +1,6 @@
 <?php
 /*
- * This file is part of Totara LMS
- *
- * Copyright (C) 2010 onwards Totara Learning Solutions LTD
+ * Copyright (C) 2020 onwards Like-Minded Learning
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,84 +15,192 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Valerii Kuznetsov <valerii.kuznetsov@totaralms.com>
- * @package totara_feedback360
+ * @author  Arthur Apanovics <arthur.a@likeminded.co.nz>
+ * @package mod_observation
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_observation\models\email_assignment;
-use mod_observation\models\external_request;
-use mod_observation\user_observation;
+/**
+ * Prints a particular instance of observation for the current user.
+ *
+ */
 
-require_once(__DIR__ . '/../../config.php');
-require_once(dirname(__FILE__) . '/forms.php');
+use core\notification;
+use mod_observation\learner_task_submission;
+use mod_observation\lib;
+use mod_observation\observer_assignment;
+use mod_observation\submission;
+
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once('lib.php');
 
 $token = required_param('token', PARAM_ALPHANUM);
+$observer_assignment = observer_assignment::read_by_token_or_null($token, true);
+$learner_task_submission = $observer_assignment->get_learner_task_submission_base();
+$learner = core_user::get_user($learner_task_submission->get_userid());
+$observer = $observer_assignment->get_observer();
+$task = $learner_task_submission->get_task_base();
+$observation = $task->get_observation_base();
 
-$email_assignment = email_assignment::get_from_token($token);
-if (!$email_assignment || is_null($email_assignment->id))
+// Print the page header.
+$name = get_string('observer_page_title', OBSERVATION, fullname($learner));
+$PAGE->set_context(null);
+$PAGE->set_url($observer_assignment->get_review_url());
+$PAGE->set_title($name);
+$PAGE->set_heading($name);
+$PAGE->set_pagelayout('popup');
+
+$PAGE->add_body_class('observation-observe');
+
+
+if (is_null($observer_assignment))
 {
-    totara_set_notification(get_string('feedback360notfound', 'totara_feedback360'),
-        new moodle_url('/'), array('class' => 'notifyproblem'));
+    print_error(get_string('error:invalid_token', OBSERVATION));
 }
-
-$external_request = new external_request($email_assignment->externalrequestid);
-$subjectuser      = $DB->get_record('user', array('id' => $external_request->userid));
+else if (!$observer_assignment->is_active())
+{
+    if (!$observer_assignment->is_declined())
+    {
+        print_error(get_string('error:not_active_observer', OBSERVATION));
+    }
+}
+// seems to print error once a second observation has been submitted instead of printing 'complete' view
+// else if ($observer_assignment->is_observation_complete())
+// {
+//     print_error(get_string('error:observation_complete', 'observation'));
+// }
 
 //Check id a user is trying to observe himself somehow or observer has account in lms
 if (isloggedin())
 {
-    if ($subjectuser->id == $USER->id)
+    if (is_siteadmin($USER->id))
     {
-        print_error('You cannot evaluate yourself. Your assessor have been notified of this attempt');
-        //TODO notify assessor of self eval attempt
+        notification::add(
+            sprintf(
+                'Hello %s. Please remember that, if you submit this observation, your name will not appear anywhere and learner will think that it was submitted by the observer ',
+                fullname($USER)),
+            notification::WARNING);
     }
-    else if ($USER->email != $email_assignment->email)
+    else
     {
-        //TODO set user id for item completion to indicate a lms user with a different email has completed observation
+        // TODO: notify admins of logged in user observation
+    }
+
+    if ($learner_task_submission->get_userid() == $USER->id)
+    {
+        print_error('You cannot observe yourself!');
+
+        //TODO notify assessor of self observation attempt
+    }
+    else if ($USER->email != $observer->get_email_or_null())
+    {
+        //TODO notify admins
+        // has account in lms, is logged in, is not one being observed, is not assigned observer (based on email)
     }
 }
 
-$user_observation         = new user_observation($external_request->observationid, $external_request->userid);
+// form submissions
+if (optional_param('submit-accept', 0, PARAM_BOOL))
+{
+    // observation accepted.
+    // this should not happen but let's confirm just to be safe
+    if (!optional_param('acknowledge_checkbox', 0, PARAM_BOOL))
+    {
+        print_error('You haven\'t acknowledged meeting the criteria, please go back and try again');
+    }
 
-// This is a hack to get around authenticating anonymous users when viewing files in observation.
-unset($SESSION->observation_usertoken);
-$SESSION->observation_usertoken = $token;
+    // if user refreshes page they will post form again
+    if (!$observer_assignment->is_accepted())
+    {
+        $observer_assignment->accept();
+    }
 
-$returnurl = new moodle_url('/mod/observation/observe.php', array('token' => $token));
+    // check if we need to update activity submission status
+    $submission = $learner_task_submission->get_submission();
+    if ($submission->is_all_tasks_observation_in_progress())
+    {
+        // all tasks are currently being observed
+        $submission->update_status_and_save(submission::STATUS_OBSERVATION_IN_PROGRESS);
+    }
 
-// Set up the page.
-$pageurl = new moodle_url('/mod/observation/observe.php');
-$PAGE->set_context(null);
-$PAGE->set_url($pageurl);
-$PAGE->set_pagelayout('popup');
+}
+else if (optional_param('submit-decline', 0, PARAM_BOOL))
+{
+    $observer_assignment->decline();
+    // update task submission status
+    $learner_task_submission->update_status_and_save(learner_task_submission::STATUS_LEARNER_IN_PROGRESS);
 
-$heading = get_string('observation', 'mod_observation');
+    // TODO: Event
 
-$PAGE->set_title($heading);
-$PAGE->set_heading($heading);
-// TODO navbar for external user?
-$PAGE->navbar->add($heading);
-$PAGE->navbar->add(get_string('givefeedback', 'totara_feedback360'));
+    // emails
+    $course = $observation->get_course();
+    $review_url = $observer_assignment->get_review_url();
 
-$email_assignment->mark_viewed();
+    $lang_data = [
+        'learner_fullname'  => fullname($learner),
+        'observer_fullname' => $observer->get_formatted_name_or_null(),
+        'task_name'         => $task->get_formatted_name(),
+        'activity_name'     => $observation->get_formatted_name(),
+        'activity_url'      => $observation->get_url(),
+        'observe_url'       => $review_url,
+        'course_fullname'   => $course->fullname,
+        'course_shortname'  => $course->shortname,
+        'course_url'        => new \moodle_url('/course/view.php', ['id' => $course->id]),
+    ];
 
-/* @var $renderer mod_observation_renderer */
+    // send confirmation email to observer
+    lib::email_external(
+        $observer->get_email_or_null(),
+        get_string('email:observer_observation_declined_subject', OBSERVATION, $lang_data),
+        get_string('email:observer_observation_declined_body', OBSERVATION, $lang_data));
+
+    // notify learner of declined observation
+    lib::email_user(
+        $learner,
+        get_string('email:learner_observation_declined_subject', OBSERVATION, $lang_data),
+        get_string('email:learner_observation_declined_body', OBSERVATION, $lang_data));
+
+    // simply redirect, we'll show a special page for declined observations
+    redirect($review_url);
+}
+
+/* @var $renderer mod_observation_renderer get this early as we might need it if observation has been declined */
 $renderer = $PAGE->get_renderer('observation');
 
-// echo $renderer->header();
 echo $OUTPUT->header();
 
-echo html_writer::start_div('container');
+$observer_submission = $observer_assignment->get_observer_submission_or_null();
 
-echo $renderer->display_feedback_header($email_assignment, $subjectuser);
+if ($observer_assignment->is_declined())
+{
+    echo $renderer->view_observer_declined($observer_assignment, $learner_task_submission, $task);
+}
+else if (!is_null($observer_submission) && $observer_submission->is_submitted())
+{
+    echo $renderer->view_observer_completed($learner_task_submission, $task);
+}
+else if (!$observation->is_activity_available())
+{
+    // not yet open or already closed
+    echo $renderer->render_from_template(
+        'view-observer_not_available', [
+        'error_message' => lib::get_activity_timing_error_string($observation)
+    ]);
+}
+else if (!$observer_assignment->is_accepted())
+{
+    // show observation EULA page
+    echo $renderer->view_observer_landing($observation, $observer_assignment);
+}
+else
+{
+    // This is a hack to get around authenticating anonymous users when viewing files in observation.
+    unset($SESSION->observation_usertoken);
+    $SESSION->observation_usertoken = $token;
 
-list($args, $jsmodule) = $renderer->get_evaluation_js_args($user_observation->id, $user_observation->userid, $token);
-$PAGE->requires->js_init_call('M.mod_observation_evaluate.init', $args, false, $jsmodule);
-
-echo $renderer->get_print_button($user_observation->name, fullname($subjectuser));
-echo $renderer->user_topic_external($user_observation, $user_observation->get_topic_by_id($external_request->topicid), $email_assignment);
-
-echo html_writer::end_div();// .container
+    // show observation page
+    echo $renderer->view_task_observer($observation, $observer_assignment);
+}
 
 // Finish the page.
 echo $OUTPUT->footer();

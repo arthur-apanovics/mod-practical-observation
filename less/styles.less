@@ -1,165 +1,818 @@
-[id ^= mod-observation-],
-[id ^= page-mod-observation-] {
-  padding-bottom: 2em;
+// font awesome icons. grunt task will resolve path just fine
+@import "base\less\fa\variables.less";
 
-  & .config-mod-observation-topic-item,
-  & .mod-observation-topic-item {
-    padding: 0.3em;
+// ====================================================================================================================
+// Variables and functions
+// ====================================================================================================================
+
+@status-color-pending: #76A4D6; // cf brand secondary
+@status-color-success: #01A850; // cf success
+@status-color-fail: #9e4444; // cf danger
+
+@wrapper-border-color: #d3d3d3;
+@wrapper-margin: 3em;
+
+.border-wrapper(@thickness:1px, @color: @wrapper-border-color) {
+  border: @thickness solid @color;
+  border-radius: .25em;
+
+  margin-bottom: @wrapper-margin;
+}
+
+// ====================================================================================================================
+// Applies to all observation pages
+// ====================================================================================================================
+
+body.path-mod-observation {
+
+  .wrapper {
+    .border-wrapper();
+    padding: 1em;
+    margin: 1em;
+
+    &-border {
+      .border-wrapper();
+    }
+
+    &-activity {
+      margin-bottom: @wrapper-margin;
+    }
+
+    &-submit {
+      margin: 4em 0;
+    }
   }
 
-  .mod-observation-topic-items {
-    font-size: 1.2em;
-    display:   table;
+  .title {
+    &-main {
+      padding: 0 0.5em;
+    }
+
+    &-secondary {
+      margin: 1em 0;
+    }
   }
 
-  .observation-eval-actions{
-    margin-top: 2em;
+  .flex {
+    display: flex;
+    flex-wrap: wrap;
   }
 
-  .mod-observation-modifiedstr,
-  .mod-observation-witnessedstr,
-  .mod-observation-topic-modifiedstr {
-    font-size:  0.8em;
-    font-style: italic;
-    color:      grey;
+  .task {
+    // relative position is needed for status indicator in corner
+    position: relative;
+
+    .corner {
+      // do not display without a status class
+      display: none;
+    }
+
+    &-header {
+      //.border-wrapper();
+      margin-bottom: 2em;
+    }
+
+    &-title {
+      display: flex;
+      flex-wrap: nowrap;
+
+      justify-content: space-between;
+      align-items: baseline;
+
+      > .action {
+        margin-right: @wrapper-margin;
+
+        &.btn {
+          border-color: #b6bcc2;
+        }
+      }
+    }
+
+    // task statuses (actual string from object)
+    &.status {
+      // convenience function
+      .task-corner(@color, @fa-icon) {
+        .corner {
+          // only show the status corner when we specifically want to
+          display: block;
+          border-top-color: @color;
+
+          &::before {
+            content: @fa-icon;
+            color: contrast(@color);
+          }
+
+          &:hover {
+            border-top-color: darken(@color, 10%);
+
+            &::before {
+              color: lighten(contrast(@color), 10%);
+            }
+          }
+        }
+      }
+
+      @border-size: 40px; // needed to calculate icon placement
+
+      .corner {
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-top: @border-size solid; // border-top-color controls color which depends on status
+        border-bottom: @border-size solid transparent;
+        border-left: @border-size solid transparent;
+        right: 0;
+        top: 0;
+
+        cursor: help;
+        transition: border 1s;
+
+        // position font-awesome icon
+        &::before {
+          position: absolute;
+          top: (@border-size - 5px) * -1;
+          left: (@border-size / 2) * -1;
+
+          transition: color 1s;
+        }
+      }
+
+      // learner
+      &.learner {
+        &-learner_in_progress {
+          .task-corner(#ededed, @fa-var-pencil);
+        }
+
+        &-observation_pending {
+          .task-corner(@status-color-pending, @fa-var-paper-plane);
+        }
+
+        &-assessment_pending {
+          .task-corner(@status-color-pending, @fa-var-clock-o);
+        }
+
+        &-observation_in_progress,
+        &-assessment_in_progress {
+          .task-corner(@status-color-pending, @fa-var-search);
+        }
+
+        &-observation_incomplete,
+        &-assessment_incomplete {
+          .task-corner(@status-color-fail, @fa-var-times);
+        }
+
+        &-complete {
+          .task-corner(@status-color-success, @fa-var-check);
+        }
+      }
+
+      // assessor
+      &.assessing {
+        &-complete {
+          .task-corner(@status-color-success, @fa-var-check);
+        }
+
+        &-not_complete {
+          .task-corner(@status-color-fail, @fa-var-times);
+        }
+      }
+    }
   }
 
-  .mod-observation-topic-signoff {
-    font-size: 1.2em;
-    padding-right: 1em;
+  .criteria {
+    &-container {
+      padding: 2em;
+    }
+
+    &-list {
+      ol {
+        li {
+          margin: 2em 1em;
+        }
+      }
+    }
+
+    &-header {
+      display: flex;
+      align-items: baseline;
+    }
+
+    &-desc {
+      .border-wrapper();
+      padding: 1em;
+
+      + .feedback.no-text {
+        // first feedback element needs to be closer to attempt container
+        margin-top: -2em;
+      }
+    }
+  }
+
+  //.feedback.assessor, // icon placement is bad
+  .criteria {
+    // status icons
+    .outcome-icon {
+      font-size: 1.2em;
+      margin: 0 0.5em;
+    }
+
+    &.not_complete {
+      .outcome-icon::before {
+        color: @status-color-fail;
+        content: @fa-var-times-circle-o;
+      }
+    }
+
+    &.complete {
+      .outcome-icon::before {
+        color: @status-color-success;
+        content: @fa-var-check-circle-o;
+      }
+    }
+  }
+
+
+  .feedback {
+    // helper function
+    .feedback-highlight(@color) {
+      .entry {
+        //box-shadow: -2px 0 0 0 @color;
+
+        &:hover {
+          box-shadow: -5px 0 0 0 @color;
+        }
+      }
+    }
+
+    // observer and assessor feedback
+    &.observer,
+    &.assessor {
+
+      .entry {
+        transition: box-shadow 1s;
+      }
+
+      &.with-text {
+        &.complete {
+          .feedback-highlight(@status-color-success);
+        }
+
+        &.not_complete {
+          .feedback-highlight(@status-color-fail);
+        }
+      }
+    }
+
+    // observer feedback specific
+    &.observer {
+      &.with-text {
+        padding: 0 0 3em 2em;
+        // move feedback closer to criteria
+        margin-top: -1em;
+      }
+
+      &.no-text {
+        text-align: right;
+
+        &.complete {
+          .outcome-inline {
+            border-bottom: 2px solid @status-color-success;
+          }
+        }
+
+        &.not_complete {
+          .outcome-inline {
+            border-bottom: 2px solid @status-color-fail;
+          }
+        }
+
+        .outcome-inline {
+          text-transform: lowercase;
+          font-weight: bold;
+
+          // underline
+          display: inline-block;
+          line-height: 1.2;
+          text-shadow: 2px 2px white;
+        }
+      }
+    }
+
+    // give feedback extra space on bottom except for last element
+    &.assessor:not(:last-child) {
+      margin-bottom: 2em;
+    }
+
+    &-outcome {
+      &-pending {
+        // TODO
+      }
+
+      &-complete {
+        // TODO
+      }
+
+      &-not_complete {
+        // TODO
+      }
+    }
+  }
+
+
+  .attempt {
+    padding: 1em 2em;
+
+    &:only-child {
+      padding: 2em;
+    }
+
+    &:first-child {
+      padding-top: 2em;
+    }
+
+    &:last-child {
+      padding-bottom: 2em;
+    }
+  }
+
+  .attempt,
+  .feedback {
+
+    .heading {
+      display: flex;
+      justify-content: space-between;
+
+      .title-secondary {
+        margin: 0 0 0.5em 0;
+      }
+
+      .attributes {
+        font-size: 0.9em;
+
+        .name {
+          font-weight: bold;
+        }
+
+        .timestamp {
+        }
+      }
+    }
+
+    .entry {
+      margin: 0;
+
+      .attachments {
+        list-style: none;
+        margin-left: 0;
+
+        .file {
+          a::before {
+            font-family: 'FontAwesome';
+            content: @fa-var-download;
+            margin-right: 0.5em;
+          }
+        }
+      }
+    }
+  }
+
+
+  .table {
+    .border-wrapper();
+
+    th {
+      background-color: #d3d3d3;
+      color: black;
+    }
+  }
+
+  .editor-container {
+    padding: 0 1em 1em 4em;
+
+    > .assessment-outcome {
+      margin: 1em 0;
+
+      > label {
+        font-weight: bold;
+      }
+
+      > select {
+        float: right;
+        min-width: 15em;
+      }
+    }
+  }
+
+  .new-attempt {
+    padding: 1em;
+  }
+
+  .button-wrapper {
+    text-align: center;
+    margin: 1em 0;
+  }
+
+  .assessor {
+    &-feedback-container {
+      padding: 2em;
+    }
+  }
+
+  .timestamp {
     text-align: right;
+    margin-right: 0.5em;
   }
 
-  .mod-observation-topic-signoff img {
-    padding-left: 0.4em;
+  form {
+    .meets-criteria-wrapper {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 1em;
+
+      #criteria-modal{
+        cursor: pointer;
+      }
+    }
   }
 
-  textarea.observation-completion-comment,
-  textarea.observation-completion-submission {
-    margin-left: 0.4em;
-    width:       90%;
-  }
-
-  .mod-observation-topic table td.c0 {
-    width: 40%;
-  }
-
-  .mod-observation-topic table td.c1 {
-    width: 60%;
-  }
-
-  .observation-submit {
+  .align-center {
     text-align: center;
   }
 
-  .evalprint,
-  .observation-save{
-    float: right;
+  .list-wrapper {
+    width: 100%;
+    margin-top: 3em;
   }
-}
 
-#page-mod-observation-evaluate,
-#page-mod-observation-observe {
+  .page-container {
+    flex-basis: 100%;
+  }
 
-  .mod-observation-topic-signoff,
-  .observation-item-witness {
-    .flex-icon {
-      cursor: pointer;
+  .btn-wrapper {
+    text-align: center;
+    margin-top: 2em;
+  }
+
+  .btn-wrapper > button {
+    margin-right: 1em;
+  }
+
+  // for highlighting elements with html titles
+  .hover-hint {
+    text-decoration-line: underline;
+    text-decoration-style: dashed;
+    text-decoration-color: @wrapper-border-color;
+    cursor: help;
+
+    &-inverted {
+      text-decoration-line: underline;
+      text-decoration-style: dashed;
+      text-decoration-color: darken(@wrapper-border-color, 50%);
+      cursor: help;
     }
   }
 }
 
-.config-mod-observation-topic-heading,
-.mod-observation-topic-heading {
-  font-size:     1.4em;
-  font-weight:   bold;
-  margin-top:    0.5em;
-  margin-bottom: 0.2em;
-}
+// ====================================================================================================================
+// "MANAGE" PAGE
+// ====================================================================================================================
 
-.mod-observation-topic-heading {
-  padding-left: 0.8em;
-}
+body.observation-manage {
+  #manage-task-list,
+  .manage-criteria-list {
+    > ol {
+      counter-reset: li-counter;
 
-.mod-observation-topic-addbtn {
-  float: right;
-}
+      > li {
+        counter-increment: li-counter;
+        display: flex;
+        border: none;
 
-#config-mod-observation-topics {
-  padding-bottom: 2em;
-}
-
-.config-mod-observation-topic-items {
-  margin-left: 1em;
-  font-size:   1.2em;
-}
-
-img.observation-topic-completion-status {
-  vertical-align: baseline;
-}
-
-#observation-eval-icon-templates,
-.user-observation-comments-warning,
-.observation-completion-comment-print,
-.observation-completion-submission-print {
-  display: none;
-}
-
-.mod-observation-evalstudents-btn,
-.mod-observation-evalself-btn,
-.mod-observation-manage-btn {
-  float: right;
-}
-
-.mod-observation-topicitem-files {
-  font-size: 0.8em;
-}
-
-
-/**
- * printing styles
- */
-@media print {
-  @page {
-    margin: 25mm !important;
+        &::before {
+          content: counter(li-counter);
+        }
+      }
+    }
   }
 
-  #block-region-side-pre,
-  #block-region-side-post,
-  #page-header,
-  #page-footer,
-  .evalprint,
-  .logininfo,
-  .navbar,
-  textarea.observation-completion-comment,
-  textarea.observation-completion-submission,
-  .user-observation-comments-warning,
-  #totaramenu {
-    display: none !important;
-  }
+  ol {
+    &#mainTaskList {
+      > li {
+        margin-bottom: 2em;
+      }
 
-  #region-main {
-    width:   100% !important;
-    padding: 0;
-  }
+      .actions {
+        margin-left: auto;
 
-  #mod-observation-user-observation {
-    .observation-completion-comment-print,
-    .observation-completion-submission-print {
-      display: block;
+        .glyphicon.disabled {
+          color: gray;
+          cursor: not-allowed;
+        }
+      }
+
+      .obs-task-list {
+        display: flex;
+        border-bottom: 1px solid teal;
+        padding: 0 .5em;
+      }
+
+      .obs-subtask-list {
+        display: flex;
+        padding: 0 .5em;
+      }
     }
 
-    .mod-observation-topic-heading {
-      padding-left: 0;
-    }
+    li {
+      &.list-group-item {
+        .my-handle {
+          cursor: move;
+        }
+      }
 
-    .mod-observation-topic-items {
-      display: table;
-    }
-
-    .mod-observation-topic {
-      page-break-inside: avoid;
+      .glyphicon {
+        position: relative;
+        float: left;
+        padding: 1px 7px;
+        font-family: 'Glyphicons Halflings';
+        font-style: normal;
+        font-weight: 400;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+      }
     }
   }
 }
 
+// ====================================================================================================================
+// ====================================================================================================================
+
+@table-border-color: darken(@wrapper-border-color, 5%);
+table {
+  &.observer-details,
+  &.submissions-summary {
+
+    .border-wrapper();
+    text-align: left;
+    line-height: 40px;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    margin-bottom: 1em;
+
+    th {
+      font-weight: 500;
+    }
+
+    th:first-child,
+    td:first-child {
+      padding: 0 15px 0 20px;
+    }
+
+    td:last-child {
+      padding-right: 10px;
+    }
+
+    // table header
+    thead {
+      tr {
+        color: #fff;
+        background-color: @wrapper-border-color;
+        border: none;
+      }
+
+      tr:last-child {
+        th {
+          border-bottom: 1px solid @table-border-color;
+        }
+      }
+    }
+
+    tbody {
+      tr:last-child {
+        td, td {
+          border: none;
+        }
+      }
+
+      td, th {
+        border-bottom: 1px solid @wrapper-border-color;
+      }
+    }
+  }
+}
+
+// Assigned observer details table
+table.observer-details {
+  tr {
+    &.declined {
+      text-decoration: line-through;
+    }
+    &.active {
+      font-weight: 600;
+    }
+  }
+}
+
+// assessor subission summary table
+.submissions-summary {
+  tr > th:not(:first-child),
+  tr > td:not(:first-child) {
+    text-align: center;
+  }
+
+  .submisisons-header {
+    th.attempts-group {
+      &:nth-child(even) {
+        border-left: 1px solid @table-border-color;
+      }
+
+      &:nth-child(odd) {
+        border-right: 1px solid @table-border-color;
+        border-left: 1px solid @table-border-color;
+      }
+
+      &[colspan="2"] {
+        border-right: 1px solid @table-border-color;
+        border-left: 1px solid @table-border-color;
+        border-bottom: 1px solid @table-border-color;
+      }
+    }
+  }
+
+  .submissions-row {
+    .observation {
+      border-left: 1px solid @table-border-color;
+
+      .flex-icon {
+        font-size: 1.3em;
+        color: #287b7c; // link color
+      }
+    }
+
+    .assessment {
+      border-right: 1px solid @table-border-color;
+    }
+
+    .completion {
+      font-size: 1.4em;
+      color: darken(@wrapper-border-color, 10%);
+
+      > .complete {
+        color: #589e44;
+      }
+
+      > .not-complete {
+        color: #44639e;
+      }
+    }
+
+    .actions {
+      .flex-icon {
+        font-size: 1.2em;
+      }
+    }
+  }
+
+  // tooltip for summary table
+  .obs-tooltip {
+    display: inline-block;
+    position: relative;
+    text-align: left;
+
+    .content-top {
+      min-width: 250px;
+      top: -20px;
+      left: 50%;
+      transform: translate(-50%, -100%);
+      padding: 0.5em 0;
+      background-color: #ffffff;
+      font-weight: normal;
+      font-size: 1em;
+      border-radius: 8px;
+      position: absolute;
+      z-index: 100;
+      box-sizing: border-box;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.8s;
+
+      i {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -12px;
+        width: 24px;
+        height: 12px;
+        overflow: hidden;
+
+        &::after {
+          content: '';
+          position: absolute;
+          width: 12px;
+          height: 12px;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(45deg);
+          background-color: #EEEEEE;
+          box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+        }
+      }
+    }
+
+    &:hover {
+      .content-top {
+        visibility: visible;
+        opacity: 1;
+      }
+    }
+  }
+}
+
+// ====================================================================================================================
+// ====================================================================================================================
+
+// task page
+body.observation-task,
+body.observation-task-assess {
+  // observer details partial
+  .observer-details-wrapper {
+    margin-bottom: 3em;
+
+    > .header {
+      h5, #change-observer, #last-assigned {
+        display: inline-block;
+      }
+    }
+  }
+}
+
+// ====================================================================================================================
+// OBSERVATION PAGE
+// ====================================================================================================================
+
+body.observation-observe {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  //justify-content: center; // causes no vertical scroll bar
+  align-items: center;
+
+  .personal-details {
+    table {
+      &.editing {
+        td {
+          > input {
+            &[type=text] {
+              height: 2em;
+              padding: 0.2em;
+            }
+          }
+        }
+      }
+    }
+
+    h5 > .edit-details {
+      font-style: italic;
+    }
+  }
+
+  .observer-requirements {
+    form#requirement-acknowledge {
+      margin: 5em 0 0 0;
+
+      input[type=checkbox] {
+        @media (min-width: 768px) {
+          margin-left: 10em;
+        }
+      }
+    }
+
+    .button-wrapper {
+      button {
+        margin: 0 1em;
+      }
+    }
+
+    .requirement-text {
+      margin: 0 0 2em 0;
+    }
+  }
+
+  .spacer {
+    margin-bottom: 5em;
+  }
+
+  .criteria {
+    // even spacing for outcome dropdown
+    &-header {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    &:not(:first-child) {
+      margin-top: @wrapper-margin;
+    }
+  }
+}

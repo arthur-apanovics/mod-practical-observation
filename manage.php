@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (C) 2015 onwards Catalyst IT
+ * Copyright (C) 2020 onwards Like-Minded Learning
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,44 +15,49 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author  Eugene Venter <eugene@catalyst.net.nz>
+ * @author  Arthur Apanovics <arthur.a@likeminded.co.nz>
  * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_observation\models\observation;
+use mod_observation\observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once(dirname(__FILE__) . '/lib.php');
-require_once(dirname(__FILE__) . '/locallib.php');
+require_once('lib.php');
 
-$id = optional_param('cmid', 0, PARAM_INT); // Course_module ID
-$b  = optional_param('b', 0, PARAM_INT);  // Observation instance ID
+$cmid = required_param('id', PARAM_INT);
 
-list($observation, $course, $cm) = observation_check_page_id_params_and_init($id, $b); /* @var $observation observation */
+list($course, $cm) = get_course_and_cm_from_cmid($cmid, OBSERVATION);
+$context = context_module::instance($cm->id);
 
-require_login($course, true, $cm);
-require_capability('mod/observation:manage', context_module::instance($cm->id));
+require_login($course, false, $cm);
+require_capability(observation::CAP_MANAGE, $context);
+
+// TODO: Event
+
+// do not filter observation by userid as we need to check if submissions exist
+$observation = new observation($cm);
+
+$title = $title = get_string('title:manage', \OBSERVATION, $observation->get_formatted_name());
 
 // Print the page header.
-$PAGE->set_url('/mod/observation/view.php', array('id' => $cm->id));
-$PAGE->set_title(format_string($course->fullname));
-$PAGE->set_heading(format_string($observation->name) . ' - ' . get_string('manage', 'observation'));
+$PAGE->set_url(OBSERVATION_MODULE_PATH . 'manage.php', array('id' => $cm->id));
+$PAGE->set_title($title);
+$PAGE->set_heading(format_string($course->fullname));
+
+$PAGE->add_body_class('observation-manage');
+
+$PAGE->navbar->add(get_string('breadcrumb:manage', \OBSERVATION));
+
+$PAGE->requires->js_call_amd(OBSERVATION_MODULE . '/developer_view', 'init');
 
 // Output starts here.
 echo $OUTPUT->header();
 
-// Replace the following lines with you own code.
-echo $OUTPUT->heading($PAGE->heading);
-
-$addtopicurl = new moodle_url('/mod/observation/topic.php', array('bid' => $observation->id));
-echo html_writer::tag('div', $OUTPUT->single_button($addtopicurl, get_string('addtopic', 'observation')),
-    array('class' => 'mod-observation-topic-addbtn'));
-
-$topics   = $DB->get_records('observation_topic', array('observationid' => $observation->id));
 /* @var $renderer mod_observation_renderer */
-$renderer = $PAGE->get_renderer('mod_observation');
-echo $renderer->config_topics($observation);
+$renderer = $PAGE->get_renderer('observation');
+
+echo $renderer->view_manage($observation);
 
 // Finish the page.
 echo $OUTPUT->footer();

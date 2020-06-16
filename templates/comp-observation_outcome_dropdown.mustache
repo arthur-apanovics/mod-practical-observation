@@ -1,0 +1,15 @@
+{{! WARNING: do not rename values of each option as they are tied to the "outcome" column in database}}
+<select
+        class="observation-outcome"
+        name="criteria[{{id}}][outcome]"
+        required>
+    <option selected disabled value>
+        {{#str}}outcome:choose, observation{{/str}}
+    </option>
+    <option value="complete">
+        {{#str}}outcome:observer_complete, observation{{/str}}
+    </option>
+    <option value="not_complete">
+        {{#str}}outcome:observer_not_complete, observation{{/str}}
+    </option>
+</select>

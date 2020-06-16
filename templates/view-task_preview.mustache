@@ -1,0 +1,28 @@
+<h5>Completion observations</h5>
+
+<div class="wrapper-border criteria-container">
+    <ol class="criteria-list">
+        {{#criteria}}
+            {{> mod_observation/comp-completion_criteria}}
+        {{/criteria}}
+    </ol>
+</div>
+
+<h5>Information and evidence from the trainee</h5>
+<div class="wrapper-border">
+    <div class="new-attempt preview">
+        <div class="editor-container">
+            <h5 class="title-secondary">
+                {{#str}}attempt_for_preview, observation, {{extra.attempt_number}}{{/str}}
+            </h5>
+            {{{extra.editor_html}}}
+            {{{extra.filemanager_html}}}
+        </div>
+    </div>
+</div>
+<div class="button-wrapper">
+    <button type="submit" class="btn btn-primary" title="Cannot submit in preview mode" disabled>
+        {{#str}}request_observation, observation{{/str}}
+    </button>
+</div>
+

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (C) 2015 onwards Catalyst IT
+ * Copyright (C) 2020 onwards Like-Minded Learning
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author  Eugene Venter <eugene@catalyst.net.nz>
+ * @author  Arthur Apanovics <arthur.a@likeminded.co.nz>
  * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -51,7 +51,8 @@ defined('MOODLE_INTERNAL') || die();
 
 // Modify capabilities as needed and remove this comment.
 $capabilities = array(
-    'mod/observation:addinstance' => array(
+    /*observation::CAP_ADDINSTANCE*/
+    'mod/observation:addinstance'     => array(
         'riskbitmask'          => RISK_XSS,
         'captype'              => 'write',
         'contextlevel'         => CONTEXT_COURSE,
@@ -62,10 +63,11 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
 
-    'mod/observation:view' => array(
+    /*observation::CAP_VIEW*/
+    'mod/observation:view'            => array(
         'captype'      => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy'       => array(
+        'archetypes'   => array(
             'student'        => CAP_ALLOW,
             'teacher'        => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
@@ -73,45 +75,44 @@ $capabilities = array(
         )
     ),
 
-    'mod/observation:evaluate' => array(
-        'riskbitmask'  => RISK_SPAM,
+    /*observation::CAP_SUBMIT*/
+    'mod/observation:submit'          => array(
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy'       => array(
-            'editingteacher' => CAP_ALLOW,
-            'manager'        => CAP_ALLOW
+        'archetypes'   => array(
+            'student' => CAP_ALLOW,
         )
     ),
 
-    'mod/observation:evaluateself' => array(
-        'captype'      => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'legacy'       => array()
-    ),
-
-    'mod/observation:signoff' => array(
+    /*observation::CAP_VIEWSUBMISSIONS*/
+    'mod/observation:viewsubmissions' => array(
         'riskbitmask'  => RISK_SPAM,
-        'captype'      => 'write',
+        'captype'      => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy'       => array(
+        'archetypes'   => array(
+            'teacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         )
     ),
 
-    'mod/observation:manage'      => array(
+    /*observation::CAP_ASSESS*/
+    'mod/observation:assess'          => array(
+        'riskbitmask'  => RISK_SPAM,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes'   => array(
+            'teacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+
+    /*observation::CAP_MANAGE*/
+    'mod/observation:manage'          => array(
         'riskbitmask'  => RISK_XSS,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy'       => array(
+        'archetypes'   => array(
             'editingteacher' => CAP_ALLOW,
-        )
-    ),
-    'mod/observation:witnessitem' => array(
-        'riskbitmask'  => RISK_SPAM,
-        'captype'      => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'legacy'       => array(
-            'manager' => CAP_ALLOW
         )
     ),
 );

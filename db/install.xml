@@ -1,193 +1,240 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/observation/db" VERSION="20190912" COMMENT="XMLDB file for Moodle mod/observation"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+<XMLDB PATH="mod/observation/db" VERSION="20200603" COMMENT="XMLDB file for Moodle mod/observation"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="observation" COMMENT="Table for observation module.">
+    <TABLE NAME="observation" COMMENT="Holds activity instance related info">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Course observation activity belongs to"/>
-        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="name field for moodle instances"/>
-        <FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General introduction of the observation activity"/>
-        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Format of the intro field (MOODLE, HTML, MARKDOWN...)"/>
-        <FIELD NAME="completiontopics" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="managersignoff" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="itemwitness" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-      </KEYS>
-      <INDEXES>
-        <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
-      </INDEXES>
-    </TABLE>
-    <TABLE NAME="observation_topic" COMMENT="Observation topics">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="observationid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="name" TYPE="char" LENGTH="254" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Format of the intro field (MOODLE, HTML, MARKDOWN...)"/>
-        <FIELD NAME="observerintro" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="observerintroformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Format of the intro field (MOODLE, HTML, MARKDOWN...)"/>
-        <FIELD NAME="completionreq" TYPE="int" LENGTH="2" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="competencies" TYPE="char" LENGTH="150" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="allowcomments" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="introformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timeopen" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timeclose" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="lastmodifiedby" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="deleted" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="def_i_task_learner" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Default intro for a task - learner view"/>
+        <FIELD NAME="def_i_task_learner_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Default intro format"/>
+        <FIELD NAME="def_i_task_observer" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Default intro for a task - observer view"/>
+        <FIELD NAME="def_i_task_observer_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Default intro format"/>
+        <FIELD NAME="def_i_task_assessor" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Default intro for a task - assessor view"/>
+        <FIELD NAME="def_i_task_assessor_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Default intro format"/>
+        <FIELD NAME="def_i_ass_obs_learner" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Default intro for assigning an observer - learner view"/>
+        <FIELD NAME="def_i_ass_obs_learner_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Default intro format"/>
+        <FIELD NAME="def_i_ass_obs_observer" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Default intro for observer requirements"/>
+        <FIELD NAME="def_i_ass_obs_observer_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Default intro format"/>
+        <FIELD NAME="completion_tasks" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If set, learner has to complete all tasks for activity to count as complete"/>
+        <FIELD NAME="fail_all_tasks" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="if set, a single failed task during assessment will fail all other tasks in activity as well"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="observation" TYPE="foreign" FIELDS="observationid" REFTABLE="observation" REFFIELDS="id"/>
+        <KEY NAME="course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
       </KEYS>
-      <INDEXES>
-        <INDEX NAME="completionreq" UNIQUE="false" FIELDS="completionreq"/>
-      </INDEXES>
     </TABLE>
-    <TABLE NAME="observation_topic_item" COMMENT="Observation topic items">
+
+    <TABLE NAME="observation_task" COMMENT="Task details">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="topicid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="name" TYPE="char" LENGTH="254" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="completionreq" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="allowfileuploads" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="allowselffileuploads" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="observationid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="intro_learner" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="intro_learner_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="intro_observer" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="intro_observer_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="intro_assessor" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="intro_assessor_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="int_assign_obs_learner" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Intro for assigning an observer - learner view"/>
+        <FIELD NAME="int_assign_obs_learner_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Intro format"/>
+        <FIELD NAME="int_assign_obs_observer" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Intro for observer requirements"/>
+        <FIELD NAME="int_assign_obs_observer_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Intro format"/>
+        <FIELD NAME="sequence" TYPE="int" LENGTH="9" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="sequence number in activity"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="topicid" TYPE="foreign" FIELDS="topicid" REFTABLE="observation_topic" REFFIELDS="id"/>
-      </KEYS>
-      <INDEXES>
-        <INDEX NAME="completionreq" UNIQUE="false" FIELDS="completionreq"/>
-      </INDEXES>
-    </TABLE>
-    <TABLE NAME="observation_topic_signoff" COMMENT="topic sign-offs">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="topicid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="signedoff" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="comment" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="modifiedby" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="topicid" TYPE="foreign" FIELDS="topicid" REFTABLE="observation_topic" REFFIELDS="id"/>
-        <KEY NAME="modifiedby" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id"/>
-      </KEYS>
-      <INDEXES>
-        <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
-        <INDEX NAME="signedoff" UNIQUE="false" FIELDS="signedoff"/>
-        <INDEX NAME="timemodified" UNIQUE="false" FIELDS="timemodified"/>
-      </INDEXES>
-    </TABLE>
-    <TABLE NAME="observation_completion" COMMENT="Observation completions for a user">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="type" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="observationid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="topicid" TYPE="int" LENGTH="11" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="topicitemid" TYPE="int" LENGTH="11" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="status" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="comment" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="observeremail" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
         <KEY NAME="observationid" TYPE="foreign" FIELDS="observationid" REFTABLE="observation" REFFIELDS="id"/>
-        <KEY NAME="topicid" TYPE="foreign" FIELDS="topicid" REFTABLE="observation_topic" REFFIELDS="id"/>
-        <KEY NAME="topicitemid" TYPE="foreign" FIELDS="topicitemid" REFTABLE="observation_topic_item" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="observation_criteria" COMMENT="Criteria for task">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="taskid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="description_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="feedback_required" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If set, observer has to provide written feedback along with marking"/>
+        <FIELD NAME="sequence" TYPE="int" LENGTH="9" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="sequence number in task"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="taskid" TYPE="foreign" FIELDS="taskid" REFTABLE="observation_task" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="observation_submission" COMMENT="Learner submission for whole activity">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="observationid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="One of 'not_started', 'learner_in_progress', 'observation_pending', 'observation_in_progress', 'observation_incomplete', 'assessment_pending', 'assessment_in_progress', 'assessment_incomplete', 'complete'"/>
+        <FIELD NAME="attempts_assessment" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false" COMMENT="number of assessment attempts"/>
+        <FIELD NAME="timestarted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="observationid" TYPE="foreign" FIELDS="observationid" REFTABLE="observation" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="observation_learner_task_submission" COMMENT="Learner submission for individual task">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="taskid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="submisisonid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="One of 'not_started', 'learner_in_progress', 'observation_pending', 'observation_in_progress', 'observation_incomplete', 'assessment_pending', 'assessment_in_progress', 'assessment_incomplete', 'complete'"/>
+        <FIELD NAME="timestarted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="attempts_observation" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false" COMMENT="number of observation attempts"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="taskid" TYPE="foreign" FIELDS="taskid" REFTABLE="observation_task" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="observation_learner_attempt" COMMENT="Learner attempt for task">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="learner_task_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timestarted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timesubmitted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="text" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="text_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="attempt_number" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false" COMMENT="attempt number in order of sequence"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="learner_task_submissionid" TYPE="foreign" FIELDS="learner_task_submissionid" REFTABLE="observation_learner_task_submission" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="observation_observer" COMMENT="External observer profile details">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="fullname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="phone" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="email" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="position_title" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="added_by" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false" COMMENT="user id that created this record"/>
+        <FIELD NAME="timeadded" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false" />
+        <FIELD NAME="modified_by" TYPE="int" LENGTH="9" NOTNULL="false" SEQUENCE="false" COMMENT="user id that last modified this record. -1 means that the observer himself modified the details"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="18" NOTNULL="false" DEFAULT="0" SEQUENCE="false" />
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="added_by" TYPE="foreign" FIELDS="added_by" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="modified_by" TYPE="foreign" FIELDS="modified_by" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="observation_observer_assignment" COMMENT="External observer assignment to learner submission">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="learner_task_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="observerid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="change_explain" TYPE="text" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="optional. used when observer change is requested"/>
+        <FIELD NAME="timeassigned" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="observation_accepted" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="null if no decision made yet, false if observer declined observation, true if accepted and observer requirements confirmed"/>
+        <FIELD NAME="timeaccepted" TYPE="int" LENGTH="18" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="token" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="active" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="indicates if this is the current assignment for related learner_task_submission"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="learner_task_submissionid" TYPE="foreign" FIELDS="learner_task_submissionid" REFTABLE="observation_learner_task_submission" REFFIELDS="id"/>
+        <KEY NAME="observerid" TYPE="foreign" FIELDS="observerid" REFTABLE="observation_observer" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="type" UNIQUE="false" FIELDS="type"/>
-        <INDEX NAME="status" UNIQUE="false" FIELDS="status"/>
-        <INDEX NAME="timemodified" UNIQUE="false" FIELDS="timemodified"/>
+        <INDEX NAME="learner_task_submissionid" UNIQUE="false" FIELDS="learner_task_submissionid"/>
+        <INDEX NAME="observerid" UNIQUE="false" FIELDS="observerid"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="observation_attempt" COMMENT="observation user attempts for topic items">
+
+    <TABLE NAME="observation_observer_task_submission" COMMENT="External observer task submission">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="topicitemid" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="sequence" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="attempt sequence number"/>
-        <FIELD NAME="text" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="observer_assignmentid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timestarted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="outcome" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="Outcome of observation, NULL if not yet submitted"/>
+        <FIELD NAME="timesubmitted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
-        <KEY NAME="topicitemid" TYPE="foreign" FIELDS="topicitemid" REFTABLE="observation_topic_item" REFFIELDS="id"/>
+        <KEY NAME="observer_assignmentid" TYPE="foreign" FIELDS="observer_assignmentid" REFTABLE="observation_observer_assignment" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="observation_attempt_feedback" COMMENT="feedback for observation user attempts">
+
+    <TABLE NAME="observation_observer_feedback" COMMENT="Feedback from external observer for criteria">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="attemptid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="emailassignmentid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="text" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="attemptid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="criteriaid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="observer_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="outcome" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="null means no decision has been made yet"/>
+        <FIELD NAME="text" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="null when feedback not requried"/>
+        <FIELD NAME="text_format" TYPE="int" LENGTH="2" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="null when feedback not requried"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="emailassignmentid" TYPE="foreign" FIELDS="emailassignmentid" REFTABLE="observation_email_assignment" REFFIELDS="id"/>
+        <KEY NAME="attemptid" TYPE="foreign" FIELDS="attemptid" REFTABLE="observation_attempt" REFFIELDS="id"/>
+        <KEY NAME="criteriaid" TYPE="foreign" FIELDS="criteriaid" REFTABLE="observation_criteria" REFFIELDS="id"/>
+        <KEY NAME="observer_submissionid" TYPE="foreign" FIELDS="observer_submissionid" REFTABLE="observation_observer_submission" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="attemptid" UNIQUE="false" FIELDS="attemptid"/>
+        <INDEX NAME="criteriaid" UNIQUE="false" FIELDS="criteriaid"/>
+        <INDEX NAME="observer_submissionid" UNIQUE="false" FIELDS="observer_submissionid"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="observation_assessor_task_submission" COMMENT="Assessor submission for task">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="assessorid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="learner_task_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="outcome" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="null if not yet graded"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="assessorid" TYPE="foreign" FIELDS="assessorid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="learner_task_submissionid" TYPE="foreign" FIELDS="learner_task_submissionid" REFTABLE="observation_learner_task_submission" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="observation_assessor_feedback" COMMENT="Assessor feedback for task">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="attemptid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="assessor_task_submissionid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="text" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="text_format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="outcome" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="Outcome of assessment, NULL if not yet submitted"/>
+        <FIELD NAME="timesubmitted" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="assessor_task_submissionid" TYPE="foreign" FIELDS="assessor_task_submissionid" REFTABLE="observation_assessor_task_submission" REFFIELDS="id"/>
         <KEY NAME="attemptid" TYPE="foreign" FIELDS="attemptid" REFTABLE="observation_attempt" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="observation_item_witness" COMMENT="Observation item completion witness">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="topicitemid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="witnessedby" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="witnessedbyexternal" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="comment" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="timewitnessed" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
-        <KEY NAME="topicitemid" TYPE="foreign" FIELDS="topicitemid" REFTABLE="observation_topic_item" REFFIELDS="id"/>
-        <KEY NAME="witnessedby" TYPE="foreign" FIELDS="witnessedby" REFTABLE="user" REFFIELDS="id"/>
-      </KEYS>
-      <INDEXES>
-        <INDEX NAME="usertopicitem" UNIQUE="true" FIELDS="userid, topicitemid"/>
-        <INDEX NAME="timewitnessed" UNIQUE="false" FIELDS="timewitnessed"/>
-      </INDEXES>
-    </TABLE>
-    <TABLE NAME="observation_external_request" COMMENT="observation requests for feedback/observations from external users">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="observationid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="topicid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="observationid" TYPE="foreign" FIELDS="observationid" REFTABLE="observation" REFFIELDS="id"/>
-        <KEY NAME="topicid" TYPE="foreign" FIELDS="topicid" REFTABLE="observation_topic" REFFIELDS="id"/>
-        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
-      </KEYS>
-    </TABLE>
-    <TABLE NAME="observation_email_assignment" COMMENT="observation email assignments">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="externalrequestid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="email" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="timeassigned" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="viewed" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="token" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="externalrequestid" TYPE="foreign" FIELDS="externalrequestid" REFTABLE="observation_external_request" REFFIELDS="id"/>
-      </KEYS>
-    </TABLE>
+
   </TABLES>
 </XMLDB>

@@ -9,35 +9,63 @@ use stdClass;
 trait record_mapper
 {
     /**
+     * Create and return a moodle database record from current object
+     *
+     * @return stdClass record
+     */
+    public function to_record()
+    {
+        $rec = [];
+        foreach ($this as $key => $val)
+        {
+            $rec[$key] = $val;
+        }
+
+        return (object) $rec;
+    }
+
+    /**
      * Attempts to map existing database record values to class by either fetching record
-     * from database by id or mapping to provided values or existing object
+     * from database by id or mapping to provided values or existing object.
+     * Intended to be used from a constructor as return is void.
+     *
      * @param $id_or_record
      * @throws coding_exception
+     * @throws \dml_missing_record_exception
      */
-    private function create_from_id_or_map_to_record($id_or_record)
+    private function create_from_id_or_map_to_record($id_or_record): void
     {
         if (!is_null($id_or_record) && !empty($id_or_record))
         {
             if (is_object($id_or_record))
             {
+                // db record or class instance given
                 $this->map_to_record($id_or_record);
             }
             else if (is_numeric($id_or_record))
             {
-                $this->map_to_record(
-                    $this->fetch_record_from_id($id_or_record));
+                // id given, fetch from db
+                if ($record = self::read_record($id_or_record))
+                {
+                    $this->map_to_record($record);
+                }
+                else
+                {
+                    throw new \dml_missing_record_exception(self::TABLE, 'SELECT', ['id' => $id_or_record]);
+                }
             }
             else
             {
-                throw new coding_exception('Incorrect constructor argument passed ("'
-                                           . json_encode($id_or_record) . '") when initializing ' . __CLASS__);
+                throw new coding_exception(
+                    'Incorrect constructor argument passed ("' . json_encode($id_or_record) . '") when initializing '
+                    . get_class($this));
             }
         }
-        // else
-        // {
-        //     throw new coding_exception('No data provided when attempting to initialize "'
-        //                                . __CLASS__ . '" object');
-        // }
+        else
+        {
+            throw new coding_exception(
+                sprintf('No data or invalid id provided when attempting to initialize "%s"', static::class));
+        }
     }
 
     /**
@@ -60,21 +88,7 @@ trait record_mapper
         }
         else
         {
-            throw new coding_exception('Cannot map supplied record to ' . get_class($this) . ' - no data provided');
+            throw new coding_exception('Cannot map supplied record to ' . static::class . ' - no data provided');
         }
-    }
-
-    /**
-     * Create and return a moodle database record from current object
-     *
-     * @return stdClass record
-     */
-    public function get_record_from_object()
-    {
-        $rec = [];
-        foreach ($this as $key => $val)
-            $rec[$key] = $val;
-
-        return (object)$rec;
     }
 }

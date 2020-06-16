@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (C) 2015 onwards Catalyst IT
+ * Copyright (C) 2020 onwards Like-Minded Learning
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author  Eugene Venter <eugene@catalyst.net.nz>
+ * @author  Arthur Apanovics <arthur.a@likeminded.co.nz>
  * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,94 +25,57 @@
  *
  */
 
-use mod_observation\event\course_module_viewed;
-use mod_observation\models\observation;
-use mod_observation\user_observation;
+use mod_observation\lib;
+use mod_observation\observation;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once($CFG->dirroot . '/mod/observation/lib.php');
-require_once($CFG->dirroot . '/mod/observation/locallib.php');
-require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
+require_once('lib.php');
+require_once('locallib.php');
 
-$id = optional_param('id', 0, PARAM_INT); // Course_module ID, or
-$b  = optional_param('n', 0, PARAM_INT);  // observation instance ID.
+$cmid = required_param('id', PARAM_INT);
 
-list($observation, $course, $cm) = observation_check_page_id_params_and_init($id, $b); /* @var $observation observation */
+list($course, $cm) = get_course_and_cm_from_cmid($cmid);
+$context = context_module::instance($cmid);
 
 require_login($course, true, $cm);
 
-$event = course_module_viewed::create(array(
-    'objectid' => $PAGE->cm->instance,
-    'context'  => $PAGE->context,
-));
-$event->add_record_snapshot('course', $PAGE->course);
-$event->add_record_snapshot($PAGE->cm->modname, $observation->get_record_from_object());
-$event->trigger();
+// TODO: Event
+// $event = course_module_viewed::create(array(
+//     'objectid' => $PAGE->cm->instance,
+//     'context'  => $PAGE->context,
+// ));
+// $event->add_record_snapshot('course', $PAGE->course);
+// $event->add_record_snapshot($PAGE->cm->modname, $observation->to_record());
+// $event->trigger();
+
+$observation = new observation($cm, $USER->id);
+$name = $observation->get_formatted_name();
 
 // Print the page header.
-$PAGE->set_url('/mod/observation/view.php', array('id' => $cm->id));
-$PAGE->set_title(format_string($observation->name));
+$PAGE->set_url($observation->get_url());
+$PAGE->set_title($name);
 $PAGE->set_heading(format_string($course->fullname));
 
-// Check access - we're assuming only $USER access on this page
-$modcontext  = context_module::instance($cm->id);
-$canevaluate = has_capability('mod/observation:evaluate', $modcontext);
-$canevalself = has_capability('mod/observation:evaluateself', $modcontext);
-$cansignoff  = has_capability('mod/observation:signoff', $modcontext);
-$canmanage   = has_capability('mod/observation:manage', $modcontext);
-
-if ($canevalself && !($canevaluate || $cansignoff))
-{
-    // Seeing as the user can only self-evaluate, but nothing else, redirect them straight to the eval page
-    redirect(new moodle_url($CFG->wwwroot . '/mod/observation/evaluate.php',
-        array('userid' => $USER->id, 'bid' => $observation->id)));
-}
+$PAGE->add_body_class('observation-view');
 
 // Output starts here.
 echo $OUTPUT->header();
 
-// Manage topics button.
-if ($canmanage)
-{
-    echo html_writer::start_tag('div', array('class' => 'mod-observation-manage-btn'));
-    echo $OUTPUT->single_button(new moodle_url('/mod/observation/manage.php', array('cmid' => $cm->id)),
-        get_string('edittopics', 'observation'), 'get');
-    echo html_writer::end_tag('div');
-}
-
-// "Evaluate students" button
-if (($canevaluate || $cansignoff))
-{
-    echo html_writer::start_tag('div', array('class' => 'mod-observation-evalstudents-btn'));
-    echo $OUTPUT->single_button(new moodle_url('/mod/observation/report.php', array('cmid' => $cm->id)),
-        get_string('evaluatestudents', 'observation'), 'get');
-    echo html_writer::end_tag('div');
-}
-
-$userobservation = new user_observation($observation, $USER->id);
-
-// "Evaluate self" button
-if ($canevalself)
-{
-    echo html_writer::start_tag('div', array('class' => 'mod-observation-evalself-btn'));
-    echo $OUTPUT->single_button(new moodle_url('/mod/observation/evaluate.php',
-        array('userid' => $USER->id, 'bid' => $userobservation->id)),
-        get_string('evaluate', 'observation'), 'get');
-    echo html_writer::end_tag('div');
-}
-
-echo $OUTPUT->heading(format_string($observation->name));
-
-// Conditions to show the intro can change to look for own settings or whatever.
-if ($observation->intro)
-{
-    echo $OUTPUT->box(format_module_intro('observation', $observation, $cm->id), 'generalbox mod_introbox', 'observationintro');
-}
-
 /* @var $renderer mod_observation_renderer */
 $renderer = $PAGE->get_renderer('observation');
 
-echo $renderer->userobservation_topic_summary($userobservation, $cm);
+if (!$observation->is_activity_available())
+{
+    // whoever's viewing needs to know that activity is not available
+    \core\notification::warning(lib::get_activity_timing_error_string($observation));
+}
+else if ($enddate_msg = $observation->get_activity_end_date_or_null())
+{
+    // activity has an end date - display message
+    \core\notification::info($enddate_msg);
+}
+
+echo $renderer->view_activity($observation);
 
 // Finish the page.
 echo $OUTPUT->footer();

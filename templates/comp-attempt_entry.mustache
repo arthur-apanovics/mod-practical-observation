@@ -1,0 +1,23 @@
+<div class="attempt">
+    <div class="heading">
+        <h5 class="title-secondary">
+            {{#str}}attempt_for, observation, {{attempt_number}}{{/str}}
+        </h5>
+        <div class="attributes">
+            <span class="name">{{name}}</span> / <span class="timestamp">{{timesubmitted}}</span>
+        </div>
+    </div>
+
+    <div class="entry wrapper">
+        <div class="text">
+            {{{text}}}
+        </div>
+        <ul class="attachments">
+            {{#files}}
+                <li class="file">
+                    <a title="Download {{filename}}" href="{{{url}}}">{{filename}}</a>
+                </li>
+            {{/files}}
+        </ul>
+    </div>
+</div>

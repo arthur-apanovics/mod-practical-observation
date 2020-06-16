@@ -1,0 +1,88 @@
+<div>
+    {{#extra.group_selector_html}}
+        <div class="group-container" style="float: right; margin: 1em;">
+            {{{extra.group_selector_html}}}
+        </div>
+    {{/extra.group_selector_html}}
+    <h4>Learner submissions</h4>
+    <table class="submissions-summary">
+        <thead class="submisisons-header">
+        <tr>
+            <th colspan="1"></th>
+            <th colspan="2" class="attempts-group">Attempts</th>
+            <th colspan="4"></th>
+        </tr>
+        <tr>
+            <th>Learner</th>
+            <th class="attempts-group ">Observations</th>
+            <th class="attempts-group">Assessments</th>
+            <th>Tasks observed</th>
+            <th>Status</th>
+            <th>Complete</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#extra.submission_summary_data}}
+            <tr class="submissions-row">
+                <td class="name">
+                    <a href="{{{learner_profile_url}}}">
+                        {{learner}}
+                    </a>
+                </td>
+                <td class="attempts-group observation">
+                    {{! has attempts }}
+                    {{#has_attempts_summary}}
+                        <div class="hover-hint obs-tooltip">
+                            {{#flex_icon}} question-circle, assess:has_attempts_alt, observation{{/flex_icon}}
+                            <div class="content-top">
+                                <ul>
+                                    {{#attempts_observation_summary}}
+                                        <li>{{task}}: {{attempts}}</li>
+                                    {{/attempts_observation_summary}}
+                                </ul>
+                                <i></i> {{! tooltip arrow }}
+                            </div>
+                        </div>
+                    {{/has_attempts_summary}}
+                    {{! no observation attempts }}
+                    {{^has_attempts_summary}}
+                        -
+                    {{/has_attempts_summary}}
+                </td>
+                <td class="attempts-group assessment">
+                    {{attempt_number_assessment}}
+                </td>
+                <td class="observed">
+                    {{observed_count_formatted}}
+                </td>
+                <td class="submission-status">
+                    {{submission_status}}
+                </td>
+                <td class="completion">
+                    {{! TODO: TLMS12 - new way of assigning 'alt', etc. https://help.totaralearning.com/display/DEV/Flexible+Icons+API }}
+                    {{#is_complete}}
+                        {{#flex_icon}}check-circle-o, assess:activity_complete, observation, complete}{{/flex_icon}}
+                    {{/is_complete}}
+                    {{^is_complete}}
+                        {{#flex_icon}}
+                            times-circle-o, assess:activity_not_complete, observation, not-complete}{{/flex_icon}}
+                    {{/is_complete}}
+                </td>
+                <td class="actions">
+                    <a href="{{{module_root}}}/activity_assess.php?id={{cmid}}&learnerid={{userid}}">
+                    {{#flex_icon}}edit, assess:assess_task, observation{{/flex_icon}}
+                    </a>
+                </td>
+            </tr>
+        {{/extra.submission_summary_data}}
+
+        {{^extra.submission_summary_data}}
+            <tr>
+                <td>No submissions yet</td>
+            </tr>
+        {{/extra.submission_summary_data}}
+
+        </tbody>
+    </table>
+</div>

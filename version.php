@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (C) 2015 onwards Catalyst IT
+ * Copyright (C) 2020 onwards Like-Minded Learning
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author  Eugene Venter <eugene@catalyst.net.nz>
+ * @author  Arthur Apanovics <arthur.a@likeminded.co.nz>
  * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,9 +30,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component    = 'mod_observation';
-$plugin->version      = 2017101806;
-$plugin->release      = 'v1.0';
+$plugin->version      = 2020060300;
+$plugin->release      = 'v0.9';
 $plugin->requires     = 2015111606.00;
-$plugin->maturity     = MATURITY_STABLE;
+$plugin->maturity     = MATURITY_RC;
 $plugin->cron         = 900;
 $plugin->dependencies = array();

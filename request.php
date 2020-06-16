@@ -1,8 +1,6 @@
 <?php
 /*
- * This file is part of Totara LMS
- *
- * Copyright (C) 2010 onwards Totara Learning Solutions LTD
+ * Copyright (C) 2020 onwards Like-Minded Learning
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,285 +15,266 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author David Curry <david.curry@totaralms.com>
- * @author Simon Player <simon.player@totaralearning.com>
- * @package totara
- * @subpackage totara_feedback360
+ * @author  Arthur Apanovics <arthur.a@likeminded.co.nz>
+ * @package mod_observation
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_observation\models\email_assignment;
-use mod_observation\models\external_request;
-use mod_observation\user_external_request;
-use mod_observation\user_observation;
+use core\output\notification;
+use mod_observation\learner_attempt_base;
+use mod_observation\learner_task_submission;
+use mod_observation\lib;
+use mod_observation\observer;
+use mod_observation\observer_base;
+use mod_observation\task;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once($CFG->dirroot . '/mod/observation/lib.php');
-require_once($CFG->dirroot . '/mod/observation/locallib.php');
-require_once(dirname(__FILE__) . '/forms.php');
+require_once('lib.php');
+require_once('forms.php');
 
-require_login();
+$cmid = required_param('id', PARAM_INT);
+$learner_task_submission_id = required_param('learner_task_submission_id', PARAM_INT);
+$attempt_id = required_param('attempt_id', PARAM_INT);
 
-$cmid    = required_param('cmid', PARAM_INT); // Course_module ID
-$topicid = required_param('topicid', PARAM_INT); // observation topic id
-$action  = required_param('action', PARAM_ALPHA);
-$userid  = required_param('userid', PARAM_INT);
+list($course, $cm) = get_course_and_cm_from_cmid($cmid);
+$context = context_module::instance($cmid);
 
-$systemcontext = context_system::instance();
-$usercontext   = context_user::instance($userid);
+require_login($course, true, $cm);
 
-// Set up the page.
-$PAGE->set_url(new moodle_url('/totara/feedback360/index.php'));
-$PAGE->set_context($systemcontext);
-$PAGE->set_focuscontrol('');
-$PAGE->set_cacheable(true);
+// TODO: Event
 
-// TODO REQUEST PAGE BREADCRUMBS
-$PAGE->navbar->add('TODO: BREADCRUMBS');
+// creating class instances also validates provided id's
+$task_submission = new learner_task_submission($learner_task_submission_id);
+$attempt = new learner_attempt_base($attempt_id);
+$task_id = $task_submission->get($task_submission::COL_TASKID);
+$task = new task($task_id, $USER->id);
+$observation = $task->get_observation_base();
 
-$cm         = get_coursemodule_from_id('observation', $cmid);
-$modcontext = context_module::instance($cm->id);
-$asmanager  = $USER->id != $userid && has_capability('mod/observation:evaluate', $modcontext);
-$owner      = $DB->get_record('user', array('id' => $userid));
+$activity_url = $observation->get_url();
 
-//Now we can set up the rest of the page.
-if ($asmanager)
+// Print the page header.
+$PAGE->set_url(
+    OBSERVATION_MODULE_PATH . 'request.php',
+    ['id' => $cm->id, 'learner_task_submission_id' => $learner_task_submission_id, 'attempt_id' => $attempt_id]);
+
+$title = get_string(
+    'title:request', \OBSERVATION, [
+    'task_name'        => $task->get_formatted_name(),
+    'observation_name' => $observation->get_formatted_name()
+]);
+
+$PAGE->set_title($title);
+$PAGE->set_heading(format_string($course->fullname));
+
+$PAGE->add_body_class('observation-request');
+
+$task_url = new \moodle_url(
+    OBSERVATION_MODULE_PATH . 'task.php', ['id' => $observation->get_cm()->id, 'taskid' => $task->get_id_or_null()]);
+$PAGE->navbar->add(get_string('breadcrumb:task', \OBSERVATION, $task->get_formatted_name()), $task_url);
+$PAGE->navbar->add(get_string('breadcrumb:request', \OBSERVATION));
+
+/* @var $renderer mod_observation_renderer */
+$renderer = $PAGE->get_renderer('observation');
+
+if (!$observation->is_activity_available())
 {
-    $userxfeedback = get_string('userxfeedback', 'mod_observation', fullname($owner));
-    $PAGE->set_title($userxfeedback);
-    $PAGE->set_heading($userxfeedback);
+    // should not have gotten here in the first place
+    throw new moodle_exception(lib::get_activity_timing_error_string($observation), \OBSERVATION);
 }
-else
+
+function email_observer(observer_base $observer, array $lang_data): bool
 {
-    $strrequestfeedback = get_string('requestobservation', 'mod_observation');
-    $PAGE->set_title($strrequestfeedback);
-    $PAGE->set_heading($strrequestfeedback);
+    return lib::email_external(
+        $observer->get_email_or_null(),
+        get_string('email:observer_assigned_subject', OBSERVATION, $lang_data),
+        (!empty($message)
+            ? get_string('email:observer_assigned_body_with_user_message', OBSERVATION, $lang_data)
+            : get_string('email:observer_assigned_body', OBSERVATION, $lang_data)));
 }
 
-// Set up the javascript for the page.
-require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
-
-// Setup lightbox.
-local_js(array(
-    TOTARA_JS_DIALOG,
-    TOTARA_JS_TREEVIEW
-));
-
-$PAGE->requires->js('/totara/feedback360/js/preview.js', false);
-
-$user_observation = new user_observation($cm->instance, $userid);
-$topic    = $user_observation->get_topic_by_id($topicid);
-// Set up the forms based off of the action.
-if ($action == 'users')
+// is confirming observer change?
+if (optional_param('confirm', 0, PARAM_BOOL))
 {
-    $update           = optional_param('update', 0, PARAM_INT);
-    $selected         = optional_param('selected', '', PARAM_SEQUENCE);
-    $external_request = user_external_request::get_or_create_user_external_request_for_observation_topic(
-        $cm->instance, $topicid, $userid);
+    // we're replacing existing observer with new one,
+    // user has already confirmed the change
+    $submitted = new observer_base();
+    $submitted->set(observer::COL_FULLNAME, required_param(observer::COL_FULLNAME, PARAM_TEXT));
+    $submitted->set(observer::COL_PHONE, required_param(observer::COL_PHONE, PARAM_TEXT));
+    $submitted->set(observer::COL_EMAIL, required_param(observer::COL_EMAIL, PARAM_TEXT));
+    $submitted->set(observer::COL_POSITION_TITLE, required_param(observer::COL_POSITION_TITLE, PARAM_TEXT));
+    $message = required_param('message', PARAM_TEXT);
 
-    $data              = array();
-    $data['cmid']      = $cmid;
-    $data['topicid']   = $topic->id;
-    $data['topicname'] = $topic->name;
-    $data['userid']    = $userid;
-    $data['topicname'] = format_string($topic->name);
-    $data['duedate']   = $external_request->timedue;
-    $data['update']    = $update;
+    $observer = observer::update_or_create($submitted);
 
-    $data['emailexisting'] = array();
-    foreach ($external_request->email_assignments as $assignment)
+    $explanation = required_param('user_input', PARAM_TEXT);
+    $assignment = $task_submission->assign_observer($observer, $explanation);
+
+    // submit task submission and attempt
+    $attempt->submit($task_submission);
+    $task_submission->submit($attempt);
+
+    // send email to assigned observer
+    $lang_data = [
+        'learner_fullname'  => fullname(\core_user::get_user($task_submission->get_userid())),
+        'learner_message'   => $message,
+        'observer_fullname' => $observer->get_formatted_name_or_null(),
+        'task_name'         => $task->get_formatted_name(),
+        'activity_name'     => $observation->get_formatted_name(),
+        'activity_url'      => $activity_url,
+        'observe_url'       => $assignment->get_review_url(true),
+        'course_fullname'   => $course->fullname,
+        'course_shortname'  => $course->shortname,
+        'course_url'        => new \moodle_url('/course/view.php', ['id' => $course->id]),
+    ];
+    email_observer($observer, $lang_data);
+
+    redirect(
+        $activity_url,
+        get_string(
+            'notification:observer_assigned_new', 'observation',
+            ['task' => $task->get_formatted_name(), 'email' => $submitted->get(observer::COL_EMAIL)]),
+        null,
+        notification::NOTIFY_SUCCESS);
+}
+
+$form = new observation_assign_observer_form();
+// is submitting observer form?
+if ($data = $form->get_data())
+{
+    // observer object
+    $submitted = new observer_base();
+    $submitted->set(observer::COL_FULLNAME, $data->{observer::COL_FULLNAME});
+    $submitted->set(observer::COL_PHONE, $data->{observer::COL_PHONE});
+    $submitted->set(observer::COL_EMAIL, $data->{observer::COL_EMAIL});
+    $submitted->set(observer::COL_POSITION_TITLE, $data->{observer::COL_POSITION_TITLE});
+
+    // check if an ACTIVE assignment already exists
+    if ($current_assignment = $task_submission->get_active_observer_assignment_or_null())
     {
-        $data['emailexisting'][$assignment->id] = $assignment->email;
-    }
+        // observer already exists, we need to make some checks.
+        // check if submitted observer exists in database OR if submitted observer is NOT same as current one
+        $submitted_observer_id = observer::try_get_id_for_observer($submitted);
+        $current = $current_assignment->get_observer();
 
-    $args = array('args' => '{"userid":' . $userid . ','
-                            . '"observationid":' . $cmid . ','
-                            . '"topicid":' . $topicid . ','
-                            . '"sesskey":"' . sesskey()
-                            . '"}'
-    );
-
-    $PAGE->requires->js('/totara/feedback360/js/delete.js', false);
-
-    $mform = new observation_request_select_users();
-    $mform->set_data($data);
-}
-else if ($action == 'confirm')
-{
-    $emailnew    = required_param('emailnew', PARAM_TEXT);
-    $emailcancel = required_param('emailcancel', PARAM_TEXT);
-    $emailkeep   = required_param('emailkeep', PARAM_TEXT);
-    $newduedate  = required_param('duedate', PARAM_INT);
-    $oldduedate  = required_param('oldduedate', PARAM_INT);
-    $mform       = new observation_request_confirmation();
-
-    $data                = array();
-    $data['userid']      = $userid;
-    $data['cmid']        = $cmid;
-    $data['topicid']     = $topic->id;
-    $data['topicname']   = $topic->name;
-    $data['emailnew']    = $emailnew;
-    $data['emailcancel'] = $emailcancel;
-    $data['emailkeep']   = $emailkeep;
-    $data['oldduedate']  = $oldduedate;
-    $data['newduedate']  = $newduedate;
-    $data['strings']     = '';
-
-    $mform->set_data($data);
-}
-else
-{
-    print_error('error:unrecognisedaction', 'mod_observation', null, $action);
-}
-
-// Handle forms being submitted.
-if ($mform->is_cancelled())
-{
-    $cancelurl = new moodle_url('/mod/observation/view.php', array('id' => $cmid, 'userid' => $userid));
-    redirect($cancelurl);
-}
-else if ($data = $mform->get_data())
-{
-    if (!empty($cmid))
-    {
-        // There was a formid that we validated at the beginning of this page.
-        // This won't happen if the user is selecting a form to choose users for.
-        if ($cmid != $data->cmid)
+        // is learner attempt submitted?
+        if ($task_submission->is_observation_pending())
         {
-            // It doesn't match. No need to validate against user again as this shouldn't happen.
-            print_error('error:accessdenied', 'totara_feedback');
-        }
-    }
-
-    if ($action == 'users')
-    {
-        // Include the list of all external emails.
-        $newemail = array();
-        if (!empty($data->emailnew))
-        {
-            $newemail = explode("\r\n", $data->emailnew);
-        }
-
-        // Show cancellations.
-        $cancelemail = array();
-        $keepemail   = array();
-        if (!empty($data->emailcancel))
-        {
-            $cancelemail = explode(',', $data->emailcancel);
-        }
-        if (!empty($data->emailold))
-        {
-            $oldemail = explode(',', $data->emailold);
-
-            foreach ($oldemail as $email)
+            // yes, we are re-assigning a new observer - ignore if same
+            if ($current->get_id_or_null() == $submitted_observer_id)
             {
-                if (!in_array($email, $cancelemail))
-                {
-                    $keepemail[] = $email;
-                }
+                // same observer, notify learner
+                redirect(
+                    $activity_url,
+                    get_string(
+                        'notification:observer_assigned_no_change', 'observation',
+                        ['task' => $task->get_formatted_name(), 'email' => $current->get(observer::COL_EMAIL)]),
+                    null,
+                    notification::NOTIFY_ERROR);
             }
         }
 
-        if (!empty($newemail) || !empty($cancelemail) || $data->duedate != $data->oldduedate)
+        if (empty($submitted_observer_id) || ($submitted_observer_id != $current->get_id_or_null()))
         {
-            $params = array(
-                'cmid'        => $cmid,
-                'userid'      => $data->userid,
-                'topicid'     => $topicid,
-                'action'      => 'confirm', // <--- confirm action
-                'emailnew'    => implode(',', $newemail),
-                'emailkeep'   => implode(',', $keepemail),
-                'emailcancel' => implode(',', $cancelemail),
-                'duedate'     => $data->duedate,
-                'oldduedate'  => $data->oldduedate,
+            // we have an existing assignment but a different observer
+            // is being assigned (new or existing), confirm change
+            $lang_params = [
+                'current'       => $current->get_formatted_name_or_null(),
+                'current_email' => $current->get_email_or_null(),
+                'new'           => $submitted->get_formatted_name_or_null(),
+                'new_email'     => $submitted->get_email_or_null(),
+                'task'          => $task->get_formatted_name()
+            ];
+
+            $renderer->echo_confirmation_page_and_die(
+                get_string('request:confirm_change', 'observation', $lang_params),
+                [
+                    'confirm'                    => 1,
+                    observer::COL_FULLNAME       => $submitted->get(observer::COL_FULLNAME),
+                    observer::COL_PHONE          => $submitted->get(observer::COL_PHONE),
+                    observer::COL_EMAIL          => $submitted->get(observer::COL_EMAIL),
+                    observer::COL_POSITION_TITLE => $submitted->get(observer::COL_POSITION_TITLE),
+                    'message'                    => $data->message
+                ],
+                true,
+                get_string('request:input_prompt', 'observation')
             );
-
-            $url = new moodle_url('/mod/observation/request.php', $params);
-            redirect($url);
-        }
-        else
-        {
-            $params = array(
-                'cmid'    => $cmid,
-                'userid'  => $data->userid,
-                'topicid' => $topicid,
-                'action'  => 'users'
-            );
-
-            $url = new moodle_url('/mod/observation/request.php', $params);
-
-            totara_set_notification(
-                get_string('nochangestobemade', 'totara_feedback360'),
-                $url,
-                array('class' => 'notifysuccess'));
+            // dies here
         }
     }
-    else if ($action == 'confirm')
+    // no observer assignment OR submitted observer is the same as currently assigned observer
+
+    // attempt can be in a submitted state already, check
+    if (!$attempt->is_submitted())
     {
-        // Update the timedue in the request.
+        // create/update observer record
+        $observer = observer::update_or_create($submitted);
+        // assign observer to this submission
+        $assignment = $task_submission->assign_observer($observer);
 
-        $external_request = user_external_request::get_user_request_for_observation_topic($cm->instance, $topicid, $userid);
-
-        $timeduevalidation = external_request::validate_new_timedue(
-            $cm->instance, $topicid, $userid, $data->duedate);
-
-        // We're updating if it's still valid. If it's not, then ignore, the date entered by the user
-        // in the interface should have been found during the 'users' action so something else is happening here.
-        if (empty($timeduevalidation))
-        {
-            $external_request->timedue = $data->duedate;
-            $external_request->update();
-        }
-
-        $userfrom = $DB->get_record('user', array('id' => $userid));
-
-        if ($data->duenotifications)
-        {
-            $strvars               = new stdClass();
-            $strvars->userfrom     = fullname($userfrom);
-            $strvars->feedbackname = "$topic->name - $user_observation->name";
-            $strvars->timedue      = userdate($data->duedate, get_string('strftimedatetime'));
-
-            if ($asmanager)
-            {
-                $staffmember        = $DB->get_record('user', array('id' => $data->userid));
-                $strvars->staffname = fullname($staffmember);
-            }
-        }
-        else
-        {
-            $strvars =
-                // $userfrom =
-                null;
-        }
-
-        email_assignment::update_and_notify_email($data, $asmanager, $userfrom, $strvars, $external_request);
-
-        // Redirect to the observation page with a success notification.
-        if (empty($emailkeep) && empty($emailcancel))
-        {
-            $successstr = get_string('requestcreatedsuccessfully', 'totara_feedback360');
-        }
-        else
-        {
-            $successstr = get_string('requestupdatedsuccessfully', 'totara_feedback360');
-        }
-
-        $returnurl = new moodle_url('/mod/observation/view.php', array('id' => $cmid));
-        totara_set_notification($successstr, $returnurl, array('class' => 'notifysuccess'));
+        // submit task submission and attempt
+        $attempt->submit($task_submission);
+        $task_submission->submit($attempt);
     }
     else
     {
-        print_error('error:unrecognisedaction', 'totara_feedback360', null, $action);
+        // 'denied observation' scenario where a submission has already been made
+        if ($latest_assignment = $task_submission->get_latest_observer_assignment_or_null())
+        {
+            if (!$latest_assignment->is_declined())
+            {
+                throw new coding_exception(
+                    sprintf(
+                        'Attempt id %d has not been submitted when observation request was made',
+                        $attempt->get_id_or_null()));
+            }
+            else
+            {
+                // task submission status was set to 'in progress' when observation was declined, update to correct status
+                $task_submission->update_status_and_save(learner_task_submission::STATUS_OBSERVATION_PENDING);
+            }
+        }
+        else
+        {
+            throw new coding_exception(
+                sprintf(
+                    'No observer assignment exists for already submitted attempt with id %d',
+                    $attempt->get_id_or_null()));
+        }
+
+        // create/update observer record
+        $observer = observer::update_or_create($submitted);
+        // assign observer to this submission
+        $assignment = $task_submission->assign_observer($observer);
     }
+
+    // send email to assigned observer
+    $lang_data = [
+        'learner_fullname'  => fullname(\core_user::get_user($task_submission->get_userid())),
+        'learner_message'   => $data->message,
+        'observer_fullname' => $observer->get_formatted_name_or_null(),
+        'task_name'         => $task->get_formatted_name(),
+        'activity_name'     => $observation->get_formatted_name(),
+        'activity_url'      => $activity_url,
+        'observe_url'       => $assignment->get_review_url(true),
+        'course_fullname'   => $course->fullname,
+        'course_shortname'  => $course->shortname,
+        'course_url'        => new \moodle_url('/course/view.php', ['id' => $course->id]),
+    ];
+    email_observer($observer, $lang_data);
+
+    redirect(
+        $activity_url,
+        get_string(
+            'notification:observer_assigned_same', 'observation',
+            ['task' => $task->get_formatted_name(), 'email' => $submitted->get(observer::COL_EMAIL)]),
+        null,
+        notification::NOTIFY_SUCCESS);
 }
 
-$renderer = $PAGE->get_renderer('mod_observation');
-/* @var $renderer mod_observation_renderer */
+// not confirming change and not submitting form - display request observation page
+echo $OUTPUT->header();
 
-echo $renderer->header();
+echo $renderer->view_request_observation($task, $task_submission, $attempt);
 
-echo $renderer->display_userview_header($owner);
-
-$mform->display();
-
-echo $renderer->footer();
+// Finish the page.
+echo $OUTPUT->footer();

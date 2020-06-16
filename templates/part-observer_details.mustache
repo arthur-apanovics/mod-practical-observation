@@ -1,0 +1,42 @@
+<div class="observer-details-wrapper">
+    <div class="header">
+        {{#extra.is_learner}}
+            <h5>{{#str}}request:assigned_observer, observation{{/str}}</h5>
+            {{#extra.change_observer_url}}
+                (
+                <a id="change-observer" href="{{{extra.change_observer_url}}}">
+                    {{#str}}request:change_observer, observation{{/str}}
+                </a>
+                )
+            {{/extra.change_observer_url}}
+        {{/extra.is_learner}}
+        {{#extra.is_assessor}}
+            <h5>{{#str}}request:assigned_observer, observation{{/str}}</h5>
+        {{/extra.is_assessor}}
+    </div>
+    {{! print the actual table with observer details }}
+    {{> mod_observation/comp-observer_details_table}}
+    {{! extra stuff for assessors }}
+    {{#extra.is_assessor}}
+        {{#extra.is_assessing}}
+            <div class="meets-criteria-wrapper">
+                <div class="control-group">
+                    <a id="criteria-modal">Observer criteria</a>
+                </div>
+                <div class="control-group">
+                    <label title="If an observer does not meet criteria, mark this submission as Not Complete and provide an explanation in feedback"
+                           for="meets-criteria">
+                        {{#str}}assess:observer_meets_criteria, observation{{/str}}
+                    </label>
+                    <input name="meets-criteria"
+                           id="meets-criteria"
+                           type="checkbox"
+                        {{#extra.existing_feedback.is_complete}}
+                        {{! based on earlier feedback, this checkbox was ticked }}
+                           checked
+                        {{/extra.existing_feedback.is_complete}}
+                    ></div>
+            </div>
+        {{/extra.is_assessing}}
+    {{/extra.is_assessor}}
+</div>

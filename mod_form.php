@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (C) 2015 onwards Catalyst IT
+ * Copyright (C) 2020 onwards Like-Minded Learning
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author  Eugene Venter <eugene@catalyst.net.nz>
+ * @author  Arthur Apanovics <arthur.a@likeminded.co.nz>
  * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,6 +26,8 @@
  * It uses the standard core Moodle formslib. For more info about them, please
  * visit: http://docs.moodle.org/en/Development:lib/formslib.php
  */
+
+use mod_observation\lib;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -42,35 +44,73 @@ class mod_observation_mod_form extends moodleform_mod
      */
     public function definition()
     {
+        global $CFG;
 
         $mform = $this->_form;
 
         // Adding the "general" fieldset, where all the common settings are showed.
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
+        $element = mod_observation\observation::COL_NAME;
         // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('observationname', 'observation'), array('size' => '64'));
-        if (!empty($CFG->formatstringstriptags))
-        {
-            $mform->setType('name', PARAM_TEXT);
-        }
-        else
-        {
-            $mform->setType('name', PARAM_CLEAN);
-        }
-        $mform->addRule('name', null, 'required', null, 'client');
-        $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
-        $mform->addHelpButton('name', 'observationname', 'observation');
+        $mform->addElement('text', $element, get_string($element, OBSERVATION), array('size' => '64'));
+        // 'Remove HTML tags from all activity names'?
+        $type = !empty($CFG->formatstringstriptags)
+            ? PARAM_TEXT
+            : PARAM_CLEAN;
+        $mform->setType($element, $type);
+        $mform->addRule($element, null, 'required', null, 'client');
+        $mform->addRule($element, get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
+        $mform->addHelpButton($element, $element, OBSERVATION);
 
         // Adding the standard "intro" and "introformat" fields.
         $this->standard_intro_elements();
 
-        // Workflow
-        $mform->addElement('advcheckbox', 'managersignoff', get_string('managersignoff', 'observation'));
-        $mform->addElement('advcheckbox', 'itemwitness', get_string('itemwitness', 'observation'));
+        $element = \mod_observation\observation::COL_FAIL_ALL_TASKS;
+        $mform->addElement('advcheckbox', $element, get_string($element, OBSERVATION));
+        $mform->setDefault($element, false);
+        $mform->addHelpButton($element, $element, OBSERVATION);
 
-        // Add standard grading elements.
-        $this->standard_grading_coursemodule_elements();
+        $mform->addElement('header', 'intro_defaults', get_string('intro_defaults', OBSERVATION));
+        $mform->setExpanded('intro_defaults', true);
+
+        $default_intros = [
+            mod_observation\observation::COL_DEF_I_TASK_LEARNER,
+            mod_observation\observation::COL_DEF_I_TASK_OBSERVER,
+            mod_observation\observation::COL_DEF_I_TASK_ASSESSOR,
+            mod_observation\observation::COL_DEF_I_ASS_OBS_LEARNER,
+            mod_observation\observation::COL_DEF_I_ASS_OBS_OBSERVER,
+        ];
+        foreach ($default_intros as $element)
+        {
+            $mform->addElement(
+                'editor',
+                $element,
+                get_string($element, OBSERVATION),
+                ['rows' => 10],
+                lib::get_editor_file_options($this->context));
+            $mform->addHelpButton($element, $element, OBSERVATION);
+            $mform->setType($element, PARAM_RAW);// no XSS prevention here, users must be trusted
+        }
+
+        //------------------------------------AVAILABILITY-------------------------------------------
+        $mform->addElement('header', 'availabilityhdr', get_string('availability'));
+
+        // date open
+        $element = mod_observation\observation::COL_TIMEOPEN;
+        $mform->addElement(
+            'date_time_selector',
+            $element,
+            get_string($element, OBSERVATION),
+            array('optional' => true));
+
+        //date closed
+        $element = mod_observation\observation::COL_TIMECLOSE;
+        $mform->addElement(
+            'date_time_selector',
+            $element,
+            get_string($element, OBSERVATION),
+            array('optional' => true));
 
         // Add standard elements, common to all modules.
         $this->standard_coursemodule_elements();
@@ -79,18 +119,21 @@ class mod_observation_mod_form extends moodleform_mod
         $this->add_action_buttons();
     }
 
+
+
     function add_completion_rules()
     {
         $mform =& $this->_form;
 
-        $mform->addElement('advcheckbox', 'completiontopics', '', get_string('completiontopics', 'observation'));
-        $mform->setDefault('completiontopics', true);
-        return array('completiontopics');
+        $element = mod_observation\observation::COL_COMPLETION_TASKS;
+        $mform->addElement('advcheckbox', $element, '', get_string($element, OBSERVATION));
+        $mform->disabledIf('completion_tasks', 'completionusegrade', 'notchecked');
+        $mform->setDefault('completion_tasks', true);
+        return array('completion_tasks');
     }
 
     function completion_rule_enabled($data)
     {
-        return !empty($data['completiontopics']);
+        return !empty($data['completion_tasks']);
     }
-
 }

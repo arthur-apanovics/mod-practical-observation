@@ -1,0 +1,43 @@
+<div class="task-header">
+    <h3>
+        {{#str}}request:page_header, observation, {{{extra.name}}}{{/str}}
+    </h3>
+    {{{extra.int_assign_obs_learner}}}
+</div>
+
+<div class="assign-from-history-container">
+    <h5 class="hover-hint" title="{{#str}}request:table_title_help, observation{{/str}}">
+        {{#str}}request:table_title, observation{{/str}}
+    </h5>
+    <table id="observer-history-table" class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th></th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {{#extra.course_observer_assignments}}
+            <tr class="observer-row"
+                data-id="{{id}}"
+                data-fullname="{{observer.fullname}}"
+                data-phone="{{observer.phone}}"
+                data-email="{{observer.email}}"
+                data-position_title="{{observer.position_title}}"
+                data-active="{{#active}}1{{/active}}{{^active}}0{{/active}}">
+                <td>{{observer.fullname}} ({{observer.email}}) {{#active}}<i>(current observer)</i>{{/active}}</td>
+                <td>
+                    <a href="#" class="assign">Assign</a>
+                </td>
+            </tr>
+        {{/extra.course_observer_assignments}}
+        {{^extra.course_observer_assignments}}
+            <tr>
+                <td>Observers that you have previously assigned in this module will appear here</td>
+                <td></td>
+            </tr>
+        {{/extra.course_observer_assignments}}
+        </tbody>
+    </table>
+</div>

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (C) 2015 onwards Catalyst IT
+ * Copyright (C) 2020 onwards Like-Minded Learning
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,916 +15,1083 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author  Eugene Venter <eugene@catalyst.net.nz>
+ * @author  Arthur Apanovics <arthur.a@likeminded.co.nz>
  * @package mod_observation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-use core\output\flex_icon;
-use mod_observation\models\completion;
-use mod_observation\models\email_assignment;
-use mod_observation\models\observation;
-use mod_observation\user_attempt;
-use mod_observation\user_observation;
-use mod_observation\user_topic;
-use mod_observation\user_topic_item;
+use core\notification;
+use mod_observation\assessor_feedback;
+use mod_observation\assessor_task_submission;
+use mod_observation\learner_attempt;
+use mod_observation\learner_attempt_base;
+use mod_observation\learner_task_submission;
+use mod_observation\learner_task_submission_base;
+use mod_observation\lib;
+use mod_observation\observation;
+use mod_observation\observation_base;
+use mod_observation\observer;
+use mod_observation\observer_assignment;
+use mod_observation\observer_feedback;
+use mod_observation\task;
+use mod_observation\task_base;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once($CFG->dirroot . '/mod/observation/lib.php');
+require_once('forms.php');
 
 class mod_observation_renderer extends plugin_renderer_base
 {
-    private $course;
-    private $cm;
-    private $context;
+    public function __construct(moodle_page $page, $target)
+    {
+        parent::__construct($page, $target);
+    }
+
+    // /**
+    //  * @param user_topic $topic
+    //  * @return string icon html
+    //  * @throws coding_exception
+    //  */
+    // public function get_completion_icon(user_topic $topic): string
+    // {
+    //     switch ($topic->completion_status)
+    //     {
+    //         case completion::STATUS_COMPLETE:
+    //             $completionicon = 'check-success';
+    //             break;
+    //         case completion::STATUS_REQUIREDCOMPLETE:
+    //             $completionicon = 'check-warning';
+    //             break;
+    //         default:
+    //             $completionicon = 'times-danger';
+    //     }
+    //     if (!empty($completionicon))
+    //     {
+    //         $completionicon = $this->output->flex_icon($completionicon,
+    //             ['alt' => get_string('completionstatus' . $topic->completion_status, 'observation')]);
+    //     }
+    //     $completionicon = html_writer::tag('span', $completionicon, ['class' => 'observation-topic-status']);
+    //
+    //     return $completionicon;
+    // }
 
     /**
-     * @param user_observation        $userobservation
-     * @throws coding_exception
-     * @throws dml_exception
-     */
-    private function set_properties(user_observation $userobservation): void
-    {
-        global $DB;
-
-        $this->course  = $DB->get_record('course', array('id' => $userobservation->course), '*', MUST_EXIST);
-        $this->cm      = get_coursemodule_from_instance('observation', $userobservation->id, $this->get_course()->id, false, MUST_EXIST);
-        $this->context = context_module::instance($this->get_cm()->id);
-    }
-
-    private function get_course()
-    {
-        if (!isset($this->course))
-        {
-            throw new coding_exception('renderer course not set');
-        }
-
-        return $this->course;
-    }
-
-    private function get_cm()
-    {
-        if (!isset($this->cm))
-        {
-            throw new coding_exception('renderer course module not set');
-        }
-
-        return $this->cm;
-    }
-
-    private function get_context()
-    {
-        if (!isset($this->context))
-        {
-            $this->context = context_module::instance($this->get_cm()->id);
-        }
-
-        return $this->context;
-    }
-
-    /**
-     * Topic configuration page
+     * Render main activity view
      *
-     * @param      $observation
-     * @param bool $config
+     * @param observation $observation
+     * @return string
+     * @throws moodle_exception
+     */
+    public function view_activity(observation $observation): string
+    {
+        global $USER;
+
+        $template_data = $observation->export_template_data();
+        $capabilities = $template_data['capabilities'];
+        $out = '';
+
+        $out .= $this->activity_header($template_data);
+
+        // assessor view
+        if ($capabilities['can_assess'] || $capabilities['can_viewsubmissions'])
+        {
+            $cm = $observation->get_cm();
+
+            // determine group
+            $userids = null; // this will be used to filter submissions
+            if (groups_get_activity_groupmode($cm))
+            {
+                // Groups are being used, so get the group selector
+                $context = context_module::instance($cm->id);
+                $template_data['extra']['group_selector_html'] = groups_print_activity_menu(
+                    $cm, $observation->get_url(), true, !has_capability('moodle/site:accessallgroups', $context));
+
+                $current_group = groups_get_activity_group($cm, true);
+                if ($current_group !== 0) // 0 = all users
+                {
+                    $userids = $this->get_usersids_in_group_or_null($current_group, $context);
+                    if (is_null($userids))
+                    {
+                        notification::add(
+                            get_string('no_learners_in_group', \OBSERVATION), notification::WARNING);
+                    }
+                }
+            }
+
+            $template_data['extra']['submission_summary_data'] =
+                $observation->export_submissions_summary_template_data($userids);
+
+            $out .= $this->render_from_template('part-assessor_table', $template_data);
+        }
+        // learner view or preview
+        else if ($capabilities['can_submit'] && $observation->is_activity_available())
+        {
+            // create submission if none exists
+            $submission = $observation->get_submission_or_create($USER->id);
+
+            if ($submission->is_assessment_complete())
+            {
+                notification::success(
+                    get_string('notification:activity_complete', 'observation'));
+            }
+            else if ($submission->is_observation_incomplete())
+            {
+                notification::warning(
+                    get_string('notification:activity_observation_not_complete', 'observation'));
+            }
+            else if ($submission->is_assessment_incomplete())
+            {
+                if ($observation->get(observation::COL_FAIL_ALL_TASKS))
+                {
+                    notification::error(
+                        get_string('notification:activity_assessment_not_complete_all', 'observation'));
+                }
+                else
+                {
+                    notification::error(
+                        get_string('notification:activity_assessment_not_complete_partial', 'observation'));
+                }
+            }
+            else if ($declined = $submission->get_declined_observation_assignments())
+            {
+                // we have at least one declined observation request
+                foreach ($declined as $observer_assignment)
+                {
+                    $task_submission = $observer_assignment->get_learner_task_submission_base();
+                    $attempt = $task_submission->get_latest_learner_attempt_or_null();
+                    $task = $task_submission->get_task_base();
+                    $link = new moodle_url(
+                        OBSERVATION_MODULE_PATH . 'request.php', [
+                            'id'                         => $observation->get_cm()->id,
+                            'learner_task_submission_id' => $task_submission->get_id_or_null(),
+                            'attempt_id'                 => $attempt->get_id_or_null(),
+                        ]);
+
+                    $lang_data = [
+                        'observer' => $observer_assignment->get_observer()->get_formatted_name_or_null(),
+                        'task_name' => $task->get_formatted_name(),
+                        'assign_url_with_text' => html_writer::link($link, 'here')
+                    ];
+                    notification::error(
+                        get_string('notification:observer_declined_observation', 'observation', $lang_data));
+                }
+            }
+            else if ($submission->all_tasks_observation_pending_or_in_progress())
+            {
+                notification::info(
+                    get_string('notification:activity_wait_for_observers', 'observation'));
+            }
+            else if ($submission->is_all_tasks_no_learner_action_required())
+            {
+                notification::info(
+                    get_string('notification:activity_wait_for_mixed', 'observation'));
+            }
+
+            $out .= $this->render_from_template('view-activity', $template_data);
+        }
+        else if ($capabilities['can_view'])
+        {
+            // notify of preview mode
+            notification::INFO(get_string('notification:previewing_activity', \OBSERVATION));
+
+            $out .= $this->render_from_template('view-activity', $template_data);
+        }
+
+        // validation for 'managers'
+        if ($capabilities['can_manage'])
+        {
+            // check all tasks have criteria
+            if (!$observation->all_tasks_have_criteria())
+            {
+                notification::warning(get_string('manage:missing_criteria', 'observation'));
+            }
+
+            $out .= $this->render_from_template('part-edit_tasks_button', $template_data);
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param observation $observation filtered by learner
+     * @param int         $learnerid
      * @return string
      * @throws coding_exception
      * @throws dml_exception
-     * @throws moodle_exception
+     * @throws dml_missing_record_exception
      */
-    function config_topics($observation, $config = true)
+    public function view_activity_assess(observation $observation, int $learnerid): string
     {
-        global $DB;
+        $template_data = $observation->export_template_data();
 
-        $out = '';
-        $out .= html_writer::start_tag('div', array('id' => 'config-mod-observation-topics'));
-
-        $topics = $DB->get_records('observation_topic', array('observationid' => $observation->id), 'id');
-        if (empty($topics))
+        if ($observation->can_assess($learnerid))
         {
-            return html_writer::tag('p', get_string('notopics', 'observation'));
-        }
-        foreach ($topics as $topic)
-        {
-            $out .= html_writer::start_tag('div', array('class' => 'config-mod-observation-topic'));
-            $out .= html_writer::start_tag('div', array('class' => 'config-mod-observation-topic-heading'));
-            $optionalstr =
-                $topic->completionreq == completion::REQ_OPTIONAL ? ' (' . get_string('optional', 'observation') . ')' : '';
-            $out .= format_string($topic->name) . $optionalstr;
-            if ($config)
+            // only tasks that failed assessment previously have to be assessed when fail_all_tasks is off
+            if (!$observation->get(observation::COL_FAIL_ALL_TASKS))
             {
-                $additemurl = new moodle_url('/mod/observation/topicitem.php', array('bid' => $observation->id, 'tid' => $topic->id));
-                $out .= $this->output->action_icon($additemurl,
-                    new flex_icon('plus', ['alt' => get_string('additem', 'observation')]));
-                $editurl = new moodle_url('/mod/observation/topic.php', array('bid' => $observation->id, 'id' => $topic->id));
-                $out .= $this->output->action_icon($editurl,
-                    new flex_icon('edit', ['alt' => get_string('edittopic', 'observation')]));
-                $deleteurl =
-                    new moodle_url('/mod/observation/topic.php', array('bid' => $observation->id, 'id' => $topic->id, 'delete' => 1));
-                $out .= $this->output->action_icon($deleteurl,
-                    new flex_icon('delete', ['alt' => get_string('deletetopic', 'observation')]));
+                foreach ($observation->get_tasks() as $task)
+                {
+                    if (!$task->can_assess($learnerid, $observation))
+                    {
+                        // keys are not indexed by id, we have to loop over every task to find correct one...
+                        $template_data['tasks'] = array_map(
+                            function ($task_template) use ($task)
+                            {
+                                if ($task_template['id'] == $task->get_id_or_null())
+                                {
+                                    $task_template['task_extra']['do_not_assess'] = true;
+                                }
+                                return $task_template;
+                            }, $template_data['tasks']);
+                    }
+                }
             }
-            $out .= html_writer::end_tag('div');
 
-            $out .= $this->config_topic_items($observation->id, $topic->id, $config);
-            $out .= html_writer::end_tag('div');
+            $template_data['extra']['is_assessing'] = true;
+            $template_data['extra']['cmid'] = $observation->get_cm()->id;
+            $template_data['extra']['activity_submission_id'] =
+                $observation->get_submission_or_null($learnerid)->get_id_or_null();
+            $template_data['extra']['can_release_grade'] = $observation->can_release_grade($learnerid);
         }
 
-        $out .= html_writer::end_tag('div');
+        $template_data['extra']['learnerid'] = $learnerid;
+
+        return $this->render_from_template_with_header('view-activity', $template_data);
+    }
+
+    public function view_manage(observation $observation): string
+    {
+        $template_data = $observation->export_template_data();
+        $out = '';
+
+        if ($observation->has_submissions(true))
+        {
+            // all submissions are preentry state, allow editing with a warning
+            notification::add(get_string('manage:editing_danger', OBSERVATION), notification::WARNING);
+            // override to allow editing
+            $template_data['has_submissions'] = false;
+        }
+
+        $out .= $this->render_from_template('view-manage_tasks', $template_data);
+
+        return $out;
+    }
+
+    public function view_request_observation(
+        task $task, learner_task_submission $learner_task_submission, learner_attempt_base $attempt): string
+    {
+        $observation_base = new observation_base($task->get(task::COL_OBSERVATIONID));
+        $template_data = $learner_task_submission->export_template_data();
+        $out = '';
+
+        // save resources by not exporting all task data
+        $template_data['extra'][task::COL_NAME] = $task->get_formatted_name();
+        $template_data['extra'][task::COL_INT_ASSIGN_OBS_LEARNER] = format_text(
+            $task->get(task::COL_INT_ASSIGN_OBS_LEARNER), FORMAT_HTML);
+
+        $template_data['extra']['course_observer_assignments'] = lib::export_template_data_from_array(
+            $learner_task_submission->get_course_level_observer_assignments());
+
+        $this->page->requires->js_call_amd(OBSERVATION_MODULE . '/assign_observer_view', 'init');
+        $out .= $this->render_from_template('view-assign_observer', $template_data);
+
+        $form = new observation_assign_observer_form(
+            null, [
+            'id'                    => $observation_base->get_cm()->id,
+            'learner_task_submission_id' => $learner_task_submission->get_id_or_null(),
+            'attempt_id' => $attempt->get_id_or_null(),
+        ]);
+        $out .= $form->render();
 
         return $out;
     }
 
     /**
-     * Topic Item configuration page
-     *
-     * @param      $observationid
-     * @param      $topicid
-     * @param bool $config
+     * @param observation_base    $observation
+     * @param observer_assignment $observer_assignment
+     * @return string
+     * @throws coding_exception
+     */
+    public function view_observer_landing(
+        observation_base $observation, observer_assignment $observer_assignment): string
+    {
+        $task = $observer_assignment->get_task_base();
+        $template_data = $observer_assignment->get_observer()->export_template_data();
+        $template_data['extra'][task::COL_INT_ASSIGN_OBS_OBSERVER] = $task->get(task::COL_INT_ASSIGN_OBS_OBSERVER);
+        $template_data['extra'][observer_assignment::COL_TOKEN] =
+            $observer_assignment->get(observer_assignment::COL_TOKEN);
+        $out = '';
+
+        $this->page->requires->js_call_amd(OBSERVATION_MODULE . '/observer_view', 'init');
+        $out .= $this->render_from_template('view-observer_landing', $template_data);
+
+        return $out;
+    }
+
+    /**
+     * @param observation_base $observation_base
+     * @param task             $task
      * @return string
      * @throws coding_exception
      * @throws dml_exception
+     * @throws dml_missing_record_exception
      * @throws moodle_exception
      */
-    function config_topic_items($observationid, $topicid, $config = true)
+    public function view_task_learner(observation_base $observation_base, task $task): string
     {
-        global $DB;
+        global $USER;
 
-        $out = '';
+        $cm = $observation_base->get_cm();
 
-        $items = $DB->get_records('observation_topic_item', array('topicid' => $topicid), 'id');
+        $template_data = $task->export_template_data();
 
-        $out .= html_writer::start_tag('div', array('class' => 'config-mod-observation-topic-items'));
-        foreach ($items as $item)
+        // learners can only see feedback from last observation - remove all feedback except for last one
+        foreach ($template_data['criteria'] as &$criteria)
         {
-            $out .= html_writer::start_tag('div', array('class' => 'config-mod-observation-topic-item'));
-            $optionalstr =
-                $item->completionreq == completion::REQ_OPTIONAL ? ' (' . get_string('optional', 'observation') . ')' : '';
-            $out .= format_string($item->name) . $optionalstr;
-            if ($config)
+            // we could check the learner task submission object for multiple observations but this is more reliable
+            if (count($criteria['observer_feedback']) > 1)
             {
-                $editurl = new moodle_url('/mod/observation/topicitem.php',
-                    array('bid' => $observationid, 'tid' => $topicid, 'id' => $item->id));
-                $out .= $this->output->action_icon($editurl,
-                    new flex_icon('edit', ['alt' => get_string('edititem', 'observation')]));
-                $deleteurl = new moodle_url('/mod/observation/topicitem.php',
-                    array('bid' => $observationid, 'tid' => $topicid, 'id' => $item->id, 'delete' => 1));
-                $out .= $this->output->action_icon($deleteurl,
-                    new flex_icon('delete', ['alt' => get_string('deleteitem', 'observation')]));
+                $criteria['observer_feedback'] = end($criteria['observer_feedback']);
             }
-            $out .= html_writer::end_tag('div');
         }
-        $out .= html_writer::end_tag('div');
 
-        return $out;
-    }
-
-    /**
-     * @param user_observation $user_observation
-     * @param stdClass $cm course module
-     * @return string html
-     * @throws coding_exception
-     * @throws moodle_exception
-     */
-    function userobservation_topic_summary(user_observation $user_observation, stdClass $cm)
-    {
+        // lightweight data to render task header
+        $header_data = [
+            task::COL_NAME => $template_data['name'],
+            'intro'        => $template_data['intro_learner']
+        ];
+        $capabilities = $observation_base->export_capabilities();
         $out = '';
-        $data = [];
-        $data['has_topics'] = !empty($user_observation->topics);
 
-        foreach ($user_observation->topics as $topic)
+        if ($capabilities['can_submit'] && $observation_base->is_activity_available())
         {
-            $topic_data = [];
-            $topic_data['id'] = $topic->id;
-            $topic_data['title'] = $topic->name;
-            $topic_data['is_submitted'] = $topic->is_submitted();
-            $topic_data['submission_status_icon'] = $this->get_topic_submission_status_icon($topic);
-            $topic_data['completion_icon_html'] = $this->get_completion_icon($topic);
+            // learner task submission
+            $task_submission = $task->get_learner_task_submission_or_create($USER->id);
 
-            $topic_data['url'] = new moodle_url('/mod/observation/viewtopic.php',
-                ['id' => $cm->id, 'topic' => $topic->id]);
-            $topic_data['manage_url'] = new moodle_url('/mod/observation/request.php',
-                ['cmid' => $cm->id, 'topicid' => $topic->id, 'userid' => $user_observation->userid, 'action' => 'users']);
+            if ($task_submission->learner_can_attempt_or_create())
+            {
+                $attempt = $task_submission->get_latest_attempt_or_null();
+                $context = context_module::instance($cm->id);
 
-            $data['topics'][] = $topic_data;
+                // render task header
+                $out .= $this->render_from_template('part-task_header', $header_data);
+
+                // since we're not looping over submitted attempts we need to manually provide attempt number
+                $template_data['extra']['attempt_number'] = $attempt->get(learner_attempt::COL_ATTEMPT_NUMBER);
+
+                // text editor
+                $template_data['extra']['editor_html'] = $this->text_editor(
+                    learner_attempt::class,
+                    $context,
+                    $attempt->get(learner_attempt::COL_TEXT),
+                    $attempt->get(learner_attempt::COL_TEXT_FORMAT)
+                );
+                // JS validation
+                $this->page->requires->js_call_amd(
+                    OBSERVATION_MODULE . '/submission_validation',
+                    'init',
+                    ['submissionType' => 'learner']);
+
+                // file manager
+                $template_data['extra']['filemanager_html'] =
+                    $this->files_input($attempt->get_id_or_null(), observation::FILE_AREA_TRAINEE, $context);
+
+                // id's
+                $template_data['extra']['learner_task_submission_id'] = $task_submission->get_id_or_null();
+                $template_data['extra']['attempt_id'] = $attempt->get_id_or_null();
+
+                // tell template that there will be a new attempt
+                $template_data['extra']['is_submission'] = true;
+                // save time later by including cmid while whe have it easily available
+                $template_data['extra']['cmid'] = $cm->id;
+
+                // display notification
+                if ($observer_assignment = $task_submission->get_active_observer_assignment_or_null())
+                {
+                    $observer_submission =  $observer_assignment->get_observer_submission_base_or_null();
+                    if (!$observer_submission->is_complete())
+                    {
+                        notification::error(get_string('notification:task_observation_not_complete', \OBSERVATION));
+                    }
+                }
+                if ($assessor_submission = $task_submission->get_assessor_task_submission_or_null())
+                {
+                    if ($feedback = $attempt->get_assessor_feedback_or_null())
+                    {
+                        // this attempt has feedback from assessor
+                        if ($feedback->get(assessor_feedback::COL_OUTCOME) === assessor_feedback::OUTCOME_NOT_COMPLETE)
+                        {
+                            // attempt was marked as 'failed' by assessor
+                            notification::error(
+                                get_string('notification:task_assessment_not_complete', \OBSERVATION));
+                        }
+                    }
+                }
+            }
+            else if ($task_submission->is_observation_pending_or_in_progress()
+                || $task_submission->is_observation_declined())
+            {
+                // render task header
+                $out .= $this->render_from_template('part-task_header', $header_data);
+
+                // render observer details
+                $observer_assignment = $task_submission->get_latest_observer_assignment_or_null();
+                $observer = $observer_assignment->get_observer();
+                $observer_template_data = $observer->export_template_data();
+                // enables 'change observer' link
+                $observer_template_data['extra']['is_learner'] = true;
+                // check if declined observation request
+                $observer_template_data['extra']['is_declined'] = $observer_assignment->is_declined();
+
+                // allow to change observer if previous observer hasn't accepted yet
+                if ($task_submission->is_observation_pending() || $observer_assignment->is_declined())
+                {
+                    // it is easier to generate this link here rather than the template
+                    $attempt = $task_submission->get_latest_attempt_or_null();
+                    $observer_template_data['extra']['change_observer_url'] = new moodle_url(
+                        OBSERVATION_MODULE_PATH . 'request.php',
+                        [
+                            'id'                         => $cm->id,
+                            'learner_task_submission_id' => $task_submission->get_id_or_null(),
+                            'attempt_id'                 => $attempt->get_id_or_null(),
+                        ]);
+                }
+
+                $out .= $this->render_from_template('part-observer_details', $observer_template_data);
+
+                if ($observer_assignment->is_declined())
+                {
+                    $lang_data = [
+                        'observer'  => $observer->get_formatted_name_or_null(),
+                        'task_name' => $task->get_formatted_name(),
+                    ];
+                    notification::error(
+                        get_string('notification:observer_declined_observation_in_task', 'observation', $lang_data));
+                }
+                else
+                {
+                    notification::info(
+                        get_string(
+                            'notification:observation_request_sent', 'observation',
+                            $observer->get(observer::COL_EMAIL)));
+                }
+            }
+            else if ($task_submission->is_assessment_pending() || $task_submission->is_assessment_in_progress())
+            {
+                notification::info(get_string('notification:activity_wait_for_assess', \OBSERVATION));
+            }
+            else if ($task_submission->is_assessment_complete())
+            {
+                notification::success(get_string('notification:task_complete', OBSERVATION));
+            }
+
+            $out .= $this->render_from_template('view-task_learner', $template_data);
         }
-
-        $out .= $this->render_from_template('mod_observation/topic_summary', $data);
-
-        return $out;
-    }
-
-    /**
-     * Renders all observation topic content
-     *
-     * @param user_observation $userobservation
-     * @param bool     $evaluate
-     * @param bool     $signoff
-     * @param bool     $itemwitness
-     * @return string html
-     */
-    function user_observation(user_observation $userobservation, $evaluate = false, $signoff = false, $itemwitness = false)
-    {
-        $out = '';
-        $out .= html_writer::start_tag('div', array('id' => 'mod-observation-user-observation'));
-
-        foreach ($userobservation->topics as $topic)
+        else if ($capabilities['can_view'])
         {
-            $out .= $this->user_topic($userobservation, $topic, $evaluate, $signoff, $itemwitness);
-        }
+            // task preview
+            $context = context_module::instance($cm->id);
 
-        $out .= html_writer::end_tag('div');  // mod-observation-user-observation
+            $text = null; // will default to lang string
+            if ($capabilities['can_submit'] && !$observation_base->is_activity_available())
+            {
+                // learner locked out of submitting, display message in editor as reminder
+                $text = lib::get_activity_timing_error_string($observation_base);
+            }
 
-        return $out;
-    }
+            // preview text editor
+            $template_data['extra']['editor_html'] = $this->text_editor_preview($context, $text);
+            // preview file manager
+            $template_data['extra']['filemanager_html'] = $this->files_input_preview($context);
 
-    /**
-     * @param user_observation   $userobservation
-     * @param user_topic $topic
-     * @param bool       $evaluate
-     * @param bool       $signoff
-     * @param bool       $itemwitness
-     * @return string html
-     */
-    public function user_topic(user_observation $userobservation, user_topic $topic, $evaluate = false, $signoff = false, $itemwitness = false)
-    {
-        global $PAGE;
-
-        $this->set_properties($userobservation);
-
-        $submitted = $topic->is_submitted();
-        $out       = '';
-
-        if ($submitted && !$evaluate)
-        {
-            \core\notification::add('Submisison is locked until an observer has reviewed or released it', \core\output\notification::NOTIFY_INFO);
-        }
-
-        // open topic container
-        $out .= $this->get_topic_start($topic);
-
-        if ($evaluate)
-        {
-            $out .= html_writer::div(format_text($topic->observerintro, $topic->observerintroformat), 'observation-topic_intro observation-topic_observerintro');
+            $out .= $this->render_from_template('view-task_preview', $template_data);
         }
         else
         {
-            $out .= html_writer::div(format_text($topic->intro, $topic->introformat), 'observation-topic_intro');
+            print_error('Sorry, you don\'t have permission to view this page');
         }
 
-        // render topic table
-        $out .= $this->get_topic_table($userobservation, $topic, $evaluate, $submitted);
+        // TODO: STATUS FAKE BLOCK
 
-        // TOPIC SIGNOFF
-        if ($userobservation->managersignoff)
+        return $out;
+    }
+
+    public function view_task_observer(
+        observation_base $observation, observer_assignment $observer_assignment): string
+    {
+        $learner_task_submission = new learner_task_submission($observer_assignment->get_learner_task_submission_base());
+        $observer_submission = $observer_assignment->get_observer_submission_or_create();
+        $userid = $learner_task_submission->get_userid();
+        $task = new task($learner_task_submission->get_task_base(), $userid);
+
+        $cm = $observation->get_cm();
+        $context = context_module::instance($cm->id);
+
+        $template_data = $task->export_template_data();
+        $template_data['extra']['cmid'] = $cm->id;
+        $template_data['extra']['observer_submission_id'] = $observer_submission->get_id_or_null();
+        $out = '';
+
+        // render editors for criteria that require feedback
+        unset($template_data['criteria']); // we will re-populate criteria data manually
+        foreach ($task->get_criteria() as $criteria)
         {
-            $out .= html_writer::start_tag('div',
-                array('class' => 'mod-observation-topic-signoff', 'observation-topic-id' => $topic->id));
-            $out .= get_string('managersignoff', 'observation');
-            if ($signoff)
+            // ensure feedback exists
+            $attempt = $learner_task_submission->get_latest_attempt_or_null();
+            $feedback = $observer_assignment->get_observer_feedback_or_create($criteria, $attempt);
+
+            $criteria_data = $criteria->export_template_data();
+            $criteria_data['extra']['is_observation'] = true;
+            $criteria_data['extra']['attempt_number'] = $attempt->get(learner_attempt::COL_ATTEMPT_NUMBER);
+            $criteria_data['extra']['feedback_id'] = $feedback->get_id_or_null();
+
+            if ($criteria->is_feedback_required())
             {
-                $out .= $this->output->flex_icon($topic->signoff->signedoff ? 'completion-manual-y' :
-                    'completion-manual-n',
-                    ['classes' => 'observation-topic-signoff-toggle']);
+                list($base) = lib::get_editor_attributes_for_class(observer_feedback::class);
+                $criteria_data['extra']['editor_html'] = $this->text_editor(
+                    observer_feedback::class,
+                    $context,
+                    $feedback->get(observer_feedback::COL_TEXT),
+                    $feedback->get(observer_feedback::COL_TEXT_FORMAT),
+                    sprintf('criteria[%d][%s]', $criteria->get_id_or_null(), $base)
+                );
+                // todo: file upload for external users
+                // $criteria_data['extra']['filepicker_html'] =
+                //     $this->files_input($feedback->get_id_or_null(), observation::FILE_AREA_OBSERVER, $context);
+                // JS validation
+                $this->page->requires->js_call_amd(
+                    OBSERVATION_MODULE . '/submission_validation',
+                    'init',
+                    ['submissionType' => 'observer']);
+            }
+
+            $template_data['criteria'][] = $criteria_data;
+        }
+
+        $header_data = [
+            task::COL_NAME => $task->get_formatted_name(),
+            'intro'        => $task->get(task::COL_INTRO_OBSERVER)
+        ];
+        $out .= $this->render_from_template('part-task_header', $header_data);
+        $out .= $this->render_from_template('view-task_observer', $template_data);
+        // wrap all in container
+        $out = html_writer::div($out, 'container', ['class' => 'spacer']);
+
+        return $out;
+    }
+
+    /**
+     * @param observation $observation pre-filtered by userid and taskid
+     * @param int         $learnerid
+     * @param task        $task
+     * @return string
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
+     */
+    public function view_task_assessor(observation $observation, int $learnerid, task $task): string
+    {
+        $learner_task_submission = $task->get_learner_task_submission_or_null($learnerid); // can be null at this point!
+        $context = context_module::instance($observation->get_cm()->id);
+        $out = '';
+
+        $template_data = $task->export_template_data();
+        // header specific
+        $header_data = [
+                task::COL_NAME  => $task->get_formatted_name(),
+                'intro' => $task->get(task::COL_INTRO_ASSESSOR)
+            ];
+        $out .= $this->render_from_template('part-task_header', $header_data);
+
+        $include_observer_details = false;
+        $is_assessing = false;
+
+        if ($task->can_assess($learnerid, $observation))
+        {
+            // assessing is good to go
+            $include_observer_details = true;
+            $is_assessing = true;
+
+            $assessor_task_submission = $learner_task_submission->get_assessor_task_submission_or_create();
+            $learner_attempt = $assessor_task_submission->get_learner_task_submission()->get_latest_learner_attempt_or_null();
+            $feedback = $assessor_task_submission->get_feedback_or_create($learner_attempt->get_id_or_null());
+
+            // add text editor for assessor feedback
+            $template_data['extra']['editor_html'] = $this->text_editor(
+                assessor_feedback::class,
+                $context,
+                $feedback->get(assessor_feedback::COL_TEXT),
+                $feedback->get(assessor_feedback::COL_TEXT_FORMAT));
+            // JS validation
+            $this->page->requires->js_call_amd(
+                OBSERVATION_MODULE . '/submission_validation',
+                'init',
+                ['submissionType' => 'assessor']);
+
+            // add filepicker
+            $template_data['extra']['filepicker_html'] = $this->files_input(
+                $feedback->get_id_or_null(),
+                observation::FILE_AREA_ASSESSOR,
+                $context);
+
+            // update learner task submission status
+            if (!$learner_task_submission->is_assessment_in_progress())
+            {
+                $learner_task_submission->update_status_and_save(learner_task_submission::STATUS_ASSESSMENT_IN_PROGRESS);
             }
             else
             {
-                if ($topic->signoff->signedoff)
-                    $out .= $this->output->flex_icon('check-success', ['alt' => get_string('signedoff', 'observation')]);
-                else
-                    $out .= $this->output->flex_icon('times-danger', ['alt' => get_string('notsignedoff', 'observation')]);
+                // we need to pre-populate page based on previously saved feedback
+                $template_data['extra']['existing_feedback']['is_complete'] =
+                    $feedback->is_marked_complete();
+                $template_data['extra']['existing_feedback']['is_not_complete'] =
+                    !$feedback->is_marked_complete();
             }
 
-            $userobj = new stdClass();
-            $userobj = username_load_fields_from_object($userobj, $topic, $prefix = 'signoffuser');
-            $out .= html_writer::tag('div', observation::get_modifiedstr_user($topic->signoff->timemodified, $userobj),
-                array('class' => 'mod-observation-topic-modifiedstr'));
-            $out .= html_writer::end_tag('div');
+            // id's
+            $template_data['extra']['cmid'] = $observation->get_cm()->id;
+            $template_data['extra']['assessor_task_submission_id'] = $assessor_task_submission->get_id_or_null();
+            $template_data['extra']['assessor_feedback_id'] = $feedback->get_id_or_null();
         }
-
-        if (!$evaluate && !$submitted)
+        else if (!is_null($learner_task_submission))
         {
-            $args     = array(
-                'args' =>
-                    '{ "observationid":' . $userobservation->id .
-                    ', "userid":' . $userobservation->userid .
-                    ', "Observation_COMPLETE":' . completion::STATUS_COMPLETE .
-                    ', "Observation_REQUIREDCOMPLETE":' . completion::STATUS_REQUIREDCOMPLETE .
-                    ', "Observation_INCOMPLETE":' . completion::STATUS_INCOMPLETE .
-                    '}');
-            $jsmodule = array(
-                'name'     => 'mod_observation_attempt',
-                'fullpath' => '/mod/observation/js/attempt.js',
-                'requires' => array('json')
-            );
-            $PAGE->requires->js_init_call('M.mod_observation_attempt.init', $args, false, $jsmodule);
+            // show relevant status notification
+            if ($learner_task_submission->is_observation_pending_or_in_progress())
+            {
+                $include_observer_details = true;
+                notification::add(
+                    get_string('notification:observation_pending_or_in_progress', \OBSERVATION), notification::INFO);
+            }
+            else if ($learner_task_submission->is_learner_action_required())
+            {
+                if (!empty($learner_task_submission->get_observer_assignments()))
+                {
+                    $include_observer_details = true;
+                }
 
-            // display 'submit attempt' button
-            $out .= html_writer::link(
-                new moodle_url('/mod/observation/request.php',
-                    ['cmid' => $this->get_cm()->id, 'topicid' => $topic->id, 'userid' => $userobservation->userid, 'action' => 'users']),
-                'Submit for observation',
-                ['class' => 'btn btn-secondary', 'style' => 'margin: 2em 0 2em 0']);
+                notification::add(
+                    get_string('notification:submission_pending_or_in_progress', OBSERVATION), notification::INFO);
+            }
+            else
+            {
+                $include_observer_details = true;
+            }
         }
 
-        // Topic comments
-        $out .= $this->get_topic_comments($topic);
+        // render observer table
+        if ($include_observer_details)
+        {
+            $observer_template_data['extra']['observer_assigments'] =
+                $template_data['learner_task_submissions'][0]['observer_assignments']; // janky, but works because task is filtered
+            $observer_template_data['extra']['is_assessor'] = true;
+            $observer_template_data['extra']['is_assessing'] = $is_assessing;
 
-        // close topic container
-        $out .= html_writer::end_tag('div');  // mod-observation-topic
+            if ($is_assessing)
+            {
+                // this is ugly but we need to repeat this data here to populate page based on existing feedback
+                $observer_template_data['extra']['existing_feedback']['is_complete'] =
+                    $feedback->is_marked_complete();
+
+                $template_data['extra']['observer'] = $observer_template_data;
+
+                // observer requirements modal
+                $this->page->requires->js_call_amd(
+                    OBSERVATION_MODULE . '/assessor_view',
+                    'init',
+                    ['observerRequirements' => $template_data[task::COL_INT_ASSIGN_OBS_OBSERVER]]);
+            }
+            else
+            {
+                // learner task template will be used so we need to render observer table ourselves
+                $out .= $this->render_from_template('part-observer_details', $observer_template_data);
+            }
+        }
+
+        // choose template to display based on action
+        $template_name = $is_assessing ? 'view-task_assessor' : 'view-task_learner';
+        $out .= $this->render_from_template($template_name, $template_data);
 
         return $out;
     }
 
+    public function view_observer_completed(
+        learner_task_submission_base $learner_task_submission, task_base $task): string
+    {
+        // page is very basic, no need to export all data
+        $learner = core_user::get_user($learner_task_submission->get_userid());
+        $template_data = [
+            'learner_name' => fullname($learner),
+            'task_name' => $task->get_formatted_name(),
+        ];
+
+        return $this->render_from_template('view-observer_completed', $template_data);
+    }
+
+    public function view_observer_declined(
+        observer_assignment $observer_assignment,
+        learner_task_submission_base $learner_task_submission,
+        task_base $task): string
+    {
+        // page is very basic, no need to export all data
+        $learner = core_user::get_user($learner_task_submission->get_userid());
+        $template_data = [
+            'learner_name' => fullname($learner),
+            'task_name' => $task->get_formatted_name(),
+        ];
+
+        echo $this->render_from_template('view-observer_declined', $template_data);
+        die();
+    }
+
     /**
-     * @param user_observation         $userobservation
-     * @param user_topic       $topic
-     * @param email_assignment $email_assignment email assignment for external user that is viewing the page
+     * Renders activity header with title and description
+     *
+     * @param array $template_data has to contain ['name' => string, 'intro' => string], everything else will be ignored
+     * @return string html
+     */
+    private function activity_header(array $template_data): string
+    {
+        return $this->render_from_template(
+            'part-activity_header', [
+            observation::COL_NAME  => $template_data[observation::COL_NAME],
+            observation::COL_INTRO => $template_data[observation::COL_INTRO],
+        ]);
+    }
+
+    public function render_from_template($templatename, $context): string
+    {
+        if (strpos($templatename, OBSERVATION_MODULE) === false)
+        {
+            $templatename = sprintf('%s/%s', OBSERVATION_MODULE, $templatename);
+        }
+
+        return parent::render_from_template($templatename, $context);
+    }
+
+    /**
+     * Renders specified template with an activity header
+     *
+     * @param string     $templatename template name
+     * @param array|null $context
+     * @return string html
+     */
+    private function render_from_template_with_header(string $templatename, array $context = null): string
+    {
+        return $this->activity_header($context) . $this->render_from_template($templatename, $context);
+    }
+
+    public function text_editor(
+        string $class_name,
+        context $context,
+        string $text = null,
+        int $format = null,
+        string $form_input_base_name = null): string
+    {
+        global $CFG;
+        require_once($CFG->dirroot . '/repository/lib.php');
+
+        $output = '';
+        $text = $text ?: '';
+        $format = $format ?: FORMAT_HTML;
+
+        // get input field names
+        list($input_base, $input_name, $input_name_format) = lib::get_editor_attributes_for_class($class_name);
+        // needs to be unique for editor js init
+        $id = sprintf('%s_id_%d', $input_base, floor(time() / rand(1, 100)));
+
+        // get available formats
+        $response_format = $format;
+        $editor = editors_get_preferred_editor($response_format);
+        $formats = $editor->get_supported_formats();
+
+        $str_formats = format_text_menu();
+        foreach ($formats as $fid)
+        {
+            $formats[$fid] = $str_formats[$fid];
+        }
+
+        // set existing text
+        $editor->set_text($text);
+
+        $editor->use_editor(
+            $id, ['context' => $context, 'autosave' => true], ['return_types' => FILE_INTERNAL | FILE_EXTERNAL]);
+
+        // editor wrapper
+        $output .= html_writer::start_tag('div', ['class' => "${input_base}-editor"]);
+        // editor textarea
+        $output .= html_writer::tag(
+            'div', html_writer::tag(
+            'textarea', s($text), [
+            'id'    => $id,
+            'name'  => $form_input_base_name ? "${form_input_base_name}[text]" : $input_name,
+            'rows'  => 10,
+            // 'cols' => 50
+            'style' => 'width: 100%;'
+        ]));
+
+        // format wrapper
+        $output .= html_writer::start_tag('div');
+        if (count($formats) == 1)
+        {
+            // format id
+            reset($formats);
+            $output .= html_writer::empty_tag(
+                'input', array(
+                'type'  => 'hidden',
+                'name'  => $form_input_base_name ? "${form_input_base_name}[format]" : $input_name_format,
+                'value' => key($formats)
+            ));
+        }
+        else
+        {
+            // format selector for plain text editors
+            $output .= html_writer::label(
+                get_string('format'), 'menu' . $form_input_base_name . 'format', false);
+            $output .= ' ';
+            $output .= html_writer::select($formats, $form_input_base_name . 'format', $response_format, '');
+        }
+
+        // /editor wrapper
+        $output .= html_writer::end_tag('div');
+        // /format wrapper
+        $output .= html_writer::end_tag('div');
+
+        return $output;
+    }
+
+    private function text_editor_preview(context $context, string $text = null)
+    {
+        global $CFG;
+        require_once($CFG->dirroot . '/repository/lib.php');
+
+        $text = !is_null($text) ? $text : get_string('preview_editor_text', \OBSERVATION);
+        $id = 'preview_editor';
+        $output = '';
+
+        $editor = editors_get_preferred_editor(FORMAT_HTML);
+        $editor->set_text($text);
+        $editor->use_editor($id, ['context' => $context, 'autosave' => false]);
+
+        // editor wrapper
+        $output .= html_writer::start_tag('div', ['class' => 'preview-editor']);
+        // editor textarea
+        $output .= html_writer::tag(
+            'div',
+            html_writer::tag(
+                'textarea', s($text), [
+                'id'    => $id,
+                'name'  => "{$id}_text",
+                'rows'  => 10,
+                'style' => 'width: 100%;'
+            ]));
+
+        // /editor wrapper
+        $output .= html_writer::end_tag('div');
+
+        return $output;
+    }
+
+    /**
+     * @param int     $itemid for learner - attempt id, for observer & assessor - feedback id
+     * @param string  $file_area
+     * @param context $context
+     * @param int     $max_files
      * @return string
      * @throws coding_exception
-     * @throws comment_exception
-     * @throws dml_exception
-     * @throws moodle_exception
      */
-    public function user_topic_external(user_observation $userobservation, user_topic $topic, email_assignment $email_assignment)
+    private function files_input(
+        int $itemid, string $file_area, context $context, int $max_files = 10): string
+    {
+        global $CFG;
+        require_once($CFG->dirroot . '/lib/form/filemanager.php');
+
+        $picker_options = new stdClass();
+        $picker_options->maxfiles = $max_files;
+        $picker_options->context = $context;
+        $picker_options->return_types = FILE_INTERNAL;
+
+        $picker_options->itemid = $this->prepare_response_files_draft_itemid($file_area, $context->id, $itemid);
+
+        // render
+        $files_renderer = $this->page->get_renderer('core', 'files');
+        $fm = new form_filemanager($picker_options);
+        $out = '';
+
+        $out .= $files_renderer->render($fm);
+        $out .= html_writer::empty_tag(
+            'input', array(
+            'type'  => 'hidden',
+            'name'  => 'attachments_itemid',
+            'value' => $picker_options->itemid
+        ));
+
+        return $out;
+    }
+
+    private function files_input_preview(context $context)
+    {
+        global $CFG;
+        require_once($CFG->dirroot . '/lib/form/filemanager.php');
+
+        $picker_options = new stdClass();
+        $picker_options->maxfiles = 0;
+        $picker_options->context = $context;
+        $picker_options->return_types = FILE_INTERNAL;
+        $picker_options->itemid = -1;
+
+        // render
+        $files_renderer = $this->page->get_renderer('core', 'files');
+        $fm = new form_filemanager($picker_options);
+
+        return $files_renderer->render($fm);
+    }
+
+    private function get_usersids_in_group_or_null(int $current_group, context_module $context)
     {
         global $DB;
 
-        $this->set_properties($userobservation);
-
-        $user = $DB->get_record('user', ['id' => $userobservation->userid], '*', MUST_EXIST);
-        $out  = '';
-
-        // open topic container
-        $out .= $this->get_topic_start($topic);
-
-        $out .= html_writer::div(format_text($topic->observerintro, $topic->observerintroformat), 'observation-topic_intro observation-topic_observerintro');
-
-        // render topic table
-        $table = new html_table();
-        $table->attributes['class'] = 'mod-observation-topic-items generaltable';
-
-        if ($userobservation->itemwitness)
+        $userids = null;
+        if (!empty($current_group))
         {
-            $table->head = array('', '', get_string('witnessed', 'mod_observation'));
-        }
-        $table->data = array();
+            // We have a currently selected group.
+            $groupstudentsjoins = get_enrolled_with_capabilities_join(
+                $context, '', observation::CAP_SUBMIT, $current_group);
 
-        foreach ($topic->topic_items as $item)
-        {
-            $row = array();
-            $optionalstr = $item->completionreq == completion::REQ_OPTIONAL ?
-                html_writer::tag('em', ' (' . get_string('optional', 'observation') . ')') : '';
-            $row[] = format_string($item->name) . $optionalstr;
-
-            $cellcontent = '';
-
-            // USER SUBMISSION
-            $cellcontent .= html_writer::start_div('observation-submission-container');
-            // SUBMITTED TEXT:
-            $cellcontent .= html_writer::span('<b>' . fullname($user) . ' says:</b>', 'observation-submission-title');
-            $cellcontent .= html_writer::tag('p',
-                'Sample trainee submission. This is how an observer will see traineess submitted text. Over time, a conversation history will be seen.');
-            $cellcontent .= html_writer::end_div();
-
-            // SUBMITTED FILES:
-            $cellcontent .= html_writer::span('<b>Attached files:</b>', 'observation-submission-title');
-            $cellcontent .= html_writer::tag('div',
-                $this->list_topic_item_files($this->get_context()->id, $userobservation->userid, $item->id),
-                array('class' => 'mod-observation-topicitem-files'));
-
-            // EXTERNAL USER:
-            $cellcontent .= html_writer::start_tag('div', array('class' => 'observation-eval-actions', 'observation-item-id' => $item->id));
-            $cellcontent .= html_writer::span('<b>' . $email_assignment->email . '\'s response:</b>');
-            $cellcontent .= html_writer::tag('textarea', $item->completion->comment,
-                array(
-                    'name'        => 'comment-' . $item->id,
-                    'rows'        => 4,
-                    'class'       => 'observation-completion-comment',
-                    'observation-item-id' => $item->id));
-            $cellcontent .= html_writer::tag('div', format_text($item->completion->comment, FORMAT_PLAIN),
-                array('class' => 'observation-completion-comment-print', 'observation-item-id' => $item->id));
-            $cellcontent .= html_writer::end_tag('div');
-
-            //TODO FILE UPLOADS FOR EXTERNAL USERS
-            // if (($evaluate && $item->allowfileuploads)
-            //     || ($userobservation->userid == $USER->id && $item->allowselffileuploads))
-            // {
-            $itemfilesurl = new moodle_url('/mod/observation/uploadfile.php',
-                array('userid' => $userobservation->userid, 'tiid' => $item->id));
-            $cellcontent .= $this->output->single_button($itemfilesurl,
-                get_string('updatefiles', 'observation'),
-                'get', ['disabled' => true]);
-            // }
-
-            $cellcontent .= html_writer::tag('div',
-                observation::get_modifiedstr_email($item->completion->timemodified, $item->completion->observeremail),
-                array('class' => 'mod-observation-modifiedstr', 'observation-item-id' => $item->id));
-
-            $row[] = html_writer::tag('div', $cellcontent, array('class' => 'observation-completion'));
-
-            $completionicon = $item->completion->status == completion::STATUS_COMPLETE
-                ? 'completion-manual-y'
-                : 'completion-manual-n';
-            $cellcontent = $this->output->flex_icon($completionicon, ['classes' => 'observation-completion-toggle']);
-
-            $row[] = html_writer::tag('div', $cellcontent, array('class' => 'observation-item-witness'));
-
-            $table->data[] = $row;
+            if (!empty($groupstudentsjoins->joins))
+            {
+                $sql = "SELECT DISTINCT u.id
+                        FROM {user} u
+                        $groupstudentsjoins->joins
+                        WHERE $groupstudentsjoins->wheres";
+                $userids = $DB->get_fieldset_sql($sql, $groupstudentsjoins->params);
+            }
         }
 
-        $out .= html_writer::table($table);
-
-        // "Submit observation" button
-        $submitbutton = new single_button(new moodle_url('#'), 'Submit Observation');
-        $submitbutton->formid = 'submit';
-        $submitbutton->disabled = true;
-        $out .= html_writer::tag(
-            'div',
-            $this->output->render($submitbutton),
-            array('class' => 'observation-submit'));
-
-        // Topic comments
-        $out .= $this->get_topic_comments($topic);
-
-        // close topic container
-        $out .= html_writer::end_tag('div');  // mod-observation-topic
-
-        return $out;
+        return !empty($userids) ? $userids : null;
     }
 
     /**
-     * @param user_topic $topic
-     * @return string icon html
-     * @throws coding_exception
+     * @param string $file_area
+     * @param int    $contextid
+     * @param int    $itemid
+     * @return int the draft itemid.
      */
-    public function get_completion_icon(user_topic $topic): string
-    {
-        switch ($topic->completion_status)
-        {
-            case completion::STATUS_COMPLETE:
-                $completionicon = 'check-success';
-                break;
-            case completion::STATUS_REQUIREDCOMPLETE:
-                $completionicon = 'check-warning';
-                break;
-            default:
-                $completionicon = 'times-danger';
-        }
-        if (!empty($completionicon))
-        {
-            $completionicon = $this->output->flex_icon($completionicon,
-                ['alt' => get_string('completionstatus' . $topic->completion_status, 'observation')]);
-        }
-        $completionicon = html_writer::tag('span', $completionicon, ['class' => 'observation-topic-status']);
-
-        return $completionicon;
-    }
-
-    /**
-     * @param string $observation_name
-     * @param string $username
-     * @return string
-     * @throws coding_exception
-     */
-    function get_print_button(string $observation_name, string $username)
-    {
-        global $OUTPUT;
-
-        $out = '';
-
-        $out .= html_writer::start_tag('a', array('href' => 'javascript:window.print()', 'class' => 'evalprint'));
-        $out .= html_writer::empty_tag('img',
-            array(
-                'src'   => $OUTPUT->pix_url('t/print'),
-                'alt'   => get_string('printthisobservation', 'observation'),
-                'class' => 'icon'));
-        $out .= get_string('printthisobservation', 'observation');
-        $out .= html_writer::end_tag('a');
-        $out .= $OUTPUT->heading(get_string('observationxforx', 'observation',
-            (object) array(
-                'observation'  => format_string($observation_name),
-                'user' => $username)));
-
-        return $out;
-    }
-
-    public function display_userview_header($user)
-    {
-        global $USER;
-
-        $header = '';
-        if ($USER->id != $user->id)
-        {
-            $picture = $this->output->user_picture($user);
-            $name = fullname($user);
-            $url = new moodle_url('/user/profile.php', array('id' => $user->id));
-            $link = html_writer::link($url, $name);
-            $viewstr = html_writer::tag('strong', get_string('viewinguserxfeedback360', 'totara_feedback360', $link));
-
-            $header = html_writer::tag('div', $picture . ' ' . $viewstr,
-                array('class' => "plan_box notifymessage totara-feedback360-head-relative", 'id' => 'feedbackhead'));
-        }
-
-        return $header;
-    }
-
-    /**
-     * Display feedback header.
-     *
-     * @param email_assignment $email_assignment
-     * @param stdClass         $subjectuser The subject of the feedback.
-     * @return string HTML
-     * @throws coding_exception
-     * @throws moodle_exception
-     */
-    public function display_feedback_header(email_assignment $email_assignment, $subjectuser)
+    public function prepare_response_files_draft_itemid(string $file_area, int $contextid, int $itemid = null): int
     {
         global $CFG, $USER;
 
-        // The heading.
-        $a = new stdClass();
-        $a->username = fullname($subjectuser);
-        $a->userid = $subjectuser->id;
-        $a->site = $CFG->wwwroot;
-        $a->profileurl = "{$CFG->wwwroot}/user/profile.php?id={$subjectuser->id}";
+        $draftid = 0; // Will be filled in by file_prepare_draft_area.
 
-        $anonmessage = false;
-        if ($subjectuser->id == $USER->id)
+        // if files exist for this itemid they will be automatically copied over
+        if ($USER->id == $CFG->siteguest || $USER->id == 0)
         {
-            $titlestr = 'userownheaderfeedback';
+            // external user, e.g. observer
+            lib::file_prepare_anonymous_draft_area(
+                $draftid, $contextid, OBSERVATION_MODULE, $file_area, $itemid);
         }
         else
         {
-            $a->responder = $email_assignment->email;
-            $titlestr = 'userheaderfeedbackbyemail';
-            $anonmessage = true;
+            // regular logged in user
+            file_prepare_draft_area(
+                $draftid, $contextid, OBSERVATION_MODULE, $file_area, $itemid);
         }
 
-        $message = html_writer::tag('p', get_string($titlestr, 'totara_feedback360', $a));
-
-        if ($anonmessage)
-        {
-            $anonmessage = get_string('feedbacknotanonymous', 'totara_feedback360');
-            $message .= html_writer::tag('p', $anonmessage);
-        }
-
-        $content = $this->output->user_picture($subjectuser, array('link' => false)) . $message;
-
-        if (!$email_assignment->timecompleted)
-        {
-            $savebutton = new single_button(new moodle_url('#'), get_string('saveprogress', 'totara_feedback360'));
-            $savebutton->formid = 'saveprogress';
-            $save = html_writer::tag('div', $this->output->render($savebutton), array('class' => 'observation-save'));
-            $content = $save . $content;
-        }
-
-        $out = html_writer::tag('div', '', array('class' => "empty", 'id' => 'feedbackhead-anchor'));
-
-        // HACK ALERT: Notifications by default put the content through clean text.
-        // This won't work for the above save progress button, but because they clean it in code the template doesn't attempt to
-        // clean it itself.
-        // We can get around this by using the template directly and making sure that we clean ourselves.
-        $context = array('message' => $content);
-        $out .= html_writer::tag(
-            'div',
-            $this->render_from_template('core/notification_info', $context),
-            array('id' => 'feedbackhead'));
-
-        return $out;
+        return $draftid;
     }
 
     /**
-     * returns the html for a user item with delete button.
+     * Sets 'confirm' as a boolean in GET request to check result
      *
-     * @param email_assignment $assignment The associated email assignment.
-     */
-    public function external_user_record($assignment)
-    {
-        $out = '';
-
-        $completestr = get_string('alreadyreplied', 'totara_feedback360');
-
-        // No JS deletion url
-        //$deleteparams = array('assignid' => $assignment->id, 'email' => $assignment->email);
-        $deleteurl = '#';//new moodle_url('/mod/observation/ext_request/delete.php', $deleteparams);
-
-        $out .= html_writer::start_tag('div',
-            array('id' => "external_user_{$assignment->email}", 'class' => 'external_record'));
-        $out .= $assignment->email;
-
-        if (!empty($assignment->timecompleted))
-        {
-            $out .= $this->output->pix_icon('/t/delete_gray', $completestr);
-        }
-        else
-        {
-            $removestr = get_string('removeuserfromrequest', 'totara_feedback360', $assignment->email);
-            $out .= $this->output->action_icon($deleteurl, new pix_icon('/t/delete', $removestr), null,
-                array('class' => 'external_record_del', 'id' => $assignment->email));
-        }
-        $out .= html_writer::end_tag('div');
-
-        return $out;
-    }
-
-    protected function list_topic_item_files($contextid, $userid, $topicitemid)
-    {
-        $out = array();
-
-        $fs = get_file_storage();
-        $files = $fs->get_area_files($contextid, 'mod_observation', 'topicitemfiles' . $topicitemid, $userid,
-            'itemid, filepath, filename', false);
-
-        foreach ($files as $file)
-        {
-            $filename = $file->get_filename();
-            $url =
-                moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
-                    $file->get_itemid(), $file->get_filepath(), $file->get_filename());
-            $out[] = html_writer::link($url, $filename);
-        }
-        $br = html_writer::empty_tag('br');
-
-        return implode($br, $out);
-    }
-
-    /**
-     * TODO CHECK IF TOKEN ALWAYS REQUIRED
-     *
-     * @param int         $observationid
-     * @param int         $userid
-     * @param string|null $token email assignment token for external evaluations
-     * @return array [args[], jsmodule[]]
-     */
-    public function get_evaluation_js_args(int $observationid, int $userid, string $token = null)
-    {
-        $args     = array(
-            'args' =>
-                '{ "observationid":' . $observationid .
-                ', "userid":' . $userid .
-                ', "token":"' . $token . '"' .
-                ', "Observation_COMPLETE":' . completion::STATUS_COMPLETE .
-                ', "Observation_REQUIREDCOMPLETE":' . completion::STATUS_REQUIREDCOMPLETE .
-                ', "Observation_INCOMPLETE":' . completion::STATUS_INCOMPLETE .
-                '}');
-        $jsmodule = array(
-            'name'     => 'mod_observation_evaluate',
-            'fullpath' => '/mod/observation/js/evaluate.js',
-            'requires' => array('json')
-        );
-
-        return array($args, $jsmodule);
-    }
-
-    private function get_topic_submission_status_icon(user_topic $topic)
-    {
-        $date_str = get_string('nosubmissiondate', 'mod_observation');
-        $icon_id = 'square-o';
-
-        if (!is_null($topic->external_request))
-        {
-            $date = $topic->external_request->get_first_email_assign_date();
-            if ($date > 0)
-            {
-                $date_str = get_string('submissiondate', 'mod_observation', userdate($date));
-                $icon_id = 'check-square-o';
-            }
-        }
-
-        return $this->output->flex_icon($icon_id, ['alt' => $date_str]);
-    }
-
-    /**
-     * @param user_topic $topic
-     * @return string
+     * @param string      $confirmation_text
+     * @param array|null  $additional_params
+     * @param bool        $require_input if true, user will need to provide text input.
+     * @param string|null $input_prompt_text text to be displayed above input box
      * @throws coding_exception
+     * @throws moodle_exception
      */
-    private function get_topic_start(user_topic $topic)
+    public function echo_confirmation_page_and_die(
+        string $confirmation_text,
+        array $additional_params = null,
+        bool $require_input = false,
+        string $input_prompt_text = null): void
     {
-        $out = '';
+        $confirm_url = $this->page->url;
+        $confirm_url->params(['confirm' => 1, 'sesskey' => sesskey()] + $additional_params);
 
-        $out .= html_writer::start_tag('div',  array('class' => 'mod-observation-topic', 'id' => "observation-topic-{$topic->id}"));
-        $completionicon = $this->get_completion_icon($topic);
-        $completionicon = html_writer::tag('span', $completionicon, array('class' => 'observation-topic-status'));
-        $optionalstr = $topic->completionreq == completion::REQ_OPTIONAL
-            ? html_writer::tag('em', ' (' . get_string('optional', 'observation') . ')')
-            : '';
-        $out .= html_writer::tag('div', format_string($topic->name) . $optionalstr . $completionicon,
-            array('class' => 'mod-observation-topic-heading expanded'));
+        echo $this->output->header();
 
-        return $out;
-    }
+        // output modal
+        $output = $this->output->box_start('generalbox modal modal-dialog modal-in-page show', 'notice');
+        $output .= $this->output->box_start('modal-content', 'modal-content');
+        $output .= $this->output->box_start('modal-header', 'modal-header');
+        $output .= html_writer::tag('h4', get_string('confirm'));
+        $output .= $this->output->box_end();
+        $output .= $this->output->box_start('modal-body', 'modal-body');
+        $output .= html_writer::tag('p', $confirmation_text);
+        $output .= $this->output->box_end();
 
-    /**
-     * @param user_observation   $userobservation
-     * @param user_topic $topic
-     * @param            $evaluate
-     * @param bool       $submitted
-     * @return string
-     * @throws coding_exception
-     */
-    private function get_topic_table(user_observation $userobservation, user_topic $topic, $evaluate, bool $submitted): string
-    {
-        $out   = '';
-        $table = new html_table();
-
-        $table->attributes['class'] = 'mod-observation-topic-items generaltable';
-
-        if ($userobservation->itemwitness)
+        if ($require_input)
         {
-            $table->head = array('', '', get_string('witnessed', 'mod_observation'));
-        }
+            // TODO VALIDATE INPUT HAS CONTENT
+            $output .= html_writer::start_tag('form', ['method' => 'POST', 'action' => $confirm_url]);
+            $output .= $this->output->box_start('modal-body', 'user-input');
+            $output .= html_writer::tag(
+                'p', (is_null($input_prompt_text) ? 'Please provide a brief explanation' : $input_prompt_text));
+            $output .= html_writer::div(
+                html_writer::tag(
+                    'textarea', '',
+                    [
+                        'id'       => 'user_input',
+                        'name'     => 'user_input',
+                        'rows'     => 5,
+                        'style'    => 'width: 100%;',
+                        'required' => true
+                    ]));
+            $output .= $this->output->box_end();
 
-        if (!count($topic->topic_items))
-        {
-            $out .= html_writer::span('No topic items created...<br/>');
+            $output .= $this->output->box_start('modal-footer', 'modal-footer');
+            $output .= html_writer::start_div('buttons');
+            // submit
+            $output .= html_writer::empty_tag(
+                'input',
+                [
+                    'class' => 'btn btn-primary form-submit',
+                    'type'  => 'submit',
+                    'value' => get_string('continue')
+                ]);
+            // cancel
+            $output .= html_writer::link(
+                $this->page->url, get_string('cancel'), ['class' => 'btn btn-secondary']);
+
+            $output .= html_writer::end_div();
+            $output .= $this->output->box_end();
+
+            $output .= html_writer::end_tag('form');
         }
         else
         {
-            $table->data = array();
-            foreach ($topic->topic_items as $item)
-            {
-                $table->data[] = $this->get_topic_item_table_row($item, $submitted, $evaluate);
-            }
+            $output .= $this->output->box_start('modal-footer', 'modal-footer');
 
-            $out .= html_writer::table($table);
-        }
-        return $out;
-    }
-
-    /**
-     * @param user_topic_item $item
-     * @param bool            $submitted
-     * @param bool            $evaluate
-     * @return array
-     */
-    private function get_topic_item_table_row(user_topic_item $item, bool $submitted, bool $evaluate)
-    {
-        global $USER;
-
-        // COLUMN 1: Topic Item Title
-        $row = array();
-        $optionalstr = $item->completionreq == completion::REQ_OPTIONAL ?
-            html_writer::tag('em', ' (' . get_string('optional', 'observation') . ')') : '';
-        $row[] = format_string($item->name) . $optionalstr;
-
-        // COLUMN 2: Topic Item Content (conversation & files)
-        $cellcontent = $this->get_conversation_history($item);
-
-        if ($evaluate)
-        {
-            $cellcontent .= html_writer::start_tag('div', array('class' => 'observation-eval-actions', 'observation-item-id' => $item->id));
-            $cellcontent .= html_writer::tag('textarea', $item->completion->comment,
-                array(
-                    'name'        => 'comment-' . $item->id,
-                    'rows'        => 4,
-                    'class'       => 'observation-completion-comment',
-                    'observation-item-id' => $item->id,
-                    'disabled' => true
-                ));
-            $cellcontent .= html_writer::tag('div', format_text($item->completion->comment, FORMAT_PLAIN),
-                array('class' => 'observation-completion-comment-print', 'observation-item-id' => $item->id));
-            $cellcontent .= html_writer::end_tag('div');
-        }
-        else
-        {
-            $cellcontent .= format_text($item->completion->comment, FORMAT_PLAIN);
-            $cellcontent .= html_writer::start_tag('div', array('class' => 'observation-submission-actions', 'observation-item-id' => $item->id));
-
-            $args = array(
-                'name'        => 'submission-' . $item->id,
-                'rows'        => 4,
-                'class'       => 'observation-completion-submission',
-                'observation-item-id' => $item->id,
-                'placeholder' => '');
-            if ($submitted || $evaluate)
-                $args += ['disabled' => true];
-
-            $cellcontent .= html_writer::tag('textarea', '', $args);
-
-            $cellcontent .= html_writer::tag('div', format_text('', FORMAT_PLAIN),
-                array('class' => 'observation-completion-submission-print', 'observation-item-id' => $item->id));
-            $cellcontent .= html_writer::end_tag('div');
-        }
-
-        if ($item->allowfileuploads || $item->allowselffileuploads)
-        {
-            $cellcontent .= html_writer::tag(
+            $continue = new single_button($confirm_url, get_string('continue'), 'post', true);
+            $cancel = new single_button($this->page->url, get_string('cancel'), 'get');
+            $output .= html_writer::tag(
                 'div',
-                $this->list_topic_item_files($this->get_context()->id, $item->userid, $item->id),
-                array('class' => 'mod-observation-topicitem-files'));
+                $this->render($continue) . $this->render($cancel),
+                array('class' => 'buttons'));
 
-            if ($item->userid == $USER->id && $item->allowselffileuploads)
-            {
-                $itemfilesurl = new moodle_url('/mod/observation/uploadfile.php',
-                    array('userid' => $item->userid, 'tiid' => $item->id));
-                $cellcontent .= $this->output->single_button(
-                    $itemfilesurl,
-                    get_string('updatefiles', 'observation'),
-                    'get',
-                    ($submitted || $evaluate ? ['disabled' => true] : [])
-                );
-            }
+            $output .= $this->output->box_end();
         }
 
-        $row[] = html_writer::tag('div', $cellcontent, array('class' => 'observation-completion'));
+        $output .= $this->output->box_end();
+        $output .= $this->output->box_end();
 
-        // COLUMN 3: Topic Item Completion
-        $completionicon = $item->completion->status == completion::STATUS_COMPLETE
-            ? 'completion-manual-y'
-            : 'completion-manual-n';
-        $cellcontent = $this->output->flex_icon($completionicon, ['classes' => 'observation-completion-status']);
-        $cellcontent .= html_writer::tag('div', observation::get_modifiedstr_email($item->completion->timemodified, $item->completion->observeremail),
-            array('class' => 'mod-observation-modifiedstr', 'observation-item-id' => $item->id));
-        $row[] = html_writer::tag('div', $cellcontent, array('class' => 'observation-item-witness'));
+        echo $output;
 
-        // if ($userobservation->itemwitness)
-        // {
-        //     $cellcontent = '';
-        //     if ($itemwitness)
-        //     {
-        //         $witnessicon = $item->witness->witnessedby ? 'completion-manual-y' : 'completion-manual-n';
-        //         $cellcontent .= html_writer:: start_tag('span',
-        //             array('class' => 'observation-witness-item', 'observation-item-id' => $item->id));
-        //         $cellcontent .= $this->output->flex_icon($witnessicon, ['classes' => 'observation-witness-toggle']);
-        //         $cellcontent .= html_writer::end_tag('span');
-        //     }
-        //     else
-        //     {
-        //         // Show static witness info
-        //         if (!empty($item->witness->witnessedby))
-        //         {
-        //             $cellcontent .= $this->output->flex_icon('check-success',
-        //                 ['alt' => get_string('witnessed', 'observation')]);
-        //         }
-        //         else
-        //         {
-        //             $cellcontent .= $this->output->flex_icon('times-danger',
-        //                 ['alt' => get_string('notwitnessed', 'observation')]);
-        //         }
-        //     }
-        //
-        //     $userobj = new stdClass();
-        //     $userobj = username_load_fields_from_object($userobj, $item, $prefix = 'itemwitness');
-        //     $cellcontent .= html_writer::tag('div', observation::get_modifiedstr_user($item->witness->timewitnessed, $userobj),
-        //         array('class' => 'mod-observation-witnessedstr', 'observation-item-id' => $item->id));
-        //
-        //     $row[] = html_writer::tag('div', $cellcontent, array('class' => 'observation-item-witness'));
-        // }
+        // echo $this->output->confirm($confirmation_text, $confirm_url, $this->page->url);
+        echo $this->output->footer();
 
-        return $row;
-    }
-
-    /**
-     * @param user_topic $topic
-     * @return string
-     * @throws coding_exception
-     * @throws comment_exception
-     */
-    private function get_topic_comments(user_topic $topic): string
-    {
-        global $CFG;
-
-        $out = '';
-
-        if ($topic->allowcomments)
-        {
-            $out .= $this->output->heading(get_string('topiccomments', 'observation'), 4);
-            require_once($CFG->dirroot . '/comment/lib.php');
-            comment::init();
-            $options            = new stdClass();
-            $options->area      = 'observation_topic_item_' . $topic->id;
-            $options->context   = $this->get_context();
-            $options->itemid    = $topic->userid;
-            $options->showcount = true;
-            $options->component = 'observation';
-            $options->autostart = true;
-            $options->notoggle  = true;
-
-            $comment = new comment($options);
-            $out     .= $comment->output(true);
-        }
-
-        return $out;
-    }
-    private function get_conversation_history(user_topic_item $topic_item)
-    {
-        $attempts = user_attempt::get_user_attempts($topic_item->id, $topic_item->userid);
-
-        // $data = new stdClass();
-        // $data->attemptnumber = $attempt->sequence;
-        // $data->timemodified = $attempt->timemodified;
-        // $data-> = $attempt->;
-        // $data-> = $attempt->;
-        // $data-> = $attempt->;
-        // $data-> = $attempt->;
-        // $data-> = $attempt->;
-
-        return $this->render_from_template('mod_observation/topic_item_conversation',
-            ['attempts' => (array)$attempts]);
+        die();
     }
 }
 

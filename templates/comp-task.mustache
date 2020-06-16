@@ -1,0 +1,84 @@
+<div class="task wrapper status
+    {{! status calss for assessors }}
+    {{#extra.is_assessing}}
+            assessing-{{assessor_submission_status}}
+    {{/extra.is_assessing}}
+    {{! status calss for learners }}
+    {{^extra.is_assessing}}
+            learner-{{learner_submission_status}}
+    {{/extra.is_assessing}}">
+    {{! status indicator in corner }}
+    <div class="corner ft" {{! "ft" class enables font-awesome }}
+        {{! add title for status indicator }}
+        {{#extra.is_assessing}}
+         title="{{assessor_submission_status_description}}"
+        {{/extra.is_assessing}}
+        {{! status calss for learners }}
+        {{^extra.is_assessing}}
+         title="{{learner_submission_status_description}}"
+        {{/extra.is_assessing}}
+    >
+    </div>
+    {{! task title }}
+    <div class="task-title">
+        <h3>{{name}}</h3>
+        {{! task action link - get link based on capability }}
+        {{! ASSESSOR }}
+        {{#capabilities.can_assess}}
+            <a class="action btn"
+               href="{{{module_root}}}/task_assess.php?id={{cmid}}&taskid={{id}}&learnerid={{extra.learnerid}}">
+        {{/capabilities.can_assess}}
+        {{! LEARNER }}
+        {{^capabilities.can_assess}}
+            <a class="action btn" href="{{{module_root}}}/task.php?id={{cmid}}&taskid={{id}}">
+        {{/capabilities.can_assess}}
+        {{! set correct text for btn }}
+        {{! if empty($submissions) }}
+        {{^has_submission}}
+        {{! if assessor }}
+            {{#capabilities.can_assess}}
+                {{#str}}view_task, observation{{/str}}
+            {{/capabilities.can_assess}}
+            {{! if learner }}
+            {{#capabilities.can_submit}}
+            {{! TODO: admins see both View and Start in link text }}
+                {{#str}}start_task, observation{{/str}}
+            {{/capabilities.can_submit}}
+            {{! else }}
+            {{^capabilities.can_submit}}
+            {{! if can view }}
+                {{#capabilities.can_view}}
+                    {{#str}}preview_task, observation{{/str}}
+                {{/capabilities.can_view}}
+            {{/capabilities.can_submit}}
+        {{/has_submission}}
+        {{! if !empty($submissions) }}
+        {{#has_submission}}
+        {{! if assessor }}
+            {{#capabilities.can_assess}}
+            {{! if assessing }}
+                {{#extra.is_assessing}}
+                    {{#task_extra.do_not_assess}}
+                        {{#str}}review_task, observation{{/str}}
+                    {{/task_extra.do_not_assess}}
+                    {{^task_extra.do_not_assess}}
+                        {{#str}}assess:assess_task, observation{{/str}}
+                    {{/task_extra.do_not_assess}}
+                {{/extra.is_assessing}}
+                {{! else }}
+                {{^extra.is_assessing}}
+                    {{#str}}view_task, observation{{/str}}
+                {{/extra.is_assessing}}
+            {{/capabilities.can_assess}}
+            {{! else }}
+            {{^capabilities.can_assess}}
+                {{#str}}review_task, observation{{/str}}
+            {{/capabilities.can_assess}}
+        {{/has_submission}}
+        </a> {{! close task action link }}
+    </div>
+    {{! task description }}
+    <div>
+        <p>{{{intro_learner}}}</p>
+    </div>
+</div>
