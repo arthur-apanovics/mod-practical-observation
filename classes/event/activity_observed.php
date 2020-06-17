@@ -49,7 +49,7 @@ class activity_observed extends \core\event\base {
      * @return void
      */
     protected function init() {
-        $this->data['objecttable'] = submission::TABLE; // db table for objectid in question (e.g. learner_submission)
+        $this->data['objecttable'] = 'observation_submission'; //submission::TABLE; // db table for objectid in question (e.g. learner_submission)
         $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
     }

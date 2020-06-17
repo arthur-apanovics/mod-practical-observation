@@ -49,7 +49,7 @@ class attempt_started extends \core\event\base {
      * @return void
      */
     protected function init() {
-        $this->data['objecttable'] = learner_attempt::TABLE; // db table for objectid in question (e.g. learner_submission)
+        $this->data['objecttable'] = 'observation_learner_attempt'; // learner_attempt::TABLE; // db table for objectid in question (e.g. learner_submission)
         $this->data['crud'] = 'c';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
     }
