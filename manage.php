@@ -55,7 +55,7 @@ $PAGE->requires->js_call_amd(OBSERVATION_MODULE . '/developer_view', 'init');
 echo $OUTPUT->header();
 
 /* @var $renderer mod_observation_renderer */
-$renderer = $PAGE->get_renderer('observation');
+$renderer = $PAGE->get_renderer(\OBSERVATION);
 
 echo $renderer->view_manage($observation);
 

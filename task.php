@@ -60,7 +60,7 @@ $PAGE->navbar->add(get_string('breadcrumb:task', \OBSERVATION, $task->get_format
 echo $OUTPUT->header();
 
 /* @var $renderer mod_observation_renderer */
-$renderer = $PAGE->get_renderer('observation');
+$renderer = $PAGE->get_renderer(\OBSERVATION);
 
 if (!$observation_base->is_activity_available())
 {

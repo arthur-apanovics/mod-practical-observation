@@ -66,7 +66,7 @@ $PAGE->navbar->add(get_string('breadcrumb:assessing_task', \OBSERVATION, $task->
 echo $OUTPUT->header();
 
 /* @var $renderer mod_observation_renderer */
-$renderer = $PAGE->get_renderer('observation');
+$renderer = $PAGE->get_renderer(\OBSERVATION);
 
 if (!$observation->is_activity_available())
 {

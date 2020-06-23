@@ -39,15 +39,6 @@ $context = context_module::instance($cmid);
 
 require_login($course, true, $cm);
 
-// TODO: Event
-// $event = course_module_viewed::create(array(
-//     'objectid' => $PAGE->cm->instance,
-//     'context'  => $PAGE->context,
-// ));
-// $event->add_record_snapshot('course', $PAGE->course);
-// $event->add_record_snapshot($PAGE->cm->modname, $observation->to_record());
-// $event->trigger();
-
 $observation = new observation($cm, $USER->id);
 $name = $observation->get_formatted_name();
 
@@ -62,7 +53,7 @@ $PAGE->add_body_class('observation-view');
 echo $OUTPUT->header();
 
 /* @var $renderer mod_observation_renderer */
-$renderer = $PAGE->get_renderer('observation');
+$renderer = $PAGE->get_renderer(\OBSERVATION);
 
 if (!$observation->is_activity_available())
 {

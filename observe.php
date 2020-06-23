@@ -165,7 +165,7 @@ else if (optional_param('submit-decline', 0, PARAM_BOOL))
 }
 
 /* @var $renderer mod_observation_renderer get this early as we might need it if observation has been declined */
-$renderer = $PAGE->get_renderer('observation');
+$renderer = $PAGE->get_renderer(\OBSERVATION);
 
 echo $OUTPUT->header();
 
