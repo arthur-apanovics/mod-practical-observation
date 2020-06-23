@@ -634,6 +634,7 @@ class mod_observation_renderer extends plugin_renderer_base
                 $feedback->get_id_or_null(),
                 observation::FILE_AREA_ASSESSOR,
                 $context);
+            $template_data['extra']['attempt_number'] = $learner_attempt->get_attempt_number();
 
             // update learner task submission status
             if (!$learner_task_submission->is_assessment_in_progress())

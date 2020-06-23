@@ -26,42 +26,48 @@
             {{/criteria}}
         </ol>
     </div>
-    {{#extra.editor_html}}
-        <div class="editor-container">
-            <h5>Please provide assessment feedback:</h5>
-            {{{extra.editor_html}}}
-            {{{extra.filepicker_html}}}
-            <div class="assessment-outcome">
-                <label for="assessment-outcome">Assessment outcome</label>
-                {{! custom validation message? https://stackoverflow.com/questions/5272433/html5-form-required-attribute-set-custom-validation-message}}
-                {{! WARNING: do not rename values of each option as they are tied to the "outcome" column in database}}
-                <select name="outcome" id="assessment-outcome" required>
-                    {{! no existing feedback? }}
-                    {{^extra.existing_feedback}}
-                        <option disabled value selected>
-                            {{#str}}outcome:choose, observation{{/str}}
+    <h5>Assessor feedback</h5>
+    <div class="assessor-feedback-container wrapper-border">
+        {{#assessor_feedback}}
+            {{> mod_observation/comp-attempt_feedback}}
+        {{/assessor_feedback}}
+        {{#extra.editor_html}}
+            <div class="editor-container">
+                <h5>Please provide feedback for attempt #{{extra.attempt_number}}</h5>
+                {{{extra.editor_html}}}
+                {{{extra.filepicker_html}}}
+                <div class="assessment-outcome">
+                    <label for="assessment-outcome">Assessment outcome</label>
+                    {{! custom validation message? https://stackoverflow.com/questions/5272433/html5-form-required-attribute-set-custom-validation-message}}
+                    {{! WARNING: do not rename values of each option as they are tied to the "outcome" column in database}}
+                    <select name="outcome" id="assessment-outcome" required>
+                        {{! no existing feedback? }}
+                        {{^extra.existing_feedback}}
+                            <option disabled value selected>
+                                {{#str}}outcome:choose, observation{{/str}}
+                            </option>
+                        {{/extra.existing_feedback}}
+                        <option value="complete"
+                            {{! set as complete earlier? }}
+                            {{#extra.existing_feedback.is_complete}}
+                                selected
+                            {{/extra.existing_feedback.is_complete}}
+                        >
+                            {{#str}}outcome:assessor_complete, observation{{/str}}
                         </option>
-                    {{/extra.existing_feedback}}
-                    <option value="complete"
-                        {{! set as complete earlier? }}
-                        {{#extra.existing_feedback.is_complete}}
-                            selected
-                        {{/extra.existing_feedback.is_complete}}
-                    >
-                        {{#str}}outcome:assessor_complete, observation{{/str}}
-                    </option>
-                    <option value="not_complete"
-                        {{! set as not_complete earlier? }}
-                        {{#extra.existing_feedback.is_not_complete}}
-                            selected
-                        {{/extra.existing_feedback.is_not_complete}}
-                    >
-                        {{#str}}outcome:assessor_not_complete, observation{{/str}}
-                    </option>
-                </select>
+                        <option value="not_complete"
+                            {{! set as not_complete earlier? }}
+                            {{#extra.existing_feedback.is_not_complete}}
+                                selected
+                            {{/extra.existing_feedback.is_not_complete}}
+                        >
+                            {{#str}}outcome:assessor_not_complete, observation{{/str}}
+                        </option>
+                    </select>
+                </div>
             </div>
-        </div>
-    {{/extra.editor_html}}
+        {{/extra.editor_html}}
+    </div>
     <div class="wrapper-submit align-center">
         <button type="submit">Save</button>
         <input type="hidden" name="cmid" value="{{extra.cmid}}">
