@@ -83,18 +83,18 @@ if (isloggedin())
     }
     else
     {
-        // TODO: notify admins of logged in user observation
+        // TODO: notify admins of logged in user observation?
     }
 
     if ($learner_task_submission->get_userid() == $USER->id)
     {
         print_error('You cannot observe yourself!');
 
-        //TODO notify assessor of self observation attempt
+        //TODO notify assessor of self observation attempt?
     }
     else if ($USER->email != $observer->get_email_or_null())
     {
-        //TODO notify admins
+        //TODO notify admins?
         // has account in lms, is logged in, is not one being observed, is not assigned observer (based on email)
     }
 }
@@ -129,8 +129,6 @@ else if (optional_param('submit-decline', 0, PARAM_BOOL))
     $observer_assignment->decline();
     // update task submission status
     $learner_task_submission->update_status_and_save(learner_task_submission::STATUS_LEARNER_IN_PROGRESS);
-
-    // TODO: Event
 
     // emails
     $course = $observation->get_course();

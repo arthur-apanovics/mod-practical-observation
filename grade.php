@@ -31,7 +31,6 @@ $userid = optional_param('userid', null, PARAM_INT); // Graded user ID (optional
 $itemid = optional_param('itemid', null, PARAM_INT); // Graded user ID (optional)
 $gradeid = optional_param('gradeid', null, PARAM_INT); // Graded user ID (optional)
 
-// TODO: link directly to user submission
 if ($userid && has_capability(observation::CAP_ASSESS, context_module::instance($cmid)))
 {
     redirect(

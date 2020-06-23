@@ -66,12 +66,11 @@ if ($learner_task_submissionid = optional_param('learner_task_submission_id', nu
     $attempt = new learner_attempt_base($attempt_id);
 
     // get editor content
-    // TODO: SANITISE INPUT!!!!!
     list($input_base) = lib::get_editor_attributes_for_class(learner_attempt::class);
     $attempt_editor = required_param_array($input_base, PARAM_RAW);
 
     // update attempt
-    $attempt->set(learner_attempt::COL_TEXT, $attempt_editor['text']);
+    $attempt->set(learner_attempt::COL_TEXT, clean_text($attempt_editor['text']));
     $attempt->set(learner_attempt::COL_TEXT_FORMAT, $attempt_editor['format']);
     $attempt->update();
 
@@ -136,7 +135,7 @@ else if ($observer_submissionid = optional_param('observer_submission_id', null,
             }
             else
             {
-                $observer_feedback->set(observer_feedback::COL_TEXT, $feedback_editor['text']);
+                $observer_feedback->set(observer_feedback::COL_TEXT, clean_text($feedback_editor['text']));
                 $observer_feedback->set(observer_feedback::COL_TEXT_FORMAT, $feedback_editor['format']);
             }
         }
@@ -216,7 +215,7 @@ else if ($assessor_task_submissionid = optional_param('assessor_task_submission_
 
     // save feedback until assessor decides to release
     $assessor_feedback->set(assessor_feedback::COL_TIMESUBMITTED, time());
-    $assessor_feedback->set(assessor_feedback::COL_TEXT, $editor['text']);
+    $assessor_feedback->set(assessor_feedback::COL_TEXT, clean_text($editor['text']));
     $assessor_feedback->set(assessor_feedback::COL_TEXT_FORMAT, $editor['format']);
     $assessor_feedback->set(assessor_feedback::COL_OUTCOME, $outcome);
     $assessor_feedback->update();

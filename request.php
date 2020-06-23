@@ -41,8 +41,6 @@ $context = context_module::instance($cmid);
 
 require_login($course, true, $cm);
 
-// TODO: Event
-
 // creating class instances also validates provided id's
 $task_submission = new learner_task_submission($learner_task_submission_id);
 $attempt = new learner_attempt_base($attempt_id);

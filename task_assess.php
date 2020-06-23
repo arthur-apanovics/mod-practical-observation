@@ -37,8 +37,6 @@ $context = context_module::instance($cmid);
 require_login($course, false, $cm);
 require_capability(observation::CAP_ASSESS, $context);
 
-// TODO: Event
-
 $observation = new observation($cm, $learnerid, $taskid);
 $task = $observation->get_task($taskid);
 $learner = core_user::get_user($learnerid);

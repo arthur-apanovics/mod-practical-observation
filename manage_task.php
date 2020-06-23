@@ -42,9 +42,6 @@ $manage_url = new moodle_url(OBSERVATION_MODULE_PATH . 'manage.php', array('id' 
 require_login($course, false, $cm);
 require_capability(observation::CAP_MANAGE, $context);
 
-// TODO: Breadcrumb
-// TODO: Event
-
 // Print the page header.
 $PAGE->set_url(OBSERVATION_MODULE_PATH . 'manage_task.php', array('id' => $cm->id, 'taskid' => $taskid));
 
@@ -136,6 +133,9 @@ $PAGE->set_title($observation_title);
 $PAGE->set_heading(sprintf('%s - %s', $observation_title, $actionstr));
 
 $PAGE->add_body_class('observation-manage-task');
+
+$PAGE->navbar->add(get_string('breadcrumb:manage', \OBSERVATION),
+    new moodle_url(OBSERVATION_MODULE_PATH . 'manage.php', array('id' => $cmid)));
 
 // Output starts here.
 echo $OUTPUT->header();

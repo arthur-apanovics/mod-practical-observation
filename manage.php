@@ -33,8 +33,6 @@ $context = context_module::instance($cm->id);
 require_login($course, false, $cm);
 require_capability(observation::CAP_MANAGE, $context);
 
-// TODO: Event
-
 // do not filter observation by userid as we need to check if submissions exist
 $observation = new observation($cm);
 

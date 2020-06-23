@@ -36,8 +36,6 @@ $context = context_module::instance($cmid);
 
 require_login($course, true, $cm);
 
-// TODO: Event
-
 $observation_base = new observation_base($cm->instance);
 $task = new task($taskid, $USER->id);
 
