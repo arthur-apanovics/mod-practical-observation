@@ -39,7 +39,7 @@
             {{#extra.editor_html}}
                 <div class="editor-container">
                     <h5>
-                        Observation for Attempt #{{extra.attempt_number}}
+                        {{#str}}observer_editor_heading, observation, {{extra.attempt_number}}{{/str}}
                     </h5>
                     {{{extra.editor_html}}}
                     {{{extra.filepicker_html}}}

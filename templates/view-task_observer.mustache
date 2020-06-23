@@ -1,5 +1,4 @@
-<h5>Information and evidence from the trainee</h5>
-
+<h5>{{#str}}task:learner_attempts_title, observation{{/str}}</h5>
 <div class="wrapper-border">
     {{#learner_task_submissions}} {{! should only ever be one as we're filtering by userid in the renderer}}
         {{#learner_attempts}}
@@ -7,15 +6,15 @@
         {{/learner_attempts}}
     {{/learner_task_submissions}}
 </div>
-
 <form action="submit.php"
       id="observation-form"
       method="post"
       enctype="multipart/form-data"
       accept-charset="utf-8"
       autocomplete="off">
-
-    <h5>Completion observations</h5>
+    <h5>
+        {{#str}}task:criteria_container_title, observation{{/str}}
+    </h5>
     <div class="wrapper-border criteria-container">
         <ol class="criteria-list">
             {{#criteria}}
@@ -23,10 +22,9 @@
             {{/criteria}}
         </ol>
     </div>
-
     <div class="wrapper-submit align-center">
         <button type="submit">
-            Submit
+            {{#str}}observation:submit, observation{{/str}}
         </button>
         <input type="hidden" name="cmid" value="{{extra.cmid}}">
         <input type="hidden" name="observer_submission_id" value="{{extra.observer_submission_id}}">

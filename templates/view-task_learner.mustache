@@ -1,5 +1,5 @@
 <h5>
-    Completion observations
+    {{#str}}task:criteria_container_title, observation{{/str}}
     {{! observation link for admins }}
     {{#learner_task_submissions}}
         {{#is_admin}}
@@ -38,7 +38,7 @@
           accept-charset="utf-8"
           autocomplete="off">
 {{/extra.is_submission}}
-    <h5>Information and evidence from the trainee</h5>
+    <h5>{{#str}}task:learner_attempts_title, observation{{/str}}</h5>
     <div class="wrapper-border">
         {{! render past attempts }}
         {{#learner_task_submissions}} {{! should only ever be one as we're filtering by userid in the renderer}}
@@ -53,7 +53,7 @@
         {{! assessor viewwing task with no submissions }}
             {{^extra.is_submission}}
                 <div class="wrapper">
-                    Learner has not made any submissions yet
+                    {{#str}}task:no_submissions, observation{{/str}}
                 </div>
             {{/extra.is_submission}}
         {{/learner_task_submissions}}

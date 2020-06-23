@@ -1,3 +1,10 @@
-<h1>Declined observation</h1>
-<h4>You have declined observation request from <strong>{{learner_name}}</strong> for task "{{task_name}}"</h4>
-<p>If this was done by accident, please contact {{learner_name}} directly and ask for a new observation request.</p>
+<h1>
+    {{#str}}observer:declined_page_title, observation{{/str}}
+</h1>
+<h4>
+    {{! todo: build string in renderer (cannot pass multiple values to lang string from template) }}
+    You have declined observation request from <strong>{{learner_name}}</strong> for task "{{task_name}}"
+</h4>
+<p>
+    {{#str}}observer:declined_outro, observation{{/str}}
+</p>

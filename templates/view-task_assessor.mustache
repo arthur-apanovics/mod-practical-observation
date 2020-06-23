@@ -9,7 +9,9 @@
         {{> mod_observation/part-observer_details}}
     {{/extra.observer}}
 
-    <h5>Information and evidence from the trainee</h5>
+    <h5>
+        {{#str}}task:learner_attempts_title, observation{{/str}}
+    </h5>
     <div class="wrapper-border">
         {{#learner_task_submissions}} {{! should only ever be one as we're filtering by userid in the renderer}}
             {{#learner_attempts}}
@@ -18,7 +20,9 @@
         {{/learner_task_submissions}}
     </div>
 
-    <h5>Completion observations</h5>
+    <h5>
+        {{#str}}task:criteria_container_title, observation{{/str}}
+    </h5>
     <div class="wrapper-border criteria-container">
         <ol class="criteria-list">
             {{#criteria}}
@@ -26,20 +30,26 @@
             {{/criteria}}
         </ol>
     </div>
-    <h5>Assessor feedback</h5>
+    <h5>
+        {{#str}}task:assessor_container_title, observation{{/str}}
+    </h5>
     <div class="assessor-feedback-container wrapper-border">
         {{#assessor_feedback}}
             {{> mod_observation/comp-attempt_feedback}}
         {{/assessor_feedback}}
         {{#extra.editor_html}}
             <div class="editor-container">
-                <h5>Please provide feedback for attempt #{{extra.attempt_number}}</h5>
+                <h5>
+                    {{#str}}assess:editor_title, observation, {{extra.attempt_number}}{{/str}}
+                </h5>
                 {{{extra.editor_html}}}
                 {{{extra.filepicker_html}}}
                 <div class="assessment-outcome">
-                    <label for="assessment-outcome">Assessment outcome</label>
+                    <label for="assessment-outcome">
+                        {{#str}}assess:outcome_label, observation{{/str}}
+                    </label>
                     {{! custom validation message? https://stackoverflow.com/questions/5272433/html5-form-required-attribute-set-custom-validation-message}}
-                    {{! WARNING: do not rename values of each option as they are tied to the "outcome" column in database}}
+                    {{! WARNING: do not change VALUE attribute of each option as they are tied to the "outcome" column in database}}
                     <select name="outcome" id="assessment-outcome" required>
                         {{! no existing feedback? }}
                         {{^extra.existing_feedback}}
@@ -69,7 +79,7 @@
         {{/extra.editor_html}}
     </div>
     <div class="wrapper-submit align-center">
-        <button type="submit">Save</button>
+        <button type="submit">{{#str}}assess:save_button_title, observation{{/str}}</button>
         <input type="hidden" name="cmid" value="{{extra.cmid}}">
         <input type="hidden" name="assessor_task_submission_id" value="{{extra.assessor_task_submission_id}}">
         <input type="hidden" name="assessor_feedback_id" value="{{extra.assessor_feedback_id}}">

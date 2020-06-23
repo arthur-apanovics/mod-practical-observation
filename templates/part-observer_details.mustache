@@ -21,10 +21,10 @@
         {{#extra.is_assessing}}
             <div class="meets-criteria-wrapper">
                 <div class="control-group">
-                    <a id="criteria-modal">Observer criteria</a>
+                    <a id="criteria-modal">{{#str}}assess:criteria_popup_title, observation{{/str}}</a>
                 </div>
                 <div class="control-group">
-                    <label title="If an observer does not meet criteria, mark this submission as Not Complete and provide an explanation in feedback"
+                    <label title="{{#str}}assess:observer_meets_criteria_hint, observation{{/str}}"
                            for="meets-criteria">
                         {{#str}}assess:observer_meets_criteria, observation{{/str}}
                     </label>

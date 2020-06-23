@@ -13,13 +13,27 @@
             <th colspan="4"></th>
         </tr>
         <tr>
-            <th>Learner</th>
-            <th class="attempts-group ">Observations</th>
-            <th class="attempts-group">Assessments</th>
-            <th>Tasks observed</th>
-            <th>Status</th>
-            <th>Complete</th>
-            <th>Actions</th>
+            <th>
+                {{#str}}assess_table:learner, observation{{/str}}
+            </th>
+            <th class="attempts-group">
+                {{#str}}assess_table:observations, observation{{/str}}
+            </th>
+            <th class="attempts-group">
+                {{#str}}assess_table:assessments, observation{{/str}}
+            </th>
+            <th>
+                {{#str}}assess_table:tasks_observed , observation{{/str}}
+            </th>
+            <th>
+                {{#str}}assess_table:status, observation{{/str}}
+            </th>
+            <th>
+                {{#str}}assess_table:complete, observation{{/str}}
+            </th>
+            <th>
+                {{#str}}assess_table:actions, observation{{/str}}
+            </th>
         </tr>
         </thead>
         <tbody>
@@ -60,13 +74,15 @@
                     {{submission_status}}
                 </td>
                 <td class="completion">
-                    {{! TODO: TLMS12 - new way of assigning 'alt', etc. https://help.totaralearning.com/display/DEV/Flexible+Icons+API }}
                     {{#is_complete}}
-                        {{#flex_icon}}check-circle-o, assess:activity_complete, observation, complete}{{/flex_icon}}
+                        {{#flex_icon}}
+                            check-circle-o, assess:activity_complete, observation, complete
+                        {{/flex_icon}}
                     {{/is_complete}}
                     {{^is_complete}}
                         {{#flex_icon}}
-                            times-circle-o, assess:activity_not_complete, observation, not-complete}{{/flex_icon}}
+                            times-circle-o, assess:activity_not_complete, observation, not-complete
+                        {{/flex_icon}}
                     {{/is_complete}}
                 </td>
                 <td class="actions">
@@ -76,13 +92,11 @@
                 </td>
             </tr>
         {{/extra.submission_summary_data}}
-
         {{^extra.submission_summary_data}}
             <tr>
                 <td>No submissions yet</td>
             </tr>
         {{/extra.submission_summary_data}}
-
         </tbody>
     </table>
 </div>

@@ -119,6 +119,7 @@ $string['status:assessment_incomplete'] = 'Assessment failed';
 $string['status:complete'] = 'Complete';
 
 // MANAGE SPECIFIC
+$string['manage:page_title'] = 'Editing observation: {$a}';
 $string['manage:no_tasks'] = 'This activity does not have any tasks, use button below to add new tasks.';
 $string['manage:missing_criteria'] = 'One or more tasks in this activity are missing completion criteria. Please correct this by using the "Edit tasks" section.';
 $string['manage:empty'] = 'No tasks yet';
@@ -146,6 +147,11 @@ $string['attempt_for_preview'] = 'Example attempt';
 $string['feedback_summary'] = '<strong>{$a->observer_fullname}</strong> has marked attempt #{$a->attempt_number} as <span class="outcome-inline">{$a->outcome}</span> {$a->timesubmitted}';
 $string['feedback_for'] = 'Feedback for attempt #{$a}';
 $string['preview_editor_text'] = 'Example learner attempt text';
+$string['task:no_submissions'] = 'Learner has not made any submissions yet';
+
+$string['task:learner_attempts_title'] = 'Information and evidence from the trainee';
+$string['task:criteria_container_title'] = 'Completion observations';
+$string['task:assessor_container_title'] = 'Assessor feedback';
 
 // CRITERIA SPECIFIC
 $string['add_criteria'] = 'Add criteria';
@@ -165,48 +171,75 @@ $string['report'] = 'Report';
 $string['request:page_header'] = 'Assign observer for "{$a}"';
 $string['request:table_title'] = 'Assign from history';
 $string['request:table_title_help'] = 'You can assign any observer you\'ve used in this module or a new observer';
+$string['request:table_col_name'] = 'Name';
+$string['request:table_active_observer'] = '(current observer)';
 $string['request:form_header'] = 'Assign observer';
 $string['request:phone_validation_message'] = 'Please enter a valid NZ phone number';
 $string['request:email_validation_message'] = 'Please enter a valid email address';
 $string['request:confirm_change'] = 'Current observer for this task is <strong>{$a->current} ({$a->current_email})</strong>.<br>Are you sure you want to assign <strong>{$a->new} ({$a->new_email})</strong> as the observer for task "{$a->task}"?';
 $string['request:input_prompt'] = 'Briefly explain this change';
+$string['request:assign_button_title'] = 'Assign';
+$string['request:previous_assignments_hint'] = 'Observers that you have previously assigned in this module will appear here';
 
 $string['request:assigned_observer'] = 'Assigned observer';
 $string['request:assigned_observer'] = 'Observer assignment records';
 $string['request:change_observer'] = 'change observer';
 
 // OBSERVER
+$string['attempt'] = 'Attempt';
 $string['fullname'] = 'Full name';
 $string['phone'] = 'Phone';
 $string['email'] = 'Email';
 $string['position_title'] = 'Position title';
 $string['message'] = 'Message';
 $string['message_placeholder'] = 'Optional message to appear in observer email';
-// observation page
+// observation landing page
 $string['accept'] = 'Accept';
 $string['decline'] = 'Decline';
 $string['confirm_decline'] = 'Are you sure you want to decline this observation?';
 $string['observer_page_title'] = 'Observation for {$a}\'s attempt';
-
+$string['observer_editor_heading'] = 'Observation for Attempt #{$a}';
 $string['send'] = 'Send';
-$string['edit_lowercase'] = 'edit';
+$string['observer:confirm_details'] = 'Confirm personal details';
+$string['edit'] = 'edit';
 $string['observer_requirements'] = 'External observer requirements';
 $string['observer_requirements_acknowledge'] = 'I acknowledge that I meet the required criteria to observe this learner';
-
+// observation outcomes
 $string['outcome:choose'] = 'Choose...';
 $string['outcome:observer_complete'] = 'Complete';
 $string['outcome:observer_not_complete'] = 'Not complete';
 $string['outcome:assessor_complete'] = 'Competent';
 $string['outcome:assessor_not_complete'] = 'Not yet competent';
+// observation complete
+$string['observer:complete_page_title'] = 'Observation complete';
+$string['observer:complete_outro'] = 'Please contact Careerforce support if you have any questions. You can safely close this window now.';
+$string['observer:declined_page_title'] = 'Declined observation';
+$string['observer:declined_outro'] = 'If this was done by accident, please contact {$a} directly and ask for a new observation request.';
+$string['observer:unavailable_page_title'] = 'Observation unavailable';
+$string['observer:unavailable_outro'] = 'Please contact Careerforce support for assistance.';
+
 
 // ASSESSOR
 $string['assess:observer_meets_criteria'] = 'Observer meets required criteria';
+$string['assess:observer_meets_criteria_hint'] = 'If an observer does not meet criteria, mark this submission as Not Complete and provide an explanation in feedback';
 $string['assess:release_grade'] = 'Release';
 $string['assess:release_grade_title'] = 'All tasks have to be assessed before releasing';
 $string['assess:has_attempts_alt'] = 'Observation attempts per task';
 $string['assess:activity_complete'] = 'Activity complete';
 $string['assess:activity_not_complete'] = 'Activity not complete';
 $string['assess:assess_task'] = 'Assess';
+$string['assess:criteria_popup_title'] = 'Observer criteria';
+$string['assess:editor_title'] = 'Please provide feedback for attempt #{$a}';
+$string['assess:outcome_label'] = 'Assessment outcome';
+$string['assess:save_button_title'] = 'Save';
+// assessor submissions table
+$string['assess_table:learner'] = 'Learner';
+$string['assess_table:observations'] = 'Observations';
+$string['assess_table:assessments'] = 'Assessments';
+$string['assess_table:tasks_observed'] = 'Tasks observed';
+$string['assess_table:status'] = 'Status';
+$string['assess_table:complete'] = 'Complete';
+$string['assess_table:actions'] = 'Actions';
 
 // PAGE TITLES
 $string['title:manage'] = 'Edit tasks - {$a}';
