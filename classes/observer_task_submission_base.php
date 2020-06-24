@@ -169,7 +169,7 @@ class observer_task_submission_base extends db_model_base
                                 return \core_user::get_user($assessor);
                             }, $assessors_in_group);
 
-                        $message_body = get_string('email:assessor_assessment_pending_body', OBSERVATION, $lang_data)
+                        $message_body = get_string('email:assessor_assessment_pending_body', OBSERVATION, $lang_data);
                         lib::email_users(
                             $assessors_in_group,
                             get_string('email:assessor_assessment_pending_subject', OBSERVATION),
