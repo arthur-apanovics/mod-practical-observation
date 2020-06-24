@@ -22,6 +22,7 @@
 
 namespace mod_observation;
 
+use context_module;
 use mod_observation\event\activity_observed;
 use mod_observation\event\attempt_observed;
 
@@ -114,15 +115,14 @@ class observer_task_submission_base extends db_model_base
             }
         }
 
-        //TODO: notifications
-
         // save
         $this->update();
 
+        $cm = $observation->get_cm();
         // trigger event
         $event = attempt_observed::create(
             [
-                'context'  => \context_module::instance($observation->get_cm()->id),
+                'context'  => \context_module::instance($cm->id),
                 'objectid' => $learner_task_submission->get_id_or_null(),
                 'userid'   => $learner_task_submission->get_userid(),
                 'other'    => [
@@ -137,6 +137,47 @@ class observer_task_submission_base extends db_model_base
         // trigger another event if all tasks have been observed and are ready for assessment
         if ($assessment_needed)
         {
+            // check if groups enabled
+            if (groups_get_activity_groupmode($cm))
+            {
+                $course = $observation->get_course();
+                $lang_data = [
+                    'learner_fullname'  => fullname(\core_user::get_user($submission->get_userid())),
+                    'assessment_url'    => $submission->get_assess_url($observation),
+                    'observer_fullname' => $observer_assignment->get_observer()->get_formatted_name_or_null(),
+                    'task_name'         => $learner_task_submission->get_task_base()->get_formatted_name(),
+                    'activity_name'     => $observation->get_formatted_name(),
+                    'activity_url'      => $observation->get_url(),
+                    'course_fullname'   => $course->fullname,
+                    'course_shortname'  => $course->shortname,
+                    'course_url'        => new \moodle_url('/course/view.php', ['id' => $course->id]),
+                ];
+
+                $context = context_module::instance($cm->id);
+                $learner_groups = groups_get_user_groups($cm->course, $submission->get_userid());
+                foreach($learner_groups[0] as $learner_group)
+                {
+                    // get assessors in this group
+                    $assessors_in_group = lib::get_usersids_in_group_or_null(
+                        $learner_group, $context, observation::CAP_ASSESS);
+                    if ($assessors_in_group)
+                    {
+                        // map userid's to user objects
+                        $assessors_in_group = array_map(
+                            function ($assessor)
+                            {
+                                return \core_user::get_user($assessor);
+                            }, $assessors_in_group);
+
+                        $message_body = get_string('email:assessor_assessment_pending_body', OBSERVATION, $lang_data)
+                        lib::email_users(
+                            $assessors_in_group,
+                            get_string('email:assessor_assessment_pending_subject', OBSERVATION),
+                            $message_body);
+                    }
+                }
+            }
+
             // trigger event
             $event = activity_observed::create(
                 [

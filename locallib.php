@@ -30,6 +30,7 @@
 namespace mod_observation;
 
 use coding_exception;
+use context_module;
 use context_user;
 use file_storage;
 use grade_scale;
@@ -42,6 +43,38 @@ defined('MOODLE_INTERNAL') || die();
 // common methods here
 class lib
 {
+    /**
+     * @param int            $current_group call {@link groups_get_activity_group} to get currently active group
+     * @param context_module $context cm
+     * @param string         $capability capability that the user needs to have
+     * @return array|null
+     * @throws \dml_exception
+     */
+    public static function get_usersids_in_group_or_null(
+        int $current_group, context_module $context, string $capability)
+    {
+        global $DB;
+
+        $userids = null;
+        if (!empty($current_group))
+        {
+            // We have a currently selected group.
+            $groupstudentsjoins = get_enrolled_with_capabilities_join(
+                $context, '', $capability, $current_group);
+
+            if (!empty($groupstudentsjoins->joins))
+            {
+                $sql = "SELECT DISTINCT u.id
+                        FROM {user} u
+                        $groupstudentsjoins->joins
+                        WHERE $groupstudentsjoins->wheres";
+                $userids = $DB->get_fieldset_sql($sql, $groupstudentsjoins->params);
+            }
+        }
+
+        return !empty($userids) ? $userids : null;
+    }
+
     /**
      * Fetches a binary type scale id or creates one if not found.
      * Required to ensure gradebook supports our grade type.

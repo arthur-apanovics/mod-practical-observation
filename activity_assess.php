@@ -46,7 +46,7 @@ $title = get_string(
 ]);
 
 // Print the page header.
-$PAGE->set_url('/mod/observation/activity_assess.php', array('id' => $cm->id, 'learnerid' => $learnerid));
+$PAGE->set_url(OBSERVATION_MODULE_PATH . '/activity_assess.php', array('id' => $cm->id, 'learnerid' => $learnerid));
 $PAGE->set_title($title);
 $PAGE->set_heading(format_string($course->fullname));
 

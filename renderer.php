@@ -24,7 +24,6 @@ defined('MOODLE_INTERNAL') || die();
 
 use core\notification;
 use mod_observation\assessor_feedback;
-use mod_observation\assessor_task_submission;
 use mod_observation\learner_attempt;
 use mod_observation\learner_attempt_base;
 use mod_observation\learner_task_submission;
@@ -105,12 +104,16 @@ class mod_observation_renderer extends plugin_renderer_base
                 // Groups are being used, so get the group selector
                 $context = context_module::instance($cm->id);
                 $template_data['extra']['group_selector_html'] = groups_print_activity_menu(
-                    $cm, $observation->get_url(), true, !has_capability('moodle/site:accessallgroups', $context));
+                    $cm,
+                    $observation->get_url(),
+                    true,
+                    !has_capability('moodle/site:accessallgroups',
+                    $context));
 
                 $current_group = groups_get_activity_group($cm, true);
                 if ($current_group !== 0) // 0 = all users
                 {
-                    $userids = $this->get_usersids_in_group_or_null($current_group, $context);
+                    $userids = lib::get_usersids_in_group_or_null($current_group, $context, observation::CAP_SUBMIT);
                     if (is_null($userids))
                     {
                         notification::add(
@@ -946,30 +949,6 @@ class mod_observation_renderer extends plugin_renderer_base
         $fm = new form_filemanager($picker_options);
 
         return $files_renderer->render($fm);
-    }
-
-    private function get_usersids_in_group_or_null(int $current_group, context_module $context)
-    {
-        global $DB;
-
-        $userids = null;
-        if (!empty($current_group))
-        {
-            // We have a currently selected group.
-            $groupstudentsjoins = get_enrolled_with_capabilities_join(
-                $context, '', observation::CAP_SUBMIT, $current_group);
-
-            if (!empty($groupstudentsjoins->joins))
-            {
-                $sql = "SELECT DISTINCT u.id
-                        FROM {user} u
-                        $groupstudentsjoins->joins
-                        WHERE $groupstudentsjoins->wheres";
-                $userids = $DB->get_fieldset_sql($sql, $groupstudentsjoins->params);
-            }
-        }
-
-        return !empty($userids) ? $userids : null;
     }
 
     /**

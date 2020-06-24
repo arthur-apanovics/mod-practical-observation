@@ -314,3 +314,5 @@ $string['email:learner_observation_complete_body'] = 'learner_observation_comple
 $string['email:learner_assessment_released_subject'] = 'learner_assessment_released_subject';
 $string['email:learner_assessment_released_body'] = 'learner_assessment_released_body';
 
+$string['email:assessor_assessment_pending_subject'] = 'assessor_assessment_pending_subject';
+$string['email:assessor_assessment_pending_body'] = 'assessor_assessment_pending_body';

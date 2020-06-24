@@ -125,6 +125,24 @@ class submission_base extends submission_status_store
         return $this;
     }
 
+    /**
+     * @param observation_base|null $observation
+     * @return \moodle_url
+     * @throws \moodle_exception
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws dml_missing_record_exception
+     */
+    public function get_assess_url(observation_base $observation = null)
+    {
+        $observation = is_null($observation) ? $this->get_observation() : $observation;
+        return new \moodle_url(
+            OBSERVATION_MODULE_PATH . '/activity_assess.php', [
+            'id'        => $observation->get_cm()->id,
+            'learnerid' => $this->get_userid()
+        ]);
+    }
+
     public function get_userid()
     {
         return $this->userid;
