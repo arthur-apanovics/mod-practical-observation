@@ -69,4 +69,11 @@ class observer_task_submission extends observer_task_submission_base implements 
                 lib::get_outcome_string('observer', $this->outcome) : null,
         ];
     }
+
+    public function delete() {
+        foreach ($this->observer_feedback as $observerfeedback) {
+            $observerfeedback->delete();
+        }
+        parent::delete();
+    }
 }

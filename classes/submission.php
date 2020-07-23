@@ -62,6 +62,14 @@ class submission extends submission_base /*TODO: implements templateable*/
         return $observed;
     }
 
+    public function delete()
+    {
+        foreach($this->learner_task_submissions as $task_submission){
+            $task_submission->delete();
+        }
+        parent::delete();
+    }
+
     /**
      * @return learner_task_submission[]
      */
@@ -290,5 +298,9 @@ class submission extends submission_base /*TODO: implements templateable*/
         $event->trigger();
 
         return $submission_status;
+    }
+
+    public static function get_submission_for_learner_or_null($cminstance, $learnerid) {
+        return submission::read_by_condition_or_null([submission::COL_OBSERVATIONID => $cminstance, submission::COL_USERID => $learnerid]);
     }
 }
