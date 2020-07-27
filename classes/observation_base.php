@@ -249,6 +249,7 @@ class observation_base extends db_model_base
             'can_viewsubmissions' => has_capability(self::CAP_VIEWSUBMISSIONS, $context, $userid),
             'can_assess'          => has_capability(self::CAP_ASSESS, $context, $userid),
             'can_manage'          => has_capability(self::CAP_MANAGE, $context, $userid),
+            'is_siteadmin'        => is_siteadmin($userid)
         ];
     }
 

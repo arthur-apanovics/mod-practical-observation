@@ -114,4 +114,11 @@ class assessor_task_submission extends assessor_task_submission_base implements 
             self::COL_OUTCOME => lib::get_outcome_string('assessor', $this->outcome),
         ];
     }
+
+    public function delete() {
+        foreach ($this->feedbacks as $feedback) {
+            $feedback->delete();
+        }
+        parent::delete();
+    }
 }

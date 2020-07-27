@@ -228,6 +228,7 @@ $string['assess:has_attempts_alt'] = 'Observation attempts per task';
 $string['assess:activity_complete'] = 'Activity complete';
 $string['assess:activity_not_complete'] = 'Activity not complete';
 $string['assess:assess_task'] = 'Assess';
+$string['assess:delete'] = 'Delete';
 $string['assess:criteria_popup_title'] = 'Observer criteria';
 $string['assess:editor_title'] = 'Please provide feedback for attempt #{$a}';
 $string['assess:outcome_label'] = 'Assessment outcome';

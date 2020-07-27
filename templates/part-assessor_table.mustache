@@ -84,11 +84,16 @@
                             times-circle-o, assess:activity_not_complete, observation, not-complete
                         {{/flex_icon}}
                     {{/is_complete}}
-                </td>
+                </td>  
                 <td class="actions">
                     <a href="{{{module_root}}}/activity_assess.php?id={{cmid}}&learnerid={{userid}}">
                     {{#flex_icon}}edit, assess:assess_task, observation{{/flex_icon}}
                     </a>
+                    {{#capabilities.is_siteadmin}}
+                        <a href="{{{module_root}}}/app_manager.php?id={{cmid}}&learnerid={{userid}}">
+                            {{#flex_icon}}delete, assess:delete, observation{{/flex_icon}}
+                        </a>
+                    {{/capabilities.is_siteadmin}}
                 </td>
             </tr>
         {{/extra.submission_summary_data}}

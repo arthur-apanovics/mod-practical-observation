@@ -548,4 +548,17 @@ class learner_task_submission extends learner_task_submission_base implements te
             'review_url'               => $review_url,
         ];
     }
+
+    public function delete() {
+        foreach($this->learner_attempts as $learner_task_attempt) {
+            $learner_task_attempt->delete();
+        }
+
+        foreach ($this->observer_assignments as $observer_assignment_task) {
+            $observer_assignment_task->delete();
+        }
+        $this->assessor_task_submission->delete();
+
+        parent::delete();
+    }
 }
