@@ -89,14 +89,11 @@
                     <a href="{{{module_root}}}/activity_assess.php?id={{cmid}}&learnerid={{userid}}">
                     {{#flex_icon}}edit, assess:assess_task, observation{{/flex_icon}}
                     </a>
-
-                    {{! todo: next task will be to make this button visible only for site admins.
-                    check out export_capabilities() in mod\observation\classes\observation_base.php and add is_siteadmin
-                    to the existing array, use is_siteadmin() to determine if a user is admin or not. Search the template
-                    directory for "capabilities." to see examples. }}
-                    <a href="{{{module_root}}}/app_manager.php?id={{cmid}}&learnerid={{userid}}">
-                    {{#flex_icon}}delete, assess:delete, observation{{/flex_icon}}
-                    </a>
+                    {{#capabilities.is_siteadmin}}
+                        <a href="{{{module_root}}}/app_manager.php?id={{cmid}}&learnerid={{userid}}">
+                            {{#flex_icon}}delete, assess:delete, observation{{/flex_icon}}
+                        </a>
+                    {{/capabilities.is_siteadmin}}
                 </td>
             </tr>
         {{/extra.submission_summary_data}}
