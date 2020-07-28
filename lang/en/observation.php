@@ -265,6 +265,7 @@ $string['notification:observer_declined_observation'] = '{$a->observer} has decl
 $string['notification:observer_declined_observation_in_task'] = '{$a->observer} has declined your request to observe "{$a->task_name}".<br>Please assign a different observer by clicking "change observer" link below';
 $string['notification:observation_pending_or_in_progress'] = 'Observation for this task is not yet complete';
 $string['notification:assessment_released'] = 'Assessment for <i>{$a}</i>\'s submission succsesfully released';
+$string['notification:submission_deleted'] = 'Submission has been successfully deleted';
 $string['notification:submission_pending_or_in_progress'] = 'Learner has not yet submitted an attempt for this task';
 $string['notification:activity_wait_for_observers'] = 'You have requested observations for all tasks, please be patient while observers review your submissions';
 $string['notification:activity_wait_for_mixed'] = 'Please be patient while your submissions are observed and assessed';
