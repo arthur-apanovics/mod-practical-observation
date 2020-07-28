@@ -273,15 +273,21 @@ class observer_assignment extends observer_assignment_base implements templateab
         ];
     }
 
-    public function delete() {
-        // todo: check if observer is assigned to any other submissions
-        // and, if not assigned - delete, otherwise keep the record.
-        // This would be better done as a SQL query. Also, this has the potential to be quite difficult to do
-        // so leave it for me if you can't figure it out.
-        // For sql query examples search the codebase for $DB->get_records_sql
-        $this->observer->delete();
-        $this->observer_task_submission->delete();
-
+    public function delete()
+    {
+        global $DB;
+        if (!is_null(($this->observer))) 
+        {
+            $sql = 'SELECT COUNT(id) FROM {' . $this::TABLE . '} WHERE NOT(id = ?)';
+            $count = $DB->get_field_sql($sql, [$this->id]);
+            if (!$count) {
+                $this->observer->delete();
+            }
+        }
+        if(!is_null($this->observer_task_submission))
+        {
+            $this->observer_task_submission->delete();
+        }
         parent::delete();
     }
 }
