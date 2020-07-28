@@ -90,7 +90,8 @@
                     {{#flex_icon}}edit, assess:assess_task, observation{{/flex_icon}}
                     </a>
                     {{#capabilities.is_siteadmin}}
-                        <a href="{{{module_root}}}/app_manager.php?id={{cmid}}&learnerid={{userid}}">
+                        <a class="submission_delete" onclick="return confirm('Are you sure you want to delete this submission?')"
+                        href="{{{module_root}}}/app_manager.php?cmid={{cmid}}&learnerid={{userid}}">
                             {{#flex_icon}}delete, assess:delete, observation{{/flex_icon}}
                         </a>
                     {{/capabilities.is_siteadmin}}
