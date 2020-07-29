@@ -508,6 +508,9 @@ class mod_observation_renderer extends plugin_renderer_base
             // preview file manager
             $template_data['extra']['filemanager_html'] = $this->files_input_preview($context);
 
+            // render task header
+            $out .= $this->render_from_template('part-task_header', $header_data);
+            // render task preview
             $out .= $this->render_from_template('view-task_preview', $template_data);
         }
         else
