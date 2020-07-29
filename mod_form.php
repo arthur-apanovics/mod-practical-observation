@@ -38,6 +38,13 @@ require_once($CFG->dirroot . '/course/moodleform_mod.php');
  */
 class mod_observation_mod_form extends moodleform_mod
 {
+    private $default_intros = [
+        mod_observation\observation::COL_DEF_I_TASK_LEARNER,
+        mod_observation\observation::COL_DEF_I_TASK_OBSERVER,
+        mod_observation\observation::COL_DEF_I_TASK_ASSESSOR,
+        mod_observation\observation::COL_DEF_I_ASS_OBS_LEARNER,
+        mod_observation\observation::COL_DEF_I_ASS_OBS_OBSERVER,
+    ];
 
     /**
      * Defines forms elements
@@ -74,21 +81,14 @@ class mod_observation_mod_form extends moodleform_mod
         $mform->addElement('header', 'intro_defaults', get_string('intro_defaults', OBSERVATION));
         $mform->setExpanded('intro_defaults', true);
 
-        $default_intros = [
-            mod_observation\observation::COL_DEF_I_TASK_LEARNER,
-            mod_observation\observation::COL_DEF_I_TASK_OBSERVER,
-            mod_observation\observation::COL_DEF_I_TASK_ASSESSOR,
-            mod_observation\observation::COL_DEF_I_ASS_OBS_LEARNER,
-            mod_observation\observation::COL_DEF_I_ASS_OBS_OBSERVER,
-        ];
-        foreach ($default_intros as $element)
+        foreach ($this->default_intros as $element)
         {
             $mform->addElement(
                 'editor',
                 $element,
                 get_string($element, OBSERVATION),
                 ['rows' => 10],
-                lib::get_editor_file_options($this->context));
+                lib::get_editor_file_options());
             $mform->addHelpButton($element, $element, OBSERVATION);
             $mform->setType($element, PARAM_RAW);// no XSS prevention here, users must be trusted
         }
@@ -119,7 +119,25 @@ class mod_observation_mod_form extends moodleform_mod
         $this->add_action_buttons();
     }
 
+    public function data_preprocessing(&$default_values)
+    {
+        foreach ($this->default_intros as $intro)
+        {
+            if (!isset($default_values[$intro]))
+            {
+                continue;
+            }
 
+            // data already exists at this offset, we need to store current value and clear it first
+            $text = $default_values[$intro];
+            unset($default_values[$intro]);
+
+            $default_values[$intro] = lib::prepare_intro(
+                $intro, $default_values["{$intro}_format"], $text, $this->context);
+        }
+
+        parent::data_preprocessing($default_values);
+    }
 
     function add_completion_rules()
     {

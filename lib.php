@@ -37,6 +37,7 @@ require_once('classes/observation.php');
 use mod_observation\lib;
 use mod_observation\observation;
 use mod_observation\observation_base;
+use mod_observation\observer_assignment;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -63,10 +64,31 @@ function observation_supports($feature)
         case FEATURE_COMPLETION_HAS_RULES:
         case FEATURE_GROUPS:
         case FEATURE_GRADE_HAS_GRADE:
-            //TODO: case FEATURE_BACKUP_MOODLE2:
+        case FEATURE_BACKUP_MOODLE2:
             return true;
         default:
             return null;
+    }
+}
+
+function observation_process_and_set_intros(array $form_data, observation_base &$observation_instance)
+{
+    $context = context_module::instance($form_data['coursemodule']);
+
+    // set the values
+    foreach (observation::get_intro_fields() as $intro)
+    {
+        list($area, $itemid) = lib::get_filearea_and_itemid_for_intro($intro);
+
+        $format = "{$intro}_format";
+        $text = lib::save_intro(
+            $form_data[$intro],
+            $area,
+            $itemid,
+            $context);
+
+        $observation_instance->set($intro, $text);
+        $observation_instance->set($format, $form_data[$intro]['format']);
     }
 }
 
@@ -104,21 +126,8 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
     $base->set($base::COL_TIMEMODIFIED, $now);
     $base->set($base::COL_LASTMODIFIEDBY, $USER->id);
 
-    $intros = [
-        $base::COL_DEF_I_TASK_LEARNER,
-        $base::COL_DEF_I_TASK_OBSERVER,
-        $base::COL_DEF_I_TASK_ASSESSOR,
-        $base::COL_DEF_I_ASS_OBS_LEARNER,
-        $base::COL_DEF_I_ASS_OBS_OBSERVER,
-    ];
-
-    // set the values
-    foreach ($intros as $intro)
-    {
-        $format = "{$intro}_format";
-        $base->set($intro, $data[$intro]['text']);
-        $base->set($format, $data[$intro]['format']);
-    }
+    // process editors and add to observation instance
+    observation_process_and_set_intros($data, $base);
 
     $base->set($base::COL_COMPLETION_TASKS, $data[$base::COL_COMPLETION_TASKS]);
     $base->set($base::COL_FAIL_ALL_TASKS, $data[$base::COL_FAIL_ALL_TASKS]);
@@ -167,21 +176,8 @@ function observation_update_instance(stdClass $observation, mod_observation_mod_
     $base->set(observation::COL_TIMEMODIFIED, $now);
     $base->set(observation::COL_LASTMODIFIEDBY, $USER->id);
 
-    $intros = [
-        observation::COL_DEF_I_TASK_LEARNER,
-        observation::COL_DEF_I_TASK_OBSERVER,
-        observation::COL_DEF_I_TASK_ASSESSOR,
-        observation::COL_DEF_I_ASS_OBS_LEARNER,
-        observation::COL_DEF_I_ASS_OBS_OBSERVER,
-    ];
-
-    // set the values
-    foreach ($intros as $intro)
-    {
-        $format = "{$intro}_format";
-        $base->set($intro, $data[$intro]['text']);
-        $base->set($format, $data[$intro]['format']);
-    }
+    // process editors and add to observation instance
+    observation_process_and_set_intros($data, $base);
 
     $base->set(observation::COL_COMPLETION_TASKS, $data[$base::COL_COMPLETION_TASKS]);
     $base->set($base::COL_FAIL_ALL_TASKS, $data[$base::COL_FAIL_ALL_TASKS]);
@@ -419,6 +415,7 @@ function observation_get_file_areas($course, $cm, $context)
 {
     $areas = [];
 
+    $areas[observation_base::FILE_AREA_GENERAL] = get_string(observation_base::FILE_AREA_GENERAL, OBSERVATION);
     $areas[observation_base::FILE_AREA_TRAINEE] = get_string(observation_base::FILE_AREA_TRAINEE, OBSERVATION);
     $areas[observation_base::FILE_AREA_OBSERVER] = get_string(observation_base::FILE_AREA_OBSERVER, OBSERVATION);
     $areas[observation_base::FILE_AREA_ASSESSOR] = get_string(observation_base::FILE_AREA_ASSESSOR, OBSERVATION);
@@ -518,7 +515,7 @@ function observation_pluginfile(
     if (isset($SESSION->observation_usertoken))
     {
         // validate
-        if (is_null(\mod_observation\observer_assignment::read_by_token_or_null($SESSION->observation_usertoken))
+        if (is_null(observer_assignment::read_by_token_or_null($SESSION->observation_usertoken))
             || $filearea != observation::FILE_AREA_TRAINEE)
         {
             require_login($course, true, $cm);

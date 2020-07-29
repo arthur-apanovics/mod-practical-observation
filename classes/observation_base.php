@@ -46,10 +46,15 @@ class observation_base extends db_model_base
     public const COL_COMPLETION_TASKS = 'completion_tasks';
     public const COL_FAIL_ALL_TASKS   = 'fail_all_tasks';
     // default intro's:
+    /** Default intro for a task - learner view */
     public const COL_DEF_I_TASK_LEARNER     = 'def_i_task_learner';
+    /** Default intro for a task - observer view */
     public const COL_DEF_I_TASK_OBSERVER    = 'def_i_task_observer';
+    /** Default intro for a task - assessor view */
     public const COL_DEF_I_TASK_ASSESSOR    = 'def_i_task_assessor';
+    /** Default intro for assigning an observer - learner view */
     public const COL_DEF_I_ASS_OBS_LEARNER  = 'def_i_ass_obs_learner';
+    /** Default intro for observer requirements */
     public const COL_DEF_I_ASS_OBS_OBSERVER = 'def_i_ass_obs_observer';
     // formats for default intro's:
     public const COL_DEF_I_TASK_LEARNER_FORMAT     = 'def_i_task_learner_format';
@@ -85,7 +90,8 @@ class observation_base extends db_model_base
      */
     public const CAP_MANAGE = 'mod/observation:manage';
 
-    public const FILE_AREA_INTRO    = 'observation_intro';
+    public const FILE_AREA_INTRO    = 'intro';
+    public const FILE_AREA_GENERAL  = 'general_attachments';
     public const FILE_AREA_TRAINEE  = 'learner_attachments';
     public const FILE_AREA_OBSERVER = 'observer_attachments';
     public const FILE_AREA_ASSESSOR = 'assessor_attachments';
@@ -206,6 +212,17 @@ class observation_base extends db_model_base
                 get_coursemodule_from_instance(
                     OBSERVATION, $this->id, $this->course, false, MUST_EXIST));
         }
+    }
+
+    public static function get_intro_fields(): array
+    {
+        return [
+            self::COL_DEF_I_TASK_LEARNER,
+            self::COL_DEF_I_TASK_OBSERVER,
+            self::COL_DEF_I_TASK_ASSESSOR,
+            self::COL_DEF_I_ASS_OBS_LEARNER,
+            self::COL_DEF_I_ASS_OBS_OBSERVER,
+        ];
     }
 
     /**
@@ -565,34 +582,26 @@ class observation_base extends db_model_base
      *                  'text' => 'default_value',
      *                  'format' => 'default_value'
      *                  ]]
+     * @throws coding_exception
      */
     public function get_form_defaults_for_new_task()
     {
-        return [
-            task::COL_INTRO_LEARNER => [
-                'text'   => $this->def_i_task_learner,
-                'format' => $this->def_i_task_learner_format
-            ],
-
-            task::COL_INTRO_OBSERVER => [
-                'text'   => $this->def_i_task_observer,
-                'format' => $this->def_i_task_observer_format
-            ],
-
-            task::COL_INTRO_ASSESSOR => [
-                'text'   => $this->def_i_task_assessor,
-                'format' => $this->def_i_task_assessor_format
-            ],
-
-            task::COL_INT_ASSIGN_OBS_LEARNER => [
-                'text'   => $this->def_i_ass_obs_learner,
-                'format' => $this->def_i_ass_obs_learner_format
-            ],
-
-            task::COL_INT_ASSIGN_OBS_OBSERVER => [
-                'text'   => $this->def_i_ass_obs_observer,
-                'format' => $this->def_i_ass_obs_observer_format
-            ],
+        $mapping = [
+            task::COL_INTRO_LEARNER           => self::COL_DEF_I_TASK_LEARNER,
+            task::COL_INTRO_OBSERVER          => self::COL_DEF_I_TASK_OBSERVER,
+            task::COL_INTRO_ASSESSOR          => self::COL_DEF_I_TASK_ASSESSOR,
+            task::COL_INT_ASSIGN_OBS_LEARNER  => self::COL_DEF_I_ASS_OBS_LEARNER,
+            task::COL_INT_ASSIGN_OBS_OBSERVER => self::COL_DEF_I_ASS_OBS_OBSERVER,
         ];
+
+        $context = context_module::instance($this->get_cm()->id);
+        $defaults = [];
+        foreach ($mapping as $task_intro => $default)
+        {
+            $defaults[$task_intro] = lib::prepare_intro(
+                $default, $this->{"{$default}_format"}, $this->{$default}, $context);
+        }
+
+        return $defaults;
     }
 }

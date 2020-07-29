@@ -20,6 +20,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_observation\lib;
 use mod_observation\observation;
 use mod_observation\observation_base;
 use mod_observation\task;
@@ -80,37 +81,39 @@ if ($data = $form->get_data())
     $task->set(task::COL_OBSERVATIONID, $observation->get_id_or_null());
     $task->set(task::COL_NAME, $data->{task::COL_NAME});
 
-    $intros = [
-            task::COL_INTRO_LEARNER,
-            task::COL_INTRO_OBSERVER,
-            task::COL_INTRO_ASSESSOR,
-            task::COL_INT_ASSIGN_OBS_LEARNER,
-            task::COL_INT_ASSIGN_OBS_OBSERVER,
-    ];
-
-    // set the values
-    foreach ($intros as $intro)
-    {
-        $format = "{$intro}_format";
-        $task->set($intro, $data->{$intro}['text']);
-        $task->set($format, $data->{$intro}['format']);
-    }
-
     if (empty($data->taskid))
     {
         // create
         $task->set($task::COL_SEQUENCE, $task->get_next_sequence_number_in_activity());
+        // intro cannot be null
+        foreach (task::get_intro_fields() as $intro)
+        {
+            $task->set($intro, '');
+            $task->set("{$intro}_format", 1);
+        }
 
         $task->create();
     }
     else
     {
-        // update
         $task->set(task::COL_ID, $data->taskid);
         $task->set($task::COL_SEQUENCE, $task->get_current_sequence_number());
-
-        $task->update();
     }
+
+
+    // set intro values
+    foreach (task::get_intro_fields() as $intro)
+    {
+        list($area, $itemid) = lib::get_filearea_and_itemid_for_intro($intro, $task->get_id_or_null());
+
+        $format = "{$intro}_format";
+        $text = lib::save_intro((array) $data->{$intro}, $area, $itemid, $context);
+
+        $task->set($intro, $text);
+        $task->set($format, $data->{$intro}['format']);
+    }
+
+    $task->update();
 
     redirect($manage_url);
 }

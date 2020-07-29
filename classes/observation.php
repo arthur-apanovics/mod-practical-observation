@@ -507,11 +507,12 @@ class observation extends observation_base implements templateable
         // sort tasks based on sequence (tasks should be sorted in constructor but need to be sure)
         $tasks = lib::sort_by_field($tasks, task::COL_SEQUENCE);
 
+        $context = context_module::instance($this->cm->id);
         return [
             self::COL_ID             => $this->id,
             self::COL_COURSE         => $this->course,
             self::COL_NAME           => $this->name,
-            self::COL_INTRO          => $this->intro,
+            self::COL_INTRO          => lib::format_intro(self::COL_INTRO, $this->intro, $context),
             self::COL_LASTMODIFIEDBY => fullname(core_user::get_user($this->lastmodifiedby)),
 
             'tasks'       => $tasks,

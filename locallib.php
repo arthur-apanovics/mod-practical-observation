@@ -30,6 +30,7 @@
 namespace mod_observation;
 
 use coding_exception;
+use context;
 use context_module;
 use context_user;
 use file_storage;
@@ -307,13 +308,12 @@ class lib
         return $array_to_sort;
     }
 
-    public static function get_editor_file_options($context)
+    public static function get_editor_file_options()
     {
         return [
             'maxfiles' => EDITOR_UNLIMITED_FILES,
             'noclean'  => true,
-            'context'  => $context,
-            'subdirs'  => false
+            'subdirs'  => true
         ];
     }
 
@@ -751,5 +751,154 @@ class lib
         {
             throw new coding_exception('Requested timing error string when activity is fully available');
         }
+    }
+
+    // /**
+    //  * Gets learner and assessor status description string for tasks
+    //  *
+    //  * @param string $status
+    //  * @return string|null
+    //  * @throws coding_exception
+    //  */
+    // public static function get_status_description_string(string $status): ?string
+    // {
+    //    switch ($status)
+    //    {
+    //        // learner
+    //        case learner_task_submission::STATUS_OBSERVATION_PENDING:
+    //        case learner_task_submission::STATUS_OBSERVATION_INCOMPLETE:
+    //        // assessor
+    //        case assessor_task_submission::OUTCOME_COMPLETE:
+    //        case assessor_task_submission::OUTCOME_NOT_COMPLETE:
+    //            return get_string("{$status}-description", OBSERVATION);
+    //        default:
+    //            return null;
+    //    }
+    // }
+
+    /**
+     * Some intros share fileareas, therefore we need to give each intro a unique itemid to save files
+     *
+     * @param string   $intro
+     * @param int|null $itemid
+     * @return array
+     * @throws coding_exception
+     */
+    public static function get_filearea_and_itemid_for_intro(string $intro, int $itemid = null): array
+    {
+        // files stored in same filearea need to have a unique item id,
+        // therefore we need to provide a dummy 'unique' id
+        $prefix_map = [
+            // task intro defaults
+            observation::COL_DEF_I_TASK_LEARNER     => 0,
+            observation::COL_DEF_I_ASS_OBS_LEARNER  => 1,
+            observation::COL_DEF_I_TASK_OBSERVER    => 2,
+            observation::COL_DEF_I_ASS_OBS_OBSERVER => 3,
+            observation::COL_DEF_I_TASK_ASSESSOR    => 4,
+            // task intros
+            task::COL_INTRO_LEARNER                 => 5,
+            task::COL_INT_ASSIGN_OBS_LEARNER        => 6,
+            task::COL_INTRO_OBSERVER                => 7,
+            task::COL_INT_ASSIGN_OBS_OBSERVER       => 8,
+            task::COL_INTRO_ASSESSOR                => 9,
+            // criteria
+            criteria::COL_DESCRIPTION               => 10,
+        ];
+
+        switch ($intro){
+            case observation::COL_DEF_I_TASK_LEARNER:
+            case observation::COL_DEF_I_ASS_OBS_LEARNER:
+            case observation::COL_DEF_I_TASK_OBSERVER:
+            case observation::COL_DEF_I_ASS_OBS_OBSERVER:
+            case observation::COL_DEF_I_TASK_ASSESSOR:
+                // general file area with just the item id prefix
+                return [observation::FILE_AREA_GENERAL, $prefix_map[$intro]];
+
+            case observation::COL_INTRO:
+                // this is a special case
+                return [observation::FILE_AREA_INTRO, null];
+
+            default:
+            {
+                // if we got here then an itemid had to be provided
+                if (is_null($itemid))
+                {
+                    throw new coding_exception('"itemid" must be provided for current filearea');
+                }
+                // check intro name is valid
+                if (!in_array($intro, array_keys($prefix_map)))
+                {
+                    throw new coding_exception("unknown intro '{$intro}'");
+                }
+
+                // general file area with modified itemid
+                return [
+                    observation::FILE_AREA_GENERAL,
+                    (int) sprintf('%d%d', $prefix_map[$intro], $itemid)
+                ];
+            }
+        }
+    }
+
+    public static function format_intro(string $intro_name, string $content, context $context, $itemid = null)
+    {
+        list($area, $itemid) = lib::get_filearea_and_itemid_for_intro($intro_name, $itemid);
+        // $itemid = !is_null($itemid) ? $itemid : $id;
+
+        return trim(
+            format_text(
+                file_rewrite_pluginfile_urls(
+                    $content, 'pluginfile.php', $context->id, OBSERVATION_MODULE, $area, $itemid)));
+    }
+
+    /**
+     * Prepare intro for editing in a form
+     *
+     * @param string   $intro
+     * @param int      $format
+     * @param string   $text
+     * @param context  $context
+     * @param int|null $itemid if known
+     * @return array 'text', 'format', 'itemid' in array
+     * @throws coding_exception
+     */
+    public static function prepare_intro(
+        string $intro, int $format, string $text, context $context, int $itemid = null): array
+    {
+        list($area, $itemid) = lib::get_filearea_and_itemid_for_intro($intro, $itemid);
+        // $itemid = !is_null($itemid) ? $itemid : $id;
+
+        $draftid = file_get_submitted_draft_itemid($intro);
+        $text = file_prepare_draft_area(
+            $draftid,                                       // Draftid.
+            $context->id,                                              // Context.
+            OBSERVATION_MODULE,                              // Component.
+            $area,                                                     // Filarea.
+            $itemid,                                                   // Itemid.
+            self::get_editor_file_options(),
+            $text                                                       // Text.
+        );
+
+        return [
+            'text'   => $text,
+            'format' => $format,
+            'itemid' => $draftid,
+        ];
+    }
+
+    public static function save_intro(
+        array $editor, string $filearea, int $itemid, context $context): string
+    {
+        global $CFG;
+        require_once("$CFG->libdir/filelib.php");
+
+        return file_save_draft_area_files(
+            $editor['itemid'],
+            $context->id,
+            OBSERVATION_MODULE,
+            $filearea,
+            $itemid,
+            lib::get_editor_file_options(),
+            $editor['text']);
     }
 }

@@ -44,29 +44,20 @@ class observation_task_form extends moodleform
         $mform =& $this->_form;
         $cmid = $this->_customdata['cmid'];
         $taskid = $this->_customdata['taskid'];
-        $cm = get_coursemodule_from_id(OBSERVATION, $cmid);
-        $context = context_module::instance($cm->id);
 
         $element = task::COL_NAME;
         $mform->addElement('text', $element, get_string('task_name', OBSERVATION));
         $mform->setType($element, PARAM_TEXT);
         $mform->addRule($element, null, 'required', null, 'client');
 
-        $task_intros = [
-            mod_observation\task::COL_INTRO_LEARNER,
-            mod_observation\task::COL_INTRO_OBSERVER,
-            mod_observation\task::COL_INTRO_ASSESSOR,
-            mod_observation\task::COL_INT_ASSIGN_OBS_LEARNER,
-            mod_observation\task::COL_INT_ASSIGN_OBS_OBSERVER,
-        ];
-        foreach ($task_intros as $element)
+        foreach (task::get_intro_fields() as $element)
         {
             $mform->addElement(
                 'editor',
                 $element,
                 get_string($element, OBSERVATION),
                 ['rows' => 10],
-                lib::get_editor_file_options($context));
+                lib::get_editor_file_options());
             $mform->addHelpButton($element, $element, OBSERVATION);
             $mform->addRule($element, get_string('required'), 'required', null);
             $mform->setType($element, PARAM_RAW);// no XSS prevention here, users must be trusted
@@ -93,8 +84,6 @@ class observation_criteria_form extends moodleform
         $cmid = $this->_customdata['cmid'];
         $taskid = $this->_customdata['taskid'];
         $criteriaid = $this->_customdata['criteriaid'];
-        $cm = get_coursemodule_from_id(OBSERVATION, $cmid);
-        $context = context_module::instance($cm->id);
 
         // name
         $element = criteria::COL_NAME;
@@ -109,7 +98,7 @@ class observation_criteria_form extends moodleform
             $element,
             get_string($element, OBSERVATION),
             ['rows' => 10],
-            lib::get_editor_file_options($context));
+            lib::get_editor_file_options());
         $mform->addHelpButton($element, $element, OBSERVATION);
         $mform->addRule($element, get_string('required'), 'required', null);
         $mform->setType($element, PARAM_RAW);// no XSS prevention here, users must be trusted

@@ -46,6 +46,12 @@ $string['back_to_activity'] =  'Back to activity';
 $string['observation'] = 'Observation';
 $string['no_learners_in_group'] = 'There are no learners in this group';
 
+// FILE AREAS
+$string['general_attachments'] = 'Genral files';
+$string['learner_attachments'] = 'Learner files';
+$string['observer_attachments'] = 'Observer files';
+$string['assessor_attachments'] = 'Assessor files';
+
 // CAPABILITIES
 $string['observation:addinstance'] = 'Add instance';
 $string['observation:view'] = 'View';

@@ -316,6 +316,13 @@ class task extends task_base implements templateable
             }
         }
 
+        $context = \context_module::instance($this->get_observation_base()->get_cm()->id);
+        $intros = [];
+        foreach (self::get_intro_fields() as $intro_field)
+        {
+            $intros[$intro_field] = lib::format_intro($intro_field, $this->{$intro_field}, $context, $this->id);
+        }
+
         return [
             // general
             self::COL_ID                      => $this->id,
@@ -323,11 +330,7 @@ class task extends task_base implements templateable
             self::COL_NAME                    => $this->name,
             self::COL_SEQUENCE                => $this->sequence,
             // intros
-            self::COL_INTRO_LEARNER           => $this->intro_learner,
-            self::COL_INTRO_OBSERVER          => $this->intro_observer,
-            self::COL_INTRO_ASSESSOR          => $this->intro_assessor,
-            self::COL_INT_ASSIGN_OBS_LEARNER  => $this->int_assign_obs_learner,
-            self::COL_INT_ASSIGN_OBS_OBSERVER => $this->int_assign_obs_observer,
+            // intros appended to array before returning
 
             'criteria'                 => $criteria_data,
             'learner_task_submissions' => $learner_task_submissions_data,
@@ -340,6 +343,6 @@ class task extends task_base implements templateable
             'assessor_submission_status'             => $assessor_submission_status,
             'learner_submission_status_description'  => $learner_submission_status_description,
             'assessor_submission_status_description' => $assessor_submission_status_description,
-        ];
+        ] + $intros;
     }
 }

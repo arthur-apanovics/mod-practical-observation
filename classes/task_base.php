@@ -101,6 +101,17 @@ class task_base extends db_model_base
      */
     protected $sequence;
 
+    public static function get_intro_fields(): array
+    {
+        return [
+            self::COL_INTRO_LEARNER,
+            self::COL_INTRO_OBSERVER,
+            self::COL_INTRO_ASSESSOR,
+            self::COL_INT_ASSIGN_OBS_LEARNER,
+            self::COL_INT_ASSIGN_OBS_OBSERVER,
+        ];
+    }
+
     public function get_formatted_name()
     {
         return format_string($this->name);
@@ -264,37 +275,22 @@ class task_base extends db_model_base
 
     public function get_moodle_form_data()
     {
-        return [
+        $context = \context_module::instance(
+            $this->get_observation_base()->get_cm()->id);
+
+        $data = [
             self::COL_OBSERVATIONID => $this->observationid,
             self::COL_NAME          => $this->name,
-            self::COL_SEQUENCE      => $this->sequence,
-
-            // editors
-            self::COL_INTRO_LEARNER => [
-                'text'   => $this->intro_learner,
-                'format' => $this->intro_learner_format
-            ],
-
-            self::COL_INTRO_OBSERVER => [
-                'text'   => $this->intro_observer,
-                'format' => $this->intro_observer_format
-            ],
-
-            self::COL_INTRO_ASSESSOR => [
-                'text'   => $this->intro_assessor,
-                'format' => $this->intro_assessor_format
-            ],
-
-            self::COL_INT_ASSIGN_OBS_LEARNER => [
-                'text'   => $this->int_assign_obs_learner,
-                'format' => $this->int_assign_obs_learner_format
-            ],
-
-            self::COL_INT_ASSIGN_OBS_OBSERVER => [
-                'text'   => $this->int_assign_obs_observer,
-                'format' => $this->int_assign_obs_observer_format
-            ],
+            self::COL_SEQUENCE      => $this->sequence
         ];
+
+        foreach (self::get_intro_fields() as $intro)
+        {
+            $data[$intro] = lib::prepare_intro(
+                $intro, $this->{"{$intro}_format"}, $this->{$intro}, $context, $this->id);
+        }
+
+        return $data;
     }
 
     public function get_criteria_count(): int
