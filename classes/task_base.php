@@ -28,23 +28,25 @@ class task_base extends db_model_base
 {
     public const TABLE = OBSERVATION . '_task';
 
-    public const COL_OBSERVATIONID         = 'observationid';
-    public const COL_NAME                  = 'name';
-    public const COL_INTRO_LEARNER         = 'intro_learner';
-    public const COL_INTRO_LEARNER_FORMAT  = 'intro_learner_format';
-    public const COL_INTRO_OBSERVER        = 'intro_observer';
-    public const COL_INTRO_OBSERVER_FORMAT = 'intro_observer_format';
-    public const COL_INTRO_ASSESSOR        = 'intro_assessor';
-    public const COL_INTRO_ASSESSOR_FORMAT = 'intro_assessor_format';
-    /** @var string column - intro, assign observation - learner */
+    public const COL_OBSERVATIONID = 'observationid';
+    public const COL_NAME          = 'name';
+    public const COL_SEQUENCE      = 'sequence';
+
+    // intros
+    public const COL_INTRO_LEARNER  = 'intro_learner';
+    public const COL_INTRO_OBSERVER = 'intro_observer';
+    public const COL_INTRO_ASSESSOR = 'intro_assessor';
+    /** @var string column - intro, assign observation -> learner */
     public const COL_INT_ASSIGN_OBS_LEARNER = 'int_assign_obs_learner';
-    /** @var string column - intro, assign observation - learner_format */
-    public const COL_INT_ASSIGN_OBS_LEARNER_FORMAT = 'int_assign_obs_learner_format';
-    /** @var string column - intro, assign observation - observer aka observer requirements */
+    /** @var string column - intro, assign observation -> observer aka observer requirements */
     public const COL_INT_ASSIGN_OBS_OBSERVER = 'int_assign_obs_observer';
-    /** @var string column - intro, assign observation - observer_format */
+
+    // intro formats
+    public const COL_INTRO_LEARNER_FORMAT           = 'intro_learner_format';
+    public const COL_INTRO_OBSERVER_FORMAT          = 'intro_observer_format';
+    public const COL_INTRO_ASSESSOR_FORMAT          = 'intro_assessor_format';
+    public const COL_INT_ASSIGN_OBS_LEARNER_FORMAT  = 'int_assign_obs_learner_format';
     public const COL_INT_ASSIGN_OBS_OBSERVER_FORMAT = 'int_assign_obs_observer_format';
-    public const COL_SEQUENCE                       = 'sequence';
 
     /**
      * @var int
@@ -196,6 +198,13 @@ class task_base extends db_model_base
         return observation_base::read_or_null($this->observationid, true);
     }
 
+    /**
+     * Delete current task, associated criteria, update sequence number of other tasks in activity
+     *
+     * @return bool
+     * @throws coding_exception
+     * @throws \dml_exception
+     */
     public function delete()
     {
         $sql = 'SELECT * 
@@ -210,6 +219,7 @@ class task_base extends db_model_base
                 'deleted_sequence' => $this->sequence,
             ]);
 
+        // delete task
         $result = parent::delete();
 
         // update sequence number for related records

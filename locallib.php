@@ -776,19 +776,11 @@ class lib
     //    }
     // }
 
-    /**
-     * Some intros share fileareas, therefore we need to give each intro a unique itemid to save files
-     *
-     * @param string   $intro
-     * @param int|null $itemid
-     * @return array
-     * @throws coding_exception
-     */
-    public static function get_filearea_and_itemid_for_intro(string $intro, int $itemid = null): array
+    public static function get_intro_itemid_mappings(bool $flip_mapping = false)
     {
         // files stored in same filearea need to have a unique item id,
         // therefore we need to provide a dummy 'unique' id
-        $prefix_map = [
+        $mappings = [
             // task intro defaults
             observation::COL_DEF_I_TASK_LEARNER     => 0,
             observation::COL_DEF_I_ASS_OBS_LEARNER  => 1,
@@ -802,8 +794,32 @@ class lib
             task::COL_INT_ASSIGN_OBS_OBSERVER       => 8,
             task::COL_INTRO_ASSESSOR                => 9,
             // criteria
-            criteria::COL_DESCRIPTION               => 10,
+            criteria::COL_DESCRIPTION               => null, // criteria id itself will suffice
+            // special cases
+            observation::COL_INTRO                  => null
         ];
+
+        return $flip_mapping ? array_flip($mappings) : $mappings;
+    }
+
+
+    public static function get_intro_itemid_prefix(string $intro): ?int
+    {
+        return self::get_intro_itemid_mappings()[$intro];
+    }
+
+    /**
+     * Some intros share fileareas, therefore we need to give each intro a unique itemid to save files
+     *
+     * @param string   $intro
+     * @param int|null $itemid must be provided for all editors
+     * except {@link observation::get_intro_fields()}
+     * @return array
+     * @throws coding_exception
+     */
+    public static function get_filearea_and_itemid_for_intro(string $intro, int $itemid = null): array
+    {
+        $prefix = self::get_intro_itemid_prefix($intro);
 
         switch ($intro){
             case observation::COL_DEF_I_TASK_LEARNER:
@@ -812,11 +828,10 @@ class lib
             case observation::COL_DEF_I_ASS_OBS_OBSERVER:
             case observation::COL_DEF_I_TASK_ASSESSOR:
                 // general file area with just the item id prefix
-                return [observation::FILE_AREA_GENERAL, $prefix_map[$intro]];
+                return [observation::FILE_AREA_GENERAL, $prefix];
 
             case observation::COL_INTRO:
-                // this is a special case
-                return [observation::FILE_AREA_INTRO, null];
+                return [observation::FILE_AREA_INTRO, $prefix];
 
             default:
             {
@@ -826,7 +841,7 @@ class lib
                     throw new coding_exception('"itemid" must be provided for current filearea');
                 }
                 // check intro name is valid
-                if (!in_array($intro, array_keys($prefix_map)))
+                if (!in_array($intro, array_keys(self::get_intro_itemid_mappings())))
                 {
                     throw new coding_exception("unknown intro '{$intro}'");
                 }
@@ -834,7 +849,7 @@ class lib
                 // general file area with modified itemid
                 return [
                     observation::FILE_AREA_GENERAL,
-                    (int) sprintf('%d%d', $prefix_map[$intro], $itemid)
+                    (int) sprintf('%d%d', $prefix, $itemid)
                 ];
             }
         }
@@ -843,7 +858,6 @@ class lib
     public static function format_intro(string $intro_name, string $content, context $context, $itemid = null)
     {
         list($area, $itemid) = lib::get_filearea_and_itemid_for_intro($intro_name, $itemid);
-        // $itemid = !is_null($itemid) ? $itemid : $id;
 
         return trim(
             format_text(

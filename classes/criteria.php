@@ -80,8 +80,8 @@ class criteria extends criteria_base implements templateable
         $observer_task_submission = null;
         foreach ($this->observer_feedback as $observer_feedback)
         {
-            if (is_null($observer_task_submission) ||
-                $observer_feedback->get_id_or_null() != $observer_task_submission->get_id_or_null())
+            if (is_null($observer_task_submission)
+                || $observer_feedback->get_id_or_null() != $observer_task_submission->get_id_or_null())
             {
                 // needed to check if feedback has been submitted
                 $observer_task_submission = $observer_feedback->get_observer_task_submission_base();
@@ -92,7 +92,7 @@ class criteria extends criteria_base implements templateable
                 $observer_feedback_data[] = $observer_feedback->export_template_data();
             }
         }
-        
+
         $outcome = null;
         // set ouctome for this criteria if only single user data present
         if ($this->is_filtered && isset($observer_feedback))
@@ -102,11 +102,18 @@ class criteria extends criteria_base implements templateable
         }
 
 
+        // todo: improve cmid retrieval
+        $cmid = (new task_base($this->taskid))->get_observation_base()->get_cm()->id;
+        $context = \context_module::instance($cmid);
         return [
             self::COL_ID                => $this->id,
             self::COL_TASKID            => $this->taskid,
             self::COL_NAME              => $this->name,
-            self::COL_DESCRIPTION       => $this->description,
+            self::COL_DESCRIPTION       => lib::format_intro(
+                self::COL_DESCRIPTION,
+                $this->description,
+                $context,
+                $this->id),
             self::COL_FEEDBACK_REQUIRED => $this->feedback_required,
             self::COL_SEQUENCE          => $this->sequence,
 

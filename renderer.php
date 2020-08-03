@@ -285,13 +285,19 @@ class mod_observation_renderer extends plugin_renderer_base
         task $task, learner_task_submission $learner_task_submission, learner_attempt_base $attempt): string
     {
         $observation_base = new observation_base($task->get(task::COL_OBSERVATIONID));
+        $cmid = $observation_base->get_cm()->id;
+        $context = context_module::instance($cmid);
+
         $template_data = $learner_task_submission->export_template_data();
         $out = '';
 
         // save resources by not exporting all task data
         $template_data['extra'][task::COL_NAME] = $task->get_formatted_name();
-        $template_data['extra'][task::COL_INT_ASSIGN_OBS_LEARNER] = format_text(
-            $task->get(task::COL_INT_ASSIGN_OBS_LEARNER), FORMAT_HTML);
+        $template_data['extra'][task::COL_INT_ASSIGN_OBS_LEARNER] = lib::format_intro(
+            task::COL_INT_ASSIGN_OBS_LEARNER,
+            $task->get(task::COL_INT_ASSIGN_OBS_LEARNER),
+            $context,
+            $task->get_id_or_null());
 
         $template_data['extra']['course_observer_assignments'] = lib::export_template_data_from_array(
             $learner_task_submission->get_course_level_observer_assignments());
@@ -301,9 +307,9 @@ class mod_observation_renderer extends plugin_renderer_base
 
         $form = new observation_assign_observer_form(
             null, [
-            'id'                    => $observation_base->get_cm()->id,
+            'id'                         => $cmid,
             'learner_task_submission_id' => $learner_task_submission->get_id_or_null(),
-            'attempt_id' => $attempt->get_id_or_null(),
+            'attempt_id'                 => $attempt->get_id_or_null(),
         ]);
         $out .= $form->render();
 
@@ -319,9 +325,16 @@ class mod_observation_renderer extends plugin_renderer_base
     public function view_observer_landing(
         observation_base $observation, observer_assignment $observer_assignment): string
     {
+        $cmid = $observation->get_cm()->id;
+        $context = context_module::instance($cmid);
+
         $task = $observer_assignment->get_task_base();
         $template_data = $observer_assignment->get_observer()->export_template_data();
-        $template_data['extra'][task::COL_INT_ASSIGN_OBS_OBSERVER] = $task->get(task::COL_INT_ASSIGN_OBS_OBSERVER);
+        $template_data['extra'][task::COL_INT_ASSIGN_OBS_OBSERVER] = lib::format_intro(
+            task::COL_INT_ASSIGN_OBS_OBSERVER,
+            $task->get(task::COL_INT_ASSIGN_OBS_OBSERVER),
+            $context,
+            $task->get_id_or_null());
         $template_data['extra'][observer_assignment::COL_TOKEN] =
             $observer_assignment->get(observer_assignment::COL_TOKEN);
         $out = '';
@@ -346,7 +359,6 @@ class mod_observation_renderer extends plugin_renderer_base
         global $USER;
 
         $cm = $observation_base->get_cm();
-
         $template_data = $task->export_template_data();
 
         // learners can only see feedback from last observation - remove all feedback except for last one
@@ -577,7 +589,7 @@ class mod_observation_renderer extends plugin_renderer_base
 
         $header_data = [
             task::COL_NAME => $task->get_formatted_name(),
-            'intro'        => $task->get(task::COL_INTRO_OBSERVER)
+            'intro'        => $template_data[task::COL_INTRO_OBSERVER]
         ];
         $out .= $this->render_from_template('part-task_header', $header_data);
         $out .= $this->render_from_template('view-task_observer', $template_data);
@@ -605,9 +617,9 @@ class mod_observation_renderer extends plugin_renderer_base
         $template_data = $task->export_template_data();
         // header specific
         $header_data = [
-                task::COL_NAME  => $task->get_formatted_name(),
-                'intro' => $task->get(task::COL_INTRO_ASSESSOR)
-            ];
+            task::COL_NAME => $task->get_formatted_name(),
+            'intro'        => $template_data[task::COL_INTRO_ASSESSOR]
+        ];
         $out .= $this->render_from_template('part-task_header', $header_data);
 
         $include_observer_details = false;

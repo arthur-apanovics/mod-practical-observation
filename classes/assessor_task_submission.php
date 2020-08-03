@@ -116,9 +116,11 @@ class assessor_task_submission extends assessor_task_submission_base implements 
     }
 
     public function delete() {
-        foreach ($this->feedbacks as $feedback) {
+        foreach ($this->feedbacks as $feedback)
+        {
             $feedback->delete();
         }
+
         parent::delete();
     }
 }

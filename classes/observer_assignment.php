@@ -276,18 +276,23 @@ class observer_assignment extends observer_assignment_base implements templateab
     public function delete()
     {
         global $DB;
+
         if (!is_null(($this->observer))) 
         {
+            // check if observer is assigned other submissions
             $sql = 'SELECT COUNT(id) FROM {' . $this::TABLE . '} WHERE NOT(id = ?)';
             $count = $DB->get_field_sql($sql, [$this->id]);
             if (!$count) {
+                // not assigned to anything else - delete
                 $this->observer->delete();
             }
         }
+
         if(!is_null($this->observer_task_submission))
         {
             $this->observer_task_submission->delete();
         }
+
         parent::delete();
     }
 }

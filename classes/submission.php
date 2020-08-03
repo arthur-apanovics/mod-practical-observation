@@ -67,6 +67,7 @@ class submission extends submission_base /*TODO: implements templateable*/
         foreach($this->learner_task_submissions as $task_submission){
             $task_submission->delete();
         }
+
         parent::delete();
     }
 

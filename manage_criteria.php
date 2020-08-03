@@ -22,6 +22,7 @@
 
 use mod_observation\criteria;
 use mod_observation\criteria_base;
+use mod_observation\lib;
 use mod_observation\observation;
 use mod_observation\observation_base;
 
@@ -84,14 +85,12 @@ if ($data = $form->get_data())
     $criteria = new criteria_base();
     $criteria->set(criteria::COL_TASKID, $taskid);
     $criteria->set(criteria::COL_NAME, $data->{criteria::COL_NAME});
-    $criteria->set(criteria::COL_DESCRIPTION, $data->{criteria::COL_DESCRIPTION}['text']);
-    $criteria->set(criteria::COL_DESCRIPTION_FORMAT, $data->{criteria::COL_DESCRIPTION}['format']);
     $criteria->set(criteria::COL_FEEDBACK_REQUIRED, $data->{criteria::COL_FEEDBACK_REQUIRED});
 
     if (empty($data->criteriaid))
     {
         // create
-        $criteria->set($criteria::COL_SEQUENCE, $criteria->get_next_sequence_number_in_task());
+        $criteria->set(criteria::COL_SEQUENCE, $criteria->get_next_sequence_number_in_task());
 
         $criteria->create();
     }
@@ -113,7 +112,15 @@ if ($data = $form->get_data())
         }
 
         $criteria->set(criteria::COL_ID, $data->criteriaid);
-        $criteria->set($criteria::COL_SEQUENCE, $criteria->get_current_sequence_number());
+        $criteria->set(criteria::COL_SEQUENCE, $criteria->get_current_sequence_number());
+
+        // save 'description' files
+        list($area, $itemid) = lib::get_filearea_and_itemid_for_intro(
+            criteria::COL_DESCRIPTION, $criteria->get_id_or_null());
+        $text = lib::save_intro($data->{criteria::COL_DESCRIPTION}, $area, $itemid, $context);
+
+        $criteria->set(criteria::COL_DESCRIPTION, $text);
+        $criteria->set(criteria::COL_DESCRIPTION_FORMAT, $data->{criteria::COL_DESCRIPTION}['format']);
 
         $criteria->update();
     }

@@ -140,6 +140,13 @@ class criteria_base extends db_model_base
         return $this;
     }
 
+    /**
+     * Delete this criteria and adjust sequence number of other criteria in this activity
+     *
+     * @return bool
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     public function delete()
     {
         $sql = 'SELECT * 

@@ -71,9 +71,11 @@ class observer_task_submission extends observer_task_submission_base implements 
     }
 
     public function delete() {
-        foreach ($this->observer_feedback as $observerfeedback) {
-            $observerfeedback->delete();
+        foreach ($this->observer_feedback as $observer_feedback)
+        {
+            $observer_feedback->delete();
         }
+
         parent::delete();
     }
 }

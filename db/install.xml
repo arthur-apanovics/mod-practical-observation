@@ -106,6 +106,7 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="taskid" TYPE="foreign" FIELDS="taskid" REFTABLE="observation_task" REFFIELDS="id"/>
+        <KEY NAME="submisisonid" TYPE="foreign" FIELDS="submisisonid" REFTABLE="observation_submission" REFFIELDS="id"/>
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
     </TABLE>

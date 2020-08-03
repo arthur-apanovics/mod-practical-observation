@@ -265,6 +265,24 @@ class task extends task_base implements templateable
     /**
      * @inheritDoc
      */
+    public function delete()
+    {
+        foreach ($this->criteria as $criteria)
+        {
+            $criteria->delete();
+        }
+
+        foreach ($this->learner_task_submissions as $learner_task_submission)
+        {
+            $learner_task_submission->delete();
+        }
+
+        return parent::delete();
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function export_template_data(): array
     {
         $criteria_data = [];

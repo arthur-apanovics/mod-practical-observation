@@ -558,6 +558,7 @@ class learner_task_submission extends learner_task_submission_base implements te
         foreach ($this->observer_assignments as $observer_assignment_task) {
             $observer_assignment_task->delete();
         }
+
         if (!is_null($this->assessor_task_submission)) {
             $this->assessor_task_submission->delete();
         }

@@ -225,6 +225,17 @@ class observation_base extends db_model_base
         ];
     }
 
+    public static function get_file_areas(): array
+    {
+        return [
+            self::FILE_AREA_INTRO,
+            self::FILE_AREA_GENERAL,
+            self::FILE_AREA_TRAINEE,
+            self::FILE_AREA_OBSERVER,
+            self::FILE_AREA_ASSESSOR,
+        ];
+    }
+
     /**
      * Get moodle url to this activity
      *

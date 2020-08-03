@@ -136,7 +136,7 @@ function observation_add_instance(stdClass $observation, mod_observation_mod_for
     // create db entry
     $base->create();
     $observation->instance = $base->get_id_or_null();
-    
+
     observation_set_events($observation);
 
     observation_grade_item_update($observation);
@@ -201,26 +201,25 @@ function observation_update_instance(stdClass $observation, mod_observation_mod_
  * @param int $id Id of the module instance
  * @return boolean Success/Failure
  * @throws coding_exception
- * @throws dml_exception
+ * @throws dml_exception|ReflectionException
  */
 function observation_delete_instance($id)
 {
+    global $DB;
+
     try
     {
-        $observation = new  observation_base($id);
+        $base = new observation_base($id);
+        $observation = new observation($base->get_cm());
     }
     catch (dml_missing_record_exception $ex)
     {
         return false;
     }
 
-    // $transaction = $DB->start_delegated_transaction();
-
-    //TODO: Normally, this is where all data related to activity instance is deleted,
-    // however, we will simply mark the instance as deleted instead.
+    $transaction = $DB->start_delegated_transaction();
     $observation->delete();
-
-    // $transaction->allow_commit();
+    $transaction->allow_commit();
 
     return true;
 }
@@ -414,11 +413,10 @@ function observation_get_extra_capabilities()
 function observation_get_file_areas($course, $cm, $context)
 {
     $areas = [];
-
-    $areas[observation_base::FILE_AREA_GENERAL] = get_string(observation_base::FILE_AREA_GENERAL, OBSERVATION);
-    $areas[observation_base::FILE_AREA_TRAINEE] = get_string(observation_base::FILE_AREA_TRAINEE, OBSERVATION);
-    $areas[observation_base::FILE_AREA_OBSERVER] = get_string(observation_base::FILE_AREA_OBSERVER, OBSERVATION);
-    $areas[observation_base::FILE_AREA_ASSESSOR] = get_string(observation_base::FILE_AREA_ASSESSOR, OBSERVATION);
+    foreach (observation::get_file_areas() as $area)
+    {
+        $areas[$area] = get_string($area, OBSERVATION);
+    }
 
     return $areas;
 }
@@ -529,8 +527,9 @@ function observation_pluginfile(
     }
 
     $fs = get_file_storage();
-    $hash = sha1("/$context->id/" . \OBSERVATION_MODULE . "/$filearea/$args[0]/$args[1]");
-    $file = $fs->get_file_by_hash($hash);
+    // $hash = sha1("/{$context->id}/" . \OBSERVATION_MODULE . "/{$filearea}/{$args[0]}/{$args[1]}");
+    // $file = $fs->get_file_by_hash($hash);
+    $file = $fs->get_file($context->id, OBSERVATION_MODULE, $filearea, $args[0], '/', $args[1]);
     if (!$file || $file->is_directory())
     {
         send_file_not_found();

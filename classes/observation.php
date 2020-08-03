@@ -121,17 +121,25 @@ class observation extends observation_base implements templateable
     }
 
     /**
-     * Marks as deleted and updates db record
+     * Removes observation and all related records
      *
-     * @return self
+     * @return bool
      * @throws dml_exception
      * @throws coding_exception
      */
     public function delete()
     {
-        $this->deleted = true;
+        foreach ($this->submisisons as $submisison)
+        {
+            $submisison->delete();
+        }
 
-        return $this->update();
+        foreach ($this->tasks as $task)
+        {
+            $task->delete();
+        }
+
+        return parent::delete();
     }
 
     /**
