@@ -31,6 +31,7 @@ use dml_missing_record_exception;
 use mod_observation\event\activity_started;
 use mod_observation\interfaces\templateable;
 use moodle_url;
+use observation_task_form;
 
 /**
  * An instance of the observation activity with all related data
@@ -533,5 +534,34 @@ class observation extends observation_base implements templateable
             'capabilities'    => $this->export_capabilities(),
             'has_submissions' => $this->has_submissions()
         ];
+    }
+
+    public function get_all_observers() : array {
+        global $DB;
+        $sql = "SELECT e.* "
+
+        . " FROM {" . observer_assignment::TABLE . "} a "
+    
+        . "INNER JOIN {" . learner_task_submission::TABLE . "} b ON\n"
+    
+        . "    a.learner_task_submissionid = b.id\n"
+    
+        . "INNER JOIN {" . observer::TABLE . "} e ON\n"
+    
+        . "	a.observerid = e.id\n"
+    
+        . "INNER JOIN {" . task::TABLE . "} c ON\n"
+    
+        . "    b.taskid = c.id\n"
+    
+        . "INNER JOIN  {" . observation::TABLE . "} d ON\n"
+    
+        . "    c.observationid = d.id\n"
+    
+        . "WHERE\n"
+    
+        . "    observationid = 1";
+
+        return observer::read_all_by_sql($sql);
     }
 }

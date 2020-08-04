@@ -92,6 +92,12 @@ class mod_observation_renderer extends plugin_renderer_base
 
         $out .= $this->activity_header($template_data);
 
+        // site admin
+        if($capabilities['is_siteadmin']) {
+            $template_data['extra']['editable_observers'] = 
+            lib::export_template_data_from_array($observation->get_all_observers());
+        }
+
         // assessor view
         if ($capabilities['can_assess'] || $capabilities['can_viewsubmissions'])
         {
